@@ -934,7 +934,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuard {
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        assets += _redeem(id, msg.sender, shares);
+        assets = _redeem(id, msg.sender, shares);
 
         // transfer eth to receiver factoring in fees/equity
         (bool success, ) = payable(receiver).call{value: assets}("");
@@ -969,32 +969,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuard {
                 perAtom
             );
             tripleAtomShares[id][atomsIds[i]][receiver] += shares;
-        }
-    }
-
-    /// @dev _redeemAtomEquity - withdraws proportional amount of shares from each underlying atom
-    /// @return assets the amount of assets/eth withdrawn from the underlying atom vaults
-    /// NOTE: assumes id refers to a triple vault.
-    function _redeemAtomEquity(
-        uint256 id,
-        uint256 shares,
-        address owner
-    ) internal returns (uint256 assets) {
-        // load atom IDs
-        uint256[3] memory atomIds;
-        (atomIds[0], atomIds[1], atomIds[2]) = getTripleAtoms((id));
-        // load receiver vault balance
-        uint256 receiverVaultBalance = vaults[id].balanceOf[owner];
-        // redeem `toRedeem` amount of shares from each atom vault representing the triple
-        uint256 toRedeem;
-        for (uint8 i = 0; i < 3; i++) {
-            /// TripleAtomShares | Triple ID -> Atom ID -> Account Address -> Atom Share Balance (perAtom)
-            toRedeem = shares.mulDiv(
-                tripleAtomShares[id][atomIds[i]][owner],
-                receiverVaultBalance
-            );
-            assets += _redeem(atomIds[i], owner, toRedeem);
-            tripleAtomShares[id][atomIds[i]][owner] -= toRedeem;
         }
     }
 
