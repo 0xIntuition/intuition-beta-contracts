@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import {BaseAccount, UserOperation} from "account-abstraction/contracts/core/BaseAccount.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -66,9 +66,13 @@ contract AtomWallet is BaseAccount {
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner != hash.recover(userOp.signature))
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash));
+
+        (address recovered, , ) = ECDSA.tryRecover(ethSignedHash, userOp.signature);
+
+        if (owner != recovered)
             return SIG_VALIDATION_FAILED;
+
         return 0;
     }
 

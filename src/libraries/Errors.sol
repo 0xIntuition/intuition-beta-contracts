@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
-import "../libraries/Types.sol";
+import "./Types.sol";
 
 /// @title  Errors
 /// @notice Library containing all custom errors detailing cases where the intuition core protocol may revert.

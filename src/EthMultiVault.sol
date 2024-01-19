@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
-import {Initializable} from "src/interfaces/Initializable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 import {LibZip} from "solady/utils/LibZip.sol";
-import {IERC20} from "src/interfaces/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {SafeCastLib} from "solmate/utils/SafeCastLib.sol";
-import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {Types} from "src/libraries/Types.sol";
 import {Errors} from "src/libraries/Errors.sol";
@@ -930,9 +929,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuard {
         if (vaults[id].balanceOf[msg.sender] < shares) {
             revert Errors.MultiVault_NotAtomCreator();
         }
-
-        // withdraw proportional amount of shares from each underlying atom
-        assets = _redeemAtomEquity(id, shares, msg.sender);
 
         /*
             withdraw shares from vault, returning the amount of
