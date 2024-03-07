@@ -41,13 +41,15 @@ $ forge script script/DeployV1.s.sol --broadcast --rpc-url <your_rpc_url> --priv
 
 ### Deployment Verification
 
-To verify the deployed smart contracts on Etherscan, you’ll need to export your etherscan API key as `ETHERSCAN_API_KEY` in the terminal, and then run the following command:
+To verify the deployed smart contracts on Etherscan, you’ll need to export your Etherscan API key as `ETHERSCAN_API_KEY` in the terminal, and then run the following command:
 
 ```shell
 $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <chain_id>
 ```
 
-Note that the chain ID for OP Sepolia is `11155420`.
+**Notes:**
+- You can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
+- The chain ID for OP Sepolia is `11155420`.
 
 ### Latest Deployments
 
