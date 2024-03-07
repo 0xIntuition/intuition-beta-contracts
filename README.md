@@ -1,66 +1,36 @@
-## Foundry
+## Instructions
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+### PreRequisites
 
-Foundry consists of:
+- Foundry
+- (Optional) [VSCode Hardhat Solidity Plugin](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)
+- (Optional) [VSCode Coverage Gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### Local Development
 
-## Documentation
+#### Install Dependencies
 
-https://book.getfoundry.sh/
+```shell
+$ npm i
+$ forge install
+```
 
-## Usage
-
-### Build
+#### Build
 
 ```shell
 $ forge build
 ```
 
-### Test
+#### Run Tests
 
 ```shell
-$ forge test
+$ forge test -vvv
 ```
+### Latest Deployments
 
-### Format
+<details>
 
-```shell
-$ forge fmt
-```
+<summary>Optimism Sepolia</summary>
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- [Proxy](https://sepolia-optimism.etherscan.io/address/0x14561f6B2CDf5dec7BA95b303DED0b2C95A96635)
+- [Implementation](https://sepolia-optimism.etherscan.io/address/0xcd5f13867D40F8f4b135f3d45Dc16D88EFEFE583)
