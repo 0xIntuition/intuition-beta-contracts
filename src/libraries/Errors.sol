@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "../libraries/Types.sol";
+import "./Types.sol";
 
 /// @title  Errors
 /// @notice Library containing all custom errors detailing cases where the intuition core protocol may revert.
@@ -14,7 +14,9 @@ library Errors {
     error MultiVault_SetApprovalForSelf();
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_InsufficientDepositAmountToCoverFees();
-    error MultiVault_InsufficientRemainingSharesInVault();
+    error MultiVault_InsufficientRemainingSharesInVault(
+        uint256 remainingShares
+    );
     error MultiVault_RedeemLimit();
     error MultiVault_MinimumDeposit();
     error MultiVault_VaultDoesNotExist();
@@ -27,18 +29,14 @@ library Errors {
     error MultiVault_InsufficientBalance();
     error MultiVault_AlreadyInitialized();
     /// RDF/INTUTION ERRORS
-    error MultiVault_AtomExists(string atomString);
+    error MultiVault_AtomExists(bytes atomUri);
     error MultiVault_AtomDoesNotExist();
     error MultiVault_VaultNotAtom();
     error MultiVault_NotAtomCreator();
     error MultiVault_DeployAccountFailed();
     error MultiVault_NotAtomWallet();
     error MultiVault_NoAtomWalletRewards();
-    error MultiVault_TripleExists(
-        string subject,
-        string predicate,
-        string object
-    );
+    error MultiVault_TripleExists(bytes subject, bytes predicate, bytes object);
     error MultiVault_TripleAlreadyExists();
     error MultiVault_ArraysNotSameLength();
     error MultiVault_TripleArrExists(
@@ -52,6 +50,7 @@ library Errors {
     error MultiVault_HasCounterStake();
     error MultiVault_TransferFailed();
     error MultiVault_InvalidFeeSet();
+    error MultiVault_InvalidExitFee();
 
     /*/////// TRUSTBONDING ERRORS /////////////////////////////////////////////////////////*/
 

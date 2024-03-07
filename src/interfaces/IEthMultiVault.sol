@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
 import "../libraries/Types.sol";
@@ -35,8 +36,8 @@ interface IEthMultiVault {
     }
 
     struct TripleConfig {
-        /// @notice percentage of msg.value that is used to deposit atom vault shares for the triple atom
-        ///         account/wallet upon creation
+        /// @notice percentage of msg.value that is used to deposit atom vault shares for the positive
+        ///         triple vault upon creation
         uint256 tripleCreationFee;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomEquityFeeForTriple;
@@ -112,8 +113,7 @@ interface IEthMultiVault {
         uint256 subjectId,
         uint256 predicateId,
         uint256 objectId,
-        uint256 vaultID,
-        uint256 tripleAtomVaultId
+        uint256 vaultID
     );
 
     /// @notice return the underlying atom vault ids given a triple vault id
@@ -144,14 +144,15 @@ interface IEthMultiVault {
     /// @param id Counter Triple ID
     function getCounterIdFromTriple(uint256 id) external returns (uint256);
 
-    /// @notice return the hash of a triple given the underlying atom IDs that make up the triple
-    /// @param subjectId String of the subject atom
-    /// @param predicateId String of the predicate atom
-    /// @param objectId String of the object atom
+    /// @notice returns the corresponding hash for the given RDF triple, given the atoms that make up the triple
+    /// @param subject the subject atom
+    /// @param predicate the predicate atom
+    /// @param object the object atom
+    /// @return hash the corresponding hash for the given RDF triple
     function tripleHashFromAtoms(
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
+        bytes memory subject,
+        bytes memory predicate,
+        bytes memory object
     ) external pure returns (bytes32);
 
     //// ERC4626 SHARE/ASSET CONVERSION HELPERS
