@@ -27,6 +27,8 @@ library Errors {
     error MultiVault_ZeroAssets();
     error MultiVault_InsufficientEnergyBalance();
     error MultiVault_InsufficientBalance();
+    error MultiVault_InsufficientSharesInVault();
+    error MultiVault_InsufficientBalanceToCoverGhostShares();
     error MultiVault_AlreadyInitialized();
     /// RDF/INTUTION ERRORS
     error MultiVault_AtomExists(bytes atomUri);

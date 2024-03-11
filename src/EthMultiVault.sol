@@ -21,7 +21,12 @@ import {Errors} from "src/libraries/Errors.sol";
  * @notice Core contract of the Intuition protocol. Manages the creation and management of vaults
  *         associated to Atom's & Triples
  */
-contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
+contract EthMultiVault is
+    IEthMultiVault,
+    Initializable,
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable
+{
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
 
@@ -535,7 +540,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///       Atom data sent to this function is expected to be compressed using the run-length encoding
     function batchCreateAtom(
         bytes[] calldata atomUri
-    ) external payable nonReentrant whenNotPaused returns (uint256[] memory ids) {
+    )
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256[] memory ids)
+    {
         // cache
         uint256 length = atomUri.length;
         uint256 valuePerAtom = msg.value / length;
@@ -594,7 +605,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///       implementation in solady's LibZip to save on calldata costs
     function batchCreateAtomCompressed(
         bytes[] calldata atomUri
-    ) external payable nonReentrant whenNotPaused returns (uint256[] memory ids) {
+    )
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256[] memory ids)
+    {
         // cache
         uint256 length = atomUri.length;
         uint256 valuePerAtom = msg.value / length;
@@ -677,7 +694,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
         if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
-        if (msg.value < atomConfig.atomCost)
+        if (msg.value < tripleConfig.tripleCreationFee)
             revert Errors.MultiVault_InsufficientBalance();
 
         // retrieve atom data
@@ -729,7 +746,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256[] calldata subjectIds,
         uint256[] calldata predicateIds,
         uint256[] calldata objectIds
-    ) external payable nonReentrant whenNotPaused returns (uint256[] memory ids) {
+    )
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256[] memory ids)
+    {
         // assert arrays are of the same length
         if (
             subjectIds.length != predicateIds.length ||
@@ -805,7 +828,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // map the triple's vault ID to the underlying atom vault IDs
         triples[id] = [subjectId, predicateId, objectId];
-        
+
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
@@ -883,7 +906,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         if (vaults[id].balanceOf[msg.sender] < shares) {
-            revert Errors.MultiVault_InsufficientBalance();
+            revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
         /*
@@ -969,7 +992,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         if (vaults[id].balanceOf[msg.sender] < shares) {
-            revert Errors.MultiVault_InsufficientBalance();
+            revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
         /*
@@ -1007,7 +1030,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         if (vaults[id].balanceOf[msg.sender] < shares) {
-            revert Errors.MultiVault_InsufficientBalance();
+            revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
         /*
@@ -1042,7 +1065,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         if (vaults[id].balanceOf[msg.sender] < shares) {
-            revert Errors.MultiVault_InsufficientBalance();
+            revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
         /*
@@ -1144,7 +1167,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 assets
     ) internal returns (uint256 protocolFees) {
         protocolFees = protocolFeeAmount(assets, id);
-        
+
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
@@ -1162,10 +1185,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
+        if (
+            assertTriple(id) &&
+            vaults[id].totalAssets +
+                totalAssetsDelta -
+                assetsForZeroAddressInCounterVault <=
+            0
+        ) {
+            revert Errors.MultiVault_InsufficientBalanceToCoverGhostShares();
+        }
+
         // set vault totals for the vault
         _setVaultTotals(
             id,
-            assertTriple(id) ? vaults[id].totalAssets + totalAssetsDelta - assetsForZeroAddressInCounterVault : vaults[id].totalAssets + totalAssetsDelta,
+            assertTriple(id)
+                ? vaults[id].totalAssets +
+                    totalAssetsDelta -
+                    assetsForZeroAddressInCounterVault
+                : vaults[id].totalAssets + totalAssetsDelta,
             vaults[id].totalShares + totalSharesDelta
         );
 
@@ -1177,20 +1214,21 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         /*
          * Initialize the counter triple vault with ghost shares if id is a positive triple vault
-         */ 
-         if (assertTriple(id)) {
+         */
+        if (assertTriple(id)) {
             uint256 counterVaultId = getCounterIdFromTriple(id);
 
             // set vault totals
             _setVaultTotals(
                 counterVaultId,
-                vaults[counterVaultId].totalAssets + assetsForZeroAddressInCounterVault,
+                vaults[counterVaultId].totalAssets +
+                    assetsForZeroAddressInCounterVault,
                 vaults[counterVaultId].totalShares + sharesForZeroAddress
             );
 
             // mint `sharesForZeroAddress` shares to zero address to initialize the vault
             _mint(address(0), counterVaultId, sharesForZeroAddress);
-         }
+        }
 
         emit Deposit(
             msg.sender,
@@ -1381,7 +1419,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default exit fee, id = n changes fees for vault n specifically
     /// @dev admin cannot set the exit fee to be greater than 10%, to avoid being able to prevent
-    ///      users from withdrawing their assets 
+    ///      users from withdrawing their assets
     /// @param _id vault id to set exit fee for
     /// @param _exitFee exit fee to set
     function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
@@ -1415,7 +1453,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
     /// @param _tripleCreationFee new fee in wei
-    function setTripleCreationFee(uint256 _tripleCreationFee) external onlyAdmin {
+    function setTripleCreationFee(
+        uint256 _tripleCreationFee
+    ) external onlyAdmin {
         tripleConfig.tripleCreationFee = _tripleCreationFee;
     }
 
