@@ -119,6 +119,20 @@ contract EthMultiVault is
     /*         Fee Helpers        */
     /* -------------------------- */
 
+    function getAtomCost() public view returns (uint256 atomCost) {
+        atomCost =
+            atomConfig.atomCreationFee + // paid to protocol
+            atomConfig.atomShareLockFee + // for purchasing shares for atom wallet
+            generalConfig.minShare; // for purchasing ghost shares
+    }
+
+    function getTripleCost() public view returns (uint256 tripleCost) {
+        tripleCost =
+            tripleConfig.tripleCreationFee + // paid to protocol
+            generalConfig.minShare *
+            2; // for purchasing ghost shares for the postive and counter triple vaults
+    }
+
     /// @notice calculates fee on raw amount
     /// @param amount amount of assets to calculate fee on
     /// @param fee fee in %
@@ -452,24 +466,37 @@ contract EthMultiVault is
     function createAtom(
         bytes calldata atomUri
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
-        if (msg.value < atomConfig.atomCost)
+        uint256 atomCost = getAtomCost();
+
+        if (msg.value < atomCost)
             revert Errors.MultiVault_InsufficientBalance();
 
         bytes32 _hash = keccak256(atomUri);
         if (AtomsByHash[_hash] != 0)
             revert Errors.MultiVault_AtomExists(atomUri);
 
+        uint256 userDeposit = msg.value - atomCost;
+
         // create a new vault ID
         id = _createVault();
+
+        uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
+
+        // give the user shares in the vault
+        _depositOnVaultCreation(
+            id,
+            msg.sender, // receiver
+            userDeposit
+        );
 
         // compute atom wallet address
         address atomWallet = computeAtomWalletAddr(id);
 
         // give the atom wallet shares in the vault
-        uint256 protocolDepositFee = _depositOnVaultCreation(
+        _depositOnVaultCreation(
             id,
             atomWallet, // receiver
-            msg.value - atomConfig.atomCreationFee
+            atomConfig.atomShareLockFee
         );
 
         // transfer fees to protocol vault
@@ -495,7 +522,9 @@ contract EthMultiVault is
     function createAtomCompressed(
         bytes calldata atomUri
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
-        if (msg.value < atomConfig.atomCost)
+        uint256 atomCost = getAtomCost();
+
+        if (msg.value < atomCost)
             revert Errors.MultiVault_InsufficientBalance();
 
         bytes32 _hash = keccak256(atomUri);
@@ -505,17 +534,28 @@ contract EthMultiVault is
         // decompress call data using LibZip
         bytes memory decompressedAtomData = atomUri.cdDecompress();
 
+        uint256 userDeposit = msg.value - atomCost;
+
         // create a new vault ID
         id = _createVault();
+
+        uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
+
+        // give the user shares in the vault
+        _depositOnVaultCreation(
+            id,
+            msg.sender, // receiver
+            userDeposit
+        );
 
         // compute atom wallet address
         address atomWallet = computeAtomWalletAddr(id);
 
         // give the atom wallet shares in the vault
-        uint256 protocolDepositFee = _depositOnVaultCreation(
+        _depositOnVaultCreation(
             id,
             atomWallet, // receiver
-            msg.value - atomConfig.atomCreationFee
+            atomConfig.atomShareLockFee
         );
 
         // transfer fees to protocol vault
@@ -550,11 +590,12 @@ contract EthMultiVault is
         // cache
         uint256 length = atomUri.length;
         uint256 valuePerAtom = msg.value / length;
+        uint256 atomCost = getAtomCost();
 
-        if (msg.value < atomConfig.atomCost * length)
+        if (msg.value < atomCost * length)
             revert Errors.MultiVault_InsufficientBalance();
 
-        uint256 protocolDepositFeesTotal;
+        uint256 protocolDepositFeeTotal;
         ids = new uint256[](length);
 
         // create atoms
@@ -563,21 +604,32 @@ contract EthMultiVault is
             if (AtomsByHash[_hash] != 0)
                 revert Errors.MultiVault_AtomExists(atomUri[i]);
 
+            uint256 userDeposit = valuePerAtom - atomCost;
+
             // create a new vault ID
             ids[i] = _createVault();
+
+            uint256 protocolDepositFee = protocolFeeAmount(userDeposit, ids[i]);
+
+            // give the user shares in the vault
+            _depositOnVaultCreation(
+                ids[i],
+                msg.sender, // receiver
+                userDeposit
+            );
 
             // compute atom wallet address
             address atomWallet = computeAtomWalletAddr(ids[i]);
 
             // give the atom wallet shares in the vault
-            uint256 protocolDepositFees = _depositOnVaultCreation(
+            _depositOnVaultCreation(
                 ids[i],
                 atomWallet, // receiver
-                valuePerAtom - atomConfig.atomCreationFee
+                atomConfig.atomShareLockFee
             );
 
             // add protocol deposit fees to total
-            protocolDepositFeesTotal += protocolDepositFees;
+            protocolDepositFeeTotal += protocolDepositFee;
 
             // map the new vault ID to the atom data
             atoms[ids[i]] = atomUri[i];
@@ -589,9 +641,7 @@ contract EthMultiVault is
 
         // transfer fees to protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeesTotal +
-                atomConfig.atomCreationFee *
-                length
+            value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
         }("");
         if (!success) revert Errors.MultiVault_TransferFailed();
     }
@@ -615,11 +665,12 @@ contract EthMultiVault is
         // cache
         uint256 length = atomUri.length;
         uint256 valuePerAtom = msg.value / length;
+        uint256 atomCost = getAtomCost();
 
-        if (msg.value < atomConfig.atomCost * length)
+        if (msg.value < atomCost * length)
             revert Errors.MultiVault_InsufficientBalance();
 
-        uint256 protocolDepositFeesTotal;
+        uint256 protocolDepositFeeTotal;
         ids = new uint256[](length);
 
         // create atoms
@@ -631,21 +682,32 @@ contract EthMultiVault is
             // decompress atom data using LibZip
             bytes memory decompressedAtomData = atomUri[i].cdDecompress();
 
+            uint256 userDeposit = valuePerAtom - atomCost;
+
             // create a new vault ID
             ids[i] = _createVault();
+
+            uint256 protocolDepositFee = protocolFeeAmount(userDeposit, ids[i]);
+
+            // give the user shares in the vault
+            _depositOnVaultCreation(
+                ids[i],
+                msg.sender, // receiver
+                userDeposit
+            );
 
             // compute atom wallet address
             address atomWallet = computeAtomWalletAddr(ids[i]);
 
             // give the atom wallet shares in the vault
-            uint256 protocolDepositFees = _depositOnVaultCreation(
+            _depositOnVaultCreation(
                 ids[i],
                 atomWallet, // receiver
-                valuePerAtom - atomConfig.atomCreationFee
+                atomConfig.atomShareLockFee
             );
 
             // add protocol deposit fees to total
-            protocolDepositFeesTotal += protocolDepositFees;
+            protocolDepositFeeTotal += protocolDepositFee;
 
             // map the new vault ID to the decompressed atom data
             atoms[ids[i]] = decompressedAtomData;
@@ -657,9 +719,7 @@ contract EthMultiVault is
 
         // transfer fees to protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeesTotal +
-                atomConfig.atomCreationFee *
-                length
+            value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
         }("");
         if (!success) revert Errors.MultiVault_TransferFailed();
     }
@@ -694,7 +754,9 @@ contract EthMultiVault is
         if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
         if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
-        if (msg.value < tripleConfig.tripleCreationFee)
+        uint256 tripleCost = getTripleCost();
+
+        if (msg.value < tripleCost)
             revert Errors.MultiVault_InsufficientBalance();
 
         // retrieve atom data
@@ -707,8 +769,12 @@ contract EthMultiVault is
         if (TriplesByHash[_hash] != 0)
             revert Errors.MultiVault_TripleExists(subject, predicate, object);
 
+        uint256 userDeposit = msg.value - tripleCost;
+
         // create a new positive triple vault
         id = _createVault();
+
+        uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
         TriplesByHash[_hash] = id;
@@ -720,10 +786,10 @@ contract EthMultiVault is
         isTriple[id] = true;
 
         // give the user shares in the positive triple vault
-        uint256 protocolDepositFee = _depositOnVaultCreation(
+        _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            msg.value - tripleConfig.tripleCreationFee
+            userDeposit
         );
 
         // transfer fees to protocol vault
@@ -762,11 +828,12 @@ contract EthMultiVault is
         // cache
         uint256 length = subjectIds.length;
         uint256 valuePerTriple = msg.value / length;
+        uint256 tripleCost = getTripleCost();
 
-        if (msg.value < atomConfig.atomCost * length)
+        if (msg.value < tripleCost * length)
             revert Errors.MultiVault_InsufficientBalance();
 
-        uint256 protocolDepositFeesTotal;
+        uint256 protocolDepositFeeTotal;
         ids = new uint256[](length);
 
         // create triples
@@ -776,18 +843,19 @@ contract EthMultiVault is
             uint256 predicateId = predicateIds[i];
             uint256 objectId = objectIds[i];
 
-            (ids[i], protocolDepositFeesTotal) = _createSingleTriple(
+            (ids[i], protocolDepositFeeTotal) = _createSingleTriple(
                 subjectId,
                 predicateId,
                 objectId,
-                valuePerTriple
+                valuePerTriple,
+                tripleCost
             );
-            protocolDepositFeesTotal += protocolDepositFeesTotal;
+            protocolDepositFeeTotal += protocolDepositFeeTotal;
         }
 
         // transfer fees to protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeesTotal +
+            value: protocolDepositFeeTotal +
                 tripleConfig.tripleCreationFee *
                 length
         }("");
@@ -798,8 +866,9 @@ contract EthMultiVault is
         uint256 subjectId,
         uint256 predicateId,
         uint256 objectId,
-        uint256 valuePerTriple
-    ) internal returns (uint256 id, uint256 protocolDepositFees) {
+        uint256 valuePerTriple,
+        uint256 tripleCost
+    ) internal returns (uint256 id, uint256 protocolDepositFee) {
         // assert atoms exist, if not, revert
         if (subjectId == 0) revert Errors.MultiVault_AtomDoesNotExist();
         if (predicateId == 0) revert Errors.MultiVault_AtomDoesNotExist();
@@ -820,8 +889,12 @@ contract EthMultiVault is
         if (TriplesByHash[_hash] != 0)
             revert Errors.MultiVault_TripleExists(subject, predicate, object);
 
+        uint256 userDeposit = valuePerTriple - tripleCost;
+
         // create a new positive triple vault
         id = _createVault();
+
+        protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
         TriplesByHash[_hash] = id;
@@ -832,11 +905,11 @@ contract EthMultiVault is
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
-        // give the atom wallet shares in the vault
-        protocolDepositFees = _depositOnVaultCreation(
+        // give the user shares in the vault
+        _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            valuePerTriple - tripleConfig.tripleCreationFee
+            userDeposit
         );
 
         emit TripleCreated(msg.sender, subjectId, predicateId, objectId, id);
@@ -1160,23 +1233,20 @@ contract EthMultiVault is
     /// @dev deposit assets into a vault upon creation
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the deposit
     /// Additionally, initializes a counter vault with ghost shares.
-    /// @return protocolFees the amount of protocol fees on the deposit
     function _depositOnVaultCreation(
         uint256 id,
         address receiver,
         uint256 assets
-    ) internal returns (uint256 protocolFees) {
-        protocolFees = protocolFeeAmount(assets, id);
-
+    ) internal {
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
         uint256 assetsForZeroAddressInCounterVault = generalConfig.minShare;
 
-        uint256 sharesForReceiver = assets - protocolFees;
+        uint256 sharesForReceiver = assets;
 
         // changes in vault's total assets
-        uint256 totalAssetsDelta = assets - protocolFees;
+        uint256 totalAssetsDelta = assets;
 
         // changes in vault's total shares
         uint256 totalSharesDelta = sharesForReceiver + sharesForZeroAddress;
@@ -1185,24 +1255,10 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
-        if (
-            assertTriple(id) &&
-            vaults[id].totalAssets +
-                totalAssetsDelta -
-                assetsForZeroAddressInCounterVault <=
-            0
-        ) {
-            revert Errors.MultiVault_InsufficientBalanceToCoverGhostShares();
-        }
-
         // set vault totals for the vault
         _setVaultTotals(
             id,
-            assertTriple(id)
-                ? vaults[id].totalAssets +
-                    totalAssetsDelta -
-                    assetsForZeroAddressInCounterVault
-                : vaults[id].totalAssets + totalAssetsDelta,
+            vaults[id].totalAssets + totalAssetsDelta,
             vaults[id].totalShares + totalSharesDelta
         );
 
@@ -1439,16 +1495,10 @@ contract EthMultiVault is
         vaultFees[_id].protocolFee = _protocolFee;
     }
 
-    /// @dev sets the atom cost, amount of wei (eth) needed to create an atom
-    /// @param _atomCost new atom cost
-    function setAtomCost(uint256 _atomCost) external onlyAdmin {
-        atomConfig.atomCost = _atomCost;
-    }
-
-    /// @dev sets fee charged in wei when creating an atom to protocol vault
-    /// @param _atomCreationFee new fee in wei
-    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = _atomCreationFee;
+    /// @dev sets the atom share lock fee
+    /// @param atomShareLockFee_ new atom share lock fee
+    function setAtomShareLockFee(uint256 atomShareLockFee_) external onlyAdmin {
+        atomConfig.atomShareLockFee = atomShareLockFee_;
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault

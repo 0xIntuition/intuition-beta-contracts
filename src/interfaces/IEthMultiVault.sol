@@ -26,18 +26,15 @@ interface IEthMultiVault {
     }
 
     struct AtomConfig {
-        /// @notice Amount charged in wei when creating the atom.
-        ///         share lock % is the percentage of wei sent to the atom wallet upon creation.
-        ///         the remaining wei is sent to the protocol admin multisig.
-        uint256 atomCost;
-        /// @notice percentage of msg.value that is used to deposit atom vault shares for the atom account/wallet
+        /// @notice fee charged for purchasing vault shares for the atom wallet
         ///         upon creation
+        uint256 atomShareLockFee;
+        /// @notice fee paid to the protocol when depositing vault shares for the atom vault upon creation
         uint256 atomCreationFee;
     }
 
     struct TripleConfig {
-        /// @notice percentage of msg.value that is used to deposit atom vault shares for the positive
-        ///         triple vault upon creation
+        /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationFee;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomEquityFeeForTriple;
