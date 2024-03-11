@@ -16,12 +16,11 @@ import {Types} from "src/libraries/Types.sol";
 import {Errors} from "src/libraries/Errors.sol";
 
 /**
- * @title  EthMultiVault
+ * @title  EthMultiVaultV2
  * @author 0xIntuition
- * @notice Core contract of the Intuition protocol. Manages the creation and management of vaults
- *         associated to Atom's & Triples
+ * @notice V2 test version of the original EthMultiVault contract, used for testing upgradeability features
  */
-contract EthMultiVault is
+contract EthMultiVaultV2 is
     IEthMultiVault,
     Initializable,
     ReentrancyGuardUpgradeable,
@@ -89,6 +88,10 @@ contract EthMultiVault is
     mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
         public tripleAtomShares;
 
+    /// @notice Version of the EthMultiVault contract, used as a test variable for upgradeability
+    /// @dev This variable is put here to make sure the storage is properly extended
+    bytes32 public VERSION = "V2";
+
     /* =================================================== */
     /*                    INITIALIZER                      */
     /* =================================================== */
@@ -130,7 +133,7 @@ contract EthMultiVault is
         tripleCost =
             tripleConfig.tripleCreationFee + // paid to protocol
             generalConfig.minShare *
-            2; // for purchasing ghost shares for the positive and counter triple vaults
+            2; // for purchasing ghost shares for the postive and counter triple vaults
     }
 
     /// @notice calculates fee on raw amount
@@ -1251,7 +1254,7 @@ contract EthMultiVault is
         // changes in vault's total shares
         uint256 totalSharesDelta = sharesForReceiver + sharesForZeroAddress;
 
-        if (sharesForReceiver < 0 || totalAssetsDelta < 0) {
+        if (sharesForReceiver <= 0 || totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
@@ -1496,15 +1499,9 @@ contract EthMultiVault is
     }
 
     /// @dev sets the atom share lock fee
-    /// @param _atomShareLockFee new atom share lock fee
-    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
-        atomConfig.atomShareLockFee = _atomShareLockFee;
-    }
-
-    /// @dev sets the atom creation fee
-    /// @param _atomCreationFee new atom creation fee
-    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = _atomCreationFee;
+    /// @param atomShareLockFee_ new atom share lock fee
+    function setAtomShareLockFee(uint256 atomShareLockFee_) external onlyAdmin {
+        atomConfig.atomShareLockFee = atomShareLockFee_;
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
