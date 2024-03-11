@@ -719,7 +719,7 @@ contract EthMultiVault is
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
-        // give the atom wallet shares in the positive triple vault
+        // give the user shares in the positive triple vault
         uint256 protocolDepositFee = _depositOnVaultCreation(
             id,
             msg.sender, // receiver
