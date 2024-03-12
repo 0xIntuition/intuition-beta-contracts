@@ -88,8 +88,8 @@ contract EthMultiVaultV2 is
     mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
         public tripleAtomShares;
 
-    /// @notice Version of the EthMultiVault contract, used as a test variable for upgradeability
-    /// @dev This variable is put here to make sure the storage is properly extended
+    /// @notice test variable to test the upgradeability of the contract
+    /// @dev this variable has also been added here to demonstrate how to properly extend the storage layout of the contract
     bytes32 public VERSION = "V2";
 
     /* =================================================== */
@@ -133,7 +133,7 @@ contract EthMultiVaultV2 is
         tripleCost =
             tripleConfig.tripleCreationFee + // paid to protocol
             generalConfig.minShare *
-            2; // for purchasing ghost shares for the postive and counter triple vaults
+            2; // for purchasing ghost shares for the positive and counter triple vaults
     }
 
     /// @notice calculates fee on raw amount
@@ -489,7 +489,7 @@ contract EthMultiVaultV2 is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // compute atom wallet address
@@ -548,7 +548,7 @@ contract EthMultiVaultV2 is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // compute atom wallet address
@@ -618,7 +618,7 @@ contract EthMultiVaultV2 is
             _depositOnVaultCreation(
                 ids[i],
                 msg.sender, // receiver
-                userDeposit
+                userDeposit - protocolDepositFee
             );
 
             // compute atom wallet address
@@ -696,7 +696,7 @@ contract EthMultiVaultV2 is
             _depositOnVaultCreation(
                 ids[i],
                 msg.sender, // receiver
-                userDeposit
+                userDeposit - protocolDepositFee
             );
 
             // compute atom wallet address
@@ -792,7 +792,7 @@ contract EthMultiVaultV2 is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // transfer fees to protocol vault
@@ -912,7 +912,7 @@ contract EthMultiVaultV2 is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         emit TripleCreated(msg.sender, subjectId, predicateId, objectId, id);
@@ -1241,6 +1241,8 @@ contract EthMultiVaultV2 is
         address receiver,
         uint256 assets
     ) internal {
+        bool isAtomWallet = receiver == computeAtomWalletAddr(id);
+
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
@@ -1252,9 +1254,11 @@ contract EthMultiVaultV2 is
         uint256 totalAssetsDelta = assets;
 
         // changes in vault's total shares
-        uint256 totalSharesDelta = sharesForReceiver + sharesForZeroAddress;
+        uint256 totalSharesDelta = isAtomWallet
+            ? sharesForReceiver
+            : sharesForReceiver + sharesForZeroAddress;
 
-        if (sharesForReceiver <= 0 || totalAssetsDelta <= 0) {
+        if (sharesForReceiver < 0 || totalAssetsDelta < 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
@@ -1269,7 +1273,9 @@ contract EthMultiVaultV2 is
         _mint(receiver, id, sharesForReceiver);
 
         // mint `sharesForZeroAddress` shares to zero address to initialize the vault
-        _mint(address(0), id, sharesForZeroAddress);
+        if (!isAtomWallet) {
+            _mint(address(0), id, sharesForZeroAddress);
+        }
 
         /*
          * Initialize the counter triple vault with ghost shares if id is a positive triple vault
@@ -1499,9 +1505,15 @@ contract EthMultiVaultV2 is
     }
 
     /// @dev sets the atom share lock fee
-    /// @param atomShareLockFee_ new atom share lock fee
-    function setAtomShareLockFee(uint256 atomShareLockFee_) external onlyAdmin {
-        atomConfig.atomShareLockFee = atomShareLockFee_;
+    /// @param _atomShareLockFee new atom share lock fee
+    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
+        atomConfig.atomShareLockFee = _atomShareLockFee;
+    }
+
+    /// @dev sets the atom creation fee
+    /// @param _atomCreationFee new atom creation fee
+    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
+        atomConfig.atomCreationFee = _atomCreationFee;
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault

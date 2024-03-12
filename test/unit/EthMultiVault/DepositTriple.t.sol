@@ -190,8 +190,6 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // test values
         uint256 testAtomCost = getAtomCost();
-        uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms

@@ -486,7 +486,7 @@ contract EthMultiVault is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // compute atom wallet address
@@ -545,7 +545,7 @@ contract EthMultiVault is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // compute atom wallet address
@@ -615,7 +615,7 @@ contract EthMultiVault is
             _depositOnVaultCreation(
                 ids[i],
                 msg.sender, // receiver
-                userDeposit
+                userDeposit - protocolDepositFee
             );
 
             // compute atom wallet address
@@ -693,7 +693,7 @@ contract EthMultiVault is
             _depositOnVaultCreation(
                 ids[i],
                 msg.sender, // receiver
-                userDeposit
+                userDeposit - protocolDepositFee
             );
 
             // compute atom wallet address
@@ -789,7 +789,7 @@ contract EthMultiVault is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         // transfer fees to protocol vault
@@ -909,7 +909,7 @@ contract EthMultiVault is
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDeposit
+            userDeposit - protocolDepositFee
         );
 
         emit TripleCreated(msg.sender, subjectId, predicateId, objectId, id);
@@ -1238,6 +1238,8 @@ contract EthMultiVault is
         address receiver,
         uint256 assets
     ) internal {
+        bool isAtomWallet = receiver == computeAtomWalletAddr(id);
+
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
@@ -1249,7 +1251,9 @@ contract EthMultiVault is
         uint256 totalAssetsDelta = assets;
 
         // changes in vault's total shares
-        uint256 totalSharesDelta = sharesForReceiver + sharesForZeroAddress;
+        uint256 totalSharesDelta = isAtomWallet
+            ? sharesForReceiver
+            : sharesForReceiver + sharesForZeroAddress;
 
         if (sharesForReceiver < 0 || totalAssetsDelta < 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -1266,7 +1270,9 @@ contract EthMultiVault is
         _mint(receiver, id, sharesForReceiver);
 
         // mint `sharesForZeroAddress` shares to zero address to initialize the vault
-        _mint(address(0), id, sharesForZeroAddress);
+        if (!isAtomWallet) {
+            _mint(address(0), id, sharesForZeroAddress);
+        }
 
         /*
          * Initialize the counter triple vault with ghost shares if id is a positive triple vault

@@ -144,18 +144,12 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
             sharesForZeroAddress;
 
         // vault's total assets should have gone up
-        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
+        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore + sharesForZeroAddress;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
-        console.log("totalAssetsDeltaExpected: ", totalAssetsDeltaExpected);
-        console.log("totalAssetsDeltaGot: ", totalAssetsDeltaGot);
-
         // vault's total shares should have gone up
-        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore + sharesForZeroAddress;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
-
-        console.log("totalSharesDeltaExpected: ", totalSharesDeltaExpected);
-        console.log("totalSharesDeltaGot: ", totalSharesDeltaGot);
     }
 
     function checkDepositOnTripleVaultCreation(

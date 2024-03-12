@@ -57,5 +57,5 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 
 <summary>Optimism Sepolia</summary>
 
-- [Proxy](https://sepolia-optimism.etherscan.io/address/0x14561f6B2CDf5dec7BA95b303DED0b2C95A96635)
-- [Implementation](https://sepolia-optimism.etherscan.io/address/0xcd5f13867D40F8f4b135f3d45Dc16D88EFEFE583)
+- [Proxy](https://sepolia-optimism.etherscan.io/address/0x68A9d5849dAEa051E33E568092508468EA329a3E)
+- [Implementation](https://sepolia-optimism.etherscan.io/address/0x34f8e22ba28a1a140fA888F99Dd1aA606aF15628)

@@ -68,7 +68,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         assertEq(
             redeemableSharesAtomWallet + redeemablesharesUser + getMinShare(),
-            vaultTotalShares(id) - getMinShare()
+            vaultTotalShares(id)
         );
 
         uint256 redeemablesharesFromUserWithNoDeposits = ethMultiVault

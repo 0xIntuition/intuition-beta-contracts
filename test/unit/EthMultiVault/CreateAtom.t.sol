@@ -18,7 +18,6 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // test values
         uint256 testAtomCost = getAtomCost();
-        console.log("testAtomCost: ", testAtomCost);
 
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);

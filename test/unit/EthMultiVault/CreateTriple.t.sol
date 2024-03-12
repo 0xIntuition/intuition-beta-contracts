@@ -49,7 +49,6 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
         assertEq(vaultBalanceOf(counterId, address(0)),vaultBalanceOf(id, address(0)));
         assertEq(vaultTotalAssets(counterId), getMinShare());
-        // assertEq(vaultTotalAssets(id), testDepositAmount - getProtocolFee(id) - getTripleCreationFee() - getMinShare());
 
         vm.stopPrank();
     }
