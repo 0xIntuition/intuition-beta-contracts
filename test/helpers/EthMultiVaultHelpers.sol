@@ -106,16 +106,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 id,
         uint256 totalAssetsBefore,
         uint256 totalSharesBefore
-    ) public {
+    ) public payable {
         // calculate expected total assets delta
         uint256 totalAssetsDeltaExpected = amount -
             atomEquityFeeAmount(amount, id) -
-            protocolFeeAmount(amount, id);
+            entryFeeAmount(amount, id);
 
         // calculate expected total shares delta
         uint256 sharesForDepositor = totalSharesBefore == getMinShare()
-            ? amount - getProtocolFee(id)
-            : previewDeposit(amount, id);
+            ? amount
+            : convertToShares(totalAssetsDeltaExpected, id);
         uint256 totalSharesDeltaExpected = sharesForDepositor;
 
         // vault's total assets should have gone up
@@ -144,11 +144,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
             sharesForZeroAddress;
 
         // vault's total assets should have gone up
-        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore + sharesForZeroAddress;
+        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) -
+            totalAssetsBefore +
+            sharesForZeroAddress;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
         // vault's total shares should have gone up
-        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore + sharesForZeroAddress;
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) -
+            totalSharesBefore +
+            sharesForZeroAddress;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 

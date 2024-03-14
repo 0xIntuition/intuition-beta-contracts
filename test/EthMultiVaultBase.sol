@@ -113,6 +113,13 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.entryFeeAmount(assets, id);
     }
 
+    function previewDeposit(
+        uint256 assets,
+        uint256 id
+    ) public view returns (uint256 feeAmount) {
+        return ethMultiVault.previewDeposit(assets, id);
+    }
+
     function atomEquityFeeAmount(
         uint256 assets,
         uint256 id
@@ -125,19 +132,6 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         uint256 id
     ) public view returns (uint256) {
         return ethMultiVault.protocolFeeAmount(assets, id);
-    }
-
-    function previewDeposit(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256 shares) {
-        shares = ethMultiVault.convertToShares(
-            assets -
-                entryFeeAmount(assets, id) -
-                atomEquityFeeAmount(assets, id) -
-                protocolFeeAmount(assets, id),
-            id
-        );
     }
 
     //////// Generate Memes ////////

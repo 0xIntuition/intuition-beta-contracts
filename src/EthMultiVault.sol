@@ -133,6 +133,18 @@ contract EthMultiVault is
             2; // for purchasing ghost shares for the positive and counter triple vaults
     }
 
+    function getDepositFees(
+        uint256 assets,
+        uint256 id
+    ) public view returns (uint256 totalFees) {
+        uint256 protocolFees = protocolFeeAmount(assets, id);
+
+        totalFees =
+            entryFeeAmount(assets, id) +
+            atomEquityFeeAmount(assets - protocolFees, id) +
+            protocolFees;
+    }
+
     /// @notice calculates fee on raw amount
     /// @param amount amount of assets to calculate fee on
     /// @param fee fee in %
@@ -262,12 +274,10 @@ contract EthMultiVault is
     ///       input amount of assets so if the vault is empty before the deposit the caller receives more
     ///       shares than returned by this function, reference internal _depositIntoVault logic for details
     function previewDeposit(
-        uint256 assets,
+        uint256 assets, // should always be msg.value
         uint256 id
     ) public view returns (uint256 shares) {
-        uint256 totalFees = entryFeeAmount(assets, id) +
-            atomEquityFeeAmount(assets, id) +
-            protocolFeeAmount(assets, id);
+        uint256 totalFees = getDepositFees(assets, id);
 
         if (assets < totalFees) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -950,8 +960,8 @@ contract EthMultiVault is
             deposit eth into the vault, returning the amount of vault
             shares given to the receiver and protocol fees
         */
-        uint256 protocolFees;
-        (shares, protocolFees) = _depositIntoVault(id, receiver, msg.value);
+        uint256 protocolFees = protocolFeeAmount(msg.value, id);
+        shares = _depositIntoVault(id, receiver, msg.value - protocolFees);
 
         // transfer protocol fees to protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
@@ -1028,8 +1038,8 @@ contract EthMultiVault is
             deposit eth into the vault, returning the amount of vault
             shares given to the receiver and protocol fees
         */
-        uint256 protocolFees;
-        (, protocolFees) = _depositIntoVault(id, receiver, msg.value);
+        uint256 protocolFees = protocolFeeAmount(msg.value, id);
+        _depositIntoVault(id, receiver, msg.value - protocolFees);
 
         // transfer protocol amount to protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
@@ -1172,11 +1182,7 @@ contract EthMultiVault is
 
         // distribute proportional equity to each atom
         for (uint8 i = 0; i < 3; i++) {
-            (uint256 shares, ) = _depositIntoVault(
-                atomsIds[i],
-                receiver,
-                perAtom
-            );
+            uint256 shares = _depositIntoVault(atomsIds[i], receiver, perAtom);
             tripleAtomShares[id][atomsIds[i]][receiver] += shares;
         }
     }
@@ -1184,27 +1190,24 @@ contract EthMultiVault is
     /// @dev deposit assets into a vault
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the deposit
     /// @return sharesForReceiver the amount of shares minted for the receiver
-    /// @return protocolFees the amount of fees charged on deposit by the protocol
     function _depositIntoVault(
         uint256 id,
         address receiver,
-        uint256 assets
-    ) internal returns (uint256 sharesForReceiver, uint256 protocolFees) {
-        protocolFees = protocolFeeAmount(assets, id);
-
-        if (vaults[id].totalShares == generalConfig.minShare) {
-            sharesForReceiver = assets - protocolFees; // shares owed to receiver
-        } else {
-            sharesForReceiver = previewDeposit(assets, id); // shares owed to receiver
-        }
-
+        uint256 assets // protocol fees already deducted
+    ) internal returns (uint256 sharesForReceiver) {
         // changes in vault's total assets
         uint256 totalAssetsDelta = assets -
-            atomEquityFeeAmount(assets, id) -
-            protocolFees;
+            entryFeeAmount(assets, id) -
+            atomEquityFeeAmount(assets, id);
 
         if (totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
+        }
+
+        if (vaults[id].totalShares == generalConfig.minShare) {
+            sharesForReceiver = assets; // shares owed to receiver
+        } else {
+            sharesForReceiver = convertToShares(totalAssetsDelta, id); // shares owed to receiver
         }
 
         // changes in vault's total shares
