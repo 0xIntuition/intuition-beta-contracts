@@ -419,7 +419,7 @@ contract EthMultiVault is
             walletConfig.atomWarden
         );
         bytes memory data = abi.encodePacked(code, encodedArgs);
-        bytes32 salt = keccak256(abi.encode(address(this), id));
+        bytes32 salt = bytes32(id);
         bytes32 rawAddress = keccak256(
             abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data))
         );
@@ -442,7 +442,7 @@ contract EthMultiVault is
         uint256 atomId
     ) external whenNotPaused returns (address atomWallet) {
         // compute salt
-        bytes32 salt = keccak256(abi.encode(address(this), atomId));
+        bytes32 salt = bytes32(atomId);
         // get creation code
         bytes memory code = type(AtomWallet).creationCode;
         // encode constructor arguments (IEntryPoint, address)
