@@ -1258,10 +1258,6 @@ contract EthMultiVault is
             ? sharesForReceiver
             : sharesForReceiver + sharesForZeroAddress;
 
-        if (sharesForReceiver < 0 || totalAssetsDelta < 0) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
-        }
-
         // set vault totals for the vault
         _setVaultTotals(
             id,
