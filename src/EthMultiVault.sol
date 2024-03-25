@@ -103,8 +103,6 @@ contract EthMultiVault is
         __ReentrancyGuard_init();
         __Pausable_init();
 
-        if (generalConfig.admin != address(0))
-            revert Errors.MultiVault_AlreadyInitialized();
         generalConfig = _generalConfig;
         atomConfig = _atomConfig;
         tripleConfig = _tripleConfig;
