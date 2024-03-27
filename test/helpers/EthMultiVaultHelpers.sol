@@ -10,15 +10,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     using FixedPointMathLib for uint256;
 
     function getAdmin() public view returns (address admin) {
-        (admin, , , , ) = ethMultiVault.generalConfig();
+        (admin, , , , , ) = ethMultiVault.generalConfig();
     }
 
     function getProtocolVault() public view returns (address protocolVault) {
-        (, protocolVault, , , ) = ethMultiVault.generalConfig();
+        (, protocolVault, , , , ) = ethMultiVault.generalConfig();
     }
 
     function getFeeDenominator() public view returns (uint256 feeDenominator) {
-        (, , feeDenominator, , ) = ethMultiVault.generalConfig();
+        (, , feeDenominator, , , ) = ethMultiVault.generalConfig();
     }
 
     function getEntryFee(uint256 _id) public view returns (uint256 entryFee) {
@@ -61,11 +61,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
-        (, , , minDeposit, ) = ethMultiVault.generalConfig();
+        (, , , minDeposit, , ) = ethMultiVault.generalConfig();
     }
 
     function getMinShare() public view returns (uint256 minShare) {
-        (, , , , minShare) = ethMultiVault.generalConfig();
+        (, , , , minShare, ) = ethMultiVault.generalConfig();
+    }
+
+    function getAtomUriMaxLength() public view returns (uint256 atomUriMaxLength) {
+        (, , , , , atomUriMaxLength) = ethMultiVault.generalConfig();
     }
 
     function getAtomEquityFee()

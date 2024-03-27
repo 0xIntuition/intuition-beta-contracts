@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
-import {EthMultiVaultV2} from "src/test/EthMultiVaultV2.sol";
+import {EthMultiVaultV2} from "../../EthMultiVaultV2.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
@@ -36,7 +36,8 @@ contract UpgradeTo is Test {
             protocolVault: msg.sender, // Deployer as protocol vault for simplicity
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.01 ether, // Minimum deposit amount in wei
-            minShare: 1e18 // Minimum share amount (e.g., for vault initialization)
+            minShare: 1e18, // Minimum share amount (e.g., for vault initialization)
+            atomUriMaxLength: 200 // Maximum length of the atom URI data that can be passed when creating atom vaults
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({

@@ -23,6 +23,8 @@ interface IEthMultiVault {
         uint256 minDeposit;
         /// @notice number of shares minted to zero address upon vault creation to initialize the vault
         uint256 minShare;
+        /// @notice maximum length of the atom URI data that can be passed when creating atom vaults
+        uint256 atomUriMaxLength;
     }
 
     struct AtomConfig {
