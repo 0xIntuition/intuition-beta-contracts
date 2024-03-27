@@ -17,7 +17,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(alice, alice);
 
         // test values
-        uint256 testAtomCost = 1 ether;
+        uint256 testAtomCost = getAtomCost();
 
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
