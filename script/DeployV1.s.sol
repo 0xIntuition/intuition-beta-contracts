@@ -12,8 +12,7 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployEthMultiVault is Script {
-    string mnemonic =
-        "test test test test test test test test test test test junk";
+    string mnemonic = "test test test test test test test test test test test junk";
 
     uint256 PRIVATE_KEY;
     string FOUNDRY_PROFILE;
@@ -48,42 +47,33 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed EntryPoint.");
 
         // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
-        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault
-            .GeneralConfig({
-                admin: msg.sender, // Deployer as admin for simplicity
-                protocolVault: msg.sender, // Deployer as protocol vault for simplicity
-                feeDenominator: 10000, // Common denominator for fee calculations
-                minDeposit: 0.01 ether, // Minimum deposit amount in wei
-                minShare: 1e5 // Minimum share amount (e.g., for vault initialization)
-            });
+        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+            admin: msg.sender, // Deployer as admin for simplicity
+            protocolVault: msg.sender, // Deployer as protocol vault for simplicity
+            feeDenominator: 10000, // Common denominator for fee calculations
+            minDeposit: 0.01 ether, // Minimum deposit amount in wei
+            minShare: 1e5 // Minimum share amount (e.g., for vault initialization)
+        });
 
-        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
-            .AtomConfig({
-                atomShareLockFee: 0.01 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 0.005 ether // Fee charged for creating an atom
-            });
+        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+            atomShareLockFee: 0.01 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationFee: 0.005 ether // Fee charged for creating an atom
+        });
 
-        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
-            .TripleConfig({
-                tripleCreationFee: 0.02 ether, // Fee for creating a triple
-                atomEquityFeeForTriple: 100 // Fee for equity in atoms when creating a triple
-            });
+        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+            tripleCreationFee: 0.02 ether, // Fee for creating a triple
+            atomEquityFeeForTriple: 100 // Fee for equity in atoms when creating a triple
+        });
 
-        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
-            .WalletConfig({
-                permit2: IPermit2(address(permit2)), // Uniswap Protocol Permit2 contract on Optimism
-                entryPoint: address(entryPoint), // Our deployed EntryPoint contract (in production, change this to the actual entry point contract address on Optimism)
-                atomWarden: msg.sender // Deployer as atom warden for simplicity
-            });
+        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+            permit2: IPermit2(address(permit2)), // Uniswap Protocol Permit2 contract on Optimism
+            entryPoint: address(entryPoint), // Our deployed EntryPoint contract (in production, change this to the actual entry point contract address on Optimism)
+            atomWarden: msg.sender // Deployer as atom warden for simplicity
+        });
 
         // Prepare data for initializer function
-        bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector,
-            generalConfig,
-            atomConfig,
-            tripleConfig,
-            walletConfig
-        );
+        bytes memory initData =
+            abi.encodeWithSelector(EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig);
 
         // Deploy EthMultiVault contract
         console.log("Deploying EthMultiVault...");
@@ -106,9 +96,7 @@ contract DeployEthMultiVault is Script {
         // // stop sending tx's
         vm.stopBroadcast();
 
-        console.log(
-            "EthMultiVault deployed and initialized successfully through proxy."
-        );
+        console.log("EthMultiVault deployed and initialized successfully through proxy.");
         console.log("EntryPoint address:", address(entryPoint));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
         console.log("Intuition ProxyAdmin address:", address(proxyAdmin));

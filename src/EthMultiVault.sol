@@ -443,8 +443,9 @@ contract EthMultiVault is
         assembly {
             atomWallet := create2(0, add(data, 0x20), mload(data), salt)
         }
-        if (atomWallet == address(0))
+        if (atomWallet == address(0)) {
             revert Errors.MultiVault_DeployAccountFailed();
+        }
     }
 
     /* -------------------------- */
@@ -458,8 +459,9 @@ contract EthMultiVault is
     function createAtom(
         bytes calldata atomUri
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
-        if (msg.value < getAtomCost())
+        if (msg.value < getAtomCost()) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
@@ -485,8 +487,9 @@ contract EthMultiVault is
         returns (uint256[] memory ids)
     {
         uint256 length = atomUris.length;
-        if (msg.value < getAtomCost() * length)
+        if (msg.value < getAtomCost() * length) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 valuePerAtom = msg.value / length;
         uint256 protocolDepositFeeTotal;
@@ -519,8 +522,9 @@ contract EthMultiVault is
     ) internal returns (uint256 id, uint256 protocolDepositFee) {
         uint256 atomCost = getAtomCost();
         bytes32 _hash = keccak256(atomUri);
-        if (AtomsByHash[_hash] != 0)
+        if (AtomsByHash[_hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
+        }
 
         uint256 userDeposit = value - atomCost;
 
@@ -569,8 +573,9 @@ contract EthMultiVault is
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
         uint256 tripleCost = getTripleCost();
 
-        if (msg.value < tripleCost)
+        if (msg.value < tripleCost) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 protocolDepositFee;
 
@@ -610,12 +615,15 @@ contract EthMultiVault is
         if (
             subjectIds.length != predicateIds.length ||
             subjectIds.length != objectIds.length
-        ) revert Errors.MultiVault_ArraysNotSameLength();
+        ) {
+            revert Errors.MultiVault_ArraysNotSameLength();
+        }
 
         uint256 length = subjectIds.length;
         uint256 tripleCost = getTripleCost();
-        if (msg.value < tripleCost * length)
+        if (msg.value < tripleCost * length) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 valuePerTriple = msg.value / length;
         uint256 protocolDepositFeeTotal;
@@ -658,12 +666,15 @@ contract EthMultiVault is
         uint256 tripleCost = getTripleCost();
 
         // assert atoms exist, if not, revert
-        if (subjectId == 0 || subjectId > count)
+        if (subjectId == 0 || subjectId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
-        if (predicateId == 0 || predicateId > count)
+        }
+        if (predicateId == 0 || predicateId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
-        if (objectId == 0 || objectId > count)
+        }
+        if (objectId == 0 || objectId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
+        }
 
         // assert that each id is not a triple vault id
         if (assertTriple(subjectId)) revert Errors.MultiVault_VaultIsTriple();
@@ -677,8 +688,9 @@ contract EthMultiVault is
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subject, predicate, object);
-        if (TriplesByHash[_hash] != 0)
+        if (TriplesByHash[_hash] != 0) {
             revert Errors.MultiVault_TripleExists(subject, predicate, object);
+        }
 
         uint256 userDeposit = value - tripleCost;
 
@@ -1202,8 +1214,9 @@ contract EthMultiVault is
     /* =================================================== */
 
     modifier onlyAdmin() {
-        if (msg.sender != generalConfig.admin)
+        if (msg.sender != generalConfig.admin) {
             revert Errors.MultiVault_AdminOnly();
+        }
 
         _;
     }

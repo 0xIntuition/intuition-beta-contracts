@@ -17,12 +17,7 @@ interface IEthMultiVaultEvents {
     /// @param entryFee total fee amount collected for entering the vault
     /// @param id vault id
     event Deposit(
-        address indexed sender,
-        address indexed receiver,
-        uint256 assets,
-        uint256 shares,
-        uint256 entryFee,
-        uint256 id
+        address indexed sender, address indexed receiver, uint256 assets, uint256 shares, uint256 entryFee, uint256 id
     );
 
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
@@ -33,12 +28,7 @@ interface IEthMultiVaultEvents {
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param id vault id
     event Withdraw(
-        address indexed sender,
-        address indexed owner,
-        uint256 assets,
-        uint256 shares,
-        uint256 exitFee,
-        uint256 id
+        address indexed sender, address indexed owner, uint256 assets, uint256 shares, uint256 exitFee, uint256 id
     );
 
     /// @notice emitted upon creation of an atom
@@ -46,12 +36,7 @@ interface IEthMultiVaultEvents {
     /// @param atomWallet address of the atom's associated abstract account
     /// @param atomString the atom's respective string
     /// @param vaultID the vault id of the atom
-    event AtomCreated(
-        address indexed creator,
-        address indexed atomWallet,
-        string atomString,
-        uint256 vaultID
-    );
+    event AtomCreated(address indexed creator, address indexed atomWallet, string atomString, uint256 vaultID);
 
     /// @notice emitted upon creation of a triple
     /// @param creator address of the triple creator
@@ -61,11 +46,6 @@ interface IEthMultiVaultEvents {
     /// @param object the triple's respective object atom
     /// @param vaultID the vault id of the triple
     event TripleCreated(
-        address indexed creator,
-        bytes32 hash,
-        string subject,
-        string predicate,
-        string object,
-        uint256 vaultID
+        address indexed creator, bytes32 hash, string subject, string predicate, string object, uint256 vaultID
     );
 }

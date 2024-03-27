@@ -59,13 +59,8 @@ contract UpgradeTo is Test {
                 atomWarden: msg.sender // Deployer as atom warden for simplicity
             });
 
-        bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector,
-            generalConfig,
-            atomConfig,
-            tripleConfig,
-            walletConfig
-        );
+        bytes memory initData =
+            abi.encodeWithSelector(EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig);
 
         // deploy EthMultiVault
         ethMultiVault = new EthMultiVault();
