@@ -65,7 +65,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
 
         // execute interaction - redeem all atom shares
-        uint256 assetsForReceiver = ethMultiVault.emergencyRedeemTriple(
+        uint256 assetsForReceiver = ethMultiVault.redeemTriple(
             userSharesBeforeRedeem,
             bob,
             id
@@ -143,7 +143,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
 
         // execute interaction - redeem all atom shares
-        uint256 assetsForReceiver = ethMultiVault.emergencyRedeemTriple(
+        uint256 assetsForReceiver = ethMultiVault.redeemTriple(
             userSharesBeforeRedeem,
             bob,
             counterId
@@ -210,7 +210,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             )
         );
         // execute interaction - redeem all atom shares
-        ethMultiVault.emergencyRedeemTriple(0, alice, id);
+        ethMultiVault.redeemTriple(0, alice, id);
 
         vm.stopPrank();
     }
@@ -264,7 +264,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             abi.encodeWithSelector(Errors.MultiVault_VaultNotTriple.selector)
         );
         // execute interaction - redeem all atom shares
-        ethMultiVault.emergencyRedeemTriple(userSharesAfterRedeem, alice, subjectId);
+        ethMultiVault.redeemTriple(userSharesAfterRedeem, alice, subjectId);
 
         vm.stopPrank();
     }
@@ -320,7 +320,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             )
         );
         // execute interaction - redeem all atom shares
-        ethMultiVault.emergencyRedeemTriple(userSharesAfterRedeem, bob, id);
+        ethMultiVault.redeemTriple(userSharesAfterRedeem, bob, id);
 
         vm.stopPrank();
     }

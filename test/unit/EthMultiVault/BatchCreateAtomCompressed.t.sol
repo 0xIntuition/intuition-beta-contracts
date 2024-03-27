@@ -37,7 +37,7 @@ contract BatchCreateAtomCompressedTest is
             totalSharesBefore[i] = vaultTotalShares(i + 1);
         }
 
-        uint256[] memory ids = ethMultiVault.batchCreateAtomCompressed{
+        uint256[] memory ids = ethMultiVault.batchCreateAtom{
             value: testAtomCost * atomsToCreate
         }(atomData);
 
@@ -77,7 +77,7 @@ contract BatchCreateAtomCompressedTest is
                 Errors.MultiVault_InsufficientBalance.selector
             )
         );
-        ethMultiVault.batchCreateAtomCompressed{
+        ethMultiVault.batchCreateAtom{
             value: testAtomCost * (atomsToCreate - 1)
         }(atomData);
 

@@ -5,8 +5,11 @@ import "forge-std/Test.sol";
 import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
 import {Errors} from "../../../src/libraries/Errors.sol";
+import {LibZip} from "solady/utils/LibZip.sol";
 
 contract CreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
+    using LibZip for bytes;
+
     function setUp() external {
         _setUp();
     }
@@ -26,7 +29,7 @@ contract CreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
             .balance;
 
         // execute interaction - create atoms
-        uint256 id1 = ethMultiVault.createAtomCompressed{value: testAtomCost}(
+        uint256 id1 = ethMultiVault.createAtom{value: testAtomCost}(
             "atom1"
         );
 
@@ -49,13 +52,13 @@ contract CreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testCreateAtomCompressedWithSameAtomData() external {
-        // creating atoms with the same atom data should not revert
+        // creating atoms with the same atom data should revert
         vm.startPrank(alice, alice);
 
         // test values
         uint256 testAtomCost = getAtomCost();
 
-        uint256 id1 = ethMultiVault.createAtomCompressed{value: testAtomCost}(
+        uint256 id1 = ethMultiVault.createAtom{value: testAtomCost}(
             "atom1"
         );
         assertEq(id1, ethMultiVault.count());
@@ -63,10 +66,10 @@ contract CreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.MultiVault_AtomExists.selector,
-                "atom1"
+                bytes("atom1")
             )
         );
-        ethMultiVault.createAtomCompressed{value: testAtomCost}("atom1");
+        ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         vm.stopPrank();
     }
@@ -74,12 +77,12 @@ contract CreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function testCreateAtomCompressedWithDifferentAtomData() external {
         vm.startPrank(alice, alice);
 
-        uint256 id1 = ethMultiVault.createAtomCompressed{value: getAtomCost()}(
+        uint256 id1 = ethMultiVault.createAtom{value: getAtomCost()}(
             "atom1"
         );
         assertEq(id1, ethMultiVault.count());
 
-        uint256 id2 = ethMultiVault.createAtomCompressed{value: getAtomCost()}(
+        uint256 id2 = ethMultiVault.createAtom{value: getAtomCost()}(
             "atom2"
         );
         assertEq(id2, ethMultiVault.count());
