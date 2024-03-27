@@ -918,19 +918,16 @@ contract EthMultiVault is
 
         uint256 sharesForReceiver = assets;
 
-        // changes in vault's total assets
-        uint256 totalAssetsDelta = assets;
-
-        // changes in vault's total shares
-        uint256 totalSharesDelta = isAtomWallet
+        // changes in vault's total assets or total shares
+        uint256 totalDelta = isAtomWallet
             ? sharesForReceiver
             : sharesForReceiver + sharesForZeroAddress;
 
         // set vault totals for the vault
         _setVaultTotals(
             id,
-            vaults[id].totalAssets + totalAssetsDelta,
-            vaults[id].totalShares + totalSharesDelta
+            vaults[id].totalAssets + totalDelta,
+            vaults[id].totalShares + totalDelta
         );
 
         // mint `sharesOwed` shares to sender factoring in fees
@@ -964,7 +961,7 @@ contract EthMultiVault is
             receiver,
             vaults[id].balanceOf[receiver],
             assets,
-            totalSharesDelta,
+            totalDelta,
             id
         );
     }

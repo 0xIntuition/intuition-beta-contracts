@@ -17,7 +17,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(alice, alice);
 
         // test values
-        uint256 testAtomCost = getAtomCost();
+        uint256 testAtomCost = 1 ether;
 
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
@@ -102,12 +102,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.stopPrank();
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {   
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }
