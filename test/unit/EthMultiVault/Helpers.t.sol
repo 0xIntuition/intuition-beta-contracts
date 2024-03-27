@@ -57,11 +57,16 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         address atomWalletAddress = ethMultiVault.deployAtomWallet(atomId);
         address payable atomWallet = payable(atomWalletAddress);
 
+        address computedAddress = ethMultiVault.computeAtomWalletAddr(atomId);
+
         // verify the returned atomWallet address is not zero
         assertNotEq(atomWallet, address(0));
 
         // verify atomWallet is a contract
         assertTrue(isContract(atomWallet));
+
+        // verify the computed address matches the actual wallet address
+        assertEq(computedAddress, atomWalletAddress);
     }
 
     function isContract(address _addr) internal view returns (bool) {
