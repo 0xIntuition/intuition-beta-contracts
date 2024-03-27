@@ -22,8 +22,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
         uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         // execute interaction - create atoms
         uint256 id1 = ethMultiVault.createAtom{value: testAtomCost}("atom1");
@@ -31,17 +30,9 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // should have created a new atom vault
         assertEq(id1, ethMultiVault.count());
 
-        checkDepositOnAtomVaultCreation(
-            id1,
-            testAtomCost,
-            totalAssetsBefore,
-            totalSharesBefore
-        );
+        checkDepositOnAtomVaultCreation(id1, testAtomCost, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalanceOnVaultCreation(
-            id1,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalanceOnVaultCreation(id1, protocolVaultBalanceBefore);
 
         vm.stopPrank();
     }
@@ -56,12 +47,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id1 = ethMultiVault.createAtom{value: getAtomCost()}("atom1");
         assertEq(id1, ethMultiVault.count());
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_AtomExists.selector,
-                "atom1"
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomExists.selector, "atom1"));
         ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         vm.stopPrank();
@@ -85,29 +71,16 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_InsufficientBalance.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientBalance.selector));
         ethMultiVault.createAtom("atom1");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_InsufficientBalance.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientBalance.selector));
         ethMultiVault.createAtom{value: testAtomCost - 1}("atom1");
 
         vm.stopPrank();
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {   
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

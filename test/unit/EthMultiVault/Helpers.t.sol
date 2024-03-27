@@ -34,19 +34,12 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         /// @notice on vault creation all shares are minted to the caller's atom wallet
         address atomWallet = ethMultiVault.computeAtomWalletAddr(id);
 
-        uint256 redeemableSharesAtomWallet = ethMultiVault.maxRedeem(
-            atomWallet,
-            id
-        );
+        uint256 redeemableSharesAtomWallet = ethMultiVault.maxRedeem(atomWallet, id);
         uint256 redeemablesharesUser = ethMultiVault.maxRedeem(alice, id);
 
-        assertEq(
-            redeemableSharesAtomWallet + redeemablesharesUser + getMinShare(),
-            vaultTotalShares(id)
-        );
+        assertEq(redeemableSharesAtomWallet + redeemablesharesUser + getMinShare(), vaultTotalShares(id));
 
-        uint256 redeemablesharesFromUserWithNoDeposits = ethMultiVault
-            .maxRedeem(bob, id);
+        uint256 redeemablesharesFromUserWithNoDeposits = ethMultiVault.maxRedeem(bob, id);
         assertEq(redeemablesharesFromUserWithNoDeposits, 0);
     }
 
@@ -77,12 +70,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         return (size > 0);
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

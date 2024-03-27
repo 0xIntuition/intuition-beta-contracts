@@ -25,25 +25,16 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256[] memory predicateIds = new uint256[](triplesToCreate);
         uint256[] memory objectIds = new uint256[](triplesToCreate);
 
-        subjectIds[0] = ethMultiVault.createAtom{value: testAtomCost}(
-            "subject1"
-        );
-        predicateIds[0] = ethMultiVault.createAtom{value: testAtomCost}(
-            "predicate1"
-        );
+        subjectIds[0] = ethMultiVault.createAtom{value: testAtomCost}("subject1");
+        predicateIds[0] = ethMultiVault.createAtom{value: testAtomCost}("predicate1");
         objectIds[0] = ethMultiVault.createAtom{value: testAtomCost}("object1");
 
-        subjectIds[1] = ethMultiVault.createAtom{value: testAtomCost}(
-            "subject2"
-        );
-        predicateIds[1] = ethMultiVault.createAtom{value: testAtomCost}(
-            "predicate2"
-        );
+        subjectIds[1] = ethMultiVault.createAtom{value: testAtomCost}("subject2");
+        predicateIds[1] = ethMultiVault.createAtom{value: testAtomCost}("predicate2");
         objectIds[1] = ethMultiVault.createAtom{value: testAtomCost}("object2");
 
         // snapshots before creating a triple
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         uint256 lastVaultIdBeforeCreatingTriple = ethMultiVault.count();
         assertEq(lastVaultIdBeforeCreatingTriple, 3 * triplesToCreate);
@@ -52,18 +43,14 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256[] memory totalSharesBefore = new uint256[](triplesToCreate);
 
         for (uint256 i = 0; i < triplesToCreate; i++) {
-            totalAssetsBefore[i] = vaultTotalAssets(
-                lastVaultIdBeforeCreatingTriple + (i + 1) * 2
-            );
-            totalSharesBefore[i] = vaultTotalShares(
-                lastVaultIdBeforeCreatingTriple + (i + 1) * 2
-            );
+            totalAssetsBefore[i] = vaultTotalAssets(lastVaultIdBeforeCreatingTriple + (i + 1) * 2);
+            totalSharesBefore[i] = vaultTotalShares(lastVaultIdBeforeCreatingTriple + (i + 1) * 2);
         }
 
         // execute interaction - create triples
-        uint256[] memory ids = ethMultiVault.batchCreateTriple{
-            value: testDepositAmountTriple * triplesToCreate
-        }(subjectIds, predicateIds, objectIds);
+        uint256[] memory ids = ethMultiVault.batchCreateTriple{value: testDepositAmountTriple * triplesToCreate}(
+            subjectIds, predicateIds, objectIds
+        );
 
         // should have created a new atom vault and triple-atom vault
         // for each triple
@@ -88,22 +75,14 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - create atoms
         for (uint256 i = 0; i < triplesToCreate; i++) {
-            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("subject"), i)
-            );
-            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("predicate"), i)
-            );
-            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("object"), i)
-            );
+            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("subject"), i));
+            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("predicate"), i));
+            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("object"), i));
         }
 
         // execute interaction - create triples
         ethMultiVault.batchCreateTriple{value: testDepositAmountTriple * triplesToCreate}(
-            subjectIds,
-            predicateIds,
-            objectIds
+            subjectIds, predicateIds, objectIds
         );
 
         vm.stopPrank();
@@ -122,24 +101,14 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - create atoms
         for (uint256 i = 0; i < triplesToCreate; i++) {
-            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("subject"), i)
-            );
-            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("predicate"), i)
-            );
-            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("object"), i)
-            );
+            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("subject"), i));
+            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("predicate"), i));
+            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("object"), i));
         }
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_InsufficientBalance.selector
-            )
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientBalance.selector));
+        ethMultiVault.batchCreateTriple{value: testAtomCost * (triplesToCreate - 1)}(
+            subjectIds, predicateIds, objectIds
         );
-        ethMultiVault.batchCreateTriple{
-            value: testAtomCost * (triplesToCreate - 1)
-        }(subjectIds, predicateIds, objectIds);
 
         vm.stopPrank();
     }
@@ -158,15 +127,9 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // atomData[i] = abi.encodePacked(bytes("atom"), i);
         // execute interaction - create atoms
         for (uint256 i = 0; i < triplesToCreate; i++) {
-            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("subject"), i)
-            );
-            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("predicate"), i)
-            );
-            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(
-                abi.encodePacked(bytes("object"), i)
-            );
+            subjectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("subject"), i));
+            predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("predicate"), i));
+            objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("object"), i));
         }
 
         // remove last element from subjectIds
@@ -175,24 +138,15 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             newSubjectIds[i] = subjectIds[i];
         }
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_ArraysNotSameLength.selector
-            )
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_ArraysNotSameLength.selector));
+        ethMultiVault.batchCreateTriple{value: testAtomCost * (triplesToCreate - 1)}(
+            newSubjectIds, predicateIds, objectIds
         );
-        ethMultiVault.batchCreateTriple{
-            value: testAtomCost * (triplesToCreate - 1)
-        }(newSubjectIds, predicateIds, objectIds);
 
         vm.stopPrank();
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

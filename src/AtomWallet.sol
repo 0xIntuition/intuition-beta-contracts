@@ -34,11 +34,7 @@ contract AtomWallet is BaseAccount {
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
-    function execute(
-        address dest,
-        uint256 value,
-        bytes calldata func
-    ) external {
+    function execute(address dest, uint256 value, bytes calldata func) external {
         if (!(msg.sender == address(entryPoint()) || msg.sender == owner)) {
             revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
         }
@@ -48,10 +44,7 @@ contract AtomWallet is BaseAccount {
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(
-        address[] calldata dest,
-        bytes[] calldata func
-    ) external {
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external {
         if (!(msg.sender == address(entryPoint()) || msg.sender == owner)) {
             revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
         }
@@ -62,13 +55,16 @@ contract AtomWallet is BaseAccount {
     }
 
     /// implement template method of BaseAccount
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
+    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
+        internal
+        virtual
+        override
+        returns (uint256 validationData)
+    {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner != hash.recover(userOp.signature))
+        if (owner != hash.recover(userOp.signature)) {
             return SIG_VALIDATION_FAILED;
+        }
         return 0;
     }
 
@@ -100,10 +96,7 @@ contract AtomWallet is BaseAccount {
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(
-        address payable withdrawAddress,
-        uint256 amount
-    ) public {
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public {
         if (!(msg.sender == owner || msg.sender == address(this))) {
             revert Errors.AtomWallet_OnlyOwner();
         }
