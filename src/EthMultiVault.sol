@@ -1122,18 +1122,12 @@ contract EthMultiVault is
         generalConfig.protocolVault = _protocolVault;
     }
 
-    /// @dev sets the denominator used for calculating percentages
-    /// @param _feeDenominator new denominator used to calculate fees
-    function setFeeDenominator(uint256 _feeDenominator) external onlyAdmin {
-        generalConfig.feeDenominator = _feeDenominator;
-    }
-
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
     /// @param _id vault id to set entry fee for
     /// @param _entryFee entry fee to set
     function setEntryFee(uint256 _id, uint256 _entryFee) external onlyAdmin {
-        if (_entryFee > 10 ** 4) revert Errors.MultiVault_InvalidFeeSet();
+        if (_entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
         vaultFees[_id].entryFee = _entryFee;
     }
 
@@ -1144,7 +1138,7 @@ contract EthMultiVault is
     /// @param _id vault id to set exit fee for
     /// @param _exitFee exit fee to set
     function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
-        if (_exitFee > 10 ** 3) revert Errors.MultiVault_InvalidExitFee();
+        if (_exitFee > (generalConfig.feeDenominator / 10)) revert Errors.MultiVault_InvalidExitFee();
         vaultFees[_id].exitFee = _exitFee;
     }
 
@@ -1156,7 +1150,7 @@ contract EthMultiVault is
         uint256 _id,
         uint256 _protocolFee
     ) external onlyAdmin {
-        if (_protocolFee > 10 ** 4) revert Errors.MultiVault_InvalidFeeSet();
+        if (_protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
         vaultFees[_id].protocolFee = _protocolFee;
     }
 
@@ -1180,7 +1174,7 @@ contract EthMultiVault is
         tripleConfig.tripleCreationFee = _tripleCreationFee;
     }
 
-    /// @dev sets the atom equity fee percentage (number to be divided by `feeDenominator`)
+    /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
     /// @param _atomEquityFeeForTriple new atom equity fee percentage
     function setAtomEquityFee(
         uint256 _atomEquityFeeForTriple
