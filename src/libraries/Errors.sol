@@ -54,7 +54,6 @@ library Errors {
     error MultiVault_TransferFailed();
     error MultiVault_InvalidFeeSet();
     error MultiVault_InvalidExitFee();
-    error MultiVault_InvalidAtomUriMaxLength();
 
     /*/////// TRUSTBONDING ERRORS /////////////////////////////////////////////////////////*/
 
