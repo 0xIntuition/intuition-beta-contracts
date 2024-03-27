@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
-import {EthMultiVaultV2} from "../../EthMultiVaultV2.sol";
+import {EthMultiVaultV2} from "src/test/EthMultiVaultV2.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";

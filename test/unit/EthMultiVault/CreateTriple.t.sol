@@ -100,15 +100,17 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function testCreateTripleNonExistentAtomVaultID() external {
         vm.startPrank(alice, alice);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector)
-        );
-        ethMultiVault.createTriple(0, 0, 0);
+        uint256 testDepositAmountTriple = 0.01 ether;
 
         vm.expectRevert(
             abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector)
         );
-        ethMultiVault.createTriple(7, 8, 9);
+        ethMultiVault.createTriple{value: testDepositAmountTriple}(0, 0, 0);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector)
+        );
+        ethMultiVault.createTriple{value: testDepositAmountTriple}(7, 8, 9);
 
         vm.stopPrank();
     }
