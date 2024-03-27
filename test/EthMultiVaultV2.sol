@@ -370,22 +370,6 @@ contract EthMultiVaultV2 is
     /*        Misc. Helpers       */
     /* -------------------------- */
 
-    /// @notice returns vault total assets and shares for all vaults
-    function getVaultStates()
-        external
-        view
-        returns (Types.VaultState[] memory states)
-    {
-        states = new Types.VaultState[](count);
-        for (uint256 i = 1; i <= count; i++) {
-            states[i - 1] = Types.VaultState({
-                id: i,
-                assets: vaults[i].totalAssets,
-                shares: vaults[i].totalShares
-            });
-        }
-    }
-
     function getVaultBalance(
         uint256 vaultId,
         address user

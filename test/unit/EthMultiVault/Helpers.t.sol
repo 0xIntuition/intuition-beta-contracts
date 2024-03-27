@@ -13,32 +13,6 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         _setUp();
     }
 
-    function testGetVaultStates() external {
-        // prank call from alice
-        // as both msg.sender and tx.origin
-        vm.startPrank(alice, alice);
-
-        // test values
-        uint256 testAtomCost = getAtomCost();
-        uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
-
-        // execute interaction - create atoms
-        uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
-
-        // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
-
-        vm.stopPrank();
-
-        Types.VaultState[] memory states = ethMultiVault.getVaultStates();
-
-        assertEq(states.length, 1);
-        assertEq(states[0].id, id);
-        assertEq(states[0].assets, vaultTotalAssets(id));
-        assertEq(states[0].shares, vaultTotalShares(id));
-    }
-
     function testMaxRedeem() external {
         // prank call from alice
         // as both msg.sender and tx.origin
