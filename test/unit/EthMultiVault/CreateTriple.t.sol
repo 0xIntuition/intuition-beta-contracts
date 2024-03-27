@@ -83,9 +83,9 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.MultiVault_TripleExists.selector,
-                "subject",
-                "predicate",
-                "object"
+                subjectId, 
+                predicateId,
+                objectId
             )
         );
         ethMultiVault.createTriple{value: testDepositAmountTriple}(
