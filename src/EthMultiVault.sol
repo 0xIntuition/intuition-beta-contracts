@@ -1218,4 +1218,8 @@ contract EthMultiVault is
     fallback() external payable {
         LibZip.cdFallback();
     }
+
+    receive() external payable {
+        revert();
+    }
 }
