@@ -51,7 +51,7 @@ contract UpgradeTo is Test {
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationFee: 2e15, // Fee for creating a triple
-            atomEquityFeeForTriple: 1e3 // Fee for equity in atoms when creating a triple
+            atomDepositFractionForTriple: 1e3 // Fee for equity in atoms when creating a triple
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({

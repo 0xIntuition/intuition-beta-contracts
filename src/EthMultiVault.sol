@@ -140,7 +140,7 @@ contract EthMultiVault is
 
         totalFees =
             entryFeeAmount(assets, id) +
-            atomEquityFeeAmount(assets - protocolFees, id) +
+            atomDepositFractionAmount(assets - protocolFees, id) +
             protocolFees;
     }
 
@@ -215,12 +215,12 @@ contract EthMultiVault is
     /// @param id vault id
     /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
     /// NOTE: only applies to triple vaults
-    function atomEquityFeeAmount(
+    function atomDepositFractionAmount(
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
         feeAmount = assertTriple(id)
-            ? feeOnRaw(assets, tripleConfig.atomEquityFeeForTriple)
+            ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
             : 0;
     }
 
@@ -832,8 +832,8 @@ contract EthMultiVault is
         uint256 userDeposit = msg.value - protocolFees;
 
         // distribute atom equity for all 3 atoms that underlie the triple
-        uint256 _atomEquityFeeAmount = atomEquityFeeAmount(userDeposit, id);
-        _distributeAtomEquity(id, receiver, _atomEquityFeeAmount);
+        uint256 _atomDepositFractionAmount = atomDepositFractionAmount(userDeposit, id);
+        _depositAtomFraction(id, receiver, _atomDepositFractionAmount);
     }
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
@@ -866,9 +866,9 @@ contract EthMultiVault is
     /*                 INTERNAL METHODS                    */
     /* =================================================== */
 
-    /// @dev _distributeAtomEquity - divides amount across the three atoms composing the triple and issues the receiver shares
+    /// @dev _depositAtomFraction - divides amount across the three atoms composing the triple and issues the receiver shares
     /// NOTE: assumes funds have already been transferred to this contract.
-    function _distributeAtomEquity(
+    function _depositAtomFraction(
         uint256 id,
         address receiver,
         uint256 amount
@@ -896,10 +896,10 @@ contract EthMultiVault is
         uint256 assets // protocol fees already deducted
     ) internal returns (uint256 sharesForReceiver) {
         // changes in vault's total assets 
-        // if the vault is an atom vault `atomEquityFeeAmount` is 0
+        // if the vault is an atom vault `atomDepositFractionAmount` is 0
         uint256 totalAssetsDelta = assets -
             entryFeeAmount(assets, id) -
-            atomEquityFeeAmount(assets, id);
+            atomDepositFractionAmount(assets, id);
 
         if (totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -1205,11 +1205,11 @@ contract EthMultiVault is
     }
 
     /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomEquityFeeForTriple new atom equity fee percentage
-    function setAtomEquityFee(
-        uint256 _atomEquityFeeForTriple
+    /// @param _atomDepositFractionForTriple new atom equity fee percentage
+    function setAtomDepositFraction(
+        uint256 _atomDepositFractionForTriple
     ) external onlyAdmin {
-        tripleConfig.atomEquityFeeForTriple = _atomEquityFeeForTriple;
+        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples

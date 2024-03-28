@@ -64,7 +64,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             });
 
         IEthMultiVault.TripleConfig memory tripleConfig =
-            IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomEquityFeeForTriple: 1e3});
+            IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(0xbeef)),
@@ -110,8 +110,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.previewDeposit(assets, id);
     }
 
-    function atomEquityFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
-        return ethMultiVault.atomEquityFeeAmount(assets, id);
+    function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256) {
+        return ethMultiVault.atomDepositFractionAmount(assets, id);
     }
 
     function protocolFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
