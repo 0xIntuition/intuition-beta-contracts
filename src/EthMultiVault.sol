@@ -419,10 +419,13 @@ contract EthMultiVault is
     /// @notice deploy a given atom wallet
     /// @param atomId vault id of atom
     /// @return atomWallet the address of the atom wallet
-    /// NOTE: deploys an ERC4337 account (atom wallet)
+    /// NOTE: deploys an ERC4337 account (atom wallet). Reverts if the atom vault does not exist
     function deployAtomWallet(
         uint256 atomId
     ) external whenNotPaused returns (address atomWallet) {
+        if (atomId == 0 || atomId > count)
+            revert Errors.MultiVault_VaultDoesNotExist();
+
         // compute salt
         bytes32 salt = bytes32(atomId);
         // get creation code
