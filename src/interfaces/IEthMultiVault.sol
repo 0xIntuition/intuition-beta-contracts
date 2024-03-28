@@ -49,6 +49,8 @@ interface IEthMultiVault {
         address entryPoint;
         /// @notice AtomWallet Warden address, address that is the initial owner of all atom accounts
         address atomWarden;
+        /// @notice AtomWalletBeacon contract address, which points to the AtomWallet implementation
+        address atomWalletBeacon;
     }
 
     /* =================================================== */

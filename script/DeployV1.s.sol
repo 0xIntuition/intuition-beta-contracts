@@ -4,12 +4,11 @@ pragma solidity ^0.8.18;
 import "forge-std/Script.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {AtomWallet} from "src/AtomWallet.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
-import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
-import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import {IntuitionProxy} from "src/IntuitionProxy.sol";
+import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployEthMultiVault is Script {
     string mnemonic = "test test test test test test test test test test test junk";
@@ -19,15 +18,23 @@ contract DeployEthMultiVault is Script {
 
     address deployer;
 
-    IPermit2 permit2;
-    EntryPoint entryPoint;
+    // Multisig addresses for key roles in the protocol (`msg.sender` for should be replaced with the actual multisig addresses for each role in production)
+    address admin = msg.sender;
+    address protocolVault = msg.sender;
+    address atomWarden = msg.sender;
+
+    // Constants from Base
+    IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
+    address entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
+
+    // Contracts to be deployed
+    AtomWallet atomWallet;
+    UpgradeableBeacon atomWalletBeacon;
     EthMultiVault ethMultiVault;
-    IntuitionProxy proxy;
+    TransparentUpgradeableProxy proxy;
     ProxyAdmin proxyAdmin;
 
     function run() external {
-        permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3));
-
         console.logString("reading environment...");
         PRIVATE_KEY = vm.envOr("PRIVATE_KEY", vm.deriveKey(mnemonic, 0));
         console.logString(" - PRIVATE_KEY");
@@ -42,38 +49,44 @@ contract DeployEthMultiVault is Script {
         // Begin sending tx's to network
         vm.startBroadcast(PRIVATE_KEY);
 
-        // deploy EntryPoint
-        entryPoint = new EntryPoint();
-        console.logString("deployed EntryPoint.");
+        // deploy AtomWallet implementation contract
+        atomWallet = new AtomWallet();
+        console.logString("deployed AtomWallet.");
+
+        // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
+        atomWalletBeacon.transferOwnership(admin);
+        console.logString("deployed AtomWalletBeacon.");
 
         // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault
             .GeneralConfig({
-                admin: msg.sender, // Deployer as admin for simplicity
-                protocolVault: msg.sender, // Deployer as protocol vault for simplicity
-                feeDenominator: 10000, // Common denominator for fee calculations
-                minDeposit: 0.01 ether, // Minimum deposit amount in wei
+                admin: admin, // Admin address for the EthMultiVault contract
+                protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+                feeDenominator: 1e4, // Common denominator for fee calculations
+                minDeposit: 1e15, // Minimum deposit amount in wei
                 minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
                 atomUriMaxLength: 250 // Maximum length of the atom URI data that can be passed when creating atom vaults
             });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
             .AtomConfig({
-                atomShareLockFee: 0.01 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 0.005 ether // Fee charged for creating an atom
+                atomShareLockFee: 1e15, // Fee charged for purchasing vault shares for the atom wallet upon creation
+                atomCreationFee: 5e14 // Fee charged for creating an atom
             });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
             .TripleConfig({
-                tripleCreationFee: 0.02 ether, // Fee for creating a triple
-                atomEquityFeeForTriple: 100 // Fee for equity in atoms when creating a triple
+                tripleCreationFee: 2e15, // Fee for creating a triple
+                atomEquityFeeForTriple: 1e3 // Fee for equity in atoms when creating a triple
             });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
             .WalletConfig({
-                permit2: IPermit2(address(permit2)), // Uniswap Protocol Permit2 contract on Optimism
-                entryPoint: address(entryPoint), // Our deployed EntryPoint contract (in production, change this to the actual entry point contract address on Optimism)
-                atomWarden: msg.sender // Deployer as atom warden for simplicity
+                permit2: IPermit2(address(permit2)), // Permit2 on Base
+                entryPoint: entryPoint, // EntryPoint address on Base
+                atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+                atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
             });
 
         // Prepare data for initializer function
@@ -86,25 +99,30 @@ contract DeployEthMultiVault is Script {
         console.logBytes(initData);
         ethMultiVault = new EthMultiVault();
 
-        // // Deploy ProxyAdmin contract
+        // Deploy ProxyAdmin contract
         console.log("Deploying ProxyAdmin...");
         proxyAdmin = new ProxyAdmin();
 
-        // // Deploy IntuitionProxy with EthMultiVault logic contract
+        // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         console.log("Deploying Proxy and initializing EthMultiVault...");
-        proxy = new IntuitionProxy(
+        proxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
             address(proxyAdmin), // ProxyAdmin address to manage proxy
             initData // Initialization data to call the `init` function in EthMultiVault
         );
+
+        // Transfer ownership of the proxy contract to the multisig admin
+        proxyAdmin.changeProxyAdmin(ITransparentUpgradeableProxy(address(proxy)), admin);
 
         // // stop sending tx's
         vm.stopBroadcast();
 
         console.log("EthMultiVault deployed and initialized successfully through proxy.");
         console.log("EntryPoint address:", address(entryPoint));
+        console.log("AtomWallet address:", address(atomWallet));
+        console.log("AtomWalletBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
-        console.log("Intuition ProxyAdmin address:", address(proxyAdmin));
+        console.log("ProxyAdmin address:", address(proxyAdmin));
         console.log("EthMultiVault Proxy address:", address(proxy));
     }
 }
