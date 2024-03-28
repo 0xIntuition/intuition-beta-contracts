@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import {BaseAccount, UserOperation} from "account-abstraction/contracts/core/BaseAccount.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {Errors} from "./libraries/Errors.sol";
 
@@ -12,10 +13,8 @@ import {Errors} from "./libraries/Errors.sol";
  * @notice Core contract of the Intuition protocol. This contract is the abstract account
  *         associated to a corresponding atom.
  */
-contract AtomWallet is BaseAccount {
+contract AtomWallet is BaseAccount, Ownable {
     using ECDSA for bytes32;
-
-    address public owner;
 
     IEntryPoint private immutable _entryPoint;
 
@@ -24,7 +23,7 @@ contract AtomWallet is BaseAccount {
 
     constructor(IEntryPoint anEntryPoint, address anOwner) {
         _entryPoint = anEntryPoint;
-        owner = anOwner;
+        transferOwnership(anOwner);
     }
 
     function entryPoint() public view virtual override returns (IEntryPoint) {
@@ -34,21 +33,24 @@ contract AtomWallet is BaseAccount {
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
-    function execute(address dest, uint256 value, bytes calldata func) external {
-        if (!(msg.sender == address(entryPoint()) || msg.sender == owner)) {
-            revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
-        }
+    function execute(
+        address dest,
+        uint256 value,
+        bytes calldata func
+    ) external onlyOwnerOrEntryPoint {
         _call(dest, value, func);
     }
 
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external {
-        if (!(msg.sender == address(entryPoint()) || msg.sender == owner)) {
-            revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
-        }
-        require(dest.length == func.length, "wrong array lengths");
+    function executeBatch(
+        address[] calldata dest,
+        bytes[] calldata func
+    ) external onlyOwnerOrEntryPoint {
+        if (dest.length != func.length) 
+            revert Errors.AtomWallet_WrongArrayLengths();
+            
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
         }
@@ -62,7 +64,7 @@ contract AtomWallet is BaseAccount {
         returns (uint256 validationData)
     {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner != hash.recover(userOp.signature)) {
+        if (owner() != hash.recover(userOp.signature)) {
             return SIG_VALIDATION_FAILED;
         }
         return 0;
@@ -96,10 +98,19 @@ contract AtomWallet is BaseAccount {
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public {
-        if (!(msg.sender == owner || msg.sender == address(this))) {
+    function withdrawDepositTo(
+        address payable withdrawAddress,
+        uint256 amount
+    ) public {
+        if (!(msg.sender == owner() || msg.sender == address(this))) {
             revert Errors.AtomWallet_OnlyOwner();
         }
         entryPoint().withdrawTo(withdrawAddress, amount);
+    }
+
+    modifier onlyOwnerOrEntryPoint() {
+        if (!(msg.sender == address(entryPoint()) || msg.sender == owner()))
+            revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
+        _;
     }
 }
