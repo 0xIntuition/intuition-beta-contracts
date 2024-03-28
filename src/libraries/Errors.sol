@@ -14,9 +14,7 @@ library Errors {
     error MultiVault_SetApprovalForSelf();
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_InsufficientDepositAmountToCoverFees();
-    error MultiVault_InsufficientRemainingSharesInVault(
-        uint256 remainingShares
-    );
+    error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error MultiVault_RedeemLimit();
     error MultiVault_MinimumDeposit();
     error MultiVault_VaultDoesNotExist();
@@ -31,6 +29,7 @@ library Errors {
     error MultiVault_InsufficientBalanceToCoverGhostShares();
     error MultiVault_AlreadyInitialized();
     /// RDF/INTUTION ERRORS
+    error MultiVault_AtomUriTooLong();
     error MultiVault_AtomExists(bytes atomUri);
     error MultiVault_AtomDoesNotExist();
     error MultiVault_VaultNotAtom();
@@ -41,11 +40,7 @@ library Errors {
     error MultiVault_TripleExists(uint256 subject, uint256 predicate, uint256 object);
     error MultiVault_TripleAlreadyExists();
     error MultiVault_ArraysNotSameLength();
-    error MultiVault_TripleArrExists(
-        uint256[] subjectIds,
-        uint256[] predicateIds,
-        uint256[] objectIds
-    );
+    error MultiVault_TripleArrExists(uint256[] subjectIds, uint256[] predicateIds, uint256[] objectIds);
     error MultiVault_VaultNotTriple();
     error MultiVault_VaultIsTriple();
     error MultiVault_ArraysEmpty();

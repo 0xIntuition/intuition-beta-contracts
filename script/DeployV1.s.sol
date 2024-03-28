@@ -12,8 +12,7 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployEthMultiVault is Script {
-    string mnemonic =
-        "test test test test test test test test test test test junk";
+    string mnemonic = "test test test test test test test test test test test junk";
 
     uint256 PRIVATE_KEY;
     string FOUNDRY_PROFILE;
@@ -54,7 +53,8 @@ contract DeployEthMultiVault is Script {
                 protocolVault: msg.sender, // Deployer as protocol vault for simplicity
                 feeDenominator: 10000, // Common denominator for fee calculations
                 minDeposit: 0.01 ether, // Minimum deposit amount in wei
-                minShare: 1e5 // Minimum share amount (e.g., for vault initialization)
+                minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+                atomUriMaxLength: 250 // Maximum length of the atom URI data that can be passed when creating atom vaults
             });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
@@ -77,13 +77,8 @@ contract DeployEthMultiVault is Script {
             });
 
         // Prepare data for initializer function
-        bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector,
-            generalConfig,
-            atomConfig,
-            tripleConfig,
-            walletConfig
-        );
+        bytes memory initData =
+            abi.encodeWithSelector(EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig);
 
         // Deploy EthMultiVault contract
         console.log("Deploying EthMultiVault...");
@@ -106,9 +101,7 @@ contract DeployEthMultiVault is Script {
         // // stop sending tx's
         vm.stopBroadcast();
 
-        console.log(
-            "EthMultiVault deployed and initialized successfully through proxy."
-        );
+        console.log("EthMultiVault deployed and initialized successfully through proxy.");
         console.log("EntryPoint address:", address(entryPoint));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
         console.log("Intuition ProxyAdmin address:", address(proxyAdmin));

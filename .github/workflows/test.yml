@@ -1,9 +1,22 @@
 name: test
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+
+concurrency:
+  group: ci-${{ github.ref }}-tests
+  cancel-in-progress: true
 
 env:
-  FOUNDRY_PROFILE: ci
+  FOUNDRY_PROFILE: "ci"
 
 jobs:
   check:
@@ -13,22 +26,22 @@ jobs:
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
+
+      - name: Install deps
+        run: |
+          npm i
+          forge install
 
       - name: Run Forge build
         run: |
-          forge --version
           forge build --sizes
-        id: build
 
       - name: Run Forge tests
         run: |
           forge test -vvv
-        id: test
