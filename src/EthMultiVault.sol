@@ -523,6 +523,9 @@ contract EthMultiVault is
         bytes memory atomUri,
         uint256 value
     ) internal returns (uint256 id, uint256 protocolDepositFee) {
+        if (atomUri.length > generalConfig.atomUriMaxLength) 
+            revert Errors.MultiVault_AtomUriTooLong();
+
         uint256 atomCost = getAtomCost();
         bytes32 _hash = keccak256(atomUri);
         if (AtomsByHash[_hash] != 0) {
@@ -1210,6 +1213,12 @@ contract EthMultiVault is
     /// @param _minShare new minimum share amount
     function setMinShare(uint256 _minShare) external onlyAdmin {
         generalConfig.minShare = _minShare;
+    }
+
+    /// @dev sets the atom URI max length
+    /// @param _atomUriMaxLength new atom URI max length
+    function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
+        generalConfig.atomUriMaxLength = _atomUriMaxLength;
     }
 
     /* =================================================== */

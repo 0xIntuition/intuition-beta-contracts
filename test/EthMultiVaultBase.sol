@@ -32,18 +32,21 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     EthMultiVault ethMultiVault;
 
     // Define the configuration objects
-    IEthMultiVault.GeneralConfig generalConfig = IEthMultiVault.GeneralConfig({
-        admin: msg.sender,
-        protocolVault: address(0xbeef),
-        feeDenominator: 1e4,
-        minDeposit: 1000000000000000,
-        minShare: 1e8
-    });
+    IEthMultiVault.GeneralConfig generalConfig =
+        IEthMultiVault.GeneralConfig({
+            admin: msg.sender,
+            protocolVault: address(0xbeef),
+            feeDenominator: 1e4,
+            minDeposit: 1000000000000000,
+            minShare: 1e8,
+            atomUriMaxLength: 250
+        });
 
-    IEthMultiVault.AtomConfig atomConfig = IEthMultiVault.AtomConfig({
-        atomShareLockFee: 1000000000000000, // 1e15
-        atomCreationFee: 500000000000000 // 5e14
-    });
+    IEthMultiVault.AtomConfig atomConfig =
+        IEthMultiVault.AtomConfig({
+            atomShareLockFee: 1000000000000000, // 1e15
+            atomCreationFee: 500000000000000 // 5e14
+        });
 
     IEthMultiVault.TripleConfig tripleConfig =
         IEthMultiVault.TripleConfig({tripleCreationFee: 2000000000000000, atomEquityFeeForTriple: 1e3});

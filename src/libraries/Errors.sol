@@ -29,6 +29,7 @@ library Errors {
     error MultiVault_InsufficientBalanceToCoverGhostShares();
     error MultiVault_AlreadyInitialized();
     /// RDF/INTUTION ERRORS
+    error MultiVault_AtomUriTooLong();
     error MultiVault_AtomExists(bytes atomUri);
     error MultiVault_AtomDoesNotExist();
     error MultiVault_VaultNotAtom();
