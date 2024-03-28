@@ -64,7 +64,7 @@ contract AtomWallet is BaseAccount, Ownable {
         returns (uint256 validationData)
     {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner() != hash.recover(userOp.signature))
+        if (owner() != hash.recover(userOp.signature)) {
             return SIG_VALIDATION_FAILED;
         }
         return 0;
