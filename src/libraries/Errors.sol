@@ -37,7 +37,7 @@ library Errors {
     error MultiVault_DeployAccountFailed();
     error MultiVault_NotAtomWallet();
     error MultiVault_NoAtomWalletRewards();
-    error MultiVault_TripleExists(bytes subject, bytes predicate, bytes object);
+    error MultiVault_TripleExists(uint256 subject, uint256 predicate, uint256 object);
     error MultiVault_TripleAlreadyExists();
     error MultiVault_ArraysNotSameLength();
     error MultiVault_TripleArrExists(uint256[] subjectIds, uint256[] predicateIds, uint256[] objectIds);

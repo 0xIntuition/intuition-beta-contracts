@@ -129,14 +129,15 @@ interface IEthMultiVault {
     function getCounterIdFromTriple(uint256 id) external returns (uint256);
 
     /// @notice returns the corresponding hash for the given RDF triple, given the atoms that make up the triple
-    /// @param subject the subject atom
-    /// @param predicate the predicate atom
-    /// @param object the object atom
-    /// @return hash the corresponding hash for the given RDF triple
-    function tripleHashFromAtoms(bytes memory subject, bytes memory predicate, bytes memory object)
-        external
-        pure
-        returns (bytes32);
+    /// @param subjectId the subject atom's vault id
+    /// @param predicateId the predicate atom's vault id
+    /// @param objectId the object atom's vault id
+    /// @return hash the corresponding hash for the given RDF triple based on the atom vault ids
+    function tripleHashFromAtoms(
+        uint256 subjectId,
+        uint256 predicateId,
+        uint256 objectId
+    ) external pure returns (bytes32);
 
     //// ERC4626 SHARE/ASSET CONVERSION HELPERS
 

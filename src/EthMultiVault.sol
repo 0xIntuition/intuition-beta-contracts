@@ -318,16 +318,16 @@ contract EthMultiVault is
     /* -------------------------- */
 
     /// @notice returns the corresponding hash for the given RDF triple, given the atoms that make up the triple
-    /// @param subject the subject atom
-    /// @param predicate the predicate atom
-    /// @param object the object atom
-    /// @return hash the corresponding hash for the given RDF triple
+    /// @param subjectId the subject atom's vault id
+    /// @param predicateId the predicate atom's vault id
+    /// @param objectId the object atom's vault id
+    /// @return hash the corresponding hash for the given RDF triple based on the atom vault ids
     function tripleHashFromAtoms(
-        bytes memory subject,
-        bytes memory predicate,
-        bytes memory object
+        uint256 subjectId,
+        uint256 predicateId,
+        uint256 objectId
     ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(subject, predicate, object));
+        return keccak256(abi.encodePacked(subjectId, predicateId, objectId));
     }
 
     /// @notice returns the corresponding hash for the given RDF triple, given the triple vault id
@@ -687,16 +687,10 @@ contract EthMultiVault is
         if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
         if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
-        // retrieve atom data
-        bytes memory subject = atoms[subjectId];
-        bytes memory predicate = atoms[predicateId];
-        bytes memory object = atoms[objectId];
-
         // check if triple already exists
-        bytes32 _hash = tripleHashFromAtoms(subject, predicate, object);
-        if (TriplesByHash[_hash] != 0) {
-            revert Errors.MultiVault_TripleExists(subject, predicate, object);
-        }
+        bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
+        if (TriplesByHash[_hash] != 0)
+            revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
 
         uint256 userDeposit = value - tripleCost;
 
