@@ -39,7 +39,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             feeDenominator: 1e4,
             minDeposit: 1000000000000000,
             minShare: 1e8,
-            atomUriMaxLength: 250
+            atomUriMaxLength: 250,
+            decimalPrecision: 1e18
         });
 
     IEthMultiVault.AtomConfig atomConfig =

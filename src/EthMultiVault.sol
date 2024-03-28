@@ -195,7 +195,6 @@ contract EthMultiVault is
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id to get corresponding fees for
     /// @return feeAmount amount of assets that would be charged by vault on protocol fee
-    /// NOTE: on deposit
     function protocolFeeAmount(
         uint256 assets,
         uint256 id
@@ -218,7 +217,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = assertTriple(id)
+        feeAmount = isTripleId(id)
             ? feeOnRaw(assets, tripleConfig.atomEquityFeeForTriple)
             : 0;
     }
@@ -260,7 +259,7 @@ contract EthMultiVault is
     ) external view returns (uint256 price) {
         price = vaults[id].totalShares == 0
             ? 0
-            : (vaults[id].totalAssets * 1e18) / vaults[id].totalShares;
+            : (vaults[id].totalAssets * generalConfig.decimalPrecision) / vaults[id].totalShares;
     }
 
     /// @notice simulates the effects of the deposited amount of 'assets' and returns the estimated
@@ -343,7 +342,7 @@ contract EthMultiVault is
     /// @notice returns whether the supplied vault id is a triple
     /// @param id vault id to check
     /// @return bool whether the supplied vault id is a triple
-    function assertTriple(uint256 id) public view returns (bool) {
+    function isTripleId(uint256 id) public view returns (bool) {
         return
             id > type(uint256).max / 2
                 ? isTriple[type(uint256).max - id]
@@ -458,7 +457,7 @@ contract EthMultiVault is
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with
     /// @return id vault id of the atom
-    /// NOTE: This function will revert if called by an address with less than `getAtomCost()` eth balance.
+    /// NOTE: This function will revert if called with less than `getAtomCost()` in `msg.value`
     function createAtom(
         bytes calldata atomUri
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
@@ -478,8 +477,7 @@ contract EthMultiVault is
     /// @notice Batch create atoms and return their vault ids
     /// @param atomUris atom data array to create atoms with
     /// @return ids vault ids array of the atoms
-    /// NOTE: This function will revert if called by an address with less than `getAtomCost()` * atomUris.length eth balance
-    ///       msg.value can be greater than `getAtomCost()` * atomUri.length.
+    /// NOTE: This function will revert if called with less than `getAtomCost()` * `atomUris.length` in `msg.value`
     function batchCreateAtom(
         bytes[] calldata atomUris
     )
@@ -569,9 +567,8 @@ contract EthMultiVault is
     /// @param predicateId vault id of the predicate atom
     /// @param objectId vault id of the object atom
     /// @return id vault id of the triple
-    /// NOTE: This function will revert if called by an address with less than `tripleCost` eth balance
-    ///       msg.value can be greater than `tripleCost`. This function will revert if any of the atoms
-    ///       do not exist or if any ids are triple vaults.
+    /// NOTE: This function will revert if called with less than `getTripleCost()` in `msg.value`. 
+    ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
     function createTriple(
         uint256 subjectId,
         uint256 predicateId,
@@ -603,8 +600,7 @@ contract EthMultiVault is
     /// @param subjectIds vault ids array of subject atoms
     /// @param predicateIds vault ids array of predicate atoms
     /// @param objectIds vault ids array of object atoms
-    /// NOTE: This function will revert if the input id arrays are not of the same length and if the caller has
-    ///       less than (`tripleCost` * array.length) eth balance. msg.value can be greater than `tripleCost` * array.length.
+    /// NOTE: This function will revert if called with less than `getTripleCost()` * `array.length` in `msg.value`. 
     ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
     function batchCreateTriple(
         uint256[] calldata subjectIds,
@@ -617,7 +613,7 @@ contract EthMultiVault is
         whenNotPaused
         returns (uint256[] memory ids)
     {
-        // assert arrays are of the same length
+        // make sure arrays are of the same length
         if (
             subjectIds.length != predicateIds.length ||
             subjectIds.length != objectIds.length
@@ -671,7 +667,7 @@ contract EthMultiVault is
     ) internal returns (uint256 id, uint256 protocolDepositFee) {
         uint256 tripleCost = getTripleCost();
 
-        // assert atoms exist, if not, revert
+        // make sure atoms exist, if not, revert
         if (subjectId == 0 || subjectId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
         }
@@ -682,10 +678,10 @@ contract EthMultiVault is
             revert Errors.MultiVault_AtomDoesNotExist();
         }
 
-        // assert that each id is not a triple vault id
-        if (assertTriple(subjectId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
+        // make sure that each id is not a triple vault id
+        if (isTripleId(subjectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(predicateId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
@@ -737,7 +733,7 @@ contract EthMultiVault is
             revert Errors.MultiVault_VaultDoesNotExist();
         }
 
-        if (assertTriple(id)) {
+        if (isTripleId(id)) {
             revert Errors.MultiVault_VaultNotAtom();
         }
 
@@ -791,7 +787,7 @@ contract EthMultiVault is
         address receiver,
         uint256 id
     ) external payable nonReentrant whenNotPaused returns (uint256 shares) {
-        if (!assertTriple(id)) {
+        if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }
 
@@ -827,7 +823,7 @@ contract EthMultiVault is
         address receiver,
         uint256 id
     ) external nonReentrant returns (uint256 assets) {
-        if (!assertTriple(id)) {
+        if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }
 
@@ -953,7 +949,7 @@ contract EthMultiVault is
         /*
          * Initialize the counter triple vault with ghost shares if id is a positive triple vault
          */
-        if (assertTriple(id)) {
+        if (isTripleId(id)) {
             uint256 counterVaultId = getCounterIdFromTriple(id);
 
             // set vault totals
@@ -1032,7 +1028,7 @@ contract EthMultiVault is
         /*
          * if the withdraw amount results in a zero share balance for
          * the associated vault, no exit fee is charged to avoid
-         * unaccounted for eth balances. Also, in case of an emergency
+         * unaccounted for ether balances. Also, in case of an emergency
          * withdrawal (i.e. when the contract is paused), no exit fees
          * are charged either.
          */
@@ -1084,7 +1080,6 @@ contract EthMultiVault is
             revert Errors.MultiVault_BurnInsufficientBalance();
         }
 
-        // TO-DO consider upgrading to solc v0.8.22 and remove unchecked
         unchecked {
             vaults[id].balanceOf[from] = fromBalance - amount;
         }

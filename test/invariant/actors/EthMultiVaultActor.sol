@@ -41,7 +41,7 @@ contract EthMultiVaultActor is Test {
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
-        (, , , minDeposit, , ) = actEthMultiVault.generalConfig();
+        (, , , minDeposit, , , ) = actEthMultiVault.generalConfig();
     }
 
     function getVaultTotalAssets(uint256 vaultId) public view returns (uint256 totalAssets) {
