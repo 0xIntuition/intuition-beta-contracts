@@ -2,15 +2,14 @@
 pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
-import { EthMultiVaultBase } from "./EthMultiVaultBase.sol";
+import {EthMultiVaultBase} from "./EthMultiVaultBase.sol";
 import "solady/utils/ERC1967Factory.sol";
 
 // Bootstrap some data on the contracts by creating a bunch of triples and staking on them
 contract CreateProxy is EthMultiVaultBase {
-
     ERC1967Factory proxyFactory;
     address proxy;
-    
+
     /// @notice set up test environment
     function setUp() internal {
         _setUp();

@@ -38,7 +38,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             protocolVault: address(0xbeef),
             feeDenominator: 1e4,
             minDeposit: 1000000000000000,
-            minShare: 1e8
+            minShare: 1e8,
+            atomUriMaxLength: 250
         });
 
     IEthMultiVault.AtomConfig atomConfig =
@@ -48,17 +49,13 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         });
 
     IEthMultiVault.TripleConfig tripleConfig =
-        IEthMultiVault.TripleConfig({
-            tripleCreationFee: 2000000000000000,
-            atomEquityFeeForTriple: 1e3
-        });
+        IEthMultiVault.TripleConfig({tripleCreationFee: 2000000000000000, atomEquityFeeForTriple: 1e3});
 
-    IEthMultiVault.WalletConfig walletConfig =
-        IEthMultiVault.WalletConfig({
-            permit2: IPermit2(address(0xbeef)),
-            entryPoint: address(0xbeef),
-            atomWarden: address(0xbeef)
-        });
+    IEthMultiVault.WalletConfig walletConfig = IEthMultiVault.WalletConfig({
+        permit2: IPermit2(address(0xbeef)),
+        entryPoint: address(0xbeef),
+        atomWarden: address(0xbeef)
+    });
 
     /// @notice set up test environment
     // usage in other test contracts that extend this one:
@@ -66,12 +63,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     // _setUp() avoids using super.setUp() cuz I lazy and it's just as readable :)
     function _setUp() public {
         ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(
-            generalConfig,
-            atomConfig,
-            tripleConfig,
-            walletConfig
-        );
+        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig);
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);
@@ -87,50 +79,31 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         tripleCost = ethMultiVault.getTripleCost();
     }
 
-    function vaultTotalAssets(
-        uint256 id
-    ) public view returns (uint256 totalAssets) {
-        (totalAssets, ) = ethMultiVault.vaults(id);
+    function vaultTotalAssets(uint256 id) public view returns (uint256 totalAssets) {
+        (totalAssets,) = ethMultiVault.vaults(id);
     }
 
-    function vaultTotalShares(
-        uint256 id
-    ) public view returns (uint256 totalShares) {
+    function vaultTotalShares(uint256 id) public view returns (uint256 totalShares) {
         (, totalShares) = ethMultiVault.vaults(id);
     }
 
-    function vaultBalanceOf(
-        uint256 id,
-        address account
-    ) public view returns (uint256) {
+    function vaultBalanceOf(uint256 id, address account) public view returns (uint256) {
         return ethMultiVault.getVaultBalance(id, account);
     }
 
-    function entryFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256 feeAmount) {
+    function entryFeeAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
         return ethMultiVault.entryFeeAmount(assets, id);
     }
 
-    function previewDeposit(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256 feeAmount) {
+    function previewDeposit(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
         return ethMultiVault.previewDeposit(assets, id);
     }
 
-    function atomEquityFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256) {
+    function atomEquityFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
         return ethMultiVault.atomEquityFeeAmount(assets, id);
     }
 
-    function protocolFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256) {
+    function protocolFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
         return ethMultiVault.protocolFeeAmount(assets, id);
     }
 

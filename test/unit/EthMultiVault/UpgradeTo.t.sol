@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Test.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
-import {EthMultiVaultV2} from "src/test/EthMultiVaultV2.sol";
+import {EthMultiVaultV2} from "../../EthMultiVaultV2.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
@@ -36,7 +36,8 @@ contract UpgradeTo is Test {
             protocolVault: msg.sender, // Deployer as protocol vault for simplicity
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.01 ether, // Minimum deposit amount in wei
-            minShare: 1e18 // Minimum share amount (e.g., for vault initialization)
+            minShare: 1e18, // Minimum share amount (e.g., for vault initialization)
+            atomUriMaxLength: 250 // Maximum length of the atom URI data that can be passed when creating atom vaults
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
@@ -72,7 +73,11 @@ contract UpgradeTo is Test {
         console.logString("deployed ProxyAdmin.");
 
         // deploy IntuitionProxy
-        proxy = new IntuitionProxy(address(ethMultiVault), address(proxyAdmin), initData);
+        proxy = new IntuitionProxy(
+            address(ethMultiVault),
+            address(proxyAdmin),
+            initData
+        );
         console.logString("deployed IntuitionProxy.");
 
         // deploy EthMultiVaultV2
@@ -80,7 +85,10 @@ contract UpgradeTo is Test {
         console.logString("deployed EthMultiVaultV2.");
 
         // upgrade EthMultiVault
-        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2));
+        proxyAdmin.upgrade(
+            ITransparentUpgradeableProxy(address(proxy)),
+            address(ethMultiVaultV2)
+        );
         console.logString("upgraded EthMultiVault.");
 
         // verify VERSION variable in EthMultiVaultV2 is V2
@@ -96,6 +104,9 @@ contract UpgradeTo is Test {
 
         // try to upgrade EthMultiVault as non-admin
         vm.expectRevert("Ownable: caller is not the owner");
-        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2New));
+        proxyAdmin.upgrade(
+            ITransparentUpgradeableProxy(address(proxy)),
+            address(ethMultiVaultV2New)
+        );
     }
 }

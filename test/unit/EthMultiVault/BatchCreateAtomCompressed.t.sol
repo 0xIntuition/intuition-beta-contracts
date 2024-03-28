@@ -6,10 +6,7 @@ import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
 import {Errors} from "../../../src/libraries/Errors.sol";
 
-contract BatchCreateAtomCompressedTest is
-    EthMultiVaultBase,
-    EthMultiVaultHelpers
-{
+contract BatchCreateAtomCompressedTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {
         _setUp();
     }
@@ -27,8 +24,7 @@ contract BatchCreateAtomCompressedTest is
         uint256 testAtomCost = getAtomCost();
 
         // snapshots before creating a triple
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         uint256[] memory totalAssetsBefore = new uint256[](atomsToCreate);
         uint256[] memory totalSharesBefore = new uint256[](atomsToCreate);
@@ -37,25 +33,15 @@ contract BatchCreateAtomCompressedTest is
             totalSharesBefore[i] = vaultTotalShares(i + 1);
         }
 
-        uint256[] memory ids = ethMultiVault.batchCreateAtom{
-            value: testAtomCost * atomsToCreate
-        }(atomData);
+        uint256[] memory ids = ethMultiVault.batchCreateAtom{value: testAtomCost * atomsToCreate}(atomData);
 
         assertEq(ids.length, atomsToCreate);
 
         for (uint256 i = 0; i < atomsToCreate; i++) {
-            checkDepositOnAtomVaultCreation(
-                ids[i],
-                testAtomCost,
-                totalAssetsBefore[i],
-                totalSharesBefore[i]
-            );
+            checkDepositOnAtomVaultCreation(ids[i], testAtomCost, totalAssetsBefore[i], totalSharesBefore[i]);
         }
 
-        checkProtocolVaultBalanceOnVaultBatchCreation(
-            ids,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalanceOnVaultBatchCreation(ids, protocolVaultBalanceBefore);
 
         vm.stopPrank();
     }
@@ -72,24 +58,13 @@ contract BatchCreateAtomCompressedTest is
 
         uint256 testAtomCost = getAtomCost();
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_InsufficientBalance.selector
-            )
-        );
-        ethMultiVault.batchCreateAtom{
-            value: testAtomCost * (atomsToCreate - 1)
-        }(atomData);
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientBalance.selector));
+        ethMultiVault.batchCreateAtom{value: testAtomCost * (atomsToCreate - 1)}(atomData);
 
         vm.stopPrank();
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

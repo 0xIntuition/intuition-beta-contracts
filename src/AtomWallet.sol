@@ -50,20 +50,23 @@ contract AtomWallet is BaseAccount, Ownable {
     ) external onlyOwnerOrEntryPoint {
         if (dest.length != func.length) 
             revert Errors.AtomWallet_WrongArrayLengths();
-
+            
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
         }
     }
 
     /// implement template method of BaseAccount
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
+    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
+        internal
+        virtual
+        override
+        returns (uint256 validationData)
+    {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
         if (owner() != hash.recover(userOp.signature))
             return SIG_VALIDATION_FAILED;
+        }
         return 0;
     }
 

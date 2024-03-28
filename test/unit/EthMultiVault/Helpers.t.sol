@@ -34,25 +34,28 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         /// @notice on vault creation all shares are minted to the caller's atom wallet
         address atomWallet = ethMultiVault.computeAtomWalletAddr(id);
 
-        uint256 redeemableSharesAtomWallet = ethMultiVault.maxRedeem(
-            atomWallet,
-            id
-        );
+        uint256 redeemableSharesAtomWallet = ethMultiVault.maxRedeem(atomWallet, id);
         uint256 redeemablesharesUser = ethMultiVault.maxRedeem(alice, id);
 
-        assertEq(
-            redeemableSharesAtomWallet + redeemablesharesUser + getMinShare(),
-            vaultTotalShares(id)
-        );
+        assertEq(redeemableSharesAtomWallet + redeemablesharesUser + getMinShare(), vaultTotalShares(id));
 
-        uint256 redeemablesharesFromUserWithNoDeposits = ethMultiVault
-            .maxRedeem(bob, id);
+        uint256 redeemablesharesFromUserWithNoDeposits = ethMultiVault.maxRedeem(bob, id);
         assertEq(redeemablesharesFromUserWithNoDeposits, 0);
     }
 
     function testDeployAtomWallet() external {
         // test values
         uint256 atomId = 1;
+
+        // should not be able to deploy atom wallet for atom that has not been created yet
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector)
+        );
+        // execute interaction - deploy atom wallet
+        ethMultiVault.deployAtomWallet(atomId);
+
+        // execute interaction - create atom
+        ethMultiVault.createAtom{value: getAtomCost()}("atom1");
 
         address atomWalletAddress = ethMultiVault.deployAtomWallet(atomId);
         address payable atomWallet = payable(atomWalletAddress);
@@ -77,12 +80,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         return (size > 0);
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

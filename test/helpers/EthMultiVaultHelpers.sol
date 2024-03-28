@@ -10,15 +10,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     using FixedPointMathLib for uint256;
 
     function getAdmin() public view returns (address admin) {
-        (admin, , , , ) = ethMultiVault.generalConfig();
+        (admin, , , , , ) = ethMultiVault.generalConfig();
     }
 
     function getProtocolVault() public view returns (address protocolVault) {
-        (, protocolVault, , , ) = ethMultiVault.generalConfig();
+        (, protocolVault, , , , ) = ethMultiVault.generalConfig();
     }
 
     function getFeeDenominator() public view returns (uint256 feeDenominator) {
-        (, , feeDenominator, , ) = ethMultiVault.generalConfig();
+        (, , feeDenominator, , , ) = ethMultiVault.generalConfig();
     }
 
     function getEntryFee(uint256 _id) public view returns (uint256 entryFee) {
@@ -33,6 +33,13 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 _id
     ) public view returns (uint256 protocolFee) {
         (, , protocolFee) = ethMultiVault.vaultFees(_id);
+    }
+
+    function getProtocolFeeAmount(
+        uint256 _assets,
+        uint256 _id
+    ) public view returns (uint256 protocolFee) {
+        protocolFee = ethMultiVault.protocolFeeAmount(_assets, _id);
     }
 
     function getAtomShareLockFee()
@@ -61,11 +68,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
-        (, , , minDeposit, ) = ethMultiVault.generalConfig();
+        (, , , minDeposit, , ) = ethMultiVault.generalConfig();
     }
 
     function getMinShare() public view returns (uint256 minShare) {
-        (, , , , minShare) = ethMultiVault.generalConfig();
+        (, , , , minShare, ) = ethMultiVault.generalConfig();
+    }
+
+    function getAtomUriMaxLength() public view returns (uint256 atomUriMaxLength) {
+        (, , , , , atomUriMaxLength) = ethMultiVault.generalConfig();
     }
 
     function getAtomEquityFee()
@@ -129,30 +140,31 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
     function checkDepositOnAtomVaultCreation(
         uint256 id,
-        uint256 atomCost,
+        uint256 value, // msg.value
         uint256 totalAssetsBefore,
         uint256 totalSharesBefore
     ) public {
-        // calculate expected total assets delta
-        uint256 assetsDeposited = atomCost - getAtomCreationFee();
-        uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFee(id);
-
-        // calculate expected total shares delta
-        uint256 sharesForDepositor = totalAssetsDeltaExpected;
         uint256 sharesForZeroAddress = getMinShare();
+        uint256 sharesForAtomWallet = getAtomShareLockFee();
+        uint256 userDeposit = value - getAtomCost();
+        uint256 assets = userDeposit - getProtocolFeeAmount(userDeposit, id);
+        uint256 sharesForDepositor = assets;
+
+        // calculate expected total assets delta
+        uint256 totalAssetsDeltaExpected = sharesForDepositor +
+            sharesForZeroAddress +
+            sharesForAtomWallet;
+        // calculate expected total shares delta
         uint256 totalSharesDeltaExpected = sharesForDepositor +
-            sharesForZeroAddress;
+            sharesForZeroAddress +
+            sharesForAtomWallet;
 
         // vault's total assets should have gone up
-        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) -
-            totalAssetsBefore +
-            sharesForZeroAddress;
+        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
         // vault's total shares should have gone up
-        uint256 totalSharesDeltaGot = vaultTotalShares(id) -
-            totalSharesBefore +
-            sharesForZeroAddress;
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
