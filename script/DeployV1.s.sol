@@ -55,7 +55,7 @@ contract DeployEthMultiVault is Script {
                 feeDenominator: 10000, // Common denominator for fee calculations
                 minDeposit: 0.01 ether, // Minimum deposit amount in wei
                 minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
-                atomUriMaxLength: 200 // Maximum length of the atom URI data that can be passed when creating atom vaults
+                atomUriMaxLength: 250 // Maximum length of the atom URI data that can be passed when creating atom vaults
             });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault

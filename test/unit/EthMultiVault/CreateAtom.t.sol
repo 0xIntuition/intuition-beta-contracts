@@ -113,7 +113,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 Errors.MultiVault_AtomUriTooLong.selector
             )
         );
-        ethMultiVault.createAtom{value: testAtomCost}(bytes("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"));
+        ethMultiVault.createAtom{value: testAtomCost}(bytes("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"));
 
         vm.stopPrank();        
     }

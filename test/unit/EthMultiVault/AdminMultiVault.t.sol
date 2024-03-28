@@ -144,7 +144,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testSetAtomUriMaxLength() external {
-        uint256 testValue = 250;
+        uint256 testValue = 350;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
