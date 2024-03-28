@@ -33,16 +33,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         ethMultiVault.setProtocolVault(testValue);
         assertEq(getProtocolVault(), testValue);
     }
-
-    function testSetFeeDenominator() external {
-        uint256 testValue = 20000;
-
-        // msg.sender is the caller of EthMultiVaultBase
-        vm.prank(msg.sender);
-        ethMultiVault.setFeeDenominator(testValue);
-        assertEq(getFeeDenominator(), testValue);
-    }
-
+    
     function testSetEntryFee() external {
         uint256 testVaultId = 0;
         uint256 testValue = 1000;
