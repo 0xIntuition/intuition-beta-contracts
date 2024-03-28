@@ -28,10 +28,7 @@ contract EthMultiVaultBasicInvariantTest is InvariantEthMultiVaultBase {
         selectors[1] = actor.depositAtom.selector; // depositAtom
         selectors[2] = actor.redeemAtom.selector; // redeemAtom
 
-        FuzzSelector memory fuzzSelector = FuzzSelector({
-            addr: address(actor),
-            selectors: selectors
-        });
+        FuzzSelector memory fuzzSelector = FuzzSelector({addr: address(actor), selectors: selectors});
 
         // target the functions in the actor contract
         targetSelector(fuzzSelector);
@@ -44,17 +41,8 @@ contract EthMultiVaultBasicInvariantTest is InvariantEthMultiVaultBase {
         //invariant_ethMultiVault_share_solvency();
         emit log_named_uint("actor.numberOfCalls()---", actor.numberOfCalls());
         emit log_named_uint("actor.numberOfAtoms()---", actor.numberOfAtoms());
-        emit log_named_uint(
-            "actor.numberOfDeposits()",
-            actor.numberOfDeposits()
-        );
-        emit log_named_uint(
-            "actor.numberOfRedeems()-",
-            actor.numberOfRedeems()
-        );
-        emit log_named_uint(
-            "ETHMULTIVAULT ETH BALANCE---",
-            address(ethMultiVault).balance
-        );
+        emit log_named_uint("actor.numberOfDeposits()", actor.numberOfDeposits());
+        emit log_named_uint("actor.numberOfRedeems()-", actor.numberOfRedeems());
+        emit log_named_uint("ETHMULTIVAULT ETH BALANCE---", address(ethMultiVault).balance);
     }
 }

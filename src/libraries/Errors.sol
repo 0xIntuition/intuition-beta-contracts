@@ -14,9 +14,7 @@ library Errors {
     error MultiVault_SetApprovalForSelf();
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_InsufficientDepositAmountToCoverFees();
-    error MultiVault_InsufficientRemainingSharesInVault(
-        uint256 remainingShares
-    );
+    error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error MultiVault_RedeemLimit();
     error MultiVault_MinimumDeposit();
     error MultiVault_VaultDoesNotExist();
@@ -42,11 +40,7 @@ library Errors {
     error MultiVault_TripleExists(bytes subject, bytes predicate, bytes object);
     error MultiVault_TripleAlreadyExists();
     error MultiVault_ArraysNotSameLength();
-    error MultiVault_TripleArrExists(
-        uint256[] subjectIds,
-        uint256[] predicateIds,
-        uint256[] objectIds
-    );
+    error MultiVault_TripleArrExists(uint256[] subjectIds, uint256[] predicateIds, uint256[] objectIds);
     error MultiVault_VaultNotTriple();
     error MultiVault_VaultIsTriple();
     error MultiVault_ArraysEmpty();

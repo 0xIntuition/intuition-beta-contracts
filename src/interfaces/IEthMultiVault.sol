@@ -94,12 +94,7 @@ interface IEthMultiVault {
     /// @param atomWallet address of the atom's associated abstract account
     /// @param atomData the atom's respective string
     /// @param vaultID the vault id of the atom
-    event AtomCreated(
-        address indexed creator,
-        address indexed atomWallet,
-        bytes atomData,
-        uint256 vaultID
-    );
+    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultID);
 
     /// @notice emitted upon creation of a triple
     /// @param creator address of the triple creator
@@ -108,18 +103,12 @@ interface IEthMultiVault {
     /// @param objectId the triple's respective object atom
     /// @param vaultID the vault id of the triple
     event TripleCreated(
-        address indexed creator,
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId,
-        uint256 vaultID
+        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
 
     /// @notice return the underlying atom vault ids given a triple vault id
     /// @param id Vault ID
-    function getTripleAtoms(
-        uint256 id
-    ) external view returns (uint256, uint256, uint256);
+    function getTripleAtoms(uint256 id) external view returns (uint256, uint256, uint256);
 
     /// @notice mapping to designate if vault ID is a triple
     /// @param id Vault ID
@@ -129,11 +118,7 @@ interface IEthMultiVault {
     /// @param id Vault ID
     /// @param atomId Id of the atom
     /// @param account Address of the account
-    function tripleAtomShares(
-        uint256 id,
-        uint256 atomId,
-        address account
-    ) external view returns (uint256);
+    function tripleAtomShares(uint256 id, uint256 atomId, address account) external view returns (uint256);
 
     /// @notice return true for triple vaults and false for atom vaults, designate if vault ID is a triple
     /// @param id id of the vault inputted
@@ -148,45 +133,29 @@ interface IEthMultiVault {
     /// @param predicate the predicate atom
     /// @param object the object atom
     /// @return hash the corresponding hash for the given RDF triple
-    function tripleHashFromAtoms(
-        bytes memory subject,
-        bytes memory predicate,
-        bytes memory object
-    ) external pure returns (bytes32);
+    function tripleHashFromAtoms(bytes memory subject, bytes memory predicate, bytes memory object)
+        external
+        pure
+        returns (bytes32);
 
     //// ERC4626 SHARE/ASSET CONVERSION HELPERS
 
     /// @notice Amount of shares that would be exchanged with the vault for the amount of assets provided
-    function convertToShares(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256 shares);
+    function convertToShares(uint256 assets, uint256 id) external view returns (uint256 shares);
 
     /// @notice Amount of assets that would be exchanged with the vault for the amount of shares provided
-    function convertToAssets(
-        uint256 shares,
-        uint256 id
-    ) external view returns (uint256 assets);
+    function convertToAssets(uint256 shares, uint256 id) external view returns (uint256 assets);
 
     //// PREVIEW HELPER FUNCTIONS
 
     /// @notice Simulates the effects of depositing assets at the current block
-    function previewDeposit(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256 shares);
+    function previewDeposit(uint256 assets, uint256 id) external view returns (uint256 shares);
 
     /// @notice Simulates the effects of redeeming shares at the current block
-    function previewRedeem(
-        uint256 shares,
-        uint256 id
-    ) external view returns (uint256 assets, uint256 exitFees);
+    function previewRedeem(uint256 shares, uint256 id) external view returns (uint256 assets, uint256 exitFees);
 
     //// REDEEM LIMIT
 
     /// @notice Max amount of shares that can be redeemed from the 'owner' balance through a redeem call
-    function maxRedeem(
-        address owner,
-        uint256 id
-    ) external view returns (uint256 shares);
+    function maxRedeem(address owner, uint256 id) external view returns (uint256 shares);
 }

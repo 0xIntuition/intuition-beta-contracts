@@ -419,10 +419,13 @@ contract EthMultiVault is
     /// @notice deploy a given atom wallet
     /// @param atomId vault id of atom
     /// @return atomWallet the address of the atom wallet
-    /// NOTE: deploys an ERC4337 account (atom wallet)
+    /// NOTE: deploys an ERC4337 account (atom wallet). Reverts if the atom vault does not exist
     function deployAtomWallet(
         uint256 atomId
     ) external whenNotPaused returns (address atomWallet) {
+        if (atomId == 0 || atomId > count)
+            revert Errors.MultiVault_VaultDoesNotExist();
+
         // compute salt
         bytes32 salt = bytes32(atomId);
         // get creation code
@@ -443,8 +446,9 @@ contract EthMultiVault is
         assembly {
             atomWallet := create2(0, add(data, 0x20), mload(data), salt)
         }
-        if (atomWallet == address(0))
+        if (atomWallet == address(0)) {
             revert Errors.MultiVault_DeployAccountFailed();
+        }
     }
 
     /* -------------------------- */
@@ -458,8 +462,9 @@ contract EthMultiVault is
     function createAtom(
         bytes calldata atomUri
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
-        if (msg.value < getAtomCost())
+        if (msg.value < getAtomCost()) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
@@ -485,8 +490,9 @@ contract EthMultiVault is
         returns (uint256[] memory ids)
     {
         uint256 length = atomUris.length;
-        if (msg.value < getAtomCost() * length)
+        if (msg.value < getAtomCost() * length) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 valuePerAtom = msg.value / length;
         uint256 protocolDepositFeeTotal;
@@ -522,8 +528,9 @@ contract EthMultiVault is
 
         uint256 atomCost = getAtomCost();
         bytes32 _hash = keccak256(atomUri);
-        if (AtomsByHash[_hash] != 0)
+        if (AtomsByHash[_hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
+        }
 
         uint256 userDeposit = value - atomCost;
 
@@ -572,8 +579,9 @@ contract EthMultiVault is
     ) external payable nonReentrant whenNotPaused returns (uint256 id) {
         uint256 tripleCost = getTripleCost();
 
-        if (msg.value < tripleCost)
+        if (msg.value < tripleCost) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 protocolDepositFee;
 
@@ -613,12 +621,15 @@ contract EthMultiVault is
         if (
             subjectIds.length != predicateIds.length ||
             subjectIds.length != objectIds.length
-        ) revert Errors.MultiVault_ArraysNotSameLength();
+        ) {
+            revert Errors.MultiVault_ArraysNotSameLength();
+        }
 
         uint256 length = subjectIds.length;
         uint256 tripleCost = getTripleCost();
-        if (msg.value < tripleCost * length)
+        if (msg.value < tripleCost * length) {
             revert Errors.MultiVault_InsufficientBalance();
+        }
 
         uint256 valuePerTriple = msg.value / length;
         uint256 protocolDepositFeeTotal;
@@ -661,12 +672,15 @@ contract EthMultiVault is
         uint256 tripleCost = getTripleCost();
 
         // assert atoms exist, if not, revert
-        if (subjectId == 0 || subjectId > count)
+        if (subjectId == 0 || subjectId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
-        if (predicateId == 0 || predicateId > count)
+        }
+        if (predicateId == 0 || predicateId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
-        if (objectId == 0 || objectId > count)
+        }
+        if (objectId == 0 || objectId > count) {
             revert Errors.MultiVault_AtomDoesNotExist();
+        }
 
         // assert that each id is not a triple vault id
         if (assertTriple(subjectId)) revert Errors.MultiVault_VaultIsTriple();
@@ -680,8 +694,9 @@ contract EthMultiVault is
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subject, predicate, object);
-        if (TriplesByHash[_hash] != 0)
+        if (TriplesByHash[_hash] != 0) {
             revert Errors.MultiVault_TripleExists(subject, predicate, object);
+        }
 
         uint256 userDeposit = value - tripleCost;
 
@@ -921,19 +936,16 @@ contract EthMultiVault is
 
         uint256 sharesForReceiver = assets;
 
-        // changes in vault's total assets
-        uint256 totalAssetsDelta = assets;
-
-        // changes in vault's total shares
-        uint256 totalSharesDelta = isAtomWallet
+        // changes in vault's total assets or total shares
+        uint256 totalDelta = isAtomWallet
             ? sharesForReceiver
             : sharesForReceiver + sharesForZeroAddress;
 
         // set vault totals for the vault
         _setVaultTotals(
             id,
-            vaults[id].totalAssets + totalAssetsDelta,
-            vaults[id].totalShares + totalSharesDelta
+            vaults[id].totalAssets + totalDelta,
+            vaults[id].totalShares + totalDelta
         );
 
         // mint `sharesOwed` shares to sender factoring in fees
@@ -967,7 +979,7 @@ contract EthMultiVault is
             receiver,
             vaults[id].balanceOf[receiver],
             assets,
-            totalSharesDelta,
+            totalDelta,
             id
         );
     }
@@ -1214,8 +1226,9 @@ contract EthMultiVault is
     /* =================================================== */
 
     modifier onlyAdmin() {
-        if (msg.sender != generalConfig.admin)
+        if (msg.sender != generalConfig.admin) {
             revert Errors.MultiVault_AdminOnly();
+        }
 
         _;
     }

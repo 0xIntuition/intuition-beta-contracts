@@ -16,9 +16,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // should revert if not admin
         vm.prank(bob);
-        vm.expectRevert(
-            abi.encodeWithSelector(Errors.MultiVault_AdminOnly.selector)
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AdminOnly.selector));
         ethMultiVault.setAdmin(testValue);
 
         // msg.sender is the caller of EthMultiVaultBase
@@ -71,11 +69,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_InvalidExitFee.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidExitFee.selector));
         ethMultiVault.setExitFee(testVaultId, testValue);
     }
 

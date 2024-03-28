@@ -73,7 +73,11 @@ contract UpgradeTo is Test {
         console.logString("deployed ProxyAdmin.");
 
         // deploy IntuitionProxy
-        proxy = new IntuitionProxy(address(ethMultiVault), address(proxyAdmin), initData);
+        proxy = new IntuitionProxy(
+            address(ethMultiVault),
+            address(proxyAdmin),
+            initData
+        );
         console.logString("deployed IntuitionProxy.");
 
         // deploy EthMultiVaultV2
@@ -81,7 +85,10 @@ contract UpgradeTo is Test {
         console.logString("deployed EthMultiVaultV2.");
 
         // upgrade EthMultiVault
-        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2));
+        proxyAdmin.upgrade(
+            ITransparentUpgradeableProxy(address(proxy)),
+            address(ethMultiVaultV2)
+        );
         console.logString("upgraded EthMultiVault.");
 
         // verify VERSION variable in EthMultiVaultV2 is V2
@@ -97,6 +104,9 @@ contract UpgradeTo is Test {
 
         // try to upgrade EthMultiVault as non-admin
         vm.expectRevert("Ownable: caller is not the owner");
-        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2New));
+        proxyAdmin.upgrade(
+            ITransparentUpgradeableProxy(address(proxy)),
+            address(ethMultiVaultV2New)
+        );
     }
 }
