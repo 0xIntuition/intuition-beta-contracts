@@ -390,29 +390,43 @@ contract EthMultiVault is
         return vaults[type(uint256).max - id].balanceOf[account] > 0;
     }
 
-    /// @notice returns the Atom Wallet address for the given atom data
-    /// @param id vault id of the atom associated to the atom wallet
-    /// @return atomWallet the address of the atom wallet
-    /// NOTE: the create2 salt is based off of the vault ID
-    function computeAtomWalletAddr(uint256 id) public view returns (address) {
-        // Address of the AtomWalletBeacon contract
+    /// @dev getDeploymentData - returns the deployment data for the AtomWallet contract
+    function getDeploymentData() internal view returns (bytes memory) {
+        // Address of the atomWalletBeacon contract
         address beaconAddress = walletConfig.atomWalletBeacon;
 
-        // BeaconProxy creation code concatenated with the beacon address
+        // BeaconProxy creation code
         bytes memory code = type(BeaconProxy).creationCode;
         
+        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
         bytes memory initData = abi.encodeWithSelector(
             AtomWallet.init.selector,
             IEntryPoint(walletConfig.entryPoint),
             walletConfig.atomWarden
         );
+
+        // encode constructor arguments of the BeaconProxy contract (beacon address, init data)
         bytes memory encodedArgs = abi.encode(
             beaconAddress,
             initData
         );
 
-        bytes memory data = abi.encodePacked(code, encodedArgs);
+        // encode the data used for the create2 call
+        return abi.encodePacked(code, encodedArgs);
+    }
+
+    /// @notice returns the Atom Wallet address for the given atom data
+    /// @param id vault id of the atom associated to the atom wallet
+    /// @return atomWallet the address of the atom wallet
+    /// NOTE: the create2 salt is based off of the vault ID
+    function computeAtomWalletAddr(uint256 id) public view returns (address) {
+        // compute salt for create2
         bytes32 salt = bytes32(id);
+
+        // get contract deployment data
+        bytes memory data = getDeploymentData();
+
+        // compute the raw contract address
         bytes32 rawAddress = keccak256(
             abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data))
         );
@@ -438,36 +452,23 @@ contract EthMultiVault is
         if (atomId == 0 || atomId > count)
             revert Errors.MultiVault_VaultDoesNotExist();
 
-        // Address of the AtomWalletBeacon contract
-        address beaconAddress = walletConfig.atomWalletBeacon;
-
         // compute salt for create2
         bytes32 salt = bytes32(atomId);
 
-        // BeaconProxy creation code needs to be concatenated with the encoded Beacon address
-        bytes memory code = type(BeaconProxy).creationCode;
-        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
-        bytes memory initData = abi.encodeWithSelector(
-            AtomWallet.init.selector,
-            IEntryPoint(walletConfig.entryPoint),
-            walletConfig.atomWarden
-        );
+        // get contract deployment data
+        bytes memory data = getDeploymentData();
 
-        // encode constructor arguments (address, bytes memory)
-        bytes memory data = abi.encodePacked(code, abi.encode(beaconAddress, initData));
-
-        // deploy atom wallet with create2
+        // deploy atom wallet with create2:
         // value sent in wei,
-        // memory offset of `code` (after first 32 bytes where length is),
+        // memory offset of `code` (after first 32 bytes where the length is),
         // length of `code` (first 32 bytes of code),
         // salt for create2
         assembly {
             atomWallet := create2(0, add(data, 0x20), mload(data), salt)
         }
 
-        if (atomWallet == address(0)) {
+        if (atomWallet == address(0))
             revert Errors.MultiVault_DeployAccountFailed();
-        }
     }
 
     /* -------------------------- */
