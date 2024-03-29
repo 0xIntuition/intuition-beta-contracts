@@ -25,6 +25,8 @@ interface IEthMultiVault {
         uint256 minShare;
         /// @notice maximum length of the atom URI data that can be passed when creating atom vaults
         uint256 atomUriMaxLength;
+        /// @notice decimal precision used for calculating share prices
+        uint256 decimalPrecision;
     }
 
     struct AtomConfig {
@@ -124,7 +126,7 @@ interface IEthMultiVault {
 
     /// @notice return true for triple vaults and false for atom vaults, designate if vault ID is a triple
     /// @param id id of the vault inputted
-    function assertTriple(uint256 id) external view returns (bool);
+    function isTripleId(uint256 id) external view returns (bool);
 
     /// @notice returns the Triple ID for the given counter triple ID
     /// @param id Counter Triple ID

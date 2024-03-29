@@ -174,7 +174,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
     /// NOTE: only applies to triple vaults
     function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
-        feeAmount = assertTriple(id) ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
+        feeAmount = isTripleId(id) ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
     }
 
     /* -------------------------- */
@@ -274,7 +274,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @notice returns whether the supplied vault id is a triple
     /// @param id vault id to check
     /// @return bool whether the supplied vault id is a triple
-    function assertTriple(uint256 id) public view returns (bool) {
+    function isTripleId(uint256 id) public view returns (bool) {
         return id > type(uint256).max / 2 ? isTriple[type(uint256).max - id] : isTriple[id];
     }
 
@@ -658,9 +658,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         }
 
         // assert that each id is not a triple vault id
-        if (assertTriple(subjectId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(subjectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(predicateId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
         uint256 tripleCost = getTripleCost();
 
@@ -765,9 +765,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         if (objectId == 0) revert Errors.MultiVault_AtomDoesNotExist();
 
         // assert that each id is not a triple vault id
-        if (assertTriple(subjectId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(predicateId)) revert Errors.MultiVault_VaultIsTriple();
-        if (assertTriple(objectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(subjectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(predicateId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
@@ -830,7 +830,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             revert Errors.MultiVault_VaultDoesNotExist();
         }
 
-        if (assertTriple(id)) {
+        if (isTripleId(id)) {
             revert Errors.MultiVault_VaultNotAtom();
         }
 
@@ -906,7 +906,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             revert Errors.MultiVault_MinimumDeposit();
         }
 
-        if (!assertTriple(id)) {
+        if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }
 
@@ -949,7 +949,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (!assertTriple(id)) {
+        if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }
 
@@ -1024,7 +1024,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (!assertTriple(id)) {
+        if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }
 
@@ -1136,7 +1136,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         /*
          * Initialize the counter triple vault with ghost shares if id is a positive triple vault
          */
-        if (assertTriple(id)) {
+        if (isTripleId(id)) {
             uint256 counterVaultId = getCounterIdFromTriple(id);
 
             // set vault totals

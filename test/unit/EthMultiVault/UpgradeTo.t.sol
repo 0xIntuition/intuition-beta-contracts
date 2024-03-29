@@ -38,10 +38,11 @@ contract UpgradeTo is Test {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: msg.sender, // Deployer as admin for simplicity
             protocolVault: msg.sender, // Deployer as protocol vault for simplicity
-            feeDenominator: 1e4, // Common denominator for fee calculations
-            minDeposit: 1e15, // Minimum deposit amount in wei
-            minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
-            atomUriMaxLength: 250 // Maximum length of the atom URI data that can be passed when creating atom vaults
+            feeDenominator: 10000, // Common denominator for fee calculations
+            minDeposit: 0.01 ether, // Minimum deposit amount in wei
+            minShare: 1e18, // Minimum share amount (e.g., for vault initialization)
+            atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
+            decimalPrecision: 1e18 // decimal precision used for calculating share prices
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
