@@ -1159,12 +1159,15 @@ contract EthMultiVault is
 
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default exit fee, id = n changes fees for vault n specifically
-    /// @dev admin cannot set the exit fee to be greater than 10%, to avoid being able to prevent
+    /// @dev admin cannot set the exit fee to be greater than `maxExitFeePercentage`, which is 
+    ///      set to be the 10% of `generalConfig.feeDenominator`, to avoid being able to prevent
     ///      users from withdrawing their assets
     /// @param _id vault id to set exit fee for
     /// @param _exitFee exit fee to set
     function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
-        if (_exitFee > (generalConfig.feeDenominator / 10)) revert Errors.MultiVault_InvalidExitFee();
+        uint256 maxExitFeePercentage = generalConfig.feeDenominator / 10;
+
+        if (_exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
         vaultFees[_id].exitFee = _exitFee;
     }
 
