@@ -41,7 +41,7 @@ interface IEthMultiVault {
         /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationFee;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
-        uint256 atomEquityFeeForTriple;
+        uint256 atomDepositFractionForTriple;
     }
 
     struct WalletConfig {
@@ -51,6 +51,8 @@ interface IEthMultiVault {
         address entryPoint;
         /// @notice AtomWallet Warden address, address that is the initial owner of all atom accounts
         address atomWarden;
+        /// @notice AtomWalletBeacon contract address, which points to the AtomWallet implementation
+        address atomWalletBeacon;
     }
 
     /* =================================================== */

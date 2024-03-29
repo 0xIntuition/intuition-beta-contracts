@@ -79,12 +79,12 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (, , , , , atomUriMaxLength, ) = ethMultiVault.generalConfig();
     }
 
-    function getAtomEquityFee()
+    function getAtomDepositFraction()
         public
         view
-        returns (uint256 atomEquityFeeForTriple)
+        returns (uint256 atomDepositFractionForTriple)
     {
-        (, atomEquityFeeForTriple) = ethMultiVault.tripleConfig();
+        (, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
     }
 
     function getAtomWalletAddr(uint256 id) public view returns (address) {
@@ -120,7 +120,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     ) public payable {
         // calculate expected total assets delta
         uint256 totalAssetsDeltaExpected = amount -
-            atomEquityFeeAmount(amount, id) -
+            atomDepositFractionAmount(amount, id) -
             entryFeeAmount(amount, id);
 
         // calculate expected total shares delta

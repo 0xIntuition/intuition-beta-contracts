@@ -9,6 +9,7 @@ import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 import {LibZip} from "solady/utils/LibZip.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import {SafeCastLib} from "solmate/utils/SafeCastLib.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
@@ -139,7 +140,7 @@ contract EthMultiVault is
 
         totalFees =
             entryFeeAmount(assets, id) +
-            atomEquityFeeAmount(assets - protocolFees, id) +
+            atomDepositFractionAmount(assets - protocolFees, id) +
             protocolFees;
     }
 
@@ -213,12 +214,12 @@ contract EthMultiVault is
     /// @param id vault id
     /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
     /// NOTE: only applies to triple vaults
-    function atomEquityFeeAmount(
+    function atomDepositFractionAmount(
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
         feeAmount = isTripleId(id)
-            ? feeOnRaw(assets, tripleConfig.atomEquityFeeForTriple)
+            ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
             : 0;
     }
 
@@ -394,16 +395,28 @@ contract EthMultiVault is
     /// @return atomWallet the address of the atom wallet
     /// NOTE: the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) public view returns (address) {
-        bytes memory code = type(AtomWallet).creationCode;
-        bytes memory encodedArgs = abi.encode(
+        // Address of the AtomWalletBeacon contract
+        address beaconAddress = walletConfig.atomWalletBeacon;
+
+        // BeaconProxy creation code concatenated with the beacon address
+        bytes memory code = type(BeaconProxy).creationCode;
+        
+        bytes memory initData = abi.encodeWithSelector(
+            AtomWallet.init.selector,
             IEntryPoint(walletConfig.entryPoint),
             walletConfig.atomWarden
         );
+        bytes memory encodedArgs = abi.encode(
+            beaconAddress,
+            initData
+        );
+
         bytes memory data = abi.encodePacked(code, encodedArgs);
         bytes32 salt = bytes32(id);
         bytes32 rawAddress = keccak256(
             abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data))
         );
+
         return address(bytes20(rawAddress << 96));
     }
 
@@ -418,33 +431,40 @@ contract EthMultiVault is
     /// @notice deploy a given atom wallet
     /// @param atomId vault id of atom
     /// @return atomWallet the address of the atom wallet
-    /// NOTE: deploys an ERC4337 account (atom wallet). Reverts if the atom vault does not exist
+    /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(
         uint256 atomId
     ) external whenNotPaused returns (address atomWallet) {
         if (atomId == 0 || atomId > count)
             revert Errors.MultiVault_VaultDoesNotExist();
 
-        // compute salt
+        // Address of the AtomWalletBeacon contract
+        address beaconAddress = walletConfig.atomWalletBeacon;
+
+        // compute salt for create2
         bytes32 salt = bytes32(atomId);
-        // get creation code
-        bytes memory code = type(AtomWallet).creationCode;
-        // encode constructor arguments (IEntryPoint, address)
-        bytes memory data = abi.encodePacked(
-            code,
-            abi.encode(
-                IEntryPoint(walletConfig.entryPoint),
-                walletConfig.atomWarden
-            )
+
+        // BeaconProxy creation code needs to be concatenated with the encoded Beacon address
+        bytes memory code = type(BeaconProxy).creationCode;
+        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
+        bytes memory initData = abi.encodeWithSelector(
+            AtomWallet.init.selector,
+            IEntryPoint(walletConfig.entryPoint),
+            walletConfig.atomWarden
         );
+
+        // encode constructor arguments (address, bytes memory)
+        bytes memory data = abi.encodePacked(code, abi.encode(beaconAddress, initData));
+
         // deploy atom wallet with create2
         // value sent in wei,
         // memory offset of `code` (after first 32 bytes where length is),
         // length of `code` (first 32 bytes of code),
-        // salt
+        // salt for create2
         assembly {
             atomWallet := create2(0, add(data, 0x20), mload(data), salt)
         }
+
         if (atomWallet == address(0)) {
             revert Errors.MultiVault_DeployAccountFailed();
         }
@@ -808,8 +828,8 @@ contract EthMultiVault is
         uint256 userDeposit = msg.value - protocolFees;
 
         // distribute atom equity for all 3 atoms that underlie the triple
-        uint256 _atomEquityFeeAmount = atomEquityFeeAmount(userDeposit, id);
-        _distributeAtomEquity(id, receiver, _atomEquityFeeAmount);
+        uint256 _atomDepositFractionAmount = atomDepositFractionAmount(userDeposit, id);
+        _depositAtomFraction(id, receiver, _atomDepositFractionAmount);
     }
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
@@ -842,9 +862,9 @@ contract EthMultiVault is
     /*                 INTERNAL METHODS                    */
     /* =================================================== */
 
-    /// @dev _distributeAtomEquity - divides amount across the three atoms composing the triple and issues the receiver shares
+    /// @dev _depositAtomFraction - divides amount across the three atoms composing the triple and issues the receiver shares
     /// NOTE: assumes funds have already been transferred to this contract.
-    function _distributeAtomEquity(
+    function _depositAtomFraction(
         uint256 id,
         address receiver,
         uint256 amount
@@ -871,10 +891,11 @@ contract EthMultiVault is
         address receiver,
         uint256 assets // protocol fees already deducted
     ) internal returns (uint256 sharesForReceiver) {
-        // changes in vault's total assets
+        // changes in vault's total assets 
+        // if the vault is an atom vault `atomDepositFractionAmount` is 0
         uint256 totalAssetsDelta = assets -
             entryFeeAmount(assets, id) -
-            atomEquityFeeAmount(assets, id);
+            atomDepositFractionAmount(assets, id);
 
         if (totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -1179,11 +1200,11 @@ contract EthMultiVault is
     }
 
     /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomEquityFeeForTriple new atom equity fee percentage
-    function setAtomEquityFee(
-        uint256 _atomEquityFeeForTriple
+    /// @param _atomDepositFractionForTriple new atom equity fee percentage
+    function setAtomDepositFraction(
+        uint256 _atomDepositFractionForTriple
     ) external onlyAdmin {
-        tripleConfig.atomEquityFeeForTriple = _atomEquityFeeForTriple;
+        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples
@@ -1225,6 +1246,6 @@ contract EthMultiVault is
     }
 
     receive() external payable {
-        revert();
+        revert Errors.MultiVault_ReceiveNotAllowed();
     }
 }

@@ -173,7 +173,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @param id vault id
     /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
     /// NOTE: only applies to triple vaults
-    function atomEquityFeeAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
+    function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
         feeAmount = isTripleId(id) ? feeOnRaw(assets, tripleConfig.atomEquityFeeForTriple) : 0;
     }
 
@@ -212,7 +212,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     ///       input amount of assets so if the vault is empty before the deposit the caller receives more
     ///       shares than returned by this function, reference internal _depositIntoVault logic for details
     function previewDeposit(uint256 assets, uint256 id) public view returns (uint256 shares) {
-        uint256 totalFees = entryFeeAmount(assets, id) + atomEquityFeeAmount(assets, id) + protocolFeeAmount(assets, id);
+        uint256 totalFees = entryFeeAmount(assets, id) + atomDepositFractionAmount(assets, id) + protocolFeeAmount(assets, id);
 
         if (assets < totalFees) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -929,8 +929,8 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         uint256 userDeposit = msg.value - protocolFees;
 
         // distribute atom equity for all 3 atoms that underlie the triple
-        uint256 _atomEquityFeeAmount = atomEquityFeeAmount(userDeposit, id);
-        _distributeAtomEquity(id, receiver, _atomEquityFeeAmount);
+        uint256 _atomDepositFractionAmount = atomDepositFractionAmount(userDeposit, id);
+        _depositAtomFraction(id, receiver, _atomDepositFractionAmount);
     }
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
@@ -1047,9 +1047,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /*                 INTERNAL METHODS                    */
     /* =================================================== */
 
-    /// @dev _distributeAtomEquity - divides amount across the three atoms composing the triple and issues the receiver shares
+    /// @dev _depositAtomFraction - divides amount across the three atoms composing the triple and issues the receiver shares
     /// NOTE: assumes funds have already been transferred to this contract.
-    function _distributeAtomEquity(uint256 id, address receiver, uint256 amount) internal {
+    function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal {
         // load atom IDs
         uint256[3] memory atomsIds;
         (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(id);
@@ -1081,7 +1081,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         }
 
         // changes in vault's total assets
-        uint256 totalAssetsDelta = assets - atomEquityFeeAmount(assets, id) - protocolFees;
+        uint256 totalAssetsDelta = assets - atomDepositFractionAmount(assets, id) - protocolFees;
 
         if (totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -1328,9 +1328,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     }
 
     /// @dev sets the atom equity fee percentage (number to be divided by `feeDenominator`)
-    /// @param _atomEquityFeeForTriple new atom equity fee percentage
-    function setAtomEquityFee(uint256 _atomEquityFeeForTriple) external onlyAdmin {
-        tripleConfig.atomEquityFeeForTriple = _atomEquityFeeForTriple;
+    /// @param _atomDepositFractionForTriple new atom equity fee percentage
+    function setAtomDepositFraction(uint256 _atomDepositFractionForTriple) external onlyAdmin {
+        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples
