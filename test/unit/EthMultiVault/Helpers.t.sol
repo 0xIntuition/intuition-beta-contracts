@@ -72,6 +72,20 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(computedAddress, atomWalletAddress);
     }
 
+    function testPlainEtherTransferToContractShouldRevert() external {
+        // prank call from alice
+        // as both msg.sender and tx.origin
+        vm.startPrank(alice, alice);
+
+        // should revert if plain ether transfer is attempted
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_ReceiveNotAllowed.selector)
+        );
+        payable(address(ethMultiVault)).transfer(1 ether);
+
+        vm.stopPrank();
+    }
+
     function isContract(address _addr) internal view returns (bool) {
         uint32 size;
         assembly {

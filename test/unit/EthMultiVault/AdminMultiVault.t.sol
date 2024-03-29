@@ -101,13 +101,13 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getTripleCreationFee(), testValue);
     }
 
-    function testSetAtomEquityFee() external {
+    function testSetAtomDepositFraction() external {
         uint256 testValue = 1000;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomEquityFee(testValue);
-        assertEq(getAtomEquityFee(), testValue);
+        ethMultiVault.setAtomDepositFraction(testValue);
+        assertEq(getAtomDepositFraction(), testValue);
     }
 
     function testSetMinDeposit() external {

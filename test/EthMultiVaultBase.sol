@@ -7,6 +7,8 @@ import "forge-std/Test.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
+import {AtomWallet} from "src/AtomWallet.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
 // test events
 import {IEthMultiVaultEvents} from "./events/IEthMultiVaultEvents.sol";
@@ -30,38 +32,47 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
 
     /// @notice core contracts
     EthMultiVault ethMultiVault;
-
-    // Define the configuration objects
-    IEthMultiVault.GeneralConfig generalConfig =
-        IEthMultiVault.GeneralConfig({
-            admin: msg.sender,
-            protocolVault: address(0xbeef),
-            feeDenominator: 1e4,
-            minDeposit: 1000000000000000,
-            minShare: 1e8,
-            atomUriMaxLength: 250
-        });
-
-    IEthMultiVault.AtomConfig atomConfig =
-        IEthMultiVault.AtomConfig({
-            atomShareLockFee: 1000000000000000, // 1e15
-            atomCreationFee: 500000000000000 // 5e14
-        });
-
-    IEthMultiVault.TripleConfig tripleConfig =
-        IEthMultiVault.TripleConfig({tripleCreationFee: 2000000000000000, atomEquityFeeForTriple: 1e3});
-
-    IEthMultiVault.WalletConfig walletConfig = IEthMultiVault.WalletConfig({
-        permit2: IPermit2(address(0xbeef)),
-        entryPoint: address(0xbeef),
-        atomWarden: address(0xbeef)
-    });
+    AtomWallet atomWallet;
+    UpgradeableBeacon atomWalletBeacon;
 
     /// @notice set up test environment
     // usage in other test contracts that extend this one:
     // function setUp() external { _setUp(); [add in extra changes that extend the base environment here] }
     // _setUp() avoids using super.setUp() cuz I lazy and it's just as readable :)
     function _setUp() public {
+        // deploy AtomWallet implementation contract
+        atomWallet = new AtomWallet();
+
+        // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
+
+        // Define the configuration objects
+        IEthMultiVault.GeneralConfig memory generalConfig =
+            IEthMultiVault.GeneralConfig({
+                admin: msg.sender,
+                protocolVault: address(0xbeef),
+                feeDenominator: 1e4,
+                minDeposit: 1e15,
+                minShare: 1e5,
+                atomUriMaxLength: 250
+            });
+
+        IEthMultiVault.AtomConfig memory atomConfig =
+            IEthMultiVault.AtomConfig({
+                atomShareLockFee: 1e15,
+                atomCreationFee: 5e14
+            });
+
+        IEthMultiVault.TripleConfig memory tripleConfig =
+            IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
+
+        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+            permit2: IPermit2(address(0xbeef)),
+            entryPoint: address(0xbeef),
+            atomWarden: address(0xbeef),
+            atomWalletBeacon: address(atomWalletBeacon)
+        });
+
         ethMultiVault = new EthMultiVault();
         ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig);
 
@@ -99,8 +110,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.previewDeposit(assets, id);
     }
 
-    function atomEquityFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
-        return ethMultiVault.atomEquityFeeAmount(assets, id);
+    function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256) {
+        return ethMultiVault.atomDepositFractionAmount(assets, id);
     }
 
     function protocolFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {

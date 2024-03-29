@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {BaseAccount, UserOperation} from "account-abstraction/contracts/core/BaseAccount.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {Errors} from "./libraries/Errors.sol";
 
@@ -13,17 +14,18 @@ import {Errors} from "./libraries/Errors.sol";
  * @notice Core contract of the Intuition protocol. This contract is the abstract account
  *         associated to a corresponding atom.
  */
-contract AtomWallet is BaseAccount, Ownable {
-    using ECDSA for bytes32;
+contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
+    using ECDSAUpgradeable for bytes32;
 
-    IEntryPoint private immutable _entryPoint;
+    IEntryPoint private _entryPoint;
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint, address anOwner) {
-        _entryPoint = anEntryPoint;
+    function init(IEntryPoint anEntryPoint, address anOwner) external initializer {
+        __Ownable_init();
         transferOwnership(anOwner);
+        _entryPoint = anEntryPoint;
     }
 
     function entryPoint() public view virtual override returns (IEntryPoint) {

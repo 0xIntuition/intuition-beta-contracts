@@ -50,7 +50,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         checkProtocolVaultBalance(id, protocolVaultBalanceBefore);
 
         // ------ Check Distribute Atom Equity ------ //
-        uint256 amountToDistribute = atomEquityFeeAmount(testDespositAmount - getProtocolFee(id), id);
+        uint256 amountToDistribute = atomDepositFractionAmount(testDespositAmount - getProtocolFee(id), id);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
