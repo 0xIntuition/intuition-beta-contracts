@@ -174,7 +174,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
     /// NOTE: only applies to triple vaults
     function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
-        feeAmount = isTripleId(id) ? feeOnRaw(assets, tripleConfig.atomEquityFeeForTriple) : 0;
+        feeAmount = isTripleId(id) ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
     }
 
     /* -------------------------- */
