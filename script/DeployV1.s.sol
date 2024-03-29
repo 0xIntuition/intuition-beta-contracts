@@ -31,7 +31,7 @@ contract DeployEthMultiVault is Script {
     AtomWallet atomWallet;
     UpgradeableBeacon atomWalletBeacon;
     EthMultiVault ethMultiVault;
-    TransparentUpgradeableProxy proxy;
+    TransparentUpgradeableProxy ethMultiVaultProxy;
     ProxyAdmin proxyAdmin;
 
     function run() external {
@@ -106,24 +106,23 @@ contract DeployEthMultiVault is Script {
 
         // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         console.log("Deploying Proxy and initializing EthMultiVault...");
-        proxy = new TransparentUpgradeableProxy(
+        ethMultiVaultProxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
-            address(proxyAdmin), // ProxyAdmin address to manage proxy
+            address(proxyAdmin), // ProxyAdmin address to manage the proxy contract
             initData // Initialization data to call the `init` function in EthMultiVault
         );
 
         // Transfer ownership of the proxy contract to the multisig admin
-        proxyAdmin.changeProxyAdmin(ITransparentUpgradeableProxy(address(proxy)), admin);
+        proxyAdmin.changeProxyAdmin(ITransparentUpgradeableProxy(address(ethMultiVaultProxy)), admin);
 
         // // stop sending tx's
         vm.stopBroadcast();
 
         console.log("EthMultiVault deployed and initialized successfully through proxy.");
-        console.log("EntryPoint address:", address(entryPoint));
         console.log("AtomWallet address:", address(atomWallet));
         console.log("AtomWalletBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
+        console.log("EthMultiVault Proxy address:", address(ethMultiVaultProxy));
         console.log("ProxyAdmin address:", address(proxyAdmin));
-        console.log("EthMultiVault Proxy address:", address(proxy));
     }
 }
