@@ -411,7 +411,7 @@ contract EthMultiVault is
             initData
         );
 
-        // encode the data used for the create2 call
+        // concatenate the BeaconProxy creation code with the ABI-encoded constructor arguments
         return abi.encodePacked(code, encodedArgs);
     }
 
