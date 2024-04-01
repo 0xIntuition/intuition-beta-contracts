@@ -67,7 +67,8 @@ contract DeployEthMultiVault is Script {
                 minDeposit: 1e15, // Minimum deposit amount in wei
                 minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
                 atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
-                decimalPrecision: 1e18 // decimal precision used for calculating share prices
+                decimalPrecision: 1e18, // decimal precision used for calculating share prices
+                minDelay: 12 hours // minimum delay for timelocked transactions
             });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault

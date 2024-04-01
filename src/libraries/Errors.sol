@@ -49,6 +49,11 @@ library Errors {
     error MultiVault_TransferFailed();
     error MultiVault_InvalidFeeSet();
     error MultiVault_InvalidExitFee();
+    error MultiVault_OperationNotScheduled();
+    error MultiVault_TimelockNotExpired();
+    error MultiVault_OperationAlreadyExecuted();
+    error MultiVault_DelayTooShort();
+    error MultiVault_OperationAlreadyScheduled();
 
     /*/////// TRUSTBONDING ERRORS /////////////////////////////////////////////////////////*/
 
