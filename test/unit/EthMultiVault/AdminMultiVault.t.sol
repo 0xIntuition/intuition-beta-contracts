@@ -35,7 +35,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function testCancelScheduledOperation() external {
         bytes32 operationId = keccak256("setExitFee");
         uint256 vaultId = 0;
-        uint256 newExitFee = 100; // An example value
+        uint256 newExitFee = 100; // 100 basis points (1%)
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, newExitFee);
         uint256 delay = 12 hours;
 
@@ -60,7 +60,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 delay = 12 hours;
         
         // Schedule the operation
-        vm.prank(msg.sender); // Use the correct admin address or role with the capability to schedule
+        vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, data, delay);
 
         // Forward time to surpass the delay
@@ -113,12 +113,12 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     
         // Schedule operation with a valid exit fee
         bytes memory validData = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, validExitFee);
-        vm.prank(msg.sender); // Use the admin address or role with the capability to schedule
+        vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, validData, delay);
 
         // Schedule operation with an invalid exit fee
         bytes memory invalidData = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, invalidExitFee);
-        vm.prank(msg.sender); // Assuming 'admin' is the correct admin address
+        vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, invalidData, delay);
 
         // Forward time to surpass the delay
@@ -135,12 +135,12 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Verify the valid exit fee update
         uint256 currentExitFee = getExitFee(vaultId);
-        assertEq(currentExitFee, validExitFee, "Exit fee was not updated correctly");
+        assertEq(currentExitFee, validExitFee);
 
         // Verify the operation is marked as executed for the valid exit fee
         bytes32 opHashValid = keccak256(abi.encodePacked(operationId, validData, delay));
         (, , bool executedValid) = ethMultiVault.timelocks(opHashValid);
-        assertTrue(executedValid, "Operation for valid exit fee was not marked as executed");
+        assertTrue(executedValid);
     }
 
 
