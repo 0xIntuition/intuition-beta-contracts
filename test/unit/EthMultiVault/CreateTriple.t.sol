@@ -25,6 +25,8 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 predicateId = ethMultiVault.createAtom{value: testDepositAmount}("predicate");
         uint256 objectId = ethMultiVault.createAtom{value: testDepositAmount}("object");
 
+        // snapshots before creating a triple
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
         uint256 lastVaultIdBeforeCreatingTriple = ethMultiVault.count();
 
         // execute interaction - create triples
@@ -36,6 +38,12 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
         assertEq(vaultBalanceOf(counterId, address(0)), vaultBalanceOf(id, address(0)));
         assertEq(vaultTotalAssets(counterId), getMinShare());
+
+        // snapshots after creating a triple
+        uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
+        uint256 protocolDepositFee = protocolFeeAmount(testDepositAmountTriple - getTripleCost(), id);
+        uint256 protocolVaultBalanceAfterLessFees = protocolVaultBalanceAfter - protocolDepositFee - getTripleCreationFee();
+        assertEq(protocolVaultBalanceBefore, protocolVaultBalanceAfterLessFees);
 
         vm.stopPrank();
     }
