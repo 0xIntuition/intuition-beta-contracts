@@ -55,7 +55,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
                 minDeposit: 1e15,
                 minShare: 1e5,
                 atomUriMaxLength: 250,
-                decimalPrecision: 1e18
+                decimalPrecision: 1e18,
+                minDelay: 12 hours
             });
 
         IEthMultiVault.AtomConfig memory atomConfig =
@@ -68,8 +69,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
-            permit2: IPermit2(address(0xbeef)),
-            entryPoint: address(0xbeef),
+            permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
+            entryPoint: address(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789),
             atomWarden: address(0xbeef),
             atomWalletBeacon: address(atomWalletBeacon)
         });
