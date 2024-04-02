@@ -33,9 +33,6 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         predicateIds[1] = ethMultiVault.createAtom{value: testAtomCost}("predicate2");
         objectIds[1] = ethMultiVault.createAtom{value: testAtomCost}("object2");
 
-        // snapshots before creating a triple
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
-
         uint256 lastVaultIdBeforeCreatingTriple = ethMultiVault.count();
         assertEq(lastVaultIdBeforeCreatingTriple, 3 * triplesToCreate);
 

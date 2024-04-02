@@ -25,8 +25,6 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 predicateId = ethMultiVault.createAtom{value: testDepositAmount}("predicate");
         uint256 objectId = ethMultiVault.createAtom{value: testDepositAmount}("object");
 
-        // snapshots before creating a triple
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
         uint256 lastVaultIdBeforeCreatingTriple = ethMultiVault.count();
 
         // execute interaction - create triples
