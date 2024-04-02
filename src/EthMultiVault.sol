@@ -1188,7 +1188,7 @@ contract EthMultiVault is
     function cancelOperation(bytes32 operationId, bytes memory data, uint256 delay) external onlyAdmin {
         // Generate the operation hash
         bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, delay));
-        
+
         // Check timelock constraints and cancel the operation
         Timelock memory timelock = timelocks[operationHash];
 
@@ -1310,14 +1310,6 @@ contract EthMultiVault is
     /// @param _atomUriMaxLength new atom URI max length
     function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
         generalConfig.atomUriMaxLength = _atomUriMaxLength;
-    }
-
-    /// @dev sets the minimum delay for timelocks
-    /// @dev admin cannot set the minimum delay to be less than 12 hours
-    /// @param _minDelay new minimum delay
-    function setMinDelay(uint256 _minDelay) external onlyAdmin {
-        if (_minDelay < 12 hours) revert Errors.MultiVault_MinDelayTooShort();
-        generalConfig.minDelay = _minDelay;
     }
 
     /* =================================================== */

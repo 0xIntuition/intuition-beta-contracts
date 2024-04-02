@@ -217,24 +217,6 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getAtomUriMaxLength(), testValue);
     }
 
-    function testSetMinDelay() external {
-        uint256 invalidMinDelay = 6 hours; // An invalid new minimum delay, too short
-        uint256 validMinDelay = 24 hours; // A valid new minimum delay
-
-        // Attempt to set an invalid minimum delay and expect a revert
-        vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinDelayTooShort.selector));
-        ethMultiVault.setMinDelay(invalidMinDelay);
-
-        // Attempt to set a valid minimum delay
-        vm.prank(msg.sender);
-        ethMultiVault.setMinDelay(validMinDelay);
-
-        // Verify that the new minimum delay has been set correctly
-        uint256 currentMinDelay = getMinDelay();
-        assertEq(currentMinDelay, validMinDelay);
-    }
-
     function getAtomCost()
         public
         view
