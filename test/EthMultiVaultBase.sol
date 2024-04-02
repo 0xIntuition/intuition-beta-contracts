@@ -55,7 +55,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
                 minDeposit: 1e15,
                 minShare: 1e5,
                 atomUriMaxLength: 250,
-                decimalPrecision: 1e18
+                decimalPrecision: 1e18,
+                minDelay: 12 hours
             });
 
         IEthMultiVault.AtomConfig memory atomConfig =

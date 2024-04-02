@@ -43,6 +43,10 @@ contract EthMultiVault is
     /// @notice ID of the last vault to be created
     uint256 public count;
 
+    // Operation identifiers
+    bytes32 constant public SET_ADMIN = keccak256("setAdmin");
+    bytes32 constant public SET_EXIT_FEE = keccak256("setExitFee");
+
     struct VaultState {
         uint256 totalAssets;
         uint256 totalShares;
@@ -57,6 +61,13 @@ contract EthMultiVault is
         uint256 exitFee;
         // protocol fee for each vault, protocol fee for vault 0 is considered the default protocol fee
         uint256 protocolFee;
+    }
+
+    /// @notice Timelock struct
+    struct Timelock {
+        bytes data;
+        uint256 readyTime;
+        bool executed;
     }
 
     mapping(uint256 => VaultState) public vaults;
@@ -89,6 +100,9 @@ contract EthMultiVault is
     /// Triple ID -> Atom ID -> Account Address -> Atom Share Balance
     mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
         public tripleAtomShares;
+
+    /// @notice Timelock mapping (operation hash -> timelock struct)
+    mapping(bytes32 => Timelock) public timelocks;
 
     /* =================================================== */
     /*                    INITIALIZER                      */
@@ -1121,15 +1135,21 @@ contract EthMultiVault is
         id = ++count;
     }
 
+    /// @dev internal method to validate the timelock constraints
+    function _validateTimelock(bytes32 _operationHash) internal view {
+        Timelock memory timelock = timelocks[_operationHash];
+
+        if (timelock.readyTime == 0) 
+            revert Errors.MultiVault_OperationNotScheduled();
+        if (timelock.executed)
+            revert Errors.MultiVault_OperationAlreadyExecuted();
+        if (timelock.readyTime > block.timestamp) 
+            revert Errors.MultiVault_TimelockNotExpired();
+    }
+
     /* =================================================== */
     /*               RESTRICTED FUNCTIONS                  */
     /* =================================================== */
-
-    /// @dev set admin
-    /// @param _admin address of the new admin
-    function setAdmin(address _admin) external onlyAdmin {
-        generalConfig.admin = _admin;
-    }
 
     /// @dev pause the pausable contract methods
     function pause() external onlyAdmin {
@@ -1139,6 +1159,59 @@ contract EthMultiVault is
     /// @dev unpause the pausable contract methods
     function unpause() external onlyAdmin {
         _unpause();
+    }
+
+    /// @dev schedule an operation to be executed after a delay
+    /// @param operationId unique identifier for the operation
+    /// @param data data to be executed
+    function scheduleOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+        uint256 minDelay = generalConfig.minDelay;        
+
+        // Generate the operation hash
+        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, minDelay));
+
+        // Check timelock constraints and schedule the operation
+        if (timelocks[operationHash].readyTime != 0) 
+            revert Errors.MultiVault_OperationAlreadyScheduled();
+        timelocks[operationHash] = Timelock({
+            data: data,
+            readyTime: block.timestamp + minDelay,
+            executed: false
+        });
+    }
+
+    /// @dev execute a scheduled operation
+    /// @param operationId unique identifier for the operation
+    /// @param data data to be executed
+    function cancelOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+        // Generate the operation hash
+        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, generalConfig.minDelay));
+
+        // Check timelock constraints and cancel the operation
+        Timelock memory timelock = timelocks[operationHash];
+
+        if (timelock.readyTime == 0) 
+            revert Errors.MultiVault_OperationNotScheduled();
+        if (timelock.executed) 
+            revert Errors.MultiVault_OperationAlreadyExecuted();
+        delete timelocks[operationHash];
+    }
+
+    /// @dev set admin
+    /// @param _admin address of the new admin
+    function setAdmin(address _admin) external onlyAdmin {
+        // Generate the operation hash
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, _admin);
+        bytes32 opHash = keccak256(abi.encodePacked(SET_ADMIN, data, generalConfig.minDelay));
+
+        // Check timelock constraints
+        _validateTimelock(opHash);
+
+        // Execute the operation
+        generalConfig.admin = _admin;
+
+        // Mark the operation as executed
+        timelocks[opHash].executed = true;
     }
 
     /// @dev set protocol vault
@@ -1164,7 +1237,19 @@ contract EthMultiVault is
     /// @param _exitFee exit fee to set
     function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
         if (_exitFee > (generalConfig.feeDenominator / 10)) revert Errors.MultiVault_InvalidExitFee();
+
+        // Generate the operation hash
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, _id, _exitFee);
+        bytes32 opHash = keccak256(abi.encodePacked(SET_EXIT_FEE, data, generalConfig.minDelay));
+
+        // Check timelock constraints
+        _validateTimelock(opHash);
+
+        // Execute the operation
         vaultFees[_id].exitFee = _exitFee;
+
+        // Mark the operation as executed
+        timelocks[opHash].executed = true;
     }
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -1233,7 +1318,6 @@ contract EthMultiVault is
         if (msg.sender != generalConfig.admin) {
             revert Errors.MultiVault_AdminOnly();
         }
-
         _;
     }
 

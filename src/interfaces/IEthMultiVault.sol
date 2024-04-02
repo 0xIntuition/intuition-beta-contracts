@@ -27,6 +27,8 @@ interface IEthMultiVault {
         uint256 atomUriMaxLength;
         /// @notice decimal precision used for calculating share prices
         uint256 decimalPrecision;
+        /// @notice minimum delay for timelocked transactions
+        uint256 minDelay;
     }
 
     struct AtomConfig {
