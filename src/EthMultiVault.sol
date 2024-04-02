@@ -118,6 +118,8 @@ contract EthMultiVault is
     /*         Fee Helpers        */
     /* -------------------------- */
 
+    /// @notice returns the cost of creating an atom
+    /// @return atomCost the cost of creating an atom
     function getAtomCost() public view returns (uint256 atomCost) {
         atomCost =
             atomConfig.atomCreationFee + // paid to protocol
@@ -125,6 +127,8 @@ contract EthMultiVault is
             generalConfig.minShare; // for purchasing ghost shares
     }
 
+    /// @notice returns the cost of creating a triple
+    /// @return tripleCost the cost of creating a triple
     function getTripleCost() public view returns (uint256 tripleCost) {
         tripleCost =
             tripleConfig.tripleCreationFee + // paid to protocol
@@ -132,6 +136,10 @@ contract EthMultiVault is
             2; // for purchasing ghost shares for the positive and counter triple vaults
     }
 
+    /// @notice returns the total fees that would be charged for depositing 'assets' into a vault
+    /// @param assets amount of `assets` to calculate fees on
+    /// @param id vault id to get corresponding fees for
+    /// @return totalFees total fees that would be charged for depositing 'assets' into a vault
     function getDepositFees(
         uint256 assets,
         uint256 id
@@ -155,7 +163,6 @@ contract EthMultiVault is
         return amount.mulDivUp(fee, generalConfig.feeDenominator);
     }
 
-    ///
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id to get corresponding fees for
@@ -255,6 +262,9 @@ contract EthMultiVault is
             : shares.mulDiv(vaults[id].totalAssets, supply);
     }
 
+    /// @notice returns the current share price for the given vault id
+    /// @param id vault id to get corresponding share price for
+    /// @return price current share price for the given vault id
     function currentSharePrice(
         uint256 id
     ) external view returns (uint256 price) {
@@ -375,6 +385,10 @@ contract EthMultiVault is
     /*        Misc. Helpers       */
     /* -------------------------- */
 
+    /// @notice returns the number of shares user has in the vault
+    /// @param vaultId vault id of the vault
+    /// @param user address of the account
+    /// @return balance number of shares user has in the vault
     function getVaultBalance(
         uint256 vaultId,
         address user
@@ -382,7 +396,10 @@ contract EthMultiVault is
         return vaults[vaultId].balanceOf[user];
     }
 
-    /// @dev hasCounterStake - returns whether the account has any shares in the vault counter to the id provided
+    /// @dev checks if an account holds shares in the vault counter to the id provided
+    /// @param id the id of the vault to check
+    /// @param account the account to check
+    /// @return bool whether the account holds shares in the counter vault to the id provided or not
     function hasCounterStake(
         uint256 id,
         address account
@@ -391,6 +408,7 @@ contract EthMultiVault is
     }
 
     /// @dev getDeploymentData - returns the deployment data for the AtomWallet contract
+    /// @return bytes memory the deployment data for the AtomWallet contract (using BeaconProxy pattern)
     function getDeploymentData() internal view returns (bytes memory) {
         // Address of the atomWalletBeacon contract
         address beaconAddress = walletConfig.atomWalletBeacon;
@@ -486,9 +504,11 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
+        // create atom and get protocol deposit fee
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
 
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: atomConfig.atomCreationFee + protocolDepositFee
         }("");
@@ -528,6 +548,7 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
         }("");
@@ -546,25 +567,31 @@ contract EthMultiVault is
             revert Errors.MultiVault_AtomUriTooLong();
 
         uint256 atomCost = getAtomCost();
+        
+        // check if atom already exists based on hash
         bytes32 _hash = keccak256(atomUri);
         if (AtomsByHash[_hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
+        // calculate user deposit amount and protocol deposit fee
         uint256 userDeposit = value - atomCost;
 
         id = _createVault();
 
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
+        // deposit user funds into vault and mint shares for the user and shares for the zero address
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
             userDeposit - protocolDepositFee
         );
 
+        // get atom wallet address for the corresponding atom
         address atomWallet = computeAtomWalletAddr(id);
 
+        // deposit atomShareLockFee amount of assets and mint the shares for the atom wallet
         _depositOnVaultCreation(
             id,
             atomWallet, // receiver
@@ -574,6 +601,7 @@ contract EthMultiVault is
         // map the new vault ID to the atom data
         atoms[id] = atomUri;
 
+        // map the resultant atom hash to the new vault ID
         AtomsByHash[_hash] = id;
 
         emit AtomCreated(msg.sender, atomWallet, atomUri, id);
