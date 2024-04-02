@@ -9,6 +9,7 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 
 contract DeployEthMultiVault is Script {
     string mnemonic = "test test test test test test test test test test test junk";
@@ -31,8 +32,9 @@ contract DeployEthMultiVault is Script {
     AtomWallet atomWallet;
     UpgradeableBeacon atomWalletBeacon;
     EthMultiVault ethMultiVault;
-    TransparentUpgradeableProxy proxy;
+    TransparentUpgradeableProxy ethMultiVaultProxy;
     ProxyAdmin proxyAdmin;
+    TimelockController timelock;
 
     function run() external {
         console.logString("reading environment...");
@@ -55,7 +57,6 @@ contract DeployEthMultiVault is Script {
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
         atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
-        atomWalletBeacon.transferOwnership(admin);
         console.logString("deployed AtomWalletBeacon.");
 
         // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
@@ -106,24 +107,45 @@ contract DeployEthMultiVault is Script {
 
         // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         console.log("Deploying Proxy and initializing EthMultiVault...");
-        proxy = new TransparentUpgradeableProxy(
+        ethMultiVaultProxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
             address(proxyAdmin), // ProxyAdmin address to manage proxy
             initData // Initialization data to call the `init` function in EthMultiVault
         );
 
-        // Transfer ownership of the proxy contract to the multisig admin
-        proxyAdmin.changeProxyAdmin(ITransparentUpgradeableProxy(address(proxy)), admin);
+        // TimelockController parameters
+        uint256 minDelay = 2 days;
+        address[] memory proposers = new address[](1);
+        address[] memory executors = new address[](1);
 
-        // // stop sending tx's
+        proposers[0] = admin;
+        executors[0] = admin;
+
+        // deploy TimelockController
+        timelock = new TimelockController(
+            minDelay, // minimum delay for timelock transactions
+            proposers, // proposers (can schedule transactions)
+            executors,  // executors
+            address(0) // no default admin that can change things without going through the timelock process (self-administered)
+        );
+
+        // Transfer ownership of ProxyAdmin to TimelockController to enforce timelock on upgrades for EthMultiVault
+        console.log("Transferring ProxyAdmin ownership to TimelockController...");
+        proxyAdmin.transferOwnership(address(timelock));
+
+        // Transfer ownership of AtomWalletBeacon to TimelockController to enforce timelock on upgrades for AtomWallet
+        console.log("Transferring UpgradeableBeacon ownership to TimelockController...");
+        atomWalletBeacon.transferOwnership(address(timelock));
+
+        // stop sending tx's
         vm.stopBroadcast();
 
         console.log("EthMultiVault deployed and initialized successfully through proxy.");
-        console.log("EntryPoint address:", address(entryPoint));
         console.log("AtomWallet address:", address(atomWallet));
         console.log("AtomWalletBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
         console.log("ProxyAdmin address:", address(proxyAdmin));
-        console.log("EthMultiVault Proxy address:", address(proxy));
+        console.log("EthMultiVault Proxy address:", address(ethMultiVaultProxy));
+        console.log("TimelockController address:", address(timelock));
     }
 }
