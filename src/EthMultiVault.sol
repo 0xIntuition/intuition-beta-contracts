@@ -1164,20 +1164,18 @@ contract EthMultiVault is
     /// @dev schedule an operation to be executed after a delay
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    /// @param delay delay in seconds
-    function scheduleOperation(bytes32 operationId, bytes memory data, uint256 delay) external onlyAdmin {
-        if (delay < generalConfig.minDelay) 
-            revert Errors.MultiVault_OperationDelayTooShort();
-        
-        //  Generate the operation hash
-        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, delay));
+    function scheduleOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+        uint256 minDelay = generalConfig.minDelay;        
+
+        // Generate the operation hash
+        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, minDelay));
 
         // Check timelock constraints and schedule the operation
         if (timelocks[operationHash].readyTime != 0) 
             revert Errors.MultiVault_OperationAlreadyScheduled();
         timelocks[operationHash] = Timelock({
             data: data,
-            readyTime: block.timestamp + delay,
+            readyTime: block.timestamp + minDelay,
             executed: false
         });
     }
@@ -1185,9 +1183,9 @@ contract EthMultiVault is
     /// @dev execute a scheduled operation
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function cancelOperation(bytes32 operationId, bytes memory data, uint256 delay) external onlyAdmin {
+    function cancelOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
         // Generate the operation hash
-        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, delay));
+        bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, generalConfig.minDelay));
 
         // Check timelock constraints and cancel the operation
         Timelock memory timelock = timelocks[operationHash];

@@ -16,19 +16,19 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         bytes32 operationId = keccak256("setAdmin");
         address newAdmin = address(0x123);
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, newAdmin);
-        uint256 delay = 12 hours;
+        uint256 minDelay = getMinDelay();
 
         // Expected operation hash
-        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, delay));
+        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, minDelay));
 
         // Schedule the operation
         vm.prank(msg.sender);
-        ethMultiVault.scheduleOperation(operationId, data, delay);
+        ethMultiVault.scheduleOperation(operationId, data);
 
         // Check if the operation was scheduled correctly
         (bytes memory scheduledData, uint256 readyTime, bool executed) = ethMultiVault.timelocks(opHash);
         assertEq(scheduledData, data);
-        assertEq(readyTime, block.timestamp + delay);
+        assertEq(readyTime, block.timestamp + minDelay);
         assertFalse(executed);
     }
 
@@ -37,18 +37,18 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 vaultId = 0;
         uint256 newExitFee = 100; // 100 basis points (1%)
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, newExitFee);
-        uint256 delay = 12 hours;
+        uint256 minDelay = getMinDelay();
 
         // Schedule the operation
         vm.prank(msg.sender);
-        ethMultiVault.scheduleOperation(operationId, data, delay);
+        ethMultiVault.scheduleOperation(operationId, data);
 
         // Cancel the scheduled operation
         vm.prank(msg.sender);
-        ethMultiVault.cancelOperation(operationId, data, delay);
+        ethMultiVault.cancelOperation(operationId, data);
 
         // Verify the operation is canceled
-        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, delay));
+        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, minDelay));
         ( , uint256 readyTime, bool executed) = ethMultiVault.timelocks(opHash);
         assertTrue(readyTime == 0 && !executed);
     }
@@ -57,14 +57,14 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         bytes32 operationId = keccak256("setAdmin");
         address newAdmin = address(0x456);
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, newAdmin);
-        uint256 delay = 12 hours;
+        uint256 minDelay = getMinDelay();
         
         // Schedule the operation
         vm.prank(msg.sender);
-        ethMultiVault.scheduleOperation(operationId, data, delay);
+        ethMultiVault.scheduleOperation(operationId, data);
 
         // Forward time to surpass the delay
-        vm.warp(block.timestamp + delay + 1);
+        vm.warp(block.timestamp + minDelay + 1);
 
         // should revert if not admin
         vm.prank(bob);
@@ -80,7 +80,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(currentAdmin, newAdmin);
 
         // Verify the operation is marked as executed
-        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, delay));
+        bytes32 opHash = keccak256(abi.encodePacked(operationId, data, minDelay));
         ( , , bool executed) = ethMultiVault.timelocks(opHash);
         assertTrue(executed);
     }
@@ -109,20 +109,20 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 vaultId = 0; // Example vault ID
         uint256 validExitFee = getFeeDenominator() / 20; // Valid exit fee within allowed range
         uint256 invalidExitFee = getFeeDenominator() / 5; // Invalid exit fee, exceeding allowed range
-        uint256 delay = 12 hours;
+        uint256 minDelay = getMinDelay();
     
         // Schedule operation with a valid exit fee
         bytes memory validData = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, validExitFee);
         vm.prank(msg.sender);
-        ethMultiVault.scheduleOperation(operationId, validData, delay);
+        ethMultiVault.scheduleOperation(operationId, validData);
 
         // Schedule operation with an invalid exit fee
         bytes memory invalidData = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, invalidExitFee);
         vm.prank(msg.sender);
-        ethMultiVault.scheduleOperation(operationId, invalidData, delay);
+        ethMultiVault.scheduleOperation(operationId, invalidData);
 
         // Forward time to surpass the delay
-        vm.warp(block.timestamp + delay + 1);
+        vm.warp(block.timestamp + minDelay + 1);
 
         // Attempt to set exit fee higher than allowed, should revert
         vm.prank(msg.sender);
@@ -138,7 +138,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(currentExitFee, validExitFee);
 
         // Verify the operation is marked as executed for the valid exit fee
-        bytes32 opHashValid = keccak256(abi.encodePacked(operationId, validData, delay));
+        bytes32 opHashValid = keccak256(abi.encodePacked(operationId, validData, minDelay));
         (, , bool executedValid) = ethMultiVault.timelocks(opHashValid);
         assertTrue(executedValid);
     }
