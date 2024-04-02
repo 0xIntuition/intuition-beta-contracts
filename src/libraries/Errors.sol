@@ -52,8 +52,9 @@ library Errors {
     error MultiVault_OperationNotScheduled();
     error MultiVault_TimelockNotExpired();
     error MultiVault_OperationAlreadyExecuted();
-    error MultiVault_DelayTooShort();
+    error MultiVault_OperationDelayTooShort();
     error MultiVault_OperationAlreadyScheduled();
+    error MultiVault_MinDelayTooShort();
 
     /*/////// TRUSTBONDING ERRORS /////////////////////////////////////////////////////////*/
 
