@@ -10,41 +10,27 @@ library Errors {
 
     /// GENERAL ERRORS
     error MultiVault_AdminOnly();
-    error MultiVault_BalanceOfAddressZero();
-    error MultiVault_SetApprovalForSelf();
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_InsufficientDepositAmountToCoverFees();
     error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
-    error MultiVault_RedeemLimit();
     error MultiVault_MinimumDeposit();
     error MultiVault_VaultDoesNotExist();
-    error MultiVault_MintToZeroAddress();
     error MultiVault_BurnFromZeroAddress();
     error MultiVault_BurnInsufficientBalance();
-    error MultiVault_NotApproved();
-    error MultiVault_ZeroAssets();
-    error MultiVault_InsufficientEnergyBalance();
     error MultiVault_InsufficientBalance();
     error MultiVault_InsufficientSharesInVault();
-    error MultiVault_InsufficientBalanceToCoverGhostShares();
-    error MultiVault_AlreadyInitialized();
     error MultiVault_ReceiveNotAllowed();
     /// RDF/INTUTION ERRORS
     error MultiVault_AtomUriTooLong();
     error MultiVault_AtomExists(bytes atomUri);
     error MultiVault_AtomDoesNotExist();
     error MultiVault_VaultNotAtom();
-    error MultiVault_NotAtomCreator();
     error MultiVault_DeployAccountFailed();
-    error MultiVault_NotAtomWallet();
     error MultiVault_NoAtomWalletRewards();
-    error MultiVault_TripleExists(uint256 subject, uint256 predicate, uint256 object);
-    error MultiVault_TripleAlreadyExists();
+    error MultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
     error MultiVault_ArraysNotSameLength();
-    error MultiVault_TripleArrExists(uint256[] subjectIds, uint256[] predicateIds, uint256[] objectIds);
     error MultiVault_VaultNotTriple();
     error MultiVault_VaultIsTriple();
-    error MultiVault_ArraysEmpty();
     error MultiVault_HasCounterStake();
     error MultiVault_TransferFailed();
     error MultiVault_InvalidFeeSet();
@@ -52,9 +38,7 @@ library Errors {
     error MultiVault_OperationNotScheduled();
     error MultiVault_TimelockNotExpired();
     error MultiVault_OperationAlreadyExecuted();
-    error MultiVault_OperationDelayTooShort();
     error MultiVault_OperationAlreadyScheduled();
-    error MultiVault_MinDelayTooShort();
 
     /*/////// TRUSTBONDING ERRORS /////////////////////////////////////////////////////////*/
 
