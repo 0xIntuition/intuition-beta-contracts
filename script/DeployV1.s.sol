@@ -110,7 +110,7 @@ contract DeployEthMultiVault is Script {
         console.log("Deploying Proxy and initializing EthMultiVault...");
         ethMultiVaultProxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
-            address(proxyAdmin), // ProxyAdmin address to manage proxy
+            address(proxyAdmin), // ProxyAdmin address to manage the proxy contract
             initData // Initialization data to call the `init` function in EthMultiVault
         );
 
@@ -145,6 +145,7 @@ contract DeployEthMultiVault is Script {
         console.log("AtomWallet address:", address(atomWallet));
         console.log("AtomWalletBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault Logic address:", address(ethMultiVault));
+        console.log("EthMultiVault Proxy address:", address(ethMultiVaultProxy));
         console.log("ProxyAdmin address:", address(proxyAdmin));
         console.log("EthMultiVault Proxy address:", address(ethMultiVaultProxy));
         console.log("TimelockController address:", address(timelock));

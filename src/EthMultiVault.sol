@@ -132,6 +132,8 @@ contract EthMultiVault is
     /*         Fee Helpers        */
     /* -------------------------- */
 
+    /// @notice returns the cost of creating an atom
+    /// @return atomCost the cost of creating an atom
     function getAtomCost() public view returns (uint256 atomCost) {
         atomCost =
             atomConfig.atomCreationFee + // paid to protocol
@@ -139,6 +141,8 @@ contract EthMultiVault is
             generalConfig.minShare; // for purchasing ghost shares
     }
 
+    /// @notice returns the cost of creating a triple
+    /// @return tripleCost the cost of creating a triple
     function getTripleCost() public view returns (uint256 tripleCost) {
         tripleCost =
             tripleConfig.tripleCreationFee + // paid to protocol
@@ -146,6 +150,10 @@ contract EthMultiVault is
             2; // for purchasing ghost shares for the positive and counter triple vaults
     }
 
+    /// @notice returns the total fees that would be charged for depositing 'assets' into a vault
+    /// @param assets amount of `assets` to calculate fees on
+    /// @param id vault id to get corresponding fees for
+    /// @return totalFees total fees that would be charged for depositing 'assets' into a vault
     function getDepositFees(
         uint256 assets,
         uint256 id
@@ -169,7 +177,6 @@ contract EthMultiVault is
         return amount.mulDivUp(fee, generalConfig.feeDenominator);
     }
 
-    ///
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id to get corresponding fees for
@@ -269,6 +276,9 @@ contract EthMultiVault is
             : shares.mulDiv(vaults[id].totalAssets, supply);
     }
 
+    /// @notice returns the current share price for the given vault id
+    /// @param id vault id to get corresponding share price for
+    /// @return price current share price for the given vault id
     function currentSharePrice(
         uint256 id
     ) external view returns (uint256 price) {
@@ -389,6 +399,10 @@ contract EthMultiVault is
     /*        Misc. Helpers       */
     /* -------------------------- */
 
+    /// @notice returns the number of shares user has in the vault
+    /// @param vaultId vault id of the vault
+    /// @param user address of the account
+    /// @return balance number of shares user has in the vault
     function getVaultBalance(
         uint256 vaultId,
         address user
@@ -396,7 +410,10 @@ contract EthMultiVault is
         return vaults[vaultId].balanceOf[user];
     }
 
-    /// @dev hasCounterStake - returns whether the account has any shares in the vault counter to the id provided
+    /// @dev checks if an account holds shares in the vault counter to the id provided
+    /// @param id the id of the vault to check
+    /// @param account the account to check
+    /// @return bool whether the account holds shares in the counter vault to the id provided or not
     function hasCounterStake(
         uint256 id,
         address account
@@ -404,29 +421,44 @@ contract EthMultiVault is
         return vaults[type(uint256).max - id].balanceOf[account] > 0;
     }
 
-    /// @notice returns the Atom Wallet address for the given atom data
-    /// @param id vault id of the atom associated to the atom wallet
-    /// @return atomWallet the address of the atom wallet
-    /// NOTE: the create2 salt is based off of the vault ID
-    function computeAtomWalletAddr(uint256 id) public view returns (address) {
-        // Address of the AtomWalletBeacon contract
+    /// @dev getDeploymentData - returns the deployment data for the AtomWallet contract
+    /// @return bytes memory the deployment data for the AtomWallet contract (using BeaconProxy pattern)
+    function getDeploymentData() internal view returns (bytes memory) {
+        // Address of the atomWalletBeacon contract
         address beaconAddress = walletConfig.atomWalletBeacon;
 
-        // BeaconProxy creation code concatenated with the beacon address
+        // BeaconProxy creation code
         bytes memory code = type(BeaconProxy).creationCode;
         
+        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
         bytes memory initData = abi.encodeWithSelector(
             AtomWallet.init.selector,
             IEntryPoint(walletConfig.entryPoint),
             walletConfig.atomWarden
         );
+
+        // encode constructor arguments of the BeaconProxy contract (beacon address, init data)
         bytes memory encodedArgs = abi.encode(
             beaconAddress,
             initData
         );
 
-        bytes memory data = abi.encodePacked(code, encodedArgs);
+        // concatenate the BeaconProxy creation code with the ABI-encoded constructor arguments
+        return abi.encodePacked(code, encodedArgs);
+    }
+
+    /// @notice returns the Atom Wallet address for the given atom data
+    /// @param id vault id of the atom associated to the atom wallet
+    /// @return atomWallet the address of the atom wallet
+    /// NOTE: the create2 salt is based off of the vault ID
+    function computeAtomWalletAddr(uint256 id) public view returns (address) {
+        // compute salt for create2
         bytes32 salt = bytes32(id);
+
+        // get contract deployment data
+        bytes memory data = getDeploymentData();
+
+        // compute the raw contract address
         bytes32 rawAddress = keccak256(
             abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data))
         );
@@ -452,36 +484,23 @@ contract EthMultiVault is
         if (atomId == 0 || atomId > count)
             revert Errors.MultiVault_VaultDoesNotExist();
 
-        // Address of the AtomWalletBeacon contract
-        address beaconAddress = walletConfig.atomWalletBeacon;
-
         // compute salt for create2
         bytes32 salt = bytes32(atomId);
 
-        // BeaconProxy creation code needs to be concatenated with the encoded Beacon address
-        bytes memory code = type(BeaconProxy).creationCode;
-        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
-        bytes memory initData = abi.encodeWithSelector(
-            AtomWallet.init.selector,
-            IEntryPoint(walletConfig.entryPoint),
-            walletConfig.atomWarden
-        );
+        // get contract deployment data
+        bytes memory data = getDeploymentData();
 
-        // encode constructor arguments (address, bytes memory)
-        bytes memory data = abi.encodePacked(code, abi.encode(beaconAddress, initData));
-
-        // deploy atom wallet with create2
+        // deploy atom wallet with create2:
         // value sent in wei,
-        // memory offset of `code` (after first 32 bytes where length is),
+        // memory offset of `code` (after first 32 bytes where the length is),
         // length of `code` (first 32 bytes of code),
         // salt for create2
         assembly {
             atomWallet := create2(0, add(data, 0x20), mload(data), salt)
         }
 
-        if (atomWallet == address(0)) {
+        if (atomWallet == address(0))
             revert Errors.MultiVault_DeployAccountFailed();
-        }
     }
 
     /* -------------------------- */
@@ -499,9 +518,11 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
+        // create atom and get protocol deposit fee
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
 
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: atomConfig.atomCreationFee + protocolDepositFee
         }("");
@@ -541,6 +562,7 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
         }("");
@@ -559,25 +581,31 @@ contract EthMultiVault is
             revert Errors.MultiVault_AtomUriTooLong();
 
         uint256 atomCost = getAtomCost();
+        
+        // check if atom already exists based on hash
         bytes32 _hash = keccak256(atomUri);
         if (AtomsByHash[_hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
+        // calculate user deposit amount and protocol deposit fee
         uint256 userDeposit = value - atomCost;
 
         id = _createVault();
 
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
+        // deposit user funds into vault and mint shares for the user and shares for the zero address
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
             userDeposit - protocolDepositFee
         );
 
+        // get atom wallet address for the corresponding atom
         address atomWallet = computeAtomWalletAddr(id);
 
+        // deposit atomShareLockFee amount of assets and mint the shares for the atom wallet
         _depositOnVaultCreation(
             id,
             atomWallet, // receiver
@@ -587,6 +615,7 @@ contract EthMultiVault is
         // map the new vault ID to the atom data
         atoms[id] = atomUri;
 
+        // map the resultant atom hash to the new vault ID
         AtomsByHash[_hash] = id;
 
         emit AtomCreated(msg.sender, atomWallet, atomUri, id);
@@ -1231,12 +1260,15 @@ contract EthMultiVault is
 
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default exit fee, id = n changes fees for vault n specifically
-    /// @dev admin cannot set the exit fee to be greater than 10%, to avoid being able to prevent
+    /// @dev admin cannot set the exit fee to be greater than `maxExitFeePercentage`, which is 
+    ///      set to be the 10% of `generalConfig.feeDenominator`, to avoid being able to prevent
     ///      users from withdrawing their assets
     /// @param _id vault id to set exit fee for
     /// @param _exitFee exit fee to set
     function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
-        if (_exitFee > (generalConfig.feeDenominator / 10)) revert Errors.MultiVault_InvalidExitFee();
+        uint256 maxExitFeePercentage = generalConfig.feeDenominator / 10;
+
+        if (_exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
 
         // Generate the operation hash
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, _id, _exitFee);
