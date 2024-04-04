@@ -30,9 +30,9 @@ $ forge test -vvv
 ### Deployment Process
 
 To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:
-- RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting OP Sepolia testnet as our target chain in the testnet phase)
-- Export private key of a deployer account in the terminal, and fund it with some test ETH (or other relevant native token) to be able to cover the gas fees for the smart contract deployments
-- For OP Sepolia, there is a reliable [testnet faucet](https://optimism-faucet.com/) deployed by Alchemy
+- RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain in the testnet phase)
+- Export private key of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments
+- For Base Sepolia, there is a reliable [testnet faucet](https://www.alchemy.com/faucets/base-sepolia) deployed by Alchemy
 - Deploy smart contracts using the following command:
 
 ```shell
@@ -49,13 +49,16 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 
 **Notes:**
 - You can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
-- The chain ID for OP Sepolia is `11155420`.
+- The chain ID for Base Sepolia is `84532`.
 
 ### Latest Deployments
 
 <details>
 
-<summary>Optimism Sepolia</summary>
+<summary>Base Sepolia</summary>
 
-- [Proxy](https://sepolia-optimism.etherscan.io/address/0x68A9d5849dAEa051E33E568092508468EA329a3E)
-- [Implementation](https://sepolia-optimism.etherscan.io/address/0x34f8e22ba28a1a140fA888F99Dd1aA606aF15628)
+- [AtomWallet implementation](https://sepolia.basescan.org/address/0x67601BcddCD15C1da7dbb449ec196b9eAc84A4c6)
+- [AtomWalletBeacon](https://sepolia.basescan.org/address/0x9fBb10f4027f001c12086f98CE5145B694B4016C)
+- [EthMultiVault implementation](https://sepolia.basescan.org/address/0x54d9e246D1DE5ff8bF196d5585D5D625Def86871)
+- [EthMultiVault proxy](https://sepolia.basescan.org/address/0x2a30dCDAd9fe511A358F5C99060068956c00edb4)
+- [ProxyAdmin](https://sepolia.basescan.org/address/0x76A44BaDDD4c490273E7D39D0276CfFAaC6eD275)
