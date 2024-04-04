@@ -533,11 +533,8 @@ contract EthMultiVault is
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: atomConfig.atomCreationFee + protocolDepositFee
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = atomConfig.atomCreationFee + protocolDepositFee;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Batch create atoms and return their vault ids
@@ -573,11 +570,8 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = atomConfig.atomCreationFee * length + protocolDepositFeeTotal;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Internal utility function to create an atom and handle vault creation
@@ -665,11 +659,8 @@ contract EthMultiVault is
             msg.value
         );
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: tripleConfig.tripleCreationFee + protocolDepositFee
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee + protocolDepositFee;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice batch create triples and return their vault ids
@@ -719,13 +710,8 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeeTotal +
-                tripleConfig.tripleCreationFee *
-                length
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee * length + protocolDepositFeeTotal;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Internal utility function to create a triple
@@ -819,11 +805,7 @@ contract EthMultiVault is
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
-        // transfer protocol fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolFees
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        _transferFeesToProtocolVault(protocolFees);
     }
 
     /// @notice redeem assets from an atom vault
@@ -878,11 +860,7 @@ contract EthMultiVault is
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
-        // transfer protocol amount to protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolFees
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        _transferFeesToProtocolVault(protocolFees);
 
         // transfer eth from sender to the MultiVault
         uint256 userDeposit = msg.value - protocolFees;
@@ -922,8 +900,16 @@ contract EthMultiVault is
     /*                 INTERNAL METHODS                    */
     /* =================================================== */
 
+    /// @dev transfer fees to the protocol vault
+    function _transferFeesToProtocolVault(uint256 value) internal {
+        (bool success, ) = payable(generalConfig.protocolVault).call{
+            value: value
+        }("");
+        if (!success) revert Errors.MultiVault_TransferFailed();
+    }
+
     /// @dev _depositAtomFraction - divides amount across the three atoms composing the triple and issues the receiver shares
-    /// NOTE: assumes funds have already been transferred to this contract.
+    /// NOTE: assumes funds have already been transferred to this contract
     function _depositAtomFraction(
         uint256 id,
         address receiver,
