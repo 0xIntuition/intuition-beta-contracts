@@ -35,6 +35,7 @@ contract EthMultiVault is
     /*                  STATE VARIABLES                    */
     /* =================================================== */
 
+    /// @notice Configuration structs
     GeneralConfig public generalConfig;
     AtomConfig public atomConfig;
     TripleConfig public tripleConfig;
@@ -70,7 +71,12 @@ contract EthMultiVault is
         bool executed;
     }
 
+    /// @notice Mapping of vault ID to vault state
+    // Vault ID -> Vault State
     mapping(uint256 => VaultState) public vaults;
+
+    /// @notice Mapping of vault ID to vault fees
+    // Vault ID -> Vault Fees
     mapping(uint256 => VaultFees) public vaultFees;
 
     /// @notice RDF (Resource Description Framework)
@@ -108,7 +114,12 @@ contract EthMultiVault is
     /*                    INITIALIZER                      */
     /* =================================================== */
 
-    /// @dev Initializes the MultiVault contract
+    /// @notice Initializes the MultiVault contract
+    /// @param _generalConfig General configuration struct
+    /// @param _atomConfig Atom configuration struct
+    /// @param _tripleConfig Triple configuration struct
+    /// @param _walletConfig Wallet configuration struct
+    /// @dev This function is called only once (during contract deployment)
     function init(
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
@@ -518,7 +529,7 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
-        // create atom and get protocol deposit fee
+        // create atom and get the protocol deposit fee
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
 
@@ -588,11 +599,13 @@ contract EthMultiVault is
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
-        // calculate user deposit amount and protocol deposit fee
+        // calculate user deposit amount
         uint256 userDeposit = value - atomCost;
 
+        // create a new atom vault
         id = _createVault();
 
+        // calculate protocol deposit fee
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // deposit user funds into vault and mint shares for the user and shares for the zero address
@@ -643,8 +656,8 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
+        // create triple and get the protocol deposit fee
         uint256 protocolDepositFee;
-
         (id, protocolDepositFee) = _createTriple(
             subjectId,
             predicateId,
@@ -652,7 +665,7 @@ contract EthMultiVault is
             msg.value
         );
 
-        // transfer fees to protocol vault
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: tripleConfig.tripleCreationFee + protocolDepositFee
         }("");
@@ -676,7 +689,6 @@ contract EthMultiVault is
         whenNotPaused
         returns (uint256[] memory ids)
     {
-        // make sure arrays are of the same length
         if (
             subjectIds.length != predicateIds.length ||
             subjectIds.length != objectIds.length
@@ -707,6 +719,7 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
+        // transfer fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: protocolDepositFeeTotal +
                 tripleConfig.tripleCreationFee *
@@ -751,11 +764,13 @@ contract EthMultiVault is
         if (TriplesByHash[_hash] != 0)
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
 
+        // calculate user deposit amount
         uint256 userDeposit = value - tripleCost;
 
         // create a new positive triple vault
         id = _createVault();
 
+        // calculate protocol deposit fee
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
@@ -800,10 +815,11 @@ contract EthMultiVault is
             revert Errors.MultiVault_VaultNotAtom();
         }
 
+        // deposit eth into vault and mint shares for the receiver
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
-        // transfer protocol fees to protocol vault
+        // transfer protocol fees to the protocol vault
         (bool success, ) = payable(generalConfig.protocolVault).call{
             value: protocolFees
         }("");
@@ -858,6 +874,7 @@ contract EthMultiVault is
             revert Errors.MultiVault_HasCounterStake();
         }
 
+        // deposit eth into vault and mint shares for the receiver
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
@@ -986,6 +1003,7 @@ contract EthMultiVault is
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
+        // ghost shares for the counter vault
         uint256 assetsForZeroAddressInCounterVault = generalConfig.minShare;
 
         uint256 sharesForReceiver = assets;
@@ -1135,7 +1153,7 @@ contract EthMultiVault is
         vaults[id].balanceOf[to] += amount;
     }
 
-    /// @dev burn vault shares of vault ID `id` from address `from`
+    /// @dev burn `amount` vault shares of vault ID `id` from address `from`
     function _burn(address from, uint256 id, uint256 amount) internal {
         if (from == address(0)) revert Errors.MultiVault_BurnFromZeroAddress();
 
@@ -1357,10 +1375,12 @@ contract EthMultiVault is
     /*                     FALLBACK                        */
     /* =================================================== */
 
+    /// @notice fallback function to decompress the calldata and call the appropriate function
     fallback() external payable {
         LibZip.cdFallback();
     }
 
+    /// @notice contract does not accept ETH donations
     receive() external payable {
         revert Errors.MultiVault_ReceiveNotAllowed();
     }
