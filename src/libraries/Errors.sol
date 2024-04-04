@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 import "./Types.sol";
 
 /// @title  Errors
+/// @author 0xIntuition
 /// @notice Library containing all custom errors detailing cases where the intuition core protocol may revert.
 library Errors {
     /*//////////// MULTIVAULT ERRORS //////////////////////////////////////////////////////*/

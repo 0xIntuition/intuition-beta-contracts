@@ -9,7 +9,7 @@ import {IPermit2} from "./IPermit2.sol";
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
-    /*                       CONFIGS                       */
+    /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
 
     struct GeneralConfig {
@@ -111,6 +111,10 @@ interface IEthMultiVault {
     event TripleCreated(
         address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
+
+    /* =================================================== */
+    /*                       FUNCTIONS                     */
+    /* =================================================== */
 
     /// @notice return the underlying atom vault ids given a triple vault id
     /// @param id Vault ID
