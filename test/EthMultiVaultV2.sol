@@ -1184,7 +1184,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Withdraw(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
+        emit Redeem(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
     }
 
     /// @dev redeem shares out of a given vault without charging any fees (used in emergency
@@ -1211,7 +1211,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // burn `shares` shares from sender
         _burn(owner, id, shares);
 
-        emit Withdraw(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, 0, id);
+        emit Redeem(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, 0, id);
     }
 
     /// @dev mint vault shares of vault ID `id` to address `to`

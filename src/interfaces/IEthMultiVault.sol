@@ -85,7 +85,7 @@ interface IEthMultiVault {
     /// @param shares quantity of shares redeemed
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param id vault id
-    event Withdraw(
+    event Redeem(
         address indexed sender,
         address indexed owner,
         uint256 vaultBalance,

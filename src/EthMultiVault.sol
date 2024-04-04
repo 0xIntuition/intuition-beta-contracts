@@ -1119,7 +1119,7 @@ contract EthMultiVault is
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Withdraw(
+        emit Redeem(
             msg.sender,
             owner,
             vaults[id].balanceOf[owner],
