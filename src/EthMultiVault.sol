@@ -579,7 +579,7 @@ contract EthMultiVault is
     /// @param value The value sent with the transaction
     /// @return id The new vault ID created for the atom
     function _createAtom(
-        bytes memory atomUri,
+        bytes calldata atomUri,
         uint256 value
     ) internal returns (uint256 id, uint256 protocolDepositFee) {
         if (atomUri.length > generalConfig.atomUriMaxLength) 
@@ -1197,7 +1197,7 @@ contract EthMultiVault is
     /// @dev schedule an operation to be executed after a delay
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function scheduleOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+    function scheduleOperation(bytes32 operationId, bytes calldata data) external onlyAdmin {
         uint256 minDelay = generalConfig.minDelay;        
 
         // Generate the operation hash
@@ -1216,7 +1216,7 @@ contract EthMultiVault is
     /// @dev execute a scheduled operation
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function cancelOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+    function cancelOperation(bytes32 operationId, bytes calldata data) external onlyAdmin {
         // Generate the operation hash
         bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, generalConfig.minDelay));
 
