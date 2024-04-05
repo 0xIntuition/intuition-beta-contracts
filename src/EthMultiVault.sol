@@ -1154,12 +1154,12 @@ contract EthMultiVault is
 
     /// @dev set total assets and shares for a vault
     function _setVaultTotals(
-        uint256 _id,
-        uint256 _totalAssets,
-        uint256 _totalShares
+        uint256 id,
+        uint256 totalAssets,
+        uint256 totalShares
     ) internal {
-        vaults[_id].totalAssets = _totalAssets;
-        vaults[_id].totalShares = _totalShares;
+        vaults[id].totalAssets = totalAssets;
+        vaults[id].totalShares = totalShares;
     }
 
     /// @dev internal method for vault creation
@@ -1230,82 +1230,82 @@ contract EthMultiVault is
     }
 
     /// @dev set admin
-    /// @param _admin address of the new admin
-    function setAdmin(address _admin) external onlyAdmin {
+    /// @param admin address of the new admin
+    function setAdmin(address admin) external onlyAdmin {
         // Generate the operation hash
-        bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, _admin);
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, admin);
         bytes32 opHash = keccak256(abi.encodePacked(SET_ADMIN, data, generalConfig.minDelay));
 
         // Check timelock constraints
         _validateTimelock(opHash);
 
         // Execute the operation
-        generalConfig.admin = _admin;
+        generalConfig.admin = admin;
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
     }
 
     /// @dev set protocol vault
-    /// @param _protocolVault address of the new protocol vault
-    function setProtocolVault(address _protocolVault) external onlyAdmin {
-        generalConfig.protocolVault = _protocolVault;
+    /// @param protocolVault address of the new protocol vault
+    function setProtocolVault(address protocolVault) external onlyAdmin {
+        generalConfig.protocolVault = protocolVault;
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples
-    /// @param _minDeposit new minimum deposit amount
-    function setMinDeposit(uint256 _minDeposit) external onlyAdmin {
-        generalConfig.minDeposit = _minDeposit;
+    /// @param minDeposit new minimum deposit amount
+    function setMinDeposit(uint256 minDeposit) external onlyAdmin {
+        generalConfig.minDeposit = minDeposit;
     }
 
     /// @dev sets the minimum share amount for atoms and triples
-    /// @param _minShare new minimum share amount
-    function setMinShare(uint256 _minShare) external onlyAdmin {
-        generalConfig.minShare = _minShare;
+    /// @param minShare new minimum share amount
+    function setMinShare(uint256 minShare) external onlyAdmin {
+        generalConfig.minShare = minShare;
     }
 
     /// @dev sets the atom URI max length
-    /// @param _atomUriMaxLength new atom URI max length
-    function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
-        generalConfig.atomUriMaxLength = _atomUriMaxLength;
+    /// @param atomUriMaxLength new atom URI max length
+    function setAtomUriMaxLength(uint256 atomUriMaxLength) external onlyAdmin {
+        generalConfig.atomUriMaxLength = atomUriMaxLength;
     }
 
     /// @dev sets the atom share lock fee
-    /// @param _atomShareLockFee new atom share lock fee
-    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
-        atomConfig.atomShareLockFee = _atomShareLockFee;
+    /// @param atomShareLockFee new atom share lock fee
+    function setAtomShareLockFee(uint256 atomShareLockFee) external onlyAdmin {
+        atomConfig.atomShareLockFee = atomShareLockFee;
     }
 
     /// @dev sets the atom creation fee
-    /// @param _atomCreationFee new atom creation fee
-    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = _atomCreationFee;
+    /// @param atomCreationFee new atom creation fee
+    function setAtomCreationFee(uint256 atomCreationFee) external onlyAdmin {
+        atomConfig.atomCreationFee = atomCreationFee;
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
-    /// @param _tripleCreationFee new fee in wei
+    /// @param tripleCreationFee new fee in wei
     function setTripleCreationFee(
-        uint256 _tripleCreationFee
+        uint256 tripleCreationFee
     ) external onlyAdmin {
-        tripleConfig.tripleCreationFee = _tripleCreationFee;
+        tripleConfig.tripleCreationFee = tripleCreationFee;
     }
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples 
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomDepositFractionForTriple new atom deposit fraction percentage
+    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
     function setAtomDepositFraction(
-        uint256 _atomDepositFractionForTriple
+        uint256 atomDepositFractionForTriple
     ) external onlyAdmin {
-        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
+        tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
-    /// @param _id vault id to set entry fee for
-    /// @param _entryFee entry fee to set
-    function setEntryFee(uint256 _id, uint256 _entryFee) external onlyAdmin {
-        if (_entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
-        vaultFees[_id].entryFee = _entryFee;
+    /// @param id vault id to set entry fee for
+    /// @param entryFee entry fee to set
+    function setEntryFee(uint256 id, uint256 entryFee) external onlyAdmin {
+        if (entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        vaultFees[id].entryFee = entryFee;
     }
 
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -1313,22 +1313,22 @@ contract EthMultiVault is
     /// @dev admin cannot set the exit fee to be greater than `maxExitFeePercentage`, which is 
     ///      set to be the 10% of `generalConfig.feeDenominator`, to avoid being able to prevent
     ///      users from withdrawing their assets
-    /// @param _id vault id to set exit fee for
-    /// @param _exitFee exit fee to set
-    function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
+    /// @param id vault id to set exit fee for
+    /// @param exitFee exit fee to set
+    function setExitFee(uint256 id, uint256 exitFee) external onlyAdmin {
         uint256 maxExitFeePercentage = generalConfig.feeDenominator / 10;
 
-        if (_exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
+        if (exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
 
         // Generate the operation hash
-        bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, _id, _exitFee);
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, id, exitFee);
         bytes32 opHash = keccak256(abi.encodePacked(SET_EXIT_FEE, data, generalConfig.minDelay));
 
         // Check timelock constraints
         _validateTimelock(opHash);
 
         // Execute the operation
-        vaultFees[_id].exitFee = _exitFee;
+        vaultFees[id].exitFee = exitFee;
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
@@ -1336,14 +1336,14 @@ contract EthMultiVault is
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default protocol fee, id = n changes fees for vault n specifically
-    /// @param _id vault id to set protocol fee for
-    /// @param _protocolFee protocol fee to set
+    /// @param id vault id to set protocol fee for
+    /// @param protocolFee protocol fee to set
     function setProtocolFee(
-        uint256 _id,
-        uint256 _protocolFee
+        uint256 id,
+        uint256 protocolFee
     ) external onlyAdmin {
-        if (_protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
-        vaultFees[_id].protocolFee = _protocolFee;
+        if (protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        vaultFees[id].protocolFee = protocolFee;
     }
 
     /* =================================================== */
