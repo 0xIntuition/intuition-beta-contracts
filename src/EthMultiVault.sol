@@ -240,11 +240,10 @@ contract EthMultiVault is
         );
     }
 
-    /// @notice returns amount of assets that would be charged by vault for atom equity on entry given amount
-    ///         of 'assets' provided
+    /// @notice returns atom deposit fraction given amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id
-    /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
+    /// @return feeAmount amount of assets that would be used as atom deposit fraction
     /// NOTE: only applies to triple vaults
     function atomDepositFractionAmount(
         uint256 assets,
@@ -1291,8 +1290,9 @@ contract EthMultiVault is
         tripleConfig.tripleCreationFee = _tripleCreationFee;
     }
 
-    /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomDepositFractionForTriple new atom equity fee percentage
+    /// @dev sets the atom deposit fraction percentage for atoms used in triples 
+    ///      (number to be divided by `generalConfig.feeDenominator`)
+    /// @param _atomDepositFractionForTriple new atom deposit fraction percentage
     function setAtomDepositFraction(
         uint256 _atomDepositFractionForTriple
     ) external onlyAdmin {
