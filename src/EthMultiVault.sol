@@ -587,8 +587,8 @@ contract EthMultiVault is
         uint256 atomCost = getAtomCost();
         
         // check if atom already exists based on hash
-        bytes32 _hash = keccak256(atomUri);
-        if (atomsByHash[_hash] != 0) {
+        bytes32 hash = keccak256(atomUri);
+        if (atomsByHash[hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
@@ -622,7 +622,7 @@ contract EthMultiVault is
         atoms[id] = atomUri;
 
         // map the resultant atom hash to the new vault ID
-        atomsByHash[_hash] = id;
+        atomsByHash[hash] = id;
 
         emit AtomCreated(msg.sender, atomWallet, atomUri, id);
     }
@@ -745,8 +745,8 @@ contract EthMultiVault is
         if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
         // check if triple already exists
-        bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
-        if (triplesByHash[_hash] != 0)
+        bytes32 hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
+        if (triplesByHash[hash] != 0)
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
 
         // calculate user deposit amount
@@ -759,7 +759,7 @@ contract EthMultiVault is
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
-        triplesByHash[_hash] = id;
+        triplesByHash[hash] = id;
 
         // map the triple's vault ID to the underlying atom vault IDs
         triples[id] = [subjectId, predicateId, objectId];
