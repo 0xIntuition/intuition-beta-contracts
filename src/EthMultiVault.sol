@@ -45,8 +45,8 @@ contract EthMultiVault is
     uint256 public count;
 
     // Operation identifiers
-    bytes32 constant public SET_ADMIN = keccak256("setAdmin");
-    bytes32 constant public SET_EXIT_FEE = keccak256("setExitFee");
+    bytes32 public constant SET_ADMIN = keccak256("setAdmin");
+    bytes32 public constant SET_EXIT_FEE = keccak256("setExitFee");
 
     struct VaultState {
         uint256 totalAssets;
@@ -1253,6 +1253,52 @@ contract EthMultiVault is
         generalConfig.protocolVault = _protocolVault;
     }
 
+    /// @dev sets the minimum deposit amount for atoms and triples
+    /// @param _minDeposit new minimum deposit amount
+    function setMinDeposit(uint256 _minDeposit) external onlyAdmin {
+        generalConfig.minDeposit = _minDeposit;
+    }
+
+    /// @dev sets the minimum share amount for atoms and triples
+    /// @param _minShare new minimum share amount
+    function setMinShare(uint256 _minShare) external onlyAdmin {
+        generalConfig.minShare = _minShare;
+    }
+
+    /// @dev sets the atom URI max length
+    /// @param _atomUriMaxLength new atom URI max length
+    function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
+        generalConfig.atomUriMaxLength = _atomUriMaxLength;
+    }
+
+    /// @dev sets the atom share lock fee
+    /// @param _atomShareLockFee new atom share lock fee
+    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
+        atomConfig.atomShareLockFee = _atomShareLockFee;
+    }
+
+    /// @dev sets the atom creation fee
+    /// @param _atomCreationFee new atom creation fee
+    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
+        atomConfig.atomCreationFee = _atomCreationFee;
+    }
+
+    /// @dev sets fee charged in wei when creating a triple to protocol vault
+    /// @param _tripleCreationFee new fee in wei
+    function setTripleCreationFee(
+        uint256 _tripleCreationFee
+    ) external onlyAdmin {
+        tripleConfig.tripleCreationFee = _tripleCreationFee;
+    }
+
+    /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
+    /// @param _atomDepositFractionForTriple new atom equity fee percentage
+    function setAtomDepositFraction(
+        uint256 _atomDepositFractionForTriple
+    ) external onlyAdmin {
+        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
+    }
+
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
     /// @param _id vault id to set entry fee for
@@ -1298,52 +1344,6 @@ contract EthMultiVault is
     ) external onlyAdmin {
         if (_protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
         vaultFees[_id].protocolFee = _protocolFee;
-    }
-
-    /// @dev sets the atom share lock fee
-    /// @param _atomShareLockFee new atom share lock fee
-    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
-        atomConfig.atomShareLockFee = _atomShareLockFee;
-    }
-
-    /// @dev sets the atom creation fee
-    /// @param _atomCreationFee new atom creation fee
-    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = _atomCreationFee;
-    }
-
-    /// @dev sets fee charged in wei when creating a triple to protocol vault
-    /// @param _tripleCreationFee new fee in wei
-    function setTripleCreationFee(
-        uint256 _tripleCreationFee
-    ) external onlyAdmin {
-        tripleConfig.tripleCreationFee = _tripleCreationFee;
-    }
-
-    /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomDepositFractionForTriple new atom equity fee percentage
-    function setAtomDepositFraction(
-        uint256 _atomDepositFractionForTriple
-    ) external onlyAdmin {
-        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
-    }
-
-    /// @dev sets the minimum deposit amount for atoms and triples
-    /// @param _minDeposit new minimum deposit amount
-    function setMinDeposit(uint256 _minDeposit) external onlyAdmin {
-        generalConfig.minDeposit = _minDeposit;
-    }
-
-    /// @dev sets the minimum share amount for atoms and triples
-    /// @param _minShare new minimum share amount
-    function setMinShare(uint256 _minShare) external onlyAdmin {
-        generalConfig.minShare = _minShare;
-    }
-
-    /// @dev sets the atom URI max length
-    /// @param _atomUriMaxLength new atom URI max length
-    function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
-        generalConfig.atomUriMaxLength = _atomUriMaxLength;
     }
 
     /* =================================================== */
