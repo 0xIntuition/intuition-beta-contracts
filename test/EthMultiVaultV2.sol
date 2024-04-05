@@ -1093,7 +1093,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // mint `sharesOwed` shares to sender factoring in fees
         _mint(receiver, id, sharesForReceiver);
 
-        emit Deposit(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, sharesForReceiver, id);
+        emit Deposited(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, sharesForReceiver, id);
     }
 
     /// @dev deposit assets into a vault upon creation
@@ -1147,7 +1147,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             _mint(address(0), counterVaultId, sharesForZeroAddress);
         }
 
-        emit Deposit(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, totalSharesDelta, id);
+        emit Deposited(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, totalSharesDelta, id);
     }
 
     /// @dev redeem shares out of a given vault
@@ -1184,7 +1184,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Redeem(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
+        emit Redeemed(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
     }
 
     /// @dev redeem shares out of a given vault without charging any fees (used in emergency
@@ -1211,7 +1211,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // burn `shares` shares from sender
         _burn(owner, id, shares);
 
-        emit Redeem(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, 0, id);
+        emit Redeemed(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, 0, id);
     }
 
     /// @dev mint vault shares of vault ID `id` to address `to`

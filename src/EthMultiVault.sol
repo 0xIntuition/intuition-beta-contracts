@@ -86,7 +86,7 @@ contract EthMultiVault is
 
     // mapping of atom hash to atom vault ID
     // Hash -> Atom ID
-    mapping(bytes32 => uint256) public AtomsByHash;
+    mapping(bytes32 => uint256) public atomsByHash;
 
     // mapping of triple vault ID to the underlying atom IDs that make up the triple
     // Triple ID -> VaultIDs of atoms that make up the triple
@@ -94,7 +94,7 @@ contract EthMultiVault is
 
     // mapping of triple hash to triple vault ID
     // Hash -> Triple ID
-    mapping(bytes32 => uint256) public TriplesByHash;
+    mapping(bytes32 => uint256) public triplesByHash;
 
     // mapping of triple vault IDs to determine whether a vault is a triple or not
     // Vault ID -> (Is Triple)
@@ -588,7 +588,7 @@ contract EthMultiVault is
         
         // check if atom already exists based on hash
         bytes32 _hash = keccak256(atomUri);
-        if (AtomsByHash[_hash] != 0) {
+        if (atomsByHash[_hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
@@ -622,7 +622,7 @@ contract EthMultiVault is
         atoms[id] = atomUri;
 
         // map the resultant atom hash to the new vault ID
-        AtomsByHash[_hash] = id;
+        atomsByHash[_hash] = id;
 
         emit AtomCreated(msg.sender, atomWallet, atomUri, id);
     }
@@ -746,7 +746,7 @@ contract EthMultiVault is
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
-        if (TriplesByHash[_hash] != 0)
+        if (triplesByHash[_hash] != 0)
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
 
         // calculate user deposit amount
@@ -759,7 +759,7 @@ contract EthMultiVault is
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
-        TriplesByHash[_hash] = id;
+        triplesByHash[_hash] = id;
 
         // map the triple's vault ID to the underlying atom vault IDs
         triples[id] = [subjectId, predicateId, objectId];
@@ -965,7 +965,7 @@ contract EthMultiVault is
         // mint `sharesOwed` shares to sender factoring in fees
         _mint(receiver, id, sharesForReceiver);
 
-        emit Deposit(
+        emit Deposited(
             msg.sender,
             receiver,
             vaults[id].balanceOf[receiver],
@@ -1031,7 +1031,7 @@ contract EthMultiVault is
             _mint(address(0), counterVaultId, sharesForZeroAddress);
         }
 
-        emit Deposit(
+        emit Deposited(
             msg.sender,
             receiver,
             vaults[id].balanceOf[receiver],
@@ -1122,7 +1122,7 @@ contract EthMultiVault is
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Redeem(
+        emit Redeemed(
             msg.sender,
             owner,
             vaults[id].balanceOf[owner],
