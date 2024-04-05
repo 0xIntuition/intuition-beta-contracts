@@ -181,7 +181,7 @@ contract EthMultiVault is
     /// @param amount amount of assets to calculate fee on
     /// @param fee fee in %
     /// @return amount of assets that would be charged as fee
-    function feeOnRaw(
+    function _feeOnRaw(
         uint256 amount,
         uint256 fee
     ) internal view returns (uint256) {
@@ -197,7 +197,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].entryFee == 0
                 ? vaultFees[0].entryFee
@@ -215,7 +215,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].exitFee == 0
                 ? vaultFees[0].exitFee
@@ -232,7 +232,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].protocolFee == 0
                 ? vaultFees[0].protocolFee
@@ -250,7 +250,7 @@ contract EthMultiVault is
         uint256 id
     ) public view returns (uint256 feeAmount) {
         feeAmount = isTripleId(id)
-            ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
+            ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
             : 0;
     }
 
@@ -424,7 +424,7 @@ contract EthMultiVault is
     /// @param id the id of the vault to check
     /// @param account the account to check
     /// @return bool whether the account holds shares in the counter vault to the id provided or not
-    function hasCounterStake(
+    function _hasCounterStake(
         uint256 id,
         address account
     ) internal view returns (bool) {
@@ -433,7 +433,7 @@ contract EthMultiVault is
 
     /// @dev getDeploymentData - returns the deployment data for the AtomWallet contract
     /// @return bytes memory the deployment data for the AtomWallet contract (using BeaconProxy pattern)
-    function getDeploymentData() internal view returns (bytes memory) {
+    function _getDeploymentData() internal view returns (bytes memory) {
         // Address of the atomWalletBeacon contract
         address beaconAddress = walletConfig.atomWalletBeacon;
 
@@ -466,7 +466,7 @@ contract EthMultiVault is
         bytes32 salt = bytes32(id);
 
         // get contract deployment data
-        bytes memory data = getDeploymentData();
+        bytes memory data = _getDeploymentData();
 
         // compute the raw contract address
         bytes32 rawAddress = keccak256(
@@ -498,7 +498,7 @@ contract EthMultiVault is
         bytes32 salt = bytes32(atomId);
 
         // get contract deployment data
-        bytes memory data = getDeploymentData();
+        bytes memory data = _getDeploymentData();
 
         // deploy atom wallet with create2:
         // value sent in wei,
@@ -851,7 +851,7 @@ contract EthMultiVault is
             revert Errors.MultiVault_VaultNotTriple();
         }
 
-        if (hasCounterStake(id, receiver)) {
+        if (_hasCounterStake(id, receiver)) {
             revert Errors.MultiVault_HasCounterStake();
         }
 
