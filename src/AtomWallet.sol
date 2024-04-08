@@ -22,18 +22,28 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
+    /**
+     * @notice Initialize the AtomWallet contract
+     * @param anEntryPoint the entry point contract address
+     * @param anOwner the owner of the contract (`walletConfig.atomWarden` is the initial owner of all atom wallets)
+     */
     function init(IEntryPoint anEntryPoint, address anOwner) external initializer {
         __Ownable_init();
         transferOwnership(anOwner);
         _entryPoint = anEntryPoint;
     }
 
+    /// @notice Get the entry point contract address
+    /// @return the entry point contract address
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return _entryPoint;
     }
 
     /**
-     * execute a transaction (called directly from owner, or by entryPoint)
+     * @notice Execute a transaction (called directly from owner, or by entryPoint)
+     * @param dest the target address
+     * @param value the value to send 
+     * @param func the function call data  
      */
     function execute(
         address dest,
@@ -44,7 +54,9 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     }
 
     /**
-     * execute a sequence of transactions
+     * @notice Execute a sequence (batch) of transactions
+     * @param dest the target addresses array
+     * @param func the function call data array
      */
     function executeBatch(
         address[] calldata dest,
@@ -59,6 +71,12 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     }
 
     /// implement template method of BaseAccount
+    /**
+     * @notice Validate the signature of the user operation
+     * @param userOp the user operation
+     * @param userOpHash the hash of the user operation
+     * @return validationData the validation data (0 if successful)   
+     */
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
         internal
         virtual
@@ -72,6 +90,12 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         return 0;
     }
 
+    /**
+     * @notice An internal method that calls a target address with value and data
+     * @param target the target address
+     * @param value the value to send
+     * @param data the function call data
+     */
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
@@ -81,22 +105,18 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         }
     }
 
-    /**
-     * check current account deposit in the entryPoint
-     */
+    /// @notice Returns the deposit of the account in the entry point contract
     function getDeposit() public view returns (uint256) {
         return entryPoint().balanceOf(address(this));
     }
 
-    /**
-     * deposit more funds for this account in the entryPoint
-     */
+    /// @notice Add deposit to the account in the entry point contract
     function addDeposit() public payable {
         entryPoint().depositTo{value: msg.value}(address(this));
     }
 
     /**
-     * withdraw value from the account's deposit
+     * @notice Withdraws value from the account's deposit
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
@@ -110,6 +130,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         entryPoint().withdrawTo(withdrawAddress, amount);
     }
 
+    /// @dev Modifier to allow only the owner or entry point to call a function
     modifier onlyOwnerOrEntryPoint() {
         if (!(msg.sender == address(entryPoint()) || msg.sender == owner()))
             revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();

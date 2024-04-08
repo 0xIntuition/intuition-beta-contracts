@@ -9,7 +9,7 @@ import {IPermit2} from "./IPermit2.sol";
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
-    /*                       CONFIGS                       */
+    /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
 
     struct GeneralConfig {
@@ -68,7 +68,7 @@ interface IEthMultiVault {
     /// @param assets total assets transferred
     /// @param shares total shares transferred
     /// @param id vault id
-    event Deposit(
+    event Deposited(
         address indexed sender,
         address indexed receiver,
         uint256 vaultBalance,
@@ -85,7 +85,7 @@ interface IEthMultiVault {
     /// @param shares quantity of shares redeemed
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param id vault id
-    event Withdraw(
+    event Redeemed(
         address indexed sender,
         address indexed owner,
         uint256 vaultBalance,
@@ -111,6 +111,10 @@ interface IEthMultiVault {
     event TripleCreated(
         address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
+
+    /* =================================================== */
+    /*                       FUNCTIONS                     */
+    /* =================================================== */
 
     /// @notice return the underlying atom vault ids given a triple vault id
     /// @param id Vault ID

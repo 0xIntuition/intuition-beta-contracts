@@ -114,30 +114,6 @@ contract DeployEthMultiVault is Script {
             initData // Initialization data to call the `init` function in EthMultiVault
         );
 
-        // TimelockController parameters
-        uint256 minDelay = 2 days;
-        address[] memory proposers = new address[](1);
-        address[] memory executors = new address[](1);
-
-        proposers[0] = admin;
-        executors[0] = admin;
-
-        // deploy TimelockController
-        timelock = new TimelockController(
-            minDelay, // minimum delay for timelock transactions
-            proposers, // proposers (can schedule transactions)
-            executors,  // executors
-            address(0) // no default admin that can change things without going through the timelock process (self-administered)
-        );
-
-        // Transfer ownership of ProxyAdmin to TimelockController to enforce timelock on upgrades for EthMultiVault
-        console.log("Transferring ProxyAdmin ownership to TimelockController...");
-        proxyAdmin.transferOwnership(address(timelock));
-
-        // Transfer ownership of AtomWalletBeacon to TimelockController to enforce timelock on upgrades for AtomWallet
-        console.log("Transferring UpgradeableBeacon ownership to TimelockController...");
-        atomWalletBeacon.transferOwnership(address(timelock));
-
         // stop sending tx's
         vm.stopBroadcast();
 

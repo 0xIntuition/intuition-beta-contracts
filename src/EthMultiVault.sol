@@ -35,6 +35,7 @@ contract EthMultiVault is
     /*                  STATE VARIABLES                    */
     /* =================================================== */
 
+    /// @notice Configuration structs
     GeneralConfig public generalConfig;
     AtomConfig public atomConfig;
     TripleConfig public tripleConfig;
@@ -44,8 +45,8 @@ contract EthMultiVault is
     uint256 public count;
 
     // Operation identifiers
-    bytes32 constant public SET_ADMIN = keccak256("setAdmin");
-    bytes32 constant public SET_EXIT_FEE = keccak256("setExitFee");
+    bytes32 public constant SET_ADMIN = keccak256("setAdmin");
+    bytes32 public constant SET_EXIT_FEE = keccak256("setExitFee");
 
     struct VaultState {
         uint256 totalAssets;
@@ -70,7 +71,12 @@ contract EthMultiVault is
         bool executed;
     }
 
+    /// @notice Mapping of vault ID to vault state
+    // Vault ID -> Vault State
     mapping(uint256 => VaultState) public vaults;
+
+    /// @notice Mapping of vault ID to vault fees
+    // Vault ID -> Vault Fees
     mapping(uint256 => VaultFees) public vaultFees;
 
     /// @notice RDF (Resource Description Framework)
@@ -80,7 +86,7 @@ contract EthMultiVault is
 
     // mapping of atom hash to atom vault ID
     // Hash -> Atom ID
-    mapping(bytes32 => uint256) public AtomsByHash;
+    mapping(bytes32 => uint256) public atomsByHash;
 
     // mapping of triple vault ID to the underlying atom IDs that make up the triple
     // Triple ID -> VaultIDs of atoms that make up the triple
@@ -88,7 +94,7 @@ contract EthMultiVault is
 
     // mapping of triple hash to triple vault ID
     // Hash -> Triple ID
-    mapping(bytes32 => uint256) public TriplesByHash;
+    mapping(bytes32 => uint256) public triplesByHash;
 
     // mapping of triple vault IDs to determine whether a vault is a triple or not
     // Vault ID -> (Is Triple)
@@ -108,7 +114,12 @@ contract EthMultiVault is
     /*                    INITIALIZER                      */
     /* =================================================== */
 
-    /// @dev Initializes the MultiVault contract
+    /// @notice Initializes the MultiVault contract
+    /// @param _generalConfig General configuration struct
+    /// @param _atomConfig Atom configuration struct
+    /// @param _tripleConfig Triple configuration struct
+    /// @param _walletConfig Wallet configuration struct
+    /// @dev This function is called only once (during contract deployment)
     function init(
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
@@ -170,7 +181,7 @@ contract EthMultiVault is
     /// @param amount amount of assets to calculate fee on
     /// @param fee fee in %
     /// @return amount of assets that would be charged as fee
-    function feeOnRaw(
+    function _feeOnRaw(
         uint256 amount,
         uint256 fee
     ) internal view returns (uint256) {
@@ -186,7 +197,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].entryFee == 0
                 ? vaultFees[0].entryFee
@@ -204,7 +215,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].exitFee == 0
                 ? vaultFees[0].exitFee
@@ -221,7 +232,7 @@ contract EthMultiVault is
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
-        feeAmount = feeOnRaw(
+        feeAmount = _feeOnRaw(
             assets,
             vaultFees[id].protocolFee == 0
                 ? vaultFees[0].protocolFee
@@ -229,18 +240,17 @@ contract EthMultiVault is
         );
     }
 
-    /// @notice returns amount of assets that would be charged by vault for atom equity on entry given amount
-    ///         of 'assets' provided
+    /// @notice returns atom deposit fraction given amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id
-    /// @return feeAmount amount of assets that would be charged by vault for atom equity on entry
+    /// @return feeAmount amount of assets that would be used as atom deposit fraction
     /// NOTE: only applies to triple vaults
     function atomDepositFractionAmount(
         uint256 assets,
         uint256 id
     ) public view returns (uint256 feeAmount) {
         feeAmount = isTripleId(id)
-            ? feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
+            ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple)
             : 0;
     }
 
@@ -414,7 +424,7 @@ contract EthMultiVault is
     /// @param id the id of the vault to check
     /// @param account the account to check
     /// @return bool whether the account holds shares in the counter vault to the id provided or not
-    function hasCounterStake(
+    function _hasCounterStake(
         uint256 id,
         address account
     ) internal view returns (bool) {
@@ -423,7 +433,7 @@ contract EthMultiVault is
 
     /// @dev getDeploymentData - returns the deployment data for the AtomWallet contract
     /// @return bytes memory the deployment data for the AtomWallet contract (using BeaconProxy pattern)
-    function getDeploymentData() internal view returns (bytes memory) {
+    function _getDeploymentData() internal view returns (bytes memory) {
         // Address of the atomWalletBeacon contract
         address beaconAddress = walletConfig.atomWalletBeacon;
 
@@ -456,7 +466,7 @@ contract EthMultiVault is
         bytes32 salt = bytes32(id);
 
         // get contract deployment data
-        bytes memory data = getDeploymentData();
+        bytes memory data = _getDeploymentData();
 
         // compute the raw contract address
         bytes32 rawAddress = keccak256(
@@ -488,7 +498,7 @@ contract EthMultiVault is
         bytes32 salt = bytes32(atomId);
 
         // get contract deployment data
-        bytes memory data = getDeploymentData();
+        bytes memory data = _getDeploymentData();
 
         // deploy atom wallet with create2:
         // value sent in wei,
@@ -518,15 +528,12 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
-        // create atom and get protocol deposit fee
+        // create atom and get the protocol deposit fee
         uint256 protocolDepositFee;
         (id, protocolDepositFee) = _createAtom(atomUri, msg.value);
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: atomConfig.atomCreationFee + protocolDepositFee
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = atomConfig.atomCreationFee + protocolDepositFee;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Batch create atoms and return their vault ids
@@ -562,11 +569,8 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        // transfer fees to the protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeeTotal + atomConfig.atomCreationFee * length
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = atomConfig.atomCreationFee * length + protocolDepositFeeTotal;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Internal utility function to create an atom and handle vault creation
@@ -574,7 +578,7 @@ contract EthMultiVault is
     /// @param value The value sent with the transaction
     /// @return id The new vault ID created for the atom
     function _createAtom(
-        bytes memory atomUri,
+        bytes calldata atomUri,
         uint256 value
     ) internal returns (uint256 id, uint256 protocolDepositFee) {
         if (atomUri.length > generalConfig.atomUriMaxLength) 
@@ -583,16 +587,18 @@ contract EthMultiVault is
         uint256 atomCost = getAtomCost();
         
         // check if atom already exists based on hash
-        bytes32 _hash = keccak256(atomUri);
-        if (AtomsByHash[_hash] != 0) {
+        bytes32 hash = keccak256(atomUri);
+        if (atomsByHash[hash] != 0) {
             revert Errors.MultiVault_AtomExists(atomUri);
         }
 
-        // calculate user deposit amount and protocol deposit fee
+        // calculate user deposit amount
         uint256 userDeposit = value - atomCost;
 
+        // create a new atom vault
         id = _createVault();
 
+        // calculate protocol deposit fee
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // deposit user funds into vault and mint shares for the user and shares for the zero address
@@ -616,7 +622,7 @@ contract EthMultiVault is
         atoms[id] = atomUri;
 
         // map the resultant atom hash to the new vault ID
-        AtomsByHash[_hash] = id;
+        atomsByHash[hash] = id;
 
         emit AtomCreated(msg.sender, atomWallet, atomUri, id);
     }
@@ -643,8 +649,8 @@ contract EthMultiVault is
             revert Errors.MultiVault_InsufficientBalance();
         }
 
+        // create triple and get the protocol deposit fee
         uint256 protocolDepositFee;
-
         (id, protocolDepositFee) = _createTriple(
             subjectId,
             predicateId,
@@ -652,11 +658,8 @@ contract EthMultiVault is
             msg.value
         );
 
-        // transfer fees to protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: tripleConfig.tripleCreationFee + protocolDepositFee
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee + protocolDepositFee;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice batch create triples and return their vault ids
@@ -676,7 +679,6 @@ contract EthMultiVault is
         whenNotPaused
         returns (uint256[] memory ids)
     {
-        // make sure arrays are of the same length
         if (
             subjectIds.length != predicateIds.length ||
             subjectIds.length != objectIds.length
@@ -707,12 +709,8 @@ contract EthMultiVault is
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolDepositFeeTotal +
-                tripleConfig.tripleCreationFee *
-                length
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee * length + protocolDepositFeeTotal;
+        _transferFeesToProtocolVault(totalFeesForProtocol);
     }
 
     /// @notice Internal utility function to create a triple
@@ -747,19 +745,21 @@ contract EthMultiVault is
         if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
 
         // check if triple already exists
-        bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
-        if (TriplesByHash[_hash] != 0)
+        bytes32 hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
+        if (triplesByHash[hash] != 0)
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
 
+        // calculate user deposit amount
         uint256 userDeposit = value - tripleCost;
 
         // create a new positive triple vault
         id = _createVault();
 
+        // calculate protocol deposit fee
         protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // map the resultant triple hash to the new vault ID of the triple
-        TriplesByHash[_hash] = id;
+        triplesByHash[hash] = id;
 
         // map the triple's vault ID to the underlying atom vault IDs
         triples[id] = [subjectId, predicateId, objectId];
@@ -800,14 +800,11 @@ contract EthMultiVault is
             revert Errors.MultiVault_VaultNotAtom();
         }
 
+        // deposit eth into vault and mint shares for the receiver
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
-        // transfer protocol fees to protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolFees
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        _transferFeesToProtocolVault(protocolFees);
     }
 
     /// @notice redeem assets from an atom vault
@@ -854,18 +851,15 @@ contract EthMultiVault is
             revert Errors.MultiVault_VaultNotTriple();
         }
 
-        if (hasCounterStake(id, receiver)) {
+        if (_hasCounterStake(id, receiver)) {
             revert Errors.MultiVault_HasCounterStake();
         }
 
+        // deposit eth into vault and mint shares for the receiver
         uint256 protocolFees;
         (shares, protocolFees) = _deposit(receiver, id, msg.value);
 
-        // transfer protocol amount to protocol vault
-        (bool success, ) = payable(generalConfig.protocolVault).call{
-            value: protocolFees
-        }("");
-        if (!success) revert Errors.MultiVault_TransferFailed();
+        _transferFeesToProtocolVault(protocolFees);
 
         // transfer eth from sender to the MultiVault
         uint256 userDeposit = msg.value - protocolFees;
@@ -905,8 +899,16 @@ contract EthMultiVault is
     /*                 INTERNAL METHODS                    */
     /* =================================================== */
 
+    /// @dev transfer fees to the protocol vault
+    function _transferFeesToProtocolVault(uint256 value) internal {
+        (bool success, ) = payable(generalConfig.protocolVault).call{
+            value: value
+        }("");
+        if (!success) revert Errors.MultiVault_TransferFailed();
+    }
+
     /// @dev _depositAtomFraction - divides amount across the three atoms composing the triple and issues the receiver shares
-    /// NOTE: assumes funds have already been transferred to this contract.
+    /// NOTE: assumes funds have already been transferred to this contract
     function _depositAtomFraction(
         uint256 id,
         address receiver,
@@ -963,7 +965,7 @@ contract EthMultiVault is
         // mint `sharesOwed` shares to sender factoring in fees
         _mint(receiver, id, sharesForReceiver);
 
-        emit Deposit(
+        emit Deposited(
             msg.sender,
             receiver,
             vaults[id].balanceOf[receiver],
@@ -986,6 +988,7 @@ contract EthMultiVault is
         // ghost shares minted to the zero address upon vault creation
         uint256 sharesForZeroAddress = generalConfig.minShare;
 
+        // ghost shares for the counter vault
         uint256 assetsForZeroAddressInCounterVault = generalConfig.minShare;
 
         uint256 sharesForReceiver = assets;
@@ -1028,7 +1031,7 @@ contract EthMultiVault is
             _mint(address(0), counterVaultId, sharesForZeroAddress);
         }
 
-        emit Deposit(
+        emit Deposited(
             msg.sender,
             receiver,
             vaults[id].balanceOf[receiver],
@@ -1119,7 +1122,7 @@ contract EthMultiVault is
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Withdraw(
+        emit Redeemed(
             msg.sender,
             owner,
             vaults[id].balanceOf[owner],
@@ -1135,7 +1138,7 @@ contract EthMultiVault is
         vaults[id].balanceOf[to] += amount;
     }
 
-    /// @dev burn vault shares of vault ID `id` from address `from`
+    /// @dev burn `amount` vault shares of vault ID `id` from address `from`
     function _burn(address from, uint256 id, uint256 amount) internal {
         if (from == address(0)) revert Errors.MultiVault_BurnFromZeroAddress();
 
@@ -1151,12 +1154,12 @@ contract EthMultiVault is
 
     /// @dev set total assets and shares for a vault
     function _setVaultTotals(
-        uint256 _id,
-        uint256 _totalAssets,
-        uint256 _totalShares
+        uint256 id,
+        uint256 totalAssets,
+        uint256 totalShares
     ) internal {
-        vaults[_id].totalAssets = _totalAssets;
-        vaults[_id].totalShares = _totalShares;
+        vaults[id].totalAssets = totalAssets;
+        vaults[id].totalShares = totalShares;
     }
 
     /// @dev internal method for vault creation
@@ -1193,7 +1196,7 @@ contract EthMultiVault is
     /// @dev schedule an operation to be executed after a delay
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function scheduleOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+    function scheduleOperation(bytes32 operationId, bytes calldata data) external onlyAdmin {
         uint256 minDelay = generalConfig.minDelay;        
 
         // Generate the operation hash
@@ -1212,7 +1215,7 @@ contract EthMultiVault is
     /// @dev execute a scheduled operation
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function cancelOperation(bytes32 operationId, bytes memory data) external onlyAdmin {
+    function cancelOperation(bytes32 operationId, bytes calldata data) external onlyAdmin {
         // Generate the operation hash
         bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, generalConfig.minDelay));
 
@@ -1227,35 +1230,82 @@ contract EthMultiVault is
     }
 
     /// @dev set admin
-    /// @param _admin address of the new admin
-    function setAdmin(address _admin) external onlyAdmin {
+    /// @param admin address of the new admin
+    function setAdmin(address admin) external onlyAdmin {
         // Generate the operation hash
-        bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, _admin);
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, admin);
         bytes32 opHash = keccak256(abi.encodePacked(SET_ADMIN, data, generalConfig.minDelay));
 
         // Check timelock constraints
         _validateTimelock(opHash);
 
         // Execute the operation
-        generalConfig.admin = _admin;
+        generalConfig.admin = admin;
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
     }
 
     /// @dev set protocol vault
-    /// @param _protocolVault address of the new protocol vault
-    function setProtocolVault(address _protocolVault) external onlyAdmin {
-        generalConfig.protocolVault = _protocolVault;
+    /// @param protocolVault address of the new protocol vault
+    function setProtocolVault(address protocolVault) external onlyAdmin {
+        generalConfig.protocolVault = protocolVault;
+    }
+
+    /// @dev sets the minimum deposit amount for atoms and triples
+    /// @param minDeposit new minimum deposit amount
+    function setMinDeposit(uint256 minDeposit) external onlyAdmin {
+        generalConfig.minDeposit = minDeposit;
+    }
+
+    /// @dev sets the minimum share amount for atoms and triples
+    /// @param minShare new minimum share amount
+    function setMinShare(uint256 minShare) external onlyAdmin {
+        generalConfig.minShare = minShare;
+    }
+
+    /// @dev sets the atom URI max length
+    /// @param atomUriMaxLength new atom URI max length
+    function setAtomUriMaxLength(uint256 atomUriMaxLength) external onlyAdmin {
+        generalConfig.atomUriMaxLength = atomUriMaxLength;
+    }
+
+    /// @dev sets the atom share lock fee
+    /// @param atomShareLockFee new atom share lock fee
+    function setAtomShareLockFee(uint256 atomShareLockFee) external onlyAdmin {
+        atomConfig.atomShareLockFee = atomShareLockFee;
+    }
+
+    /// @dev sets the atom creation fee
+    /// @param atomCreationFee new atom creation fee
+    function setAtomCreationFee(uint256 atomCreationFee) external onlyAdmin {
+        atomConfig.atomCreationFee = atomCreationFee;
+    }
+
+    /// @dev sets fee charged in wei when creating a triple to protocol vault
+    /// @param tripleCreationFee new fee in wei
+    function setTripleCreationFee(
+        uint256 tripleCreationFee
+    ) external onlyAdmin {
+        tripleConfig.tripleCreationFee = tripleCreationFee;
+    }
+
+    /// @dev sets the atom deposit fraction percentage for atoms used in triples 
+    ///      (number to be divided by `generalConfig.feeDenominator`)
+    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
+    function setAtomDepositFraction(
+        uint256 atomDepositFractionForTriple
+    ) external onlyAdmin {
+        tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
-    /// @param _id vault id to set entry fee for
-    /// @param _entryFee entry fee to set
-    function setEntryFee(uint256 _id, uint256 _entryFee) external onlyAdmin {
-        if (_entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
-        vaultFees[_id].entryFee = _entryFee;
+    /// @param id vault id to set entry fee for
+    /// @param entryFee entry fee to set
+    function setEntryFee(uint256 id, uint256 entryFee) external onlyAdmin {
+        if (entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        vaultFees[id].entryFee = entryFee;
     }
 
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -1263,22 +1313,22 @@ contract EthMultiVault is
     /// @dev admin cannot set the exit fee to be greater than `maxExitFeePercentage`, which is 
     ///      set to be the 10% of `generalConfig.feeDenominator`, to avoid being able to prevent
     ///      users from withdrawing their assets
-    /// @param _id vault id to set exit fee for
-    /// @param _exitFee exit fee to set
-    function setExitFee(uint256 _id, uint256 _exitFee) external onlyAdmin {
+    /// @param id vault id to set exit fee for
+    /// @param exitFee exit fee to set
+    function setExitFee(uint256 id, uint256 exitFee) external onlyAdmin {
         uint256 maxExitFeePercentage = generalConfig.feeDenominator / 10;
 
-        if (_exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
+        if (exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
 
         // Generate the operation hash
-        bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, _id, _exitFee);
+        bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, id, exitFee);
         bytes32 opHash = keccak256(abi.encodePacked(SET_EXIT_FEE, data, generalConfig.minDelay));
 
         // Check timelock constraints
         _validateTimelock(opHash);
 
         // Execute the operation
-        vaultFees[_id].exitFee = _exitFee;
+        vaultFees[id].exitFee = exitFee;
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
@@ -1286,60 +1336,14 @@ contract EthMultiVault is
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default protocol fee, id = n changes fees for vault n specifically
-    /// @param _id vault id to set protocol fee for
-    /// @param _protocolFee protocol fee to set
+    /// @param id vault id to set protocol fee for
+    /// @param protocolFee protocol fee to set
     function setProtocolFee(
-        uint256 _id,
-        uint256 _protocolFee
+        uint256 id,
+        uint256 protocolFee
     ) external onlyAdmin {
-        if (_protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
-        vaultFees[_id].protocolFee = _protocolFee;
-    }
-
-    /// @dev sets the atom share lock fee
-    /// @param _atomShareLockFee new atom share lock fee
-    function setAtomShareLockFee(uint256 _atomShareLockFee) external onlyAdmin {
-        atomConfig.atomShareLockFee = _atomShareLockFee;
-    }
-
-    /// @dev sets the atom creation fee
-    /// @param _atomCreationFee new atom creation fee
-    function setAtomCreationFee(uint256 _atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = _atomCreationFee;
-    }
-
-    /// @dev sets fee charged in wei when creating a triple to protocol vault
-    /// @param _tripleCreationFee new fee in wei
-    function setTripleCreationFee(
-        uint256 _tripleCreationFee
-    ) external onlyAdmin {
-        tripleConfig.tripleCreationFee = _tripleCreationFee;
-    }
-
-    /// @dev sets the atom equity fee percentage (number to be divided by `generalConfig.feeDenominator`)
-    /// @param _atomDepositFractionForTriple new atom equity fee percentage
-    function setAtomDepositFraction(
-        uint256 _atomDepositFractionForTriple
-    ) external onlyAdmin {
-        tripleConfig.atomDepositFractionForTriple = _atomDepositFractionForTriple;
-    }
-
-    /// @dev sets the minimum deposit amount for atoms and triples
-    /// @param _minDeposit new minimum deposit amount
-    function setMinDeposit(uint256 _minDeposit) external onlyAdmin {
-        generalConfig.minDeposit = _minDeposit;
-    }
-
-    /// @dev sets the minimum share amount for atoms and triples
-    /// @param _minShare new minimum share amount
-    function setMinShare(uint256 _minShare) external onlyAdmin {
-        generalConfig.minShare = _minShare;
-    }
-
-    /// @dev sets the atom URI max length
-    /// @param _atomUriMaxLength new atom URI max length
-    function setAtomUriMaxLength(uint256 _atomUriMaxLength) external onlyAdmin {
-        generalConfig.atomUriMaxLength = _atomUriMaxLength;
+        if (protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        vaultFees[id].protocolFee = protocolFee;
     }
 
     /* =================================================== */
@@ -1357,10 +1361,12 @@ contract EthMultiVault is
     /*                     FALLBACK                        */
     /* =================================================== */
 
+    /// @notice fallback function to decompress the calldata and call the appropriate function
     fallback() external payable {
         LibZip.cdFallback();
     }
 
+    /// @notice contract does not accept ETH donations
     receive() external payable {
         revert Errors.MultiVault_ReceiveNotAllowed();
     }
