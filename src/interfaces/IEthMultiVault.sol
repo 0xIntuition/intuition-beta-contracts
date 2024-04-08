@@ -112,6 +112,14 @@ interface IEthMultiVault {
         address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
 
+    /// @notice emitted upon the transfer of fees to the protocol vault
+    /// @param sender address of the sender
+    /// @param protocolVault address of the protocol vault
+    /// @param amount amount of fees transferred
+    event FeesTransferred(
+        address indexed sender, address indexed protocolVault, uint256 amount
+    );
+
     /* =================================================== */
     /*                       FUNCTIONS                     */
     /* =================================================== */
