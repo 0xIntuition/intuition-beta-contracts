@@ -1211,8 +1211,9 @@ contract EthMultiVault is
     }
 
     /// @dev internal method for vault creation
-    function _createVault() internal returns (uint256 id) {
-        id = ++count;
+    function _createVault() internal returns (uint256) {
+        uint256 id = ++count;
+        return id;
     }
 
     /// @dev internal method to validate the timelock constraints
