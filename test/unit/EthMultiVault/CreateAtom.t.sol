@@ -32,7 +32,37 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         checkDepositOnAtomVaultCreation(id1, testAtomCost, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalanceOnVaultCreation(id1, protocolVaultBalanceBefore);
+        uint256 userDeposit = testAtomCost - getAtomCost();
+
+        checkProtocolVaultBalanceOnVaultCreation(id1, userDeposit, protocolVaultBalanceBefore);
+
+        vm.stopPrank();
+    }
+
+    function testCreateAtomWithMoreValueThanAtomCost() external {
+        // prank call from alice
+        // as both msg.sender and tx.origin
+        vm.startPrank(alice, alice);
+
+        // test values
+        uint256 testAtomCost = getAtomCost() + 0.1 ether;
+
+        // snapshots before interaction
+        uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
+        uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+
+        // execute interaction - create atoms
+        uint256 id1 = ethMultiVault.createAtom{value: testAtomCost}("atom1");
+
+        // should have created a new atom vault
+        assertEq(id1, ethMultiVault.count());
+
+        checkDepositOnAtomVaultCreation(id1, testAtomCost, totalAssetsBefore, totalSharesBefore);
+
+        uint256 userDeposit = testAtomCost - getAtomCost();
+
+        checkProtocolVaultBalanceOnVaultCreation(id1, userDeposit, protocolVaultBalanceBefore);
 
         vm.stopPrank();
     }

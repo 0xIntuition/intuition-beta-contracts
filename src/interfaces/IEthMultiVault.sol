@@ -56,6 +56,15 @@ interface IEthMultiVault {
         address atomWalletBeacon;
     }
 
+    struct VaultConfig {
+        /// @notice entry fee for vault 0 is considered the default entry fee
+        uint256 entryFee;
+        /// @notice exit fee for vault 0 is considered the default exit fee
+        uint256 exitFee;
+        /// @notice protocol fee for vault 0 is considered the default protocol fee
+        uint256 protocolFee;
+    }
+
     /* =================================================== */
     /*                       EVENTS                        */
     /* =================================================== */

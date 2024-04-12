@@ -41,7 +41,9 @@ contract BatchCreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
             checkDepositOnAtomVaultCreation(ids[i], testAtomCost, totalAssetsBefore[i], totalSharesBefore[i]);
         }
 
-        checkProtocolVaultBalanceOnVaultBatchCreation(ids, protocolVaultBalanceBefore);
+        uint256 userDepositPerAtom = testAtomCost - getAtomCost();
+
+        checkProtocolVaultBalanceOnVaultBatchCreation(ids, userDepositPerAtom, protocolVaultBalanceBefore);
 
         vm.stopPrank();
     }
