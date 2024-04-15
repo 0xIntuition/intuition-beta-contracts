@@ -44,7 +44,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         atomWallet = new AtomWallet();
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
-        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), address(atomWallet));
 
         // Define the configuration objects
         IEthMultiVault.GeneralConfig memory generalConfig =
