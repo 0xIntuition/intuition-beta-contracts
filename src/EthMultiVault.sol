@@ -118,12 +118,14 @@ contract EthMultiVault is
     /// @param _atomConfig Atom configuration struct
     /// @param _tripleConfig Triple configuration struct
     /// @param _walletConfig Wallet configuration struct
+    /// @param _vaultConfig Vault configuration struct
     /// @dev This function is called only once (during contract deployment)
     function init(
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
         TripleConfig memory _tripleConfig,
-        WalletConfig memory _walletConfig
+        WalletConfig memory _walletConfig,
+        VaultConfig memory _vaultConfig
     ) external initializer {
         __ReentrancyGuard_init();
         __Pausable_init();
@@ -132,6 +134,12 @@ contract EthMultiVault is
         atomConfig = _atomConfig;
         tripleConfig = _tripleConfig;
         walletConfig = _walletConfig;
+
+        vaultFees[0] = VaultFees({
+            entryFee: _vaultConfig.entryFee,
+            exitFee: _vaultConfig.exitFee,
+            protocolFee: _vaultConfig.protocolFee
+        });
     }
 
     /* =================================================== */

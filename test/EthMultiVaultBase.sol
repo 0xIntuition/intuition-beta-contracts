@@ -75,8 +75,14 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             atomWalletBeacon: address(atomWalletBeacon)
         });
 
+        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+            entryFee: 500,
+            exitFee: 500,
+            protocolFee: 100
+        });
+
         ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig);
+        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig);
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);

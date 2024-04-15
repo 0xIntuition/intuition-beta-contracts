@@ -74,14 +74,14 @@ contract DeployEthMultiVault is Script {
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
             .AtomConfig({
-                atomShareLockFee: 1e15, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 5e14 // Fee charged for creating an atom
+                atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+                atomCreationFee: 0.0021 ether // Fee charged for creating an atom
             });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
             .TripleConfig({
-                tripleCreationFee: 2e15, // Fee for creating a triple
-                atomDepositFractionForTriple: 1e3 // Fee for equity in atoms when creating a triple
+                tripleCreationFee: 0.0021 ether, // Fee for creating a triple
+                atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
             });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
@@ -92,9 +92,16 @@ contract DeployEthMultiVault is Script {
                 atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
             });
 
+        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault  
+            .VaultConfig({
+                entryFee: 500, // Entry fee for vault 0
+                exitFee: 500, // Exit fee for vault 0
+                protocolFee: 100 // Protocol fee for vault 0
+            });
+
         // Prepare data for initializer function
         bytes memory initData =
-            abi.encodeWithSelector(EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig);
+            abi.encodeWithSelector(EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig);
 
         // Deploy EthMultiVault contract
         console.log("Deploying EthMultiVault...");

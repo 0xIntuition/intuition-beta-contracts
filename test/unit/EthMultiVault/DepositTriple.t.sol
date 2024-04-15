@@ -16,17 +16,15 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // test values
         uint256 testAtomCost = getAtomCost();
-        uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
-        uint256 testDepositAmountTriple = 0.01 ether;
+        uint256 testDespositAmount = getMinDeposit();
 
         // execute interaction - create atoms
         uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
         uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}("predicate");
         uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}("object");
 
-        // execute interaction - create a triple
-        uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
+        // execute interaction - create a triple using test deposit amount for triple (0.01 ether)
+        uint256 id = ethMultiVault.createTriple{value: 0.01 ether}(subjectId, predicateId, objectId);
 
         vm.stopPrank();
 
@@ -45,12 +43,14 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // execute interaction - deposit atoms
         ethMultiVault.depositTriple{value: testDespositAmount}(address(1), id);
 
-        checkDepositIntoVault(testDespositAmount, id, totalAssetsBefore, totalSharesBefore);
+        uint256 valueToDeposit = testDespositAmount - getProtocolFeeAmount(testDespositAmount, id);
 
-        checkProtocolVaultBalance(id, protocolVaultBalanceBefore);
+        checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
+
+        checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
 
         // ------ Check Distribute Atom Equity ------ //
-        uint256 amountToDistribute = atomDepositFractionAmount(testDespositAmount - getProtocolFee(id), id);
+        uint256 amountToDistribute = atomDepositFractionAmount(valueToDeposit, id);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(

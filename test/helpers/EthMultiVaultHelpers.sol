@@ -180,7 +180,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     ) public {
         // calculate expected total assets delta
         uint256 assetsDeposited = atomCost - getTripleCreationFee();
-        uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFee(id);
+        uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFeeAmount(atomCost, id);
 
         // calculate expected total shares delta
         uint256 sharesForDepositor = totalAssetsDeltaExpected;
@@ -199,15 +199,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
     function checkProtocolVaultBalanceOnVaultCreation(
         uint256 id,
+        uint256 userDeposit,
         uint256 protocolVaultBalanceBefore
     ) public {
         // calculate expected protocol vault balance delta
         uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() +
-            getProtocolFee(id);
+            getProtocolFeeAmount(userDeposit, id);
 
-        // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
             .balance - protocolVaultBalanceBefore;
+
         assertEq(
             protocolVaultBalanceDeltaExpected,
             protocolVaultBalanceDeltaGot
@@ -216,6 +217,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
     function checkProtocolVaultBalanceOnVaultBatchCreation(
         uint256[] memory ids,
+        uint256 valuePerAtom,
         uint256 protocolVaultBalanceBefore
     ) public {
         uint256 length = ids.length;
@@ -223,7 +225,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
         for (uint256 i = 0; i < length; i++) {
             // calculate expected protocol vault balance delta
-            protocolFees += getProtocolFee(i);
+            protocolFees += getProtocolFeeAmount(valuePerAtom, i);
         }
 
         uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() *
@@ -233,22 +235,27 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
             .balance - protocolVaultBalanceBefore;
+
         assertEq(
             protocolVaultBalanceDeltaExpected,
             protocolVaultBalanceDeltaGot
         );
     }
 
+
+
     function checkProtocolVaultBalance(
         uint256 id,
+        uint256 assets,
         uint256 protocolVaultBalanceBefore
     ) public {
         // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getProtocolFee(id);
+        uint256 protocolVaultBalanceDeltaExpected = getProtocolFeeAmount(assets, id);
 
         // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
             .balance - protocolVaultBalanceBefore;
+
         assertEq(
             protocolVaultBalanceDeltaExpected,
             protocolVaultBalanceDeltaGot
