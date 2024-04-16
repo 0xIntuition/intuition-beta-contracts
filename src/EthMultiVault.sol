@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.21;
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
