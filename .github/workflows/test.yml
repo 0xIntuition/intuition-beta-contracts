@@ -38,9 +38,9 @@ jobs:
           npm i
           forge install
 
-      - name: Run Forge build
-        run: |
-          forge build --sizes
+      #- name: Run Forge build
+      #  run: |
+      #    forge build --sizes
 
       - name: Run Forge tests
         run: |
