@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.18;
 
-/// @title  Errors
-/// @author 0xIntuition
-/// @notice Library containing all custom errors detailing cases where the intuition core protocol may revert.
+/// @title  Errors Library
+/// @notice Library containing all custom errors detailing cases in which the contracts should revert
 library Errors {
     /*//////////// MULTIVAULT ERRORS //////////////////////////////////////////////////////*/
 

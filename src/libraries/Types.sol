@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.18;
 
-/// @title Intuition Types Library
-/// @author 0xIntuition
-/// @notice Library containing types used throughout the Intuition core protocol
+/// @title Types Library
+/// @notice Library containing types used in the EthMultiVault contract
 library Types {
     /// @notice Vault state
     struct VaultState {

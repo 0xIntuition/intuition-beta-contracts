@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.18;
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -17,9 +17,7 @@ import {Errors} from "src/libraries/Errors.sol";
 
 /**
  * @title  EthMultiVault
- * @author 0xIntuition
- * @notice Core contract of the Intuition protocol. Manages the creation and management of vaults
- *         associated to Atom's & Triples
+ * @notice Manages the creation and management of vaults associated with atoms & triples.
  */
 contract EthMultiVault is
     IEthMultiVault,

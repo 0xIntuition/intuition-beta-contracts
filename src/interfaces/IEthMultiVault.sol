@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.18;
 
 import {IPermit2} from "./IPermit2.sol";
 
 /// @title IVaultManager
-/// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
@@ -14,7 +13,7 @@ interface IEthMultiVault {
     struct GeneralConfig {
         /// @notice Admin address
         address admin;
-        /// @notice Intuition Protocol multisig address
+        /// @notice Protocol vault address
         address protocolVault;
         /// @notice Fees are calculated by amount * (fee / feeDenominator);
         uint256 feeDenominator;
