@@ -1,57 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import {Script, console} from "forge-std/Script.sol";
-import {EthMultiVault} from "src/EthMultiVault.sol";
+import "forge-std/Test.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {EthMultiVaultV2} from "../../EthMultiVaultV2.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
-import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
-contract DeployEthMultiVault is Script {
+contract TimelockControllerTest is Test {
 
-    function run() external {
-        vm.startBroadcast();
-
-        address deployer = msg.sender;
-
-        console.log("deployer:", deployer);
-
-
-        // ======== OpenZeppelin Defender Approval Process ========
-
-        // Check if we have deploy and upgrade processes defined
-        ApprovalProcessResponse memory deployApprovalProcess = Defender.getDeployApprovalProcess();
-        ApprovalProcessResponse memory upgradeApprovalProcess = Defender.getUpgradeApprovalProcess();
-
-        console.log("deploy approval:", deployApprovalProcess.via);
-        console.log("upgrade approval:", upgradeApprovalProcess.via);
-
-        if (deployApprovalProcess.via == address(0)) {
-            revert(
-                string.concat(
-                    "Deploy approval process with id ",
-                    deployApprovalProcess.approvalProcessId,
-                    " has no assigned address"
-                )
-            );
-        }
-
-        if (upgradeApprovalProcess.via == address(0)) {
-            revert(
-                string.concat(
-                    "Upgrade approval process with id ",
-                    upgradeApprovalProcess.approvalProcessId,
-                    " has no assigned address"
-                )
-            );
-        }
-
+    function testTimelockController() external {
+        
         // Multisig addresses for key roles in the protocol
-        // Should be defined in OpenZeppelin Defender
-        address admin = upgradeApprovalProcess.via;
+        // address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition
+        address admin = 0x9D5b33E8E4D8A68F4B773B831Ad34c8c1f925a6a; // Claus's test
         address protocolVault = admin;
         address atomWarden = admin;
 
@@ -62,7 +27,6 @@ contract DeployEthMultiVault is Script {
 
         Options memory opts;
         opts.defender.useDefenderDeploy = true;
-
 
         // ======== Deploy TimelockController ========
 
@@ -99,7 +63,7 @@ contract DeployEthMultiVault is Script {
                 admin: admin, // Admin address for the EthMultiVault contract
                 protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
                 feeDenominator: 1e4, // Common denominator for fee calculations
-                minDeposit: 0.0003 ether, // Minimum deposit amount in wei
+                minDeposit: 1e15, // Minimum deposit amount in wei
                 minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
                 atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
                 decimalPrecision: 1e18, // decimal precision used for calculating share prices
@@ -108,13 +72,13 @@ contract DeployEthMultiVault is Script {
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
             .AtomConfig({
-                atomShareLockFee: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 0.0002 ether // Fee charged for creating an atom
+                atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+                atomCreationFee: 0.0021 ether // Fee charged for creating an atom
             });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
             .TripleConfig({
-                tripleCreationFee: 0.0003 ether, // Fee for creating a triple
+                tripleCreationFee: 0.0021 ether, // Fee for creating a triple
                 atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
             });
 
@@ -142,6 +106,10 @@ contract DeployEthMultiVault is Script {
 
         console.log("TransparentUpgradableProxy:", ethMultiVaultProxy);        
 
-        vm.stopBroadcast();
+        // deploy EthMultiVaultV2
+        EthMultiVaultV2 ethMultiVaultV2 = new EthMultiVaultV2();
+
+        console.log("EthMultiVaultV2:", address(ethMultiVaultV2));
+
     }
 }

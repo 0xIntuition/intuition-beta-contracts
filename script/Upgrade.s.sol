@@ -10,14 +10,14 @@ contract DefenderScript is Script {
     function setUp() public {}
 
     function run() public {
-        address proxy = 0xf1C32Dc428C76A8f0ea77c9457f01d0e38f9Bce4;
+        address transparentUpgradeableProxy = 0xD655f1000B6a418e154A7e42eb88D9380649Aa92;
         Options memory opts;
         ProposeUpgradeResponse memory response = Defender.proposeUpgrade(
-            proxy,
+            transparentUpgradeableProxy,
             "EthMultiVaultV2.sol",
             opts
         );
-        console.log("Proposal id", response.proposalId);
-        console.log("Url", response.url);
+        console.log("Transaction proposal:", response.proposalId);
+        console.log("URL:", response.url);
     }
 }
