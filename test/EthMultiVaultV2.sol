@@ -95,8 +95,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
         TripleConfig memory _tripleConfig,
-        WalletConfig memory _walletConfig
-    ) external initializer {
+        WalletConfig memory _walletConfig,
+        VaultConfig memory _vaultConfig
+    ) external reinitializer(2) {
         __ReentrancyGuard_init();
         __Pausable_init();
 
@@ -104,6 +105,12 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         atomConfig = _atomConfig;
         tripleConfig = _tripleConfig;
         walletConfig = _walletConfig;
+
+        vaultFees[0] = VaultFees({
+            entryFee: _vaultConfig.entryFee,
+            exitFee: _vaultConfig.exitFee,
+            protocolFee: _vaultConfig.protocolFee
+        });
     }
 
     /* =================================================== */

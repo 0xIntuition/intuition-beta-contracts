@@ -51,7 +51,7 @@ contract DeployEthMultiVault is Script {
 
         // ======== Deploy TimelockController ========
 
-        uint256 minDelay = 2 days;
+        uint256 minDelay = 5 minutes; // 2 days for prod
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
 
@@ -84,22 +84,22 @@ contract DeployEthMultiVault is Script {
                 admin: admin, // Admin address for the EthMultiVault contract
                 protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
                 feeDenominator: 1e4, // Common denominator for fee calculations
-                minDeposit: 1e15, // Minimum deposit amount in wei
+                minDeposit: 0.0003 ether, // Minimum deposit amount in wei
                 minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
                 atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
                 decimalPrecision: 1e18, // decimal precision used for calculating share prices
-                minDelay: 12 hours // minimum delay for timelocked transactions
+                minDelay: 5 minutes // 1 days for prod // minimum delay for timelocked transactions
             });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
             .AtomConfig({
-                atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 0.0021 ether // Fee charged for creating an atom
+                atomShareLockFee: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+                atomCreationFee: 0.0002 ether // Fee charged for creating an atom
             });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
             .TripleConfig({
-                tripleCreationFee: 0.0021 ether, // Fee for creating a triple
+                tripleCreationFee: 0.0003 ether, // Fee for creating a triple
                 atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
             });
 
