@@ -36,7 +36,7 @@ library Errors {
     error MultiVault_VaultIsTriple();
     error MultiVault_VaultNotAtom();
     error MultiVault_VaultNotTriple();
-    
+
     /*/////// ATOMWALLET ERRORS ///////////////////////////////////////////////////////////*/
 
     error AtomWallet_OnlyOwner();

@@ -42,7 +42,8 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // snapshots after creating a triple
         uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
         uint256 protocolDepositFee = protocolFeeAmount(testDepositAmountTriple - getTripleCost(), id);
-        uint256 protocolVaultBalanceAfterLessFees = protocolVaultBalanceAfter - protocolDepositFee - getTripleCreationFee();
+        uint256 protocolVaultBalanceAfterLessFees =
+            protocolVaultBalanceAfter - protocolDepositFee - getTripleCreationFee();
         assertEq(protocolVaultBalanceBefore, protocolVaultBalanceAfterLessFees);
 
         vm.stopPrank();
@@ -66,12 +67,7 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_TripleExists.selector,
-                subjectId, 
-                predicateId,
-                objectId
-            )
+            abi.encodeWithSelector(Errors.MultiVault_TripleExists.selector, subjectId, predicateId, objectId)
         );
         ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 

@@ -65,7 +65,8 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             protocolFeesTotal += protocolFeeAmount(testDepositAmountTriple - getTripleCost(), ids[i]);
         }
 
-        uint256 protocolVaultBalanceAfterLessFees = protocolVaultBalanceAfter - protocolFeesTotal - (getTripleCreationFee() * triplesToCreate);
+        uint256 protocolVaultBalanceAfterLessFees =
+            protocolVaultBalanceAfter - protocolFeesTotal - (getTripleCreationFee() * triplesToCreate);
         assertEq(protocolVaultBalanceBefore, protocolVaultBalanceAfterLessFees);
 
         vm.stopPrank();

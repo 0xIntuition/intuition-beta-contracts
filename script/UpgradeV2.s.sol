@@ -9,7 +9,7 @@ contract UpgradeV2Script is Script {
     function run() public {
         vm.startBroadcast();
 
-        EthMultiVaultV2 ethMultiVaultV2 = new EthMultiVaultV2();        
+        EthMultiVaultV2 ethMultiVaultV2 = new EthMultiVaultV2();
         console.log("deployed EthMultiVaultV2:", address(ethMultiVaultV2));
 
         vm.stopBroadcast();

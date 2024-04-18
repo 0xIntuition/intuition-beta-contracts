@@ -10,84 +10,62 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     using FixedPointMathLib for uint256;
 
     function getAdmin() public view returns (address admin) {
-        (admin, , , , , , , ) = ethMultiVault.generalConfig();
+        (admin,,,,,,,) = ethMultiVault.generalConfig();
     }
 
     function getProtocolVault() public view returns (address protocolVault) {
-        (, protocolVault, , , , , , ) = ethMultiVault.generalConfig();
+        (, protocolVault,,,,,,) = ethMultiVault.generalConfig();
     }
 
     function getFeeDenominator() public view returns (uint256 feeDenominator) {
-        (, , feeDenominator, , , , , ) = ethMultiVault.generalConfig();
+        (,, feeDenominator,,,,,) = ethMultiVault.generalConfig();
     }
 
     function getEntryFee(uint256 _id) public view returns (uint256 entryFee) {
-        (entryFee, , ) = ethMultiVault.vaultFees(_id);
+        (entryFee,,) = ethMultiVault.vaultFees(_id);
     }
 
     function getExitFee(uint256 _id) public view returns (uint256 exitFee) {
-        (, exitFee, ) = ethMultiVault.vaultFees(_id);
+        (, exitFee,) = ethMultiVault.vaultFees(_id);
     }
 
-    function getProtocolFee(
-        uint256 _id
-    ) public view returns (uint256 protocolFee) {
-        (, , protocolFee) = ethMultiVault.vaultFees(_id);
+    function getProtocolFee(uint256 _id) public view returns (uint256 protocolFee) {
+        (,, protocolFee) = ethMultiVault.vaultFees(_id);
     }
 
-    function getProtocolFeeAmount(
-        uint256 _assets,
-        uint256 _id
-    ) public view returns (uint256 protocolFee) {
+    function getProtocolFeeAmount(uint256 _assets, uint256 _id) public view returns (uint256 protocolFee) {
         protocolFee = ethMultiVault.protocolFeeAmount(_assets, _id);
     }
 
-    function getAtomShareLockFee()
-        public
-        view
-        virtual
-        returns (uint256 atomShareLockFee)
-    {
-        (atomShareLockFee, ) = ethMultiVault.atomConfig();
+    function getAtomShareLockFee() public view virtual returns (uint256 atomShareLockFee) {
+        (atomShareLockFee,) = ethMultiVault.atomConfig();
     }
 
-    function getAtomCreationFee()
-        public
-        view
-        returns (uint256 atomCreationFee)
-    {
+    function getAtomCreationFee() public view returns (uint256 atomCreationFee) {
         (, atomCreationFee) = ethMultiVault.atomConfig();
     }
 
-    function getTripleCreationFee()
-        public
-        view
-        returns (uint256 tripleCreationFee)
-    {
-        (tripleCreationFee, ) = ethMultiVault.tripleConfig();
+    function getTripleCreationFee() public view returns (uint256 tripleCreationFee) {
+        (tripleCreationFee,) = ethMultiVault.tripleConfig();
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
-        (, , , minDeposit, , , , ) = ethMultiVault.generalConfig();
+        (,,, minDeposit,,,,) = ethMultiVault.generalConfig();
     }
 
     function getMinShare() public view returns (uint256 minShare) {
-        (, , , , minShare, , , ) = ethMultiVault.generalConfig();
+        (,,,, minShare,,,) = ethMultiVault.generalConfig();
     }
 
     function getAtomUriMaxLength() public view returns (uint256 atomUriMaxLength) {
-        (, , , , , atomUriMaxLength, , ) = ethMultiVault.generalConfig();
+        (,,,,, atomUriMaxLength,,) = ethMultiVault.generalConfig();
     }
 
     function getMinDelay() public view returns (uint256 minDelay) {
-        (, , , , , , , minDelay ) = ethMultiVault.generalConfig();
+        (,,,,,,, minDelay) = ethMultiVault.generalConfig();
     }
 
-    function getAtomDepositFraction()
-        public
-        view
-        returns (uint256 atomDepositFractionForTriple)
-    {
+    function getAtomDepositFraction() public view returns (uint256 atomDepositFractionForTriple) {
         (, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
     }
 
@@ -95,42 +73,28 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         return ethMultiVault.computeAtomWalletAddr(id);
     }
 
-    function convertToShares(
-        uint256 assets,
-        uint256 id
-    ) public view returns (uint256) {
+    function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         return ethMultiVault.convertToShares(assets, id);
     }
 
-    function convertToAssets(
-        uint256 shares,
-        uint256 id
-    ) public view returns (uint256) {
+    function convertToAssets(uint256 shares, uint256 id) public view returns (uint256) {
         return ethMultiVault.convertToAssets(shares, id);
     }
 
-    function getSharesInVault(
-        uint256 vaultId,
-        address user
-    ) public view returns (uint256) {
+    function getSharesInVault(uint256 vaultId, address user) public view returns (uint256) {
         return ethMultiVault.getVaultBalance(vaultId, user);
     }
 
-    function checkDepositIntoVault(
-        uint256 amount,
-        uint256 id,
-        uint256 totalAssetsBefore,
-        uint256 totalSharesBefore
-    ) public payable {
+    function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)
+        public
+        payable
+    {
         // calculate expected total assets delta
-        uint256 totalAssetsDeltaExpected = amount -
-            atomDepositFractionAmount(amount, id) -
-            entryFeeAmount(amount, id);
+        uint256 totalAssetsDeltaExpected = amount - atomDepositFractionAmount(amount, id) - entryFeeAmount(amount, id);
 
         // calculate expected total shares delta
-        uint256 sharesForDepositor = totalSharesBefore == getMinShare()
-            ? amount
-            : convertToShares(totalAssetsDeltaExpected, id);
+        uint256 sharesForDepositor =
+            totalSharesBefore == getMinShare() ? amount : convertToShares(totalAssetsDeltaExpected, id);
         uint256 totalSharesDeltaExpected = sharesForDepositor;
 
         // vault's total assets should have gone up
@@ -155,13 +119,9 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 sharesForDepositor = assets;
 
         // calculate expected total assets delta
-        uint256 totalAssetsDeltaExpected = sharesForDepositor +
-            sharesForZeroAddress +
-            sharesForAtomWallet;
+        uint256 totalAssetsDeltaExpected = sharesForDepositor + sharesForZeroAddress + sharesForAtomWallet;
         // calculate expected total shares delta
-        uint256 totalSharesDeltaExpected = sharesForDepositor +
-            sharesForZeroAddress +
-            sharesForAtomWallet;
+        uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress + sharesForAtomWallet;
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
@@ -185,8 +145,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         // calculate expected total shares delta
         uint256 sharesForDepositor = totalAssetsDeltaExpected;
         uint256 sharesForZeroAddress = getMinShare();
-        uint256 totalSharesDeltaExpected = sharesForDepositor +
-            sharesForZeroAddress;
+        uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress;
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
@@ -203,16 +162,11 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 protocolVaultBalanceBefore
     ) public view {
         // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() +
-            getProtocolFeeAmount(userDeposit, id);
+        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() + getProtocolFeeAmount(userDeposit, id);
 
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
-            .balance - protocolVaultBalanceBefore;
+        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
 
-        assertEq(
-            protocolVaultBalanceDeltaExpected,
-            protocolVaultBalanceDeltaGot
-        );
+        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
     }
 
     function checkProtocolVaultBalanceOnVaultBatchCreation(
@@ -228,37 +182,21 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
             protocolFees += getProtocolFeeAmount(valuePerAtom, i);
         }
 
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() *
-            length +
-            protocolFees;
+        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() * length + protocolFees;
 
         // protocol vault's balance should have gone up
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
-            .balance - protocolVaultBalanceBefore;
+        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
 
-        assertEq(
-            protocolVaultBalanceDeltaExpected,
-            protocolVaultBalanceDeltaGot
-        );
+        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
     }
 
-
-
-    function checkProtocolVaultBalance(
-        uint256 id,
-        uint256 assets,
-        uint256 protocolVaultBalanceBefore
-    ) public view {
+    function checkProtocolVaultBalance(uint256 id, uint256 assets, uint256 protocolVaultBalanceBefore) public view {
         // calculate expected protocol vault balance delta
         uint256 protocolVaultBalanceDeltaExpected = getProtocolFeeAmount(assets, id);
 
         // protocol vault's balance should have gone up
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
-            .balance - protocolVaultBalanceBefore;
+        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
 
-        assertEq(
-            protocolVaultBalanceDeltaExpected,
-            protocolVaultBalanceDeltaGot
-        );
+        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
     }
 }

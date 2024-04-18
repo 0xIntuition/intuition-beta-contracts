@@ -11,9 +11,7 @@ import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/D
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
 contract TimelockControllerTest is Test {
-
     function testTimelockController() external {
-        
         // Multisig addresses for key roles in the protocol
         // address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition
         address admin = 0x9D5b33E8E4D8A68F4B773B831Ad34c8c1f925a6a; // Claus's test
@@ -38,14 +36,13 @@ contract TimelockControllerTest is Test {
         executors[0] = admin;
 
         TimelockController timelock = new TimelockController(
-            minDelay,  // minimum delay for timelock transactions
+            minDelay, // minimum delay for timelock transactions
             proposers, // proposers (can schedule transactions)
             executors, // executors
             address(0) // no default admin that can change things without going through the timelock process (self-administered)
         );
 
         console.log("timelock:", address(timelock));
-
 
         // ======== Deploy AtomWalletBeacon ========
 
@@ -54,48 +51,42 @@ contract TimelockControllerTest is Test {
 
         console.log("atomWalletBeacon:", address(atomWalletBeacon));
 
-
         // // ======== Deploy EthMultiVault ========
 
         // // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
-        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault
-            .GeneralConfig({
-                admin: admin, // Admin address for the EthMultiVault contract
-                protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
-                feeDenominator: 1e4, // Common denominator for fee calculations
-                minDeposit: 1e15, // Minimum deposit amount in wei
-                minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
-                atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
-                decimalPrecision: 1e18, // decimal precision used for calculating share prices
-                minDelay: 5 minutes // minimum delay for timelocked transactions
-            });
+        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+            admin: admin, // Admin address for the EthMultiVault contract
+            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            feeDenominator: 1e4, // Common denominator for fee calculations
+            minDeposit: 1e15, // Minimum deposit amount in wei
+            minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+            atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
+            decimalPrecision: 1e18, // decimal precision used for calculating share prices
+            minDelay: 5 minutes // minimum delay for timelocked transactions
+        });
 
-        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
-            .AtomConfig({
-                atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-                atomCreationFee: 0.0021 ether // Fee charged for creating an atom
-            });
+        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+            atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationFee: 0.0021 ether // Fee charged for creating an atom
+        });
 
-        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
-            .TripleConfig({
-                tripleCreationFee: 0.0021 ether, // Fee for creating a triple
-                atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
-            });
+        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+            tripleCreationFee: 0.0021 ether, // Fee for creating a triple
+            atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
+        });
 
-        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
-            .WalletConfig({
-                permit2: IPermit2(address(permit2)), // Permit2 on Base
-                entryPoint: entryPoint, // EntryPoint address on Base
-                atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
-                atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
-            });
+        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+            permit2: IPermit2(address(permit2)), // Permit2 on Base
+            entryPoint: entryPoint, // EntryPoint address on Base
+            atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+            atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
+        });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault  
-            .VaultConfig({
-                entryFee: 500, // Entry fee for vault 0
-                exitFee: 500, // Exit fee for vault 0
-                protocolFee: 100 // Protocol fee for vault 0
-            });
+        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+            entryFee: 500, // Entry fee for vault 0
+            exitFee: 500, // Exit fee for vault 0
+            protocolFee: 100 // Protocol fee for vault 0
+        });
 
         address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
             "EthMultiVault.sol",
@@ -104,12 +95,11 @@ contract TimelockControllerTest is Test {
             opts
         );
 
-        console.log("TransparentUpgradableProxy:", ethMultiVaultProxy);        
+        console.log("TransparentUpgradableProxy:", ethMultiVaultProxy);
 
         // deploy EthMultiVaultV2
         EthMultiVaultV2 ethMultiVaultV2 = new EthMultiVaultV2();
 
         console.log("EthMultiVaultV2:", address(ethMultiVaultV2));
-
     }
 }

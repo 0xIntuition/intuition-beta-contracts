@@ -41,14 +41,10 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /**
      * @notice Execute a transaction (called directly from owner, or by entryPoint)
      * @param dest the target address
-     * @param value the value to send 
-     * @param func the function call data  
+     * @param value the value to send
+     * @param func the function call data
      */
-    function execute(
-        address dest,
-        uint256 value,
-        bytes calldata func
-    ) external onlyOwnerOrEntryPoint {
+    function execute(address dest, uint256 value, bytes calldata func) external onlyOwnerOrEntryPoint {
         _call(dest, value, func);
     }
 
@@ -57,13 +53,11 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
      * @param dest the target addresses array
      * @param func the function call data array
      */
-    function executeBatch(
-        address[] calldata dest,
-        bytes[] calldata func
-    ) external onlyOwnerOrEntryPoint {
-        if (dest.length != func.length) 
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external onlyOwnerOrEntryPoint {
+        if (dest.length != func.length) {
             revert Errors.AtomWallet_WrongArrayLengths();
-            
+        }
+
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
         }
@@ -74,7 +68,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
      * @notice Validate the signature of the user operation
      * @param userOp the user operation
      * @param userOpHash the hash of the user operation
-     * @return validationData the validation data (0 if successful)   
+     * @return validationData the validation data (0 if successful)
      */
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
         internal
@@ -82,11 +76,9 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         override
         returns (uint256 validationData)
     {
-        bytes32 hash = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash)
-        );
+        bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash));
 
-        (address recovered, , ) = ECDSA.tryRecover(hash, userOp.signature);
+        (address recovered,,) = ECDSA.tryRecover(hash, userOp.signature);
 
         if (recovered != owner()) {
             return SIG_VALIDATION_FAILED;
@@ -125,10 +117,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(
-        address payable withdrawAddress,
-        uint256 amount
-    ) public {
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public {
         if (!(msg.sender == owner() || msg.sender == address(this))) {
             revert Errors.AtomWallet_OnlyOwner();
         }
@@ -137,8 +126,9 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
 
     /// @dev Modifier to allow only the owner or entry point to call a function
     modifier onlyOwnerOrEntryPoint() {
-        if (!(msg.sender == address(entryPoint()) || msg.sender == owner()))
+        if (!(msg.sender == address(entryPoint()) || msg.sender == owner())) {
             revert Errors.AtomWallet_OnlyOwnerOrEntryPoint();
+        }
         _;
     }
 }

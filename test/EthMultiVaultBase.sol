@@ -47,23 +47,19 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), msg.sender);
 
         // Define the configuration objects
-        IEthMultiVault.GeneralConfig memory generalConfig =
-            IEthMultiVault.GeneralConfig({
-                admin: msg.sender,
-                protocolVault: address(0xbeef),
-                feeDenominator: 1e4,
-                minDeposit: 1e15,
-                minShare: 1e5,
-                atomUriMaxLength: 250,
-                decimalPrecision: 1e18,
-                minDelay: 12 hours
-            });
+        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+            admin: msg.sender,
+            protocolVault: address(0xbeef),
+            feeDenominator: 1e4,
+            minDeposit: 1e15,
+            minShare: 1e5,
+            atomUriMaxLength: 250,
+            decimalPrecision: 1e18,
+            minDelay: 12 hours
+        });
 
         IEthMultiVault.AtomConfig memory atomConfig =
-            IEthMultiVault.AtomConfig({
-                atomShareLockFee: 1e15,
-                atomCreationFee: 5e14
-            });
+            IEthMultiVault.AtomConfig({atomShareLockFee: 1e15, atomCreationFee: 5e14});
 
         IEthMultiVault.TripleConfig memory tripleConfig =
             IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
@@ -75,11 +71,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             atomWalletBeacon: address(atomWalletBeacon)
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
-            entryFee: 500,
-            exitFee: 500,
-            protocolFee: 100
-        });
+        IEthMultiVault.VaultConfig memory vaultConfig =
+            IEthMultiVault.VaultConfig({entryFee: 500, exitFee: 500, protocolFee: 100});
 
         ethMultiVault = new EthMultiVault();
         ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig);
