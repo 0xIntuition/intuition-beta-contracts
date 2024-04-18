@@ -134,7 +134,9 @@ contract UpgradeTo is Test {
         ethMultiVaultV2 = new EthMultiVaultV2();
         console.logString("deployed EthMultiVaultV2.");
 
-        proxyAdmin = ProxyAdmin(ethMultiVaultProxy._admin());
+        // hardcode the proxyAdmin here or just change the var to public on TransparentUpgradeableProxy
+        proxyAdmin = ProxyAdmin(0x0000000000000000000000000000000000000000);
+        // proxyAdmin = ProxyAdmin(ethMultiVaultProxy._admin());
         console.log("proxyAdmin:", address(proxyAdmin));
 
         proxyAdminOwner = proxyAdmin.owner();
@@ -152,7 +154,7 @@ contract UpgradeTo is Test {
             proxyAdmin.upgradeAndCall.selector, 
             ITransparentUpgradeableProxy(address(ethMultiVaultProxy)), 
             address(ethMultiVaultV2), 
-            initData
+            initDataV2
         );
 
         // schedule an upgradeAndCall transaction in the timelock

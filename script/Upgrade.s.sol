@@ -6,7 +6,7 @@ import {console} from "forge-std/console.sol";
 
 import {ProposeUpgradeResponse, Defender, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
-contract DefenderScript is Script {
+contract UpgradeScript is Script {
     function setUp() public {}
 
     function run() public {

@@ -10,7 +10,7 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
-contract DeployEthMultiVault is Script {
+contract DeployEthMultiVaultScript is Script {
 
     function run() external {
         vm.startBroadcast();
@@ -66,7 +66,7 @@ contract DeployEthMultiVault is Script {
 
         // ======== Deploy TimelockController ========
 
-        uint256 minDelay = 5 minutes;
+        uint256 minDelay = 2 days;
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
 
