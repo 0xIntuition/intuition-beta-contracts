@@ -1,31 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {Script, console} from "forge-std/Script.sol";
-import {EthMultiVault} from "src/EthMultiVault.sol";
-import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import "forge-std/Script.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {
     TransparentUpgradeableProxy,
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
-contract DeployEthMultiVault is Script {
-    string mnemonic = "test test test test test test test test test test test junk";
-
-    uint256 PRIVATE_KEY;
-    string FOUNDRY_PROFILE;
-
-    address deployer;
-
-    // Multisig addresses for key roles in the protocol (`msg.sender` for should be replaced with the actual multisig addresses for each role in production)
-    address admin = msg.sender;
-    address protocolVault = msg.sender;
-    address atomWarden = msg.sender;
+contract DeployTimelockScript is Script {
+    address private multisig = 0x9D5b33E8E4D8A68F4B773B831Ad34c8c1f925a6a; // the multi-sig claus set up
 
     // Constants from Base
     IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
@@ -40,32 +30,19 @@ contract DeployEthMultiVault is Script {
     TimelockController timelock;
 
     function run() external {
-        console.logString("reading environment...");
-        PRIVATE_KEY = vm.envOr("PRIVATE_KEY", vm.deriveKey(mnemonic, 0));
-        console.logString(" - PRIVATE_KEY");
-        FOUNDRY_PROFILE = vm.envOr("FOUNDRY_PROFILE", string("local"));
-        console.logString(" - FOUNDRY_PROFILE");
-
-        console.logString("starting deploy...");
-
-        // set up deployer wallet
-        deployer = vm.addr(PRIVATE_KEY);
-
-        // Begin sending tx's to network
-        vm.startBroadcast(PRIVATE_KEY);
+        vm.startBroadcast();
 
         // deploy AtomWallet implementation contract
         atomWallet = new AtomWallet();
-        console.logString("deployed AtomWallet.");
+        console.log("deployed AtomWallet", address(atomWallet));
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
         atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
-        console.logString("deployed AtomWalletBeacon.");
+        console.log("deployed AtomWalletBeacon", address(atomWalletBeacon));
 
-        // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
-            admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            admin: multisig, // Admin address for the EthMultiVault contract
+            protocolVault: multisig, // Intuition protocol vault address (should be a multisig in production)
             feeDenominator: 1e4, // Common denominator for fee calculations
             minDeposit: 1e15, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
@@ -87,7 +64,7 @@ contract DeployEthMultiVault is Script {
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
-            atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+            atomWarden: multisig, // AtomWarden address (should be a multisig in production)
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
@@ -120,12 +97,29 @@ contract DeployEthMultiVault is Script {
             initData // Initialization data to call the `init` function in EthMultiVault
         );
 
-        // stop sending tx's
+        // deploy TimelockController
+        uint256 minDelay = 2 days;
+        address[] memory proposers = new address[](1);
+        address[] memory executors = new address[](1);
+        address admin = multisig;
+
+        proposers[0] = multisig;
+        executors[0] = multisig;
+
+        timelock = new TimelockController(minDelay, proposers, executors, admin);
+        // Transfer ownership of ProxyAdmin to TimelockController to enforce timelock on upgrades for EthMultiVault
+        console.log("Transferring ProxyAdmin ownership to TimelockController...");
+        proxyAdmin.transferOwnership(address(timelock));
+
+        // Transfer ownership of AtomWalletBeacon to TimelockController to enforce timelock on upgrades for AtomWallet
+        console.log("Transferring UpgradeableBeacon ownership to TimelockController...");
+        atomWalletBeacon.transferOwnership(address(timelock));
+
         vm.stopBroadcast();
 
         console.log("All contracts deployed successfully.");
         console.log("AtomWallet implementation address:", address(atomWallet));
-        console.log("UpgradeableBeacon address:", address(atomWalletBeacon));
+        console.log("AtomWallet beacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
         console.log("ProxyAdmin address:", address(proxyAdmin));

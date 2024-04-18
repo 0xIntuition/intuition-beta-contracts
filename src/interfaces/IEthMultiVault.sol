@@ -124,9 +124,7 @@ interface IEthMultiVault {
     /// @param sender address of the sender
     /// @param protocolVault address of the protocol vault
     /// @param amount amount of fees transferred
-    event FeesTransferred(
-        address indexed sender, address indexed protocolVault, uint256 amount
-    );
+    event FeesTransferred(address indexed sender, address indexed protocolVault, uint256 amount);
 
     /* =================================================== */
     /*                       FUNCTIONS                     */
@@ -159,11 +157,10 @@ interface IEthMultiVault {
     /// @param predicateId the predicate atom's vault id
     /// @param objectId the object atom's vault id
     /// @return hash the corresponding hash for the given RDF triple based on the atom vault ids
-    function tripleHashFromAtoms(
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
-    ) external pure returns (bytes32);
+    function tripleHashFromAtoms(uint256 subjectId, uint256 predicateId, uint256 objectId)
+        external
+        pure
+        returns (bytes32);
 
     //// ERC4626 SHARE/ASSET CONVERSION HELPERS
 
