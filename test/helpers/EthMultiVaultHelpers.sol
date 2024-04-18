@@ -89,13 +89,9 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         public
         payable
     {
-        // calculate expected total assets delta
-        uint256 totalAssetsDeltaExpected = amount - atomDepositFractionAmount(amount, id) - entryFeeAmount(amount, id);
+        uint256 entryFee = entryFeeAmount(amount, id);
 
-        // calculate expected total shares delta
-        uint256 sharesForDepositor =
-            totalSharesBefore == getMinShare() ? amount : convertToShares(totalAssetsDeltaExpected, id);
-        uint256 totalSharesDeltaExpected = sharesForDepositor;
+        uint256 totalAssetsDeltaExpected = amount - atomDepositFractionAmount(amount, id);
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
@@ -103,7 +99,9 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
         // vault's total shares should have gone up
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
-        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
+
+        // user receives entryFeeAmount less shares than assets deposited into the vault
+        assertEq(totalAssetsDeltaGot, totalSharesDeltaGot + entryFee);
     }
 
     function checkDepositOnAtomVaultCreation(

@@ -855,20 +855,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         address receiver,
         uint256 assets // protocol fees already deducted
     ) internal returns (uint256) {
-        // changes in vault's total assets
-        // if the vault is an atom vault `atomDepositFractionAmount` is 0
-        uint256 totalAssetsDelta = assets - entryFeeAmount(assets, id) - atomDepositFractionAmount(assets, id);
+        uint256 userAssets = assets - entryFeeAmount(assets, id) - atomDepositFractionAmount(assets, id);
 
-        if (totalAssetsDelta <= 0) {
+        if (userAssets <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
+
+        // changes in vault's total assets
+        // if the vault is an atom vault `atomDepositFractionAmount` is 0
+        uint256 totalAssetsDelta = assets - atomDepositFractionAmount(assets, id);
 
         uint256 sharesForReceiver;
 
         if (vaults[id].totalShares == generalConfig.minShare) {
             sharesForReceiver = assets; // shares owed to receiver
         } else {
-            sharesForReceiver = convertToShares(totalAssetsDelta, id); // shares owed to receiver
+            // user receives entryFeeAmount less shares than assets deposited into the vault
+            sharesForReceiver = convertToShares(userAssets, id);
         }
 
         // changes in vault's total shares
@@ -1175,7 +1178,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to set entry fee for
     /// @param entryFee entry fee to set
     function setEntryFee(uint256 id, uint256 entryFee) external onlyAdmin {
-        if (entryFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        if (entryFee > generalConfig.feeDenominator) {
+            revert Errors.MultiVault_InvalidFeeSet();
+        }
         vaultFees[id].entryFee = entryFee;
     }
 
@@ -1189,7 +1194,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     function setExitFee(uint256 id, uint256 exitFee) external onlyAdmin {
         uint256 maxExitFeePercentage = generalConfig.feeDenominator / 10;
 
-        if (exitFee > maxExitFeePercentage) revert Errors.MultiVault_InvalidExitFee();
+        if (exitFee > maxExitFeePercentage) {
+            revert Errors.MultiVault_InvalidExitFee();
+        }
 
         // Generate the operation hash
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, id, exitFee);
@@ -1210,7 +1217,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to set protocol fee for
     /// @param protocolFee protocol fee to set
     function setProtocolFee(uint256 id, uint256 protocolFee) external onlyAdmin {
-        if (protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
+        if (protocolFee > generalConfig.feeDenominator) {
+            revert Errors.MultiVault_InvalidFeeSet();
+        }
         vaultFees[id].protocolFee = protocolFee;
     }
 
