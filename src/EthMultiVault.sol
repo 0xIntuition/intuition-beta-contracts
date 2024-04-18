@@ -855,15 +855,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         address receiver,
         uint256 assets // protocol fees already deducted
     ) internal returns (uint256) {
-        // changes in vault's total assets
-        // if the vault is an atom vault `atomDepositFractionAmount` is 0
         uint256 userAssets = assets - entryFeeAmount(assets, id) - atomDepositFractionAmount(assets, id);
-
-        uint256 totalAssetsDelta = assets - atomDepositFractionAmount(assets, id);
 
         if (userAssets <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
+
+        // changes in vault's total assets
+        // if the vault is an atom vault `atomDepositFractionAmount` is 0
+        uint256 totalAssetsDelta = assets - atomDepositFractionAmount(assets, id);
 
         uint256 sharesForReceiver;
 
