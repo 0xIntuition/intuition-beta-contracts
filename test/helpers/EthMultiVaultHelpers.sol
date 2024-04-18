@@ -75,12 +75,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (, , , , minShare, , , ) = ethMultiVault.generalConfig();
     }
 
-    function getAtomUriMaxLength() public view returns (uint256 atomUriMaxLength) {
+    function getAtomUriMaxLength()
+        public
+        view
+        returns (uint256 atomUriMaxLength)
+    {
         (, , , , , atomUriMaxLength, , ) = ethMultiVault.generalConfig();
     }
 
     function getMinDelay() public view returns (uint256 minDelay) {
-        (, , , , , , , minDelay ) = ethMultiVault.generalConfig();
+        (, , , , , , , minDelay) = ethMultiVault.generalConfig();
     }
 
     function getAtomDepositFraction()
@@ -123,14 +127,17 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalSharesBefore
     ) public payable {
         // calculate expected total assets delta
+        uint256 userAssets = amount -
+            entryFeeAmount(amount, id) -
+            atomDepositFractionAmount(amount, id);
+
         uint256 totalAssetsDeltaExpected = amount -
-            atomDepositFractionAmount(amount, id) -
-            entryFeeAmount(amount, id);
+            atomDepositFractionAmount(amount, id);
 
         // calculate expected total shares delta
         uint256 sharesForDepositor = totalSharesBefore == getMinShare()
             ? amount
-            : convertToShares(totalAssetsDeltaExpected, id);
+            : convertToShares(userAssets, id);
         uint256 totalSharesDeltaExpected = sharesForDepositor;
 
         // vault's total assets should have gone up
@@ -180,7 +187,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     ) public {
         // calculate expected total assets delta
         uint256 assetsDeposited = atomCost - getTripleCreationFee();
-        uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFeeAmount(atomCost, id);
+        uint256 totalAssetsDeltaExpected = assetsDeposited -
+            getProtocolFeeAmount(atomCost, id);
 
         // calculate expected total shares delta
         uint256 sharesForDepositor = totalAssetsDeltaExpected;
@@ -242,15 +250,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         );
     }
 
-
-
     function checkProtocolVaultBalance(
         uint256 id,
         uint256 assets,
         uint256 protocolVaultBalanceBefore
     ) public {
         // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getProtocolFeeAmount(assets, id);
+        uint256 protocolVaultBalanceDeltaExpected = getProtocolFeeAmount(
+            assets,
+            id
+        );
 
         // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault())
