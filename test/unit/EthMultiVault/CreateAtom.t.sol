@@ -116,22 +116,17 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.MultiVault_AtomUriTooLong.selector
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomUriTooLong.selector));
+        ethMultiVault.createAtom{value: testAtomCost}(
+            bytes(
+                "test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"
             )
         );
-        ethMultiVault.createAtom{value: testAtomCost}(bytes("test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test"));
 
-        vm.stopPrank();        
+        vm.stopPrank();
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {   
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }

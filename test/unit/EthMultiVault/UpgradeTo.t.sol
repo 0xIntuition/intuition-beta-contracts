@@ -8,7 +8,10 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
-import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {
+    TransparentUpgradeableProxy,
+    ITransparentUpgradeableProxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract UpgradeTo is Test {
@@ -70,12 +73,7 @@ contract UpgradeTo is Test {
         });
 
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector,
-            generalConfig,
-            atomConfig,
-            tripleConfig,
-            walletConfig,
-            vaultConfig
+            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
         );
 
         // deploy EthMultiVault
@@ -87,11 +85,7 @@ contract UpgradeTo is Test {
         console.logString("deployed ProxyAdmin.");
 
         // deploy TransparentUpgradeableProxy with EthMultiVault logic contract
-        proxy = new TransparentUpgradeableProxy(
-            address(ethMultiVault),
-            address(proxyAdmin),
-            initData
-        );
+        proxy = new TransparentUpgradeableProxy(address(ethMultiVault), address(proxyAdmin), initData);
         console.logString("deployed TransparentUpgradeableProxy with EthMultiVault logic contract.");
 
         // deploy EthMultiVaultV2
@@ -99,10 +93,7 @@ contract UpgradeTo is Test {
         console.logString("deployed EthMultiVaultV2.");
 
         // upgrade EthMultiVault
-        proxyAdmin.upgrade(
-            ITransparentUpgradeableProxy(address(proxy)),
-            address(ethMultiVaultV2)
-        );
+        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2));
         console.logString("upgraded EthMultiVault.");
 
         // verify VERSION variable in EthMultiVaultV2 is V2
@@ -118,9 +109,6 @@ contract UpgradeTo is Test {
 
         // try to upgrade EthMultiVault as non-admin
         vm.expectRevert("Ownable: caller is not the owner");
-        proxyAdmin.upgrade(
-            ITransparentUpgradeableProxy(address(proxy)),
-            address(ethMultiVaultV2New)
-        );
+        proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(proxy)), address(ethMultiVaultV2New));
     }
 }

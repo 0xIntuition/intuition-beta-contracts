@@ -209,7 +209,8 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     ///       input amount of assets so if the vault is empty before the deposit the caller receives more
     ///       shares than returned by this function, reference internal _depositIntoVault logic for details
     function previewDeposit(uint256 assets, uint256 id) public view returns (uint256 shares) {
-        uint256 totalFees = entryFeeAmount(assets, id) + atomDepositFractionAmount(assets, id) + protocolFeeAmount(assets, id);
+        uint256 totalFees =
+            entryFeeAmount(assets, id) + atomDepositFractionAmount(assets, id) + protocolFeeAmount(assets, id);
 
         if (assets < totalFees) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
@@ -250,11 +251,11 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @param predicateId the predicate atom's vault id
     /// @param objectId the object atom's vault id
     /// @return hash the corresponding hash for the given RDF triple based on the atom vault ids
-    function tripleHashFromAtoms(
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
-    ) public pure returns (bytes32) {
+    function tripleHashFromAtoms(uint256 subjectId, uint256 predicateId, uint256 objectId)
+        public
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encodePacked(subjectId, predicateId, objectId));
     }
 
@@ -667,8 +668,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
-        if (TriplesByHash[_hash] != 0)
+        if (TriplesByHash[_hash] != 0) {
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
+        }
 
         uint256 userDeposit = msg.value - tripleCost;
 
@@ -768,8 +770,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
 
         // check if triple already exists
         bytes32 _hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
-        if (TriplesByHash[_hash] != 0)
+        if (TriplesByHash[_hash] != 0) {
             revert Errors.MultiVault_TripleExists(subjectId, predicateId, objectId);
+        }
 
         uint256 userDeposit = valuePerTriple - tripleCost;
 
