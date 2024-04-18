@@ -49,7 +49,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Verify the operation is canceled
         bytes32 opHash = keccak256(abi.encodePacked(operationId, data, minDelay));
-        ( , uint256 readyTime, bool executed) = ethMultiVault.timelocks(opHash);
+        (, uint256 readyTime, bool executed) = ethMultiVault.timelocks(opHash);
         assertTrue(readyTime == 0 && !executed);
     }
 
@@ -58,7 +58,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         address newAdmin = address(0x456);
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, newAdmin);
         uint256 minDelay = getMinDelay();
-        
+
         // Schedule the operation
         vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, data);
@@ -81,7 +81,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Verify the operation is marked as executed
         bytes32 opHash = keccak256(abi.encodePacked(operationId, data, minDelay));
-        ( , , bool executed) = ethMultiVault.timelocks(opHash);
+        (,, bool executed) = ethMultiVault.timelocks(opHash);
         assertTrue(executed);
     }
 
@@ -93,7 +93,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         ethMultiVault.setProtocolVault(testValue);
         assertEq(getProtocolVault(), testValue);
     }
-    
+
     function testSetEntryFee() external {
         uint256 testVaultId = 0;
         uint256 testValue = 1000;
@@ -110,7 +110,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 validExitFee = getFeeDenominator() / 20; // Valid exit fee within allowed range
         uint256 invalidExitFee = getFeeDenominator() / 5; // Invalid exit fee, exceeding allowed range
         uint256 minDelay = getMinDelay();
-    
+
         // Schedule operation with a valid exit fee
         bytes memory validData = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, vaultId, validExitFee);
         vm.prank(msg.sender);
@@ -139,10 +139,9 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Verify the operation is marked as executed for the valid exit fee
         bytes32 opHashValid = keccak256(abi.encodePacked(operationId, validData, minDelay));
-        (, , bool executedValid) = ethMultiVault.timelocks(opHashValid);
+        (,, bool executedValid) = ethMultiVault.timelocks(opHashValid);
         assertTrue(executedValid);
     }
-
 
     function testSetProtocolFee() external {
         uint256 testVaultId = 0;
@@ -217,12 +216,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getAtomUriMaxLength(), testValue);
     }
 
-    function getAtomCost()
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }
 }
