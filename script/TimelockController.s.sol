@@ -10,11 +10,11 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
 contract TimelockControllerScript is Script {
-    address _transparentUpgradeableProxy = 0xD655f1000B6a418e154A7e42eb88D9380649Aa92;
-    address _atomWalletBeacon = 0x8914C65F19642Ca17Cf0e59a43847C5273B3322A;
-    address _proxyAdmin = 0x1F2f0584591E4794Ae161EF57f60998631AFBA1b;
-    address _timelockController = 0xce7c945a8e7fD930F7d3eB9dc9736f08B58ABa98;
-    address _newImplementation = 0x4c201A6d11265b61296ab96dfB6D6285Fe49C898;
+    address _transparentUpgradeableProxy = 0xb243844355d80Ad82031f2e84C48B2e012c72D3b;
+    address _atomWalletBeacon = 0x4c48b6654D5fdfcDFa84ba073563DCA03a0Cc5A2;
+    address _proxyAdmin = 0xE17841F28a47250467f91D5D74a1D86768c182E9;
+    address _timelockController = 0xFb05d31c3D2aa044b3e5Bd6A37807331A261Eed9;
+    address _newImplementation = 0x1E75Db45bC9bd9E7f2866442F94404104c0898dF;
 
     IPermit2 _permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
     address _entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
@@ -27,44 +27,44 @@ contract TimelockControllerScript is Script {
         Options memory opts;
         opts.defender.useDefenderDeploy = true;
 
-        // IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault
-        //     .GeneralConfig({
-        //         admin: _admin, // Admin address for the EthMultiVault contract
-        //         protocolVault: _protocolVault, // Intuition protocol vault address (should be a multisig in production)
-        //         feeDenominator: 1e4, // Common denominator for fee calculations
-        //         minDeposit: 1e15, // Minimum deposit amount in wei
-        //         minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
-        //         atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
-        //         decimalPrecision: 1e18, // decimal precision used for calculating share prices
-        //         minDelay: 5 minutes // minimum delay for timelocked transactions
-        //     });
+        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault
+            .GeneralConfig({
+                admin: _admin, // Admin address for the EthMultiVault contract
+                protocolVault: _protocolVault, // Intuition protocol vault address (should be a multisig in production)
+                feeDenominator: 1e4, // Common denominator for fee calculations
+                minDeposit: 1e15, // Minimum deposit amount in wei
+                minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+                atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
+                decimalPrecision: 1e18, // decimal precision used for calculating share prices
+                minDelay: 5 minutes // minimum delay for timelocked transactions
+            });
 
-        // IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
-        //     .AtomConfig({
-        //         atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-        //         atomCreationFee: 0.0021 ether // Fee charged for creating an atom
-        //     });
+        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault
+            .AtomConfig({
+                atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+                atomCreationFee: 0.0021 ether // Fee charged for creating an atom
+            });
 
-        // IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
-        //     .TripleConfig({
-        //         tripleCreationFee: 0.0021 ether, // Fee for creating a triple
-        //         atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
-        //     });
+        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault
+            .TripleConfig({
+                tripleCreationFee: 0.0021 ether, // Fee for creating a triple
+                atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
+            });
 
-        // IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
-        //     .WalletConfig({
-        //         permit2: IPermit2(address(_permit2)), // Permit2 on Base
-        //         entryPoint: _entryPoint, // EntryPoint address on Base
-        //         atomWarden: _atomWarden, // AtomWarden address (should be a multisig in production)
-        //         atomWalletBeacon: _atomWalletBeacon // Address of the AtomWalletBeacon contract
-        //     });
+        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault
+            .WalletConfig({
+                permit2: IPermit2(address(_permit2)), // Permit2 on Base
+                entryPoint: _entryPoint, // EntryPoint address on Base
+                atomWarden: _atomWarden, // AtomWarden address (should be a multisig in production)
+                atomWalletBeacon: _atomWalletBeacon // Address of the AtomWalletBeacon contract
+            });
 
-        // IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault  
-        //     .VaultConfig({
-        //         entryFee: 500, // Entry fee for vault 0
-        //         exitFee: 500, // Exit fee for vault 0
-        //         protocolFee: 100 // Protocol fee for vault 0
-        //     });
+        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault  
+            .VaultConfig({
+                entryFee: 500, // Entry fee for vault 0
+                exitFee: 500, // Exit fee for vault 0
+                protocolFee: 100 // Protocol fee for vault 0
+            });
 
         address to = _timelockController;
         address target = _proxyAdmin;
@@ -73,23 +73,16 @@ contract TimelockControllerScript is Script {
         bytes32 salt = bytes32(0);
         uint256 delay = 2 days;
 
-        // bytes memory initData = abi.encodeWithSelector(
-        //     EthMultiVaultV2.init.selector, 
-        //     generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
-        // );
-
-        // bytes memory timelockControllerData = abi.encodeWithSelector(
-        //     ProxyAdmin(_proxyAdmin).upgradeAndCall.selector,
-        //     ITransparentUpgradeableProxy(_transparentUpgradeableProxy),
-        //     _newImplementation,
-        //     bytes("")
-        // );
+        bytes memory initData = abi.encodeWithSelector(
+            EthMultiVaultV2.init.selector, 
+            generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
+        );
 
         bytes memory timelockControllerData = abi.encodeWithSelector(
-            ProxyAdmin(_proxyAdmin).upgradeAndCall.selector,
+            ProxyAdmin.upgradeAndCall.selector,
             ITransparentUpgradeableProxy(_transparentUpgradeableProxy),
             _newImplementation,
-            bytes("")
+            initData
         );
 
         console.log("To Address:", to);
