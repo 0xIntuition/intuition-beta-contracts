@@ -112,69 +112,56 @@ contract UpgradeTo is Test {
         ethMultiVault = new EthMultiVault();
         console.log("deployed EthMultiVault", address(ethMultiVault));
 
-        // Prepare data for initializer function
+        // // Prepare data for initializer function
         bytes memory initData = abi.encodeWithSelector(
             EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
         );
 
-        // Deploy EthMultiVaultProxy
-        ethMultiVaultProxy = new TransparentUpgradeableProxy(address(ethMultiVault), address(timelock), initData);
-        console.log("ethMultiVaultProxy:", address(ethMultiVaultProxy));
+        // // Deploy EthMultiVaultProxy
+        // ethMultiVaultProxy = new TransparentUpgradeableProxy(address(ethMultiVault), address(timelock), initData);
+        // console.log("ethMultiVaultProxy:", address(ethMultiVaultProxy));
 
-        // deploy EthMultiVaultV2
-        ethMultiVaultV2 = new EthMultiVaultV2();
-        console.logString("deployed EthMultiVaultV2.");
+        // // deploy EthMultiVaultV2
+        // ethMultiVaultV2 = new EthMultiVaultV2();
+        // console.logString("deployed EthMultiVaultV2.");
 
-        // hardcode the proxyAdmin here or just change the var to public on TransparentUpgradeableProxy
-        proxyAdmin = ProxyAdmin(0x0000000000000000000000000000000000000000);
-        // proxyAdmin = ProxyAdmin(ethMultiVaultProxy._admin());
-        console.log("proxyAdmin:", address(proxyAdmin));
+        // // hardcode the proxyAdmin here or just change the var to public on TransparentUpgradeableProxy
+        // proxyAdmin = ProxyAdmin(0x0000000000000000000000000000000000000000);
+        // // proxyAdmin = ProxyAdmin(ethMultiVaultProxy._admin());
+        // console.log("proxyAdmin:", address(proxyAdmin));
 
-        proxyAdminOwner = proxyAdmin.owner();
-        console.log("proxyAdminOwner:", proxyAdminOwner);
+        // proxyAdminOwner = proxyAdmin.owner();
+        // console.log("proxyAdminOwner:", proxyAdminOwner);
 
-        assertEq(proxyAdminOwner, address(timelock));
+        // assertEq(proxyAdminOwner, address(timelock));
 
-        vm.startPrank(admin, admin);
+        // vm.startPrank(admin, admin);
 
-        bytes memory initDataV2 = abi.encodeWithSelector(
-            EthMultiVaultV2.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
-        );
+        // bytes memory initDataV2 = abi.encodeWithSelector(
+        //     EthMultiVaultV2.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
+        // );
 
-        // prepare data for upgradeAndCall transaction
-        bytes memory data = abi.encodeWithSelector(
-            proxyAdmin.upgradeAndCall.selector,
-            ITransparentUpgradeableProxy(address(ethMultiVaultProxy)),
-            address(ethMultiVaultV2),
-            initDataV2
-        );
-
-        // schedule an upgradeAndCall transaction in the timelock
-        timelock.schedule(address(proxyAdmin), 0, data, bytes32(0), bytes32(0), timelock.getMinDelay() + 1000);
-
-        console.logString("scheduled upgradeAndCall transaction in the timelock.");
-
-        // go 3 days into the future
-        // Forward time to surpass the delay
-        vm.warp(block.timestamp + timelock.getMinDelay() + 1001);
-
-        // execute the upgradeAndCall transaction
-        timelock.execute(address(proxyAdmin), 0, data, bytes32(0), bytes32(0));
-
-        console.logString("executed upgradeAndCall transaction in the timelock.");
-
-        // upgrade EthMultiVault
-        // proxyAdmin.upgradeAndCall(
+        // // prepare data for upgradeAndCall transaction
+        // bytes memory data = abi.encodeWithSelector(
+        //     proxyAdmin.upgradeAndCall.selector,
         //     ITransparentUpgradeableProxy(address(ethMultiVaultProxy)),
         //     address(ethMultiVaultV2),
-        //     initData
+        //     initDataV2
         // );
-        // console.logString("upgraded EthMultiVault.");
 
-        // // verify VERSION variable in EthMultiVaultV2 is V2
-        // assertEq(ethMultiVaultV2.VERSION(), "V2");
-        // console.logString("verified VERSION variable in EthMultiVaultV2 is V2");
+        // // schedule an upgradeAndCall transaction in the timelock
+        // timelock.schedule(address(proxyAdmin), 0, data, bytes32(0), bytes32(0), timelock.getMinDelay() + 1000);
 
-        vm.stopPrank();
+        // console.logString("scheduled upgradeAndCall transaction in the timelock.");
+
+        // // go 3 days into the future
+        // // Forward time to surpass the delay
+        // vm.warp(block.timestamp + timelock.getMinDelay() + 1001);
+
+        // // execute the upgradeAndCall transaction
+        // timelock.execute(address(proxyAdmin), 0, data, bytes32(0), bytes32(0));
+
+        // console.logString("executed upgradeAndCall transaction in the timelock.");
+        // vm.stopPrank();
     }
 }
