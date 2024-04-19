@@ -33,15 +33,24 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
-
         uint256 protocolFee = getProtocolFeeAmount(testDespositAmount, id);
         uint256 valueToDeposit = testDespositAmount - protocolFee;
+
+        uint256 sharesExpected = convertToShares(valueToDeposit - entryFeeAmount(valueToDeposit, id), id);
+
+        // execute interaction - deposit atoms
+        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
 
         checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
 
         checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
+
+        (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
+
+        uint256 assetsExpected = previewRedeem(sharesGot, id);
+
+        assertEq(assetsExpected, assetsGot);
+        assertEq(sharesExpected, sharesGot);
 
         vm.stopPrank();
     }

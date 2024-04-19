@@ -173,6 +173,42 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return totalFees;
     }
 
+    /// @notice returns the assets that would be returned to the receiver of the redeem and protocol fees
+    /// @param shares amount of `shares` to calculate fees on
+    /// @param id vault id to get corresponding fees for
+    /// @return assetsForReceiver amount of assets that would be returned to the receiver
+    /// @return protocolFees amount of assets that would be sent to the protocol vault
+    /// @return exitFees amount of assets that would be charged for the exit fee
+    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
+        uint256 remainingShares = vaults[id].totalShares - shares;
+
+        uint256 assetsForReceiver = convertToAssets(shares, id);
+        uint256 protocolFees;
+        uint256 exitFees;
+
+        /*
+         * if the redeem amount results in a zero share balance for
+         * the associated vault, no exit fee is charged to avoid
+         * zero address accumulating disproportionate fee revenue via ghost 
+         * shares. Also, in case of an emergency redemption (i.e. when the 
+         * contract is paused), no exit fees are charged either.
+         */
+        if (paused()) {
+            exitFees = 0;
+            protocolFees = 0;
+        } else if (remainingShares == generalConfig.minShare) {
+            exitFees = 0;
+            protocolFees = protocolFeeAmount(assetsForReceiver, id);
+        } else {
+            protocolFees = protocolFeeAmount(assetsForReceiver, id);
+            exitFees = exitFeeAmount(assetsForReceiver - protocolFees, id);
+        }
+
+        assetsForReceiver = assetsForReceiver - exitFees - protocolFees;
+
+        return (assetsForReceiver, protocolFees, exitFees);
+    }
+
     /// @notice calculates fee on raw amount
     /// @param amount amount of assets to calculate fee on
     /// @param fee fee in %
@@ -286,14 +322,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param shares amount of shares to calculate assets on
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets estimated to be returned to the receiver
-    /// NOTE: this function pessimistically estimates the amount of assets that would be returned to the
-    ///       receiver so in the case that the vault is empty after the redeem the receiver will receive
-    ///       more assets than what is returned by this function, reference internal _redeem logic for details
-    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256, uint256) {
-        uint256 assets = convertToAssets(shares, id);
-        uint256 exitFees = exitFeeAmount(assets, id);
-        assets -= exitFees;
-        return (assets, exitFees);
+    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
+        (uint256 assetsForReceiver,,) = getRedeemFees(shares, id);
+        return assetsForReceiver;
     }
 
     /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call
@@ -366,6 +397,17 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return balance number of shares user has in the vault
     function getVaultBalance(uint256 vaultId, address user) external view returns (uint256) {
         return vaults[vaultId].balanceOf[user];
+    }
+
+    /// @notice returns the number of shares and assets (less fees) user has in the vault
+    /// @param vaultId vault id of the vault
+    /// @param user address of the account
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUser(uint256 vaultId, address user) external view returns (uint256, uint256) {
+        uint256 shares = vaults[vaultId].balanceOf[user];
+        (uint256 assets,,) = getRedeemFees(shares, vaultId);
+        return (shares, assets);
     }
 
     /// @dev checks if an account holds shares in the vault counter to the id provided
@@ -744,11 +786,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        uint256 assets = _redeem(id, msg.sender, shares);
+        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, shares);
 
         // transfer eth to receiver factoring in fees/equity
         (bool success,) = payable(receiver).call{value: assets}("");
         if (!success) revert Errors.MultiVault_TransferFailed();
+
+        _transferFeesToProtocolVault(protocolFees);
 
         return assets;
     }
@@ -809,11 +853,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        uint256 assets = _redeem(id, msg.sender, shares);
+        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, shares);
 
         // transfer eth to receiver factoring in fees/equity
         (bool success,) = payable(receiver).call{value: assets}("");
         if (!success) revert Errors.MultiVault_TransferFailed();
+
+        _transferFeesToProtocolVault(protocolFees);
 
         return assets;
     }
@@ -824,6 +870,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev transfer fees to the protocol vault
     function _transferFeesToProtocolVault(uint256 value) internal {
+        if (value == 0) return;
+
         (bool success,) = payable(generalConfig.protocolVault).call{value: value}("");
         if (!success) revert Errors.MultiVault_TransferFailed();
 
@@ -964,7 +1012,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev redeem shares out of a given vault
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal
     /// @return assetsForReceiver the amount of assets/eth to be transferred to the receiver
-    function _redeem(uint256 id, address owner, uint256 shares) internal returns (uint256) {
+    /// @return protocolFees the amount of protocol fees deducted
+    function _redeem(uint256 id, address owner, uint256 shares) internal returns (uint256, uint256) {
         if (shares == 0) {
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
@@ -978,38 +1027,21 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InsufficientRemainingSharesInVault(remainingShares);
         }
 
-        uint256 exitFees;
-        uint256 assetsForReceiver;
-
-        /*
-         * if the withdraw amount results in a zero share balance for
-         * the associated vault, no exit fee is charged to avoid
-         * unaccounted for ether balances. Also, in case of an emergency
-         * withdrawal (i.e. when the contract is paused), no exit fees
-         * are charged either.
-         */
-        if (remainingShares == generalConfig.minShare || paused()) {
-            exitFees = 0;
-            assetsForReceiver = convertToAssets(shares, id);
-        } else {
-            (assetsForReceiver, exitFees) = previewRedeem(shares, id);
-        }
-
-        // changes in vault's total shares
-        uint256 totalSharesDelta = shares;
-
-        // changes in vault's total assets
-        uint256 totalAssetsDelta = assetsForReceiver;
+        (uint256 assetsForReceiver, uint256 protocolFees, uint256 exitFees) = getRedeemFees(shares, id);
 
         // set vault totals (assets and shares)
-        _setVaultTotals(id, vaults[id].totalAssets - totalAssetsDelta, vaults[id].totalShares - totalSharesDelta);
+        _setVaultTotals(
+            id,
+            vaults[id].totalAssets - (assetsForReceiver + protocolFees), // totalAssetsDelta
+            vaults[id].totalShares - shares // totalSharesDelta
+        );
 
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
         emit Redeemed(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
 
-        return assetsForReceiver;
+        return (assetsForReceiver, protocolFees);
     }
 
     /// @dev mint vault shares of vault ID `id` to address `to`
@@ -1217,9 +1249,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to set protocol fee for
     /// @param protocolFee protocol fee to set
     function setProtocolFee(uint256 id, uint256 protocolFee) external onlyAdmin {
-        if (protocolFee > generalConfig.feeDenominator) {
-            revert Errors.MultiVault_InvalidFeeSet();
-        }
+        if (protocolFee > generalConfig.feeDenominator) revert Errors.MultiVault_InvalidFeeSet();
         vaultFees[id].protocolFee = protocolFee;
     }
 

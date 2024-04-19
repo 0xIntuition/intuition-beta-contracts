@@ -165,21 +165,21 @@ interface IEthMultiVault {
     //// ERC4626 SHARE/ASSET CONVERSION HELPERS
 
     /// @notice Amount of shares that would be exchanged with the vault for the amount of assets provided
-    function convertToShares(uint256 assets, uint256 id) external view returns (uint256 shares);
+    function convertToShares(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice Amount of assets that would be exchanged with the vault for the amount of shares provided
-    function convertToAssets(uint256 shares, uint256 id) external view returns (uint256 assets);
+    function convertToAssets(uint256 shares, uint256 id) external view returns (uint256);
 
     //// PREVIEW HELPER FUNCTIONS
 
     /// @notice Simulates the effects of depositing assets at the current block
-    function previewDeposit(uint256 assets, uint256 id) external view returns (uint256 shares);
+    function previewDeposit(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice Simulates the effects of redeeming shares at the current block
-    function previewRedeem(uint256 shares, uint256 id) external view returns (uint256 assets, uint256 exitFees);
+    function previewRedeem(uint256 shares, uint256 id) external view returns (uint256);
 
     //// REDEEM LIMIT
 
     /// @notice Max amount of shares that can be redeemed from the 'owner' balance through a redeem call
-    function maxRedeem(address owner, uint256 id) external view returns (uint256 shares);
+    function maxRedeem(address owner, uint256 id) external view returns (uint256);
 }

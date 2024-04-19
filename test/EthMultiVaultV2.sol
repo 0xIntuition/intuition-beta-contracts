@@ -228,9 +228,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// NOTE: this function pessimistically estimates the amount of assets that would be returned to the
     ///       receiver so in the case that the vault is empty after the redeem the receiver will receive
     ///       more assets than what is returned by this function, reference internal _redeem logic for details
-    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256 assets, uint256 exitFees) {
+    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256 assets) {
         assets = convertToAssets(shares, id);
-        exitFees = exitFeeAmount(assets, id);
+        uint256 exitFees = exitFeeAmount(assets, id);
         assets -= exitFees;
     }
 
@@ -1172,7 +1172,9 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             exitFees = 0;
             assetsForReceiver = convertToAssets(shares, id);
         } else {
-            (assetsForReceiver, exitFees) = previewRedeem(shares, id);
+            assetsForReceiver = previewRedeem(shares, id);
+            uint256 assets = convertToAssets(shares, id);
+            exitFees = exitFeeAmount(assets, id);
         }
 
         // changes in vault's total shares
