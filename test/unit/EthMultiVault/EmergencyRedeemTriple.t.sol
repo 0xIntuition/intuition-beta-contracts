@@ -54,8 +54,18 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
+        (, uint256 protocolFees, uint256 exitFees) = getRedeemFees(userSharesBeforeRedeem, id);
+
+        // protocol fees and exit fees are not charged in the emergency redeem
+        assertEq(protocolFees, 0);
+        assertEq(exitFees, 0);
+
+        uint256 protocolVaultBalanceBeforeRedeem = address(getProtocolVault()).balance;
+
         // execute interaction - redeem all atom shares
         uint256 assetsForReceiver = ethMultiVault.redeemTriple(userSharesBeforeRedeem, bob, id);
+
+        uint256 protocolVaultBalanceAfterRedeem = address(getProtocolVault()).balance;
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(id, bob);
@@ -65,6 +75,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         assertEq(userSharesAfterRedeem, 0);
         assertEq(userBalanceDelta, assetsForReceiver);
+        assertEq(protocolVaultBalanceAfterRedeem, protocolVaultBalanceBeforeRedeem);
 
         vm.stopPrank();
     }

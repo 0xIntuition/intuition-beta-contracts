@@ -118,12 +118,12 @@ contract UpgradeTo is Test {
         );
 
         // // Deploy EthMultiVaultProxy
-        // ethMultiVaultProxy = new TransparentUpgradeableProxy(address(ethMultiVault), address(timelock), initData);
-        // console.log("ethMultiVaultProxy:", address(ethMultiVaultProxy));
+        ethMultiVaultProxy = new TransparentUpgradeableProxy(address(ethMultiVault), address(timelock), initData);
+        console.log("ethMultiVaultProxy:", address(ethMultiVaultProxy));
 
         // // deploy EthMultiVaultV2
-        // ethMultiVaultV2 = new EthMultiVaultV2();
-        // console.logString("deployed EthMultiVaultV2.");
+        ethMultiVaultV2 = new EthMultiVaultV2();
+        console.logString("deployed EthMultiVaultV2.");
 
         // // hardcode the proxyAdmin here or just change the var to public on TransparentUpgradeableProxy
         // proxyAdmin = ProxyAdmin(0x0000000000000000000000000000000000000000);
