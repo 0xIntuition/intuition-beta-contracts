@@ -127,6 +127,11 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.protocolFeeAmount(assets, id);
     }
 
+    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
+        (uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemFees(shares, id);
+        return (assetsForReceiver, protocolFee, exitFees);
+    }
+
     //////// Generate Memes ////////
 
     function _generateMemes() internal {
