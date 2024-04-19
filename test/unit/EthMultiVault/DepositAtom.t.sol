@@ -37,7 +37,6 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 valueToDeposit = testDespositAmount - protocolFee;
 
         uint256 sharesExpected = convertToShares(valueToDeposit - entryFeeAmount(valueToDeposit, id), id);
-        uint256 assetsExpected = previewRedeem(sharesExpected, id);
 
         // execute interaction - deposit atoms
         ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
@@ -47,6 +46,8 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
 
         (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
+
+        uint256 assetsExpected = previewRedeem(sharesGot, id);
 
         assertEq(assetsExpected, assetsGot);
         assertEq(sharesExpected, sharesGot);
