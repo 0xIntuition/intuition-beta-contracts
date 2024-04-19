@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
 
@@ -44,7 +44,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         atomWallet = new AtomWallet();
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
-        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet));
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), msg.sender);
 
         // Define the configuration objects
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({

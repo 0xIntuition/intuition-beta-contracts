@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {BaseAccount, UserOperation} from "account-abstraction/contracts/core/BaseAccount.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
@@ -15,7 +15,7 @@ import {Errors} from "./libraries/Errors.sol";
  *         associated to a corresponding atom.
  */
 contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
-    using ECDSAUpgradeable for bytes32;
+    using ECDSA for bytes32;
 
     IEntryPoint private _entryPoint;
 
@@ -28,8 +28,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
      * @param anOwner the owner of the contract (`walletConfig.atomWarden` is the initial owner of all atom wallets)
      */
     function init(IEntryPoint anEntryPoint, address anOwner) external initializer {
-        __Ownable_init();
-        transferOwnership(anOwner);
+        __Ownable_init(anOwner);
         _entryPoint = anEntryPoint;
     }
 
@@ -77,10 +76,14 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         override
         returns (uint256 validationData)
     {
-        bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner() != hash.recover(userOp.signature)) {
+        bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash));
+
+        (address recovered,,) = ECDSA.tryRecover(hash, userOp.signature);
+
+        if (recovered != owner()) {
             return SIG_VALIDATION_FAILED;
         }
+
         return 0;
     }
 

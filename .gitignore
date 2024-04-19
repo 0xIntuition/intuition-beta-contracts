@@ -10,6 +10,7 @@ cache
 artifacts
 
 # Foundry files
+lib
 cache_forge
 out
 broadcast
