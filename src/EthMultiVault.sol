@@ -204,7 +204,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             exitFees = exitFeeAmount(assetsForReceiver - protocolFees, id);
         }
 
-        assetsForReceiver = assetsForReceiver - exitFees - protocolFees;   
+        assetsForReceiver = assetsForReceiver - exitFees - protocolFees;
 
         return (assetsForReceiver, protocolFees, exitFees);
     }
@@ -323,8 +323,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets estimated to be returned to the receiver
     function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
-       (uint256 assetsForReceiver, , ) = getRedeemFees(shares, id);
-       return assetsForReceiver;
+        (uint256 assetsForReceiver,,) = getRedeemFees(shares, id);
+        return assetsForReceiver;
     }
 
     /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call
@@ -406,7 +406,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address user) external view returns (uint256, uint256) {
         uint256 shares = vaults[vaultId].balanceOf[user];
-        (uint256 assets, , ) = getRedeemFees(shares, vaultId);
+        (uint256 assets,,) = getRedeemFees(shares, vaultId);
         return (shares, assets);
     }
 
@@ -871,7 +871,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev transfer fees to the protocol vault
     function _transferFeesToProtocolVault(uint256 value) internal {
         if (value == 0) return;
-        
+
         (bool success,) = payable(generalConfig.protocolVault).call{value: value}("");
         if (!success) revert Errors.MultiVault_TransferFailed();
 
@@ -1031,7 +1031,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // set vault totals (assets and shares)
         _setVaultTotals(
-            id, 
+            id,
             vaults[id].totalAssets - (assetsForReceiver + protocolFees), // totalAssetsDelta
             vaults[id].totalShares - shares // totalSharesDelta
         );
