@@ -103,12 +103,20 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.getVaultBalance(id, account);
     }
 
+    function getVaultStateForUser(uint256 id, address account) public view returns (uint256 shares, uint256 assets) {
+        (shares, assets) = ethMultiVault.getVaultStateForUser(id, account);
+    }
+
     function entryFeeAmount(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
         return ethMultiVault.entryFeeAmount(assets, id);
     }
 
     function previewDeposit(uint256 assets, uint256 id) public view returns (uint256 feeAmount) {
         return ethMultiVault.previewDeposit(assets, id);
+    }
+
+    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
+        return ethMultiVault.previewRedeem(shares, id);
     }
 
     function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256) {

@@ -322,14 +322,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param shares amount of shares to calculate assets on
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets estimated to be returned to the receiver
-    /// NOTE: this function pessimistically estimates the amount of assets that would be returned to the
-    ///       receiver so in the case that the vault is empty after the redeem the receiver will receive
-    ///       more assets than what is returned by this function, reference internal _redeem logic for details
-    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256, uint256) {
-        uint256 assets = convertToAssets(shares, id);
-        uint256 exitFees = exitFeeAmount(assets, id);
-        assets -= exitFees;
-        return (assets, exitFees);
+    function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
+       (uint256 assetsForReceiver, , ) = getRedeemFees(shares, id);
+       return assetsForReceiver;
     }
 
     /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call
@@ -402,6 +397,17 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return balance number of shares user has in the vault
     function getVaultBalance(uint256 vaultId, address user) external view returns (uint256) {
         return vaults[vaultId].balanceOf[user];
+    }
+
+    /// @notice returns the number of shares and assets (less fees) user has in the vault
+    /// @param vaultId vault id of the vault
+    /// @param user address of the account
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUser(uint256 vaultId, address user) external view returns (uint256, uint256) {
+        uint256 shares = vaults[vaultId].balanceOf[user];
+        (uint256 assets, , ) = getRedeemFees(shares, vaultId);
+        return (shares, assets);
     }
 
     /// @dev checks if an account holds shares in the vault counter to the id provided
