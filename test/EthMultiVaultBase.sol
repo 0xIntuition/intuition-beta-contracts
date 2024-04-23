@@ -51,18 +51,18 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             admin: msg.sender,
             protocolVault: address(0xbeef),
             feeDenominator: 1e4,
-            minDeposit: 1e15,
-            minShare: 1e5,
+            minDeposit: 0.1 ether,
+            minShare: 0.01 ether,
             atomUriMaxLength: 250,
             decimalPrecision: 1e18,
             minDelay: 12 hours
         });
 
         IEthMultiVault.AtomConfig memory atomConfig =
-            IEthMultiVault.AtomConfig({atomShareLockFee: 1e15, atomCreationFee: 5e14});
+            IEthMultiVault.AtomConfig({atomShareLockFee: 0.1 ether, atomCreationFee: 0.05 ether});
 
         IEthMultiVault.TripleConfig memory tripleConfig =
-            IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
+            IEthMultiVault.TripleConfig({tripleCreationFee: 0.05 ether, atomDepositFractionForTriple: 1500});
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
@@ -127,9 +127,13 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.protocolFeeAmount(assets, id);
     }
 
-    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
-        (uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemFees(shares, id);
-        return (assetsForReceiver, protocolFee, exitFees);
+    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
+        (uint256 totalUserAssets, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemFees(shares, id);
+        return (totalUserAssets, assetsForReceiver, protocolFee, exitFees);
+    }
+
+    function getCurrentSharePrice(uint256 id) public view returns (uint256) {
+        return ethMultiVault.currentSharePrice(id);
     }
 
     //////// Generate Memes ////////

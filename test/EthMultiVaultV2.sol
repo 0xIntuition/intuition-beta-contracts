@@ -315,7 +315,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         uint256 totalFees = getDepositFees(assets, id);
 
         if (assets < totalFees) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
+            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees(assets);
         }
 
         uint256 totalAssetsDelta = assets - totalFees;
@@ -912,7 +912,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         uint256 userAssets = assets - entryFeeAmount(assets, id) - atomDepositFractionAmount(assets, id);
 
         if (userAssets <= 0) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
+            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees(assets);
         }
 
         // changes in vault's total assets

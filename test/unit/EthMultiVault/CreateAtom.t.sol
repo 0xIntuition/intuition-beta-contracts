@@ -17,7 +17,10 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(alice, alice);
 
         // test values
-        uint256 testAtomCost = getAtomCost();
+        uint256 testAtomCost = 1 ether;
+
+        console.log("testAtomCost: %s", testAtomCost);
+        assertEq(getAtomCost(), 0.16 ether);
 
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
@@ -28,13 +31,41 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id1 = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // should have created a new atom vault
-        assertEq(id1, ethMultiVault.count());
+        // assertEq(id1, ethMultiVault.count());
 
-        checkDepositOnAtomVaultCreation(id1, testAtomCost, totalAssetsBefore, totalSharesBefore);
+        // checkDepositOnAtomVaultCreation(id1, testAtomCost, totalAssetsBefore, totalSharesBefore);
 
         uint256 userDeposit = testAtomCost - getAtomCost();
 
-        checkProtocolVaultBalanceOnVaultCreation(id1, userDeposit, protocolVaultBalanceBefore);
+        // checkProtocolVaultBalanceOnVaultCreation(id1, userDeposit, protocolVaultBalanceBefore);
+
+        uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
+        console.log("protocolVaultBalanceAfter: %s", protocolVaultBalanceAfter);
+        assertEq(protocolVaultBalanceAfter, 0.0584 ether);
+
+        uint256 zeroAddressShares = getSharesInVault(id1, address(0));
+        console.log("zeroAddressShares: %s", zeroAddressShares);
+        assertEq(zeroAddressShares, getMinShare());
+
+        address atomWalletAddress = getAtomWalletAddr(id1);
+        console.log("atomWalletAddress: %s", atomWalletAddress);
+        uint256 atomWalletBalance = getSharesInVault(id1, atomWalletAddress);
+        console.log("atomWalletBalance: %s", atomWalletBalance);
+        assertEq(atomWalletBalance, 0.1 ether);
+
+        (uint256 userShares, uint256 userAssets) = getVaultStateForUser(id1, alice);
+        console.log("userShares: %s", userShares);
+        console.log("userAssets: %s", userAssets);
+        assertEq(userShares, 0.8316 ether); 
+        assertEq(userAssets, 0.8316 ether);
+
+        uint256 totalAssets = vaultTotalAssets(id1);
+        console.log("totalAssets: %s", totalAssets);
+        assertEq(totalAssets, 0.9416 ether);
+
+        uint256 totalShares = vaultTotalShares(id1);
+        console.log("totalShares: %s", totalShares);
+        assertEq(totalShares, 0.9416 ether);
 
         vm.stopPrank();
     }

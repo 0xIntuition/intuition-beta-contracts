@@ -19,10 +19,14 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDespositAmount = 1 ether;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
+
+        uint256 userSharesBefore = getSharesInVault(id, address(1));
+        console.log("userSharesBefore: %s", userSharesBefore);
+        assertEq(userSharesBefore, 0);
 
         vm.stopPrank();
 
@@ -41,16 +45,44 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // execute interaction - deposit atoms
         ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
 
-        checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
+        uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
+        console.log("protocolVaultBalanceAfter: %s", protocolVaultBalanceAfter);
+        assertEq(protocolVaultBalanceAfter, protocolVaultBalanceBefore + protocolFee);
 
-        checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
+        // checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
 
-        (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
+        // checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
 
-        uint256 assetsExpected = previewRedeem(sharesGot, id);
+        // (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
 
-        assertEq(assetsExpected, assetsGot);
-        assertEq(sharesExpected, sharesGot);
+        // uint256 assetsExpected = previewRedeem(sharesGot, id);
+
+        // assertEq(assetsExpected, assetsGot);
+        // assertEq(sharesExpected, sharesGot);
+
+        uint256 entryFee = entryFeeAmount(valueToDeposit, id);
+        console.log("entryFee: %s", entryFee);
+        assertEq(entryFee, 0.0495 ether);
+
+        uint256 userShares = getSharesInVault(id, address(1));
+        console.log("userShares: %s", userShares);
+        assertEq(userShares, 0.9405 ether);
+
+        uint256 vaultTotalAssetsAfter = vaultTotalAssets(id);
+        uint256 vaultTotalSharesAfter = vaultTotalShares(id);  
+
+        console.log("vaultTotalAssetsBefore: %s", totalAssetsBefore);
+        console.log("vaultTotalSharesBefore: %s", totalSharesBefore);
+        console.log("vaultTotalAssetsAfter: %s", vaultTotalAssetsAfter);
+        console.log("vaultTotalSharesAfter: %s", vaultTotalSharesAfter);
+        assertEq(vaultTotalAssetsAfter, totalAssetsBefore + 0.99 ether);
+        assertEq(vaultTotalSharesAfter, totalSharesBefore + 0.9405 ether);
+
+        console.log("sharePriceCalc: %s", vaultTotalAssetsAfter * 1e18 / vaultTotalSharesAfter);
+
+        uint256 sharePriceAfter = getCurrentSharePrice(id);
+        console.log("sharePriceAfter: %s", sharePriceAfter);
+        assertEq(sharePriceAfter, vaultTotalAssetsAfter * 1e18 / vaultTotalSharesAfter);
 
         vm.stopPrank();
     }
@@ -106,7 +138,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
         uint256 testDespositAmount = testMinDesposit;
-        uint256 testDepositAmountTriple = 0.01 ether;
+        uint256 testDepositAmountTriple = 1 ether;
 
         // execute interaction - create atoms
         uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");

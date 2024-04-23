@@ -18,7 +18,7 @@ library Errors {
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_HasCounterStake();
     error MultiVault_InsufficientBalance();
-    error MultiVault_InsufficientDepositAmountToCoverFees();
+    error MultiVault_InsufficientDepositAmountToCoverFees(uint256 userAssets);
     error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error MultiVault_InsufficientSharesInVault();
     error MultiVault_InvalidExitFee();

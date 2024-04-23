@@ -179,7 +179,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assetsForReceiver amount of assets that would be returned to the receiver
     /// @return protocolFees amount of assets that would be sent to the protocol vault
     /// @return exitFees amount of assets that would be charged for the exit fee
-    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
+    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
         uint256 remainingShares = vaults[id].totalShares - shares;
 
         uint256 assetsForReceiver = convertToAssets(shares, id);
@@ -204,9 +204,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             exitFees = exitFeeAmount(assetsForReceiver - protocolFees, id);
         }
 
+        uint256 totalUserAssets = assetsForReceiver;
         assetsForReceiver = assetsForReceiver - exitFees - protocolFees;
 
-        return (assetsForReceiver, protocolFees, exitFees);
+        return (totalUserAssets, assetsForReceiver, protocolFees, exitFees);
     }
 
     /// @notice calculates fee on raw amount
@@ -309,7 +310,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 totalFees = getDepositFees(assets, id);
 
         if (assets < totalFees) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
+            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees(assets);
         }
 
         uint256 totalAssetsDelta = assets - totalFees;
@@ -323,7 +324,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets estimated to be returned to the receiver
     function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
-        (uint256 assetsForReceiver,,) = getRedeemFees(shares, id);
+        ( , uint256 assetsForReceiver, ,) = getRedeemFees(shares, id);
         return assetsForReceiver;
     }
 
@@ -406,8 +407,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address user) external view returns (uint256, uint256) {
         uint256 shares = vaults[vaultId].balanceOf[user];
-        (uint256 assets,,) = getRedeemFees(shares, vaultId);
-        return (shares, assets);
+        (uint256 totalUserAssets, , ,) = getRedeemFees(shares, vaultId);
+        return (shares, totalUserAssets);
     }
 
     /// @dev checks if an account holds shares in the vault counter to the id provided
@@ -906,7 +907,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 userAssets = assets - entryFeeAmount(assets, id) - atomDepositFractionAmount(assets, id);
 
         if (userAssets <= 0) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
+            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees(userAssets);
         }
 
         // changes in vault's total assets
@@ -940,6 +941,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the deposit
     /// Additionally, initializes a counter vault with ghost shares.
     function _depositOnVaultCreation(uint256 id, address receiver, uint256 assets) internal {
+        uint256 _atomDepositFractionAmount = atomDepositFractionAmount(assets, id);
+
+        assets -= _atomDepositFractionAmount;
+
         bool isAtomWallet = receiver == computeAtomWalletAddr(id);
 
         // ghost shares minted to the zero address upon vault creation
@@ -979,6 +984,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
             // mint `sharesForZeroAddress` shares to zero address to initialize the vault
             _mint(address(0), counterVaultId, sharesForZeroAddress);
+
+            if (assets > 0) {
+                _depositAtomFraction(id, receiver, _atomDepositFractionAmount);
+            }
         }
 
         emit Deposited(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, totalDelta, id);
@@ -1027,7 +1036,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InsufficientRemainingSharesInVault(remainingShares);
         }
 
-        (uint256 assetsForReceiver, uint256 protocolFees, uint256 exitFees) = getRedeemFees(shares, id);
+        ( , uint256 assetsForReceiver, uint256 protocolFees, uint256 exitFees) = getRedeemFees(shares, id);
 
         // set vault totals (assets and shares)
         _setVaultTotals(
