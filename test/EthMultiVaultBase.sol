@@ -14,7 +14,7 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 import {IEthMultiVaultEvents} from "./events/IEthMultiVaultEvents.sol";
 
 contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
-    // msg.value - atomCreationFee - protocolFees
+    // msg.value - atomCreationProtocolFee - protocolFees
 
     /// @notice constants
     // vault fees
@@ -59,10 +59,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         });
 
         IEthMultiVault.AtomConfig memory atomConfig =
-            IEthMultiVault.AtomConfig({atomShareLockFee: 1e15, atomCreationFee: 5e14});
+            IEthMultiVault.AtomConfig({atomWalletInitialDepositAmount: 1e15, atomCreationProtocolFee: 5e14});
 
         IEthMultiVault.TripleConfig memory tripleConfig =
-            IEthMultiVault.TripleConfig({tripleCreationFee: 2e15, atomDepositFractionForTriple: 1e3});
+            IEthMultiVault.TripleConfig({tripleCreationProtocolFee: 2e15, atomDepositFractionForTriple: 1e3});
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
@@ -128,7 +128,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     }
 
     function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
-        (uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemFees(shares, id);
+        (uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemValues(shares, id);
         return (assetsForReceiver, protocolFee, exitFees);
     }
 

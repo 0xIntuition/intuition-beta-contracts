@@ -153,22 +153,22 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getProtocolFee(testVaultId), testValue);
     }
 
-    function testSetAtomShareLockFee() external {
+    function testSetAtomWalletInitialDepositAmount() external {
         uint256 testValue = 1000;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomShareLockFee(testValue);
-        assertEq(getAtomShareLockFee(), testValue);
+        ethMultiVault.setAtomWalletInitialDepositAmount(testValue);
+        assertEq(getAtomWalletInitialDepositAmount(), testValue);
     }
 
-    function testSetAtomCreationFee() external {
+    function testSetAtomCreationProtocolFee() external {
         uint256 testValue = 1000;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomCreationFee(testValue);
-        assertEq(getAtomCreationFee(), testValue);
+        ethMultiVault.setAtomCreationProtocolFee(testValue);
+        assertEq(getAtomCreationProtocolFee(), testValue);
     }
 
     function testSetTripleCreateFee() external {
@@ -176,16 +176,16 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setTripleCreationFee(testValue);
-        assertEq(getTripleCreationFee(), testValue);
+        ethMultiVault.setTripleCreationProtocolFee(testValue);
+        assertEq(getTripleCreationProtocolFee(), testValue);
     }
 
-    function testSetAtomDepositFraction() external {
+    function testSetAtomDepositFractionForTriple() external {
         uint256 testValue = 1000;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomDepositFraction(testValue);
+        ethMultiVault.setAtomDepositFractionForTriple(testValue);
         assertEq(getAtomDepositFraction(), testValue);
     }
 

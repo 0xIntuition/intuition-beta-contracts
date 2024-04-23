@@ -33,14 +33,14 @@ interface IEthMultiVault {
     struct AtomConfig {
         /// @notice fee charged for purchasing vault shares for the atom wallet
         ///         upon creation
-        uint256 atomShareLockFee;
+        uint256 atomWalletInitialDepositAmount;
         /// @notice fee paid to the protocol when depositing vault shares for the atom vault upon creation
-        uint256 atomCreationFee;
+        uint256 atomCreationProtocolFee;
     }
 
     struct TripleConfig {
         /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
-        uint256 tripleCreationFee;
+        uint256 tripleCreationProtocolFee;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomDepositFractionForTriple;
     }

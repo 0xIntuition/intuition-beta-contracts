@@ -37,16 +37,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         protocolFee = ethMultiVault.protocolFeeAmount(_assets, _id);
     }
 
-    function getAtomShareLockFee() public view virtual returns (uint256 atomShareLockFee) {
-        (atomShareLockFee,) = ethMultiVault.atomConfig();
+    function getAtomWalletInitialDepositAmount() public view virtual returns (uint256 atomWalletInitialDepositAmount) {
+        (atomWalletInitialDepositAmount,) = ethMultiVault.atomConfig();
     }
 
-    function getAtomCreationFee() public view returns (uint256 atomCreationFee) {
-        (, atomCreationFee) = ethMultiVault.atomConfig();
+    function getAtomCreationProtocolFee() public view returns (uint256 atomCreationProtocolFee) {
+        (, atomCreationProtocolFee) = ethMultiVault.atomConfig();
     }
 
-    function getTripleCreationFee() public view returns (uint256 tripleCreationFee) {
-        (tripleCreationFee,) = ethMultiVault.tripleConfig();
+    function getTripleCreationProtocolFee() public view returns (uint256 tripleCreationProtocolFee) {
+        (tripleCreationProtocolFee,) = ethMultiVault.tripleConfig();
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
@@ -111,7 +111,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalSharesBefore
     ) public view {
         uint256 sharesForZeroAddress = getMinShare();
-        uint256 sharesForAtomWallet = getAtomShareLockFee();
+        uint256 sharesForAtomWallet = getAtomWalletInitialDepositAmount();
         uint256 userDeposit = value - getAtomCost();
         uint256 assets = userDeposit - getProtocolFeeAmount(userDeposit, id);
         uint256 sharesForDepositor = assets;
@@ -137,7 +137,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalSharesBefore
     ) public view {
         // calculate expected total assets delta
-        uint256 assetsDeposited = atomCost - getTripleCreationFee();
+        uint256 assetsDeposited = atomCost - getTripleCreationProtocolFee();
         uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFeeAmount(atomCost, id);
 
         // calculate expected total shares delta
@@ -160,7 +160,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 protocolVaultBalanceBefore
     ) public view {
         // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() + getProtocolFeeAmount(userDeposit, id);
+        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() + getProtocolFeeAmount(userDeposit, id);
 
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
 
@@ -180,7 +180,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
             protocolFees += getProtocolFeeAmount(valuePerAtom, i);
         }
 
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationFee() * length + protocolFees;
+        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() * length + protocolFees;
 
         // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;

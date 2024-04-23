@@ -101,12 +101,12 @@ contract DeployEthMultiVaultScript is Script {
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomShareLockFee: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-            atomCreationFee: 0.0002 ether // Fee charged for creating an atom
+            atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationFee: 0.0003 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 

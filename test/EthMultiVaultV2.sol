@@ -153,8 +153,8 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @notice returns the cost of creating an atom
     /// @return atomCost the cost of creating an atom
     function getAtomCost() public view returns (uint256) {
-        uint256 atomCost = atomConfig.atomCreationFee // paid to protocol
-            + atomConfig.atomShareLockFee // for purchasing shares for atom wallet
+        uint256 atomCost = atomConfig.atomCreationProtocolFee // paid to protocol
+            + atomConfig.atomWalletInitialDepositAmount // for purchasing shares for atom wallet
             + generalConfig.minShare; // for purchasing ghost shares
         return atomCost;
     }
@@ -162,7 +162,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     /// @notice returns the cost of creating a triple
     /// @return tripleCost the cost of creating a triple
     function getTripleCost() public view returns (uint256) {
-        uint256 tripleCost = tripleConfig.tripleCreationFee // paid to protocol
+        uint256 tripleCost = tripleConfig.tripleCreationProtocolFee // paid to protocol
             + generalConfig.minShare * 2; // for purchasing ghost shares for the positive and counter triple vaults
         return tripleCost;
     }
@@ -519,7 +519,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // create atom and get the protocol deposit fee
         (uint256 id, uint256 protocolDepositFee) = _createAtom(atomUri, msg.value);
 
-        uint256 totalFeesForProtocol = atomConfig.atomCreationFee + protocolDepositFee;
+        uint256 totalFeesForProtocol = atomConfig.atomCreationProtocolFee + protocolDepositFee;
         _transferFeesToProtocolVault(totalFeesForProtocol);
 
         return id;
@@ -553,7 +553,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        uint256 totalFeesForProtocol = atomConfig.atomCreationFee * length + protocolDepositFeeTotal;
+        uint256 totalFeesForProtocol = atomConfig.atomCreationProtocolFee * length + protocolDepositFeeTotal;
         _transferFeesToProtocolVault(totalFeesForProtocol);
 
         return ids;
@@ -595,11 +595,11 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // get atom wallet address for the corresponding atom
         address atomWallet = computeAtomWalletAddr(id);
 
-        // deposit atomShareLockFee amount of assets and mint the shares for the atom wallet
+        // deposit atomWalletInitialDepositAmount amount of assets and mint the shares for the atom wallet
         _depositOnVaultCreation(
             id,
             atomWallet, // receiver
-            atomConfig.atomShareLockFee
+            atomConfig.atomWalletInitialDepositAmount
         );
 
         // map the new vault ID to the atom data
@@ -640,7 +640,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         // create triple and get the protocol deposit fee
         (uint256 id, uint256 protocolDepositFee) = _createTriple(subjectId, predicateId, objectId, msg.value);
 
-        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee + protocolDepositFee;
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationProtocolFee + protocolDepositFee;
         _transferFeesToProtocolVault(totalFeesForProtocol);
 
         return id;
@@ -679,7 +679,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
             protocolDepositFeeTotal += protocolDepositFee;
         }
 
-        uint256 totalFeesForProtocol = tripleConfig.tripleCreationFee * length + protocolDepositFeeTotal;
+        uint256 totalFeesForProtocol = tripleConfig.tripleCreationProtocolFee * length + protocolDepositFeeTotal;
         _transferFeesToProtocolVault(totalFeesForProtocol);
 
         return ids;
@@ -700,19 +700,19 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
 
         // make sure atoms exist, if not, revert
         if (subjectId == 0 || subjectId > count) {
-            revert Errors.MultiVault_AtomDoesNotExist();
+            revert Errors.MultiVault_AtomDoesNotExist(subjectId);
         }
         if (predicateId == 0 || predicateId > count) {
-            revert Errors.MultiVault_AtomDoesNotExist();
+            revert Errors.MultiVault_AtomDoesNotExist(predicateId);
         }
         if (objectId == 0 || objectId > count) {
-            revert Errors.MultiVault_AtomDoesNotExist();
+            revert Errors.MultiVault_AtomDoesNotExist(objectId);
         }
 
         // make sure that each id is not a triple vault id
-        if (isTripleId(subjectId)) revert Errors.MultiVault_VaultIsTriple();
-        if (isTripleId(predicateId)) revert Errors.MultiVault_VaultIsTriple();
-        if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple();
+        if (isTripleId(subjectId)) revert Errors.MultiVault_VaultIsTriple(subjectId);
+        if (isTripleId(predicateId)) revert Errors.MultiVault_VaultIsTriple(predicateId);
+        if (isTripleId(objectId)) revert Errors.MultiVault_VaultIsTriple(objectId);
 
         // check if triple already exists
         bytes32 hash = tripleHashFromAtoms(subjectId, predicateId, objectId);
@@ -895,7 +895,7 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
         uint256 perAtom = amount / 3;
 
         // distribute proportional equity to each atom
-        for (uint8 i = 0; i < 3; i++) {
+        for (uint256 i = 0; i < 3; i++) {
             uint256 shares = _depositIntoVault(atomsIds[i], receiver, perAtom);
             tripleAtomShares[id][atomsIds[i]][receiver] += shares;
         }
@@ -1187,27 +1187,27 @@ contract EthMultiVaultV2 is IEthMultiVault, Initializable, ReentrancyGuardUpgrad
     }
 
     /// @dev sets the atom share lock fee
-    /// @param atomShareLockFee new atom share lock fee
-    function setAtomShareLockFee(uint256 atomShareLockFee) external onlyAdmin {
-        atomConfig.atomShareLockFee = atomShareLockFee;
+    /// @param atomWalletInitialDepositAmount new atom share lock fee
+    function setAtomWalletInitialDepositAmount(uint256 atomWalletInitialDepositAmount) external onlyAdmin {
+        atomConfig.atomWalletInitialDepositAmount = atomWalletInitialDepositAmount;
     }
 
     /// @dev sets the atom creation fee
-    /// @param atomCreationFee new atom creation fee
-    function setAtomCreationFee(uint256 atomCreationFee) external onlyAdmin {
-        atomConfig.atomCreationFee = atomCreationFee;
+    /// @param atomCreationProtocolFee new atom creation fee
+    function setAtomCreationProtocolFee(uint256 atomCreationProtocolFee) external onlyAdmin {
+        atomConfig.atomCreationProtocolFee = atomCreationProtocolFee;
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
-    /// @param tripleCreationFee new fee in wei
-    function setTripleCreationFee(uint256 tripleCreationFee) external onlyAdmin {
-        tripleConfig.tripleCreationFee = tripleCreationFee;
+    /// @param tripleCreationProtocolFee new fee in wei
+    function setTripleCreationProtocolFee(uint256 tripleCreationProtocolFee) external onlyAdmin {
+        tripleConfig.tripleCreationProtocolFee = tripleCreationProtocolFee;
     }
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit fraction percentage
-    function setAtomDepositFraction(uint256 atomDepositFractionForTriple) external onlyAdmin {
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
         tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
     }
 
