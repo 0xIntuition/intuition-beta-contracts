@@ -170,8 +170,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 entryFee = entryFeeAmount(assets, id);
         uint256 atomDepositFraction = atomDepositFractionAmount(assetsAfterProtocolFees, id);
 
-        uint256 totalFees =
-            entryFee + atomDepositFraction + protocolFees;
+        uint256 totalFees = entryFee + atomDepositFraction + protocolFees;
         return totalFees;
     }
 
@@ -801,7 +800,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
-        if (!success) { 
+        if (!success) {
             revert Errors.MultiVault_TransferFailed();
         }
 
@@ -1252,7 +1251,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default exit fee, id = n changes fees for vault n specifically
     /// @dev admin cannot set the exit fee to be greater than `maxExitFeePercentage`, which is
-    ///      set to be the 10% of `generalConfig.feeDenominator` (which represents 100%), to avoid 
+    ///      set to be the 10% of `generalConfig.feeDenominator` (which represents 100%), to avoid
     ///      being able to prevent users from withdrawing their assets
     /// @param id vault id to set exit fee for
     /// @param exitFee exit fee to set
@@ -1283,7 +1282,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to set protocol fee for
     /// @param protocolFee protocol fee to set
     function setProtocolFee(uint256 id, uint256 protocolFee) external onlyAdmin {
-        if (protocolFee > generalConfig.feeDenominator) { 
+        if (protocolFee > generalConfig.feeDenominator) {
             revert Errors.MultiVault_InvalidFeeSet();
         }
 
