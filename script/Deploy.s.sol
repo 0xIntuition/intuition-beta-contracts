@@ -60,6 +60,7 @@ contract DeployEthMultiVaultScript is Script {
 
         Options memory opts;
         opts.defender.useDefenderDeploy = true;
+        opts.defender.skipVerifySourceCode = true;
 
         // ======== Deploy TimelockController ========
 
