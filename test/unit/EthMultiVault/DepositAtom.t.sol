@@ -29,6 +29,8 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(id);
         uint256 totalSharesBefore = vaultTotalShares(id);
+        console.log("totalAssetsBefore", totalAssetsBefore);
+        console.log("totalSharesBefore", totalSharesBefore);
         uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         vm.startPrank(bob, bob);
