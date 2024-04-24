@@ -304,7 +304,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets estimated to be returned to the receiver
     function previewRedeem(uint256 shares, uint256 id) public view returns (uint256) {
-        ( , uint256 redeemableAssets, , ) = getRedeemValues(shares, id);
+        (, uint256 redeemableAssets,,) = getRedeemValues(shares, id);
         return redeemableAssets;
     }
 
@@ -389,7 +389,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256) {
         uint256 shares = vaults[vaultId].balanceOf[receiver];
-        (uint256 totalUserAssets, , , ) = getRedeemValues(shares, vaultId);
+        (uint256 totalUserAssets,,,) = getRedeemValues(shares, vaultId);
         return (shares, totalUserAssets);
     }
 
@@ -1031,7 +1031,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InsufficientRemainingSharesInVault(remainingShares);
         }
 
-        ( , uint256 redeemableAssets, uint256 protocolFees, uint256 exitFees) = getRedeemValues(shares, id);
+        (, uint256 redeemableAssets, uint256 protocolFees, uint256 exitFees) = getRedeemValues(shares, id);
 
         // set vault totals (assets and shares)
         _setVaultTotals(

@@ -128,7 +128,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     }
 
     function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
-        (uint256 totalUserAssets, uint256 redeemableAssets, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemValues(shares, id);
+        (uint256 totalUserAssets, uint256 redeemableAssets, uint256 protocolFee, uint256 exitFees) =
+            ethMultiVault.getRedeemValues(shares, id);
         return (totalUserAssets, redeemableAssets, protocolFee, exitFees);
     }
 
