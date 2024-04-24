@@ -802,9 +802,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param receiver the address to receiver the assets
     /// @param id the vault ID of the atom
     /// @return assets the amount of assets/eth withdrawn
+    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    ///       See `getRedeemValues` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (id == 0 || id > count) {
             revert Errors.MultiVault_VaultDoesNotExist();
+        }
+
+        if (isTripleId(id)) {
+            revert Errors.MultiVault_VaultNotAtom();
         }
 
         /*
@@ -876,6 +882,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param receiver the address to receiver the assets
     /// @param id the vault ID of the triple
     /// @return assets the amount of assets/eth withdrawn
+    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    ///       See `getRedeemValues` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
