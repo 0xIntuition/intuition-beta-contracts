@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
 import {Errors} from "../../../src/libraries/Errors.sol";
-import {Types} from "src/libraries/Types.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
 
 contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {

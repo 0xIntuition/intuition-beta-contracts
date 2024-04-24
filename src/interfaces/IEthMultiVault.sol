@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
 import {IPermit2} from "./IPermit2.sol";
 
 /// @title IVaultManager
-/// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
