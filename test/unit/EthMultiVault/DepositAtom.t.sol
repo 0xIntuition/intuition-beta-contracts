@@ -29,6 +29,8 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // snapshots before interaction
         uint256 totalAssetsBefore = vaultTotalAssets(id);
         uint256 totalSharesBefore = vaultTotalShares(id);
+        console.log("totalAssetsBefore", totalAssetsBefore);
+        console.log("totalSharesBefore", totalSharesBefore);
         uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         vm.startPrank(bob, bob);
@@ -47,7 +49,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
 
-        uint256 assetsExpected = previewRedeem(sharesGot, id);
+        uint256 assetsExpected = convertToAssets(sharesGot, id);
 
         assertEq(assetsExpected, assetsGot);
         assertEq(sharesExpected, sharesGot);

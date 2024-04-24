@@ -1,15 +1,14 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-/// @title  Errors
-/// @author 0xIntuition
-/// @notice Library containing all custom errors detailing cases where the intuition core protocol may revert.
+/// @title  Errors Library
+/// @notice Library containing all custom errors detailing cases in which the contracts should revert
 library Errors {
     /*//////////// MULTIVAULT ERRORS //////////////////////////////////////////////////////*/
 
     error MultiVault_AdminOnly();
     error MultiVault_ArraysNotSameLength();
-    error MultiVault_AtomDoesNotExist();
+    error MultiVault_AtomDoesNotExist(uint256 atomId);
     error MultiVault_AtomExists(bytes atomUri);
     error MultiVault_AtomUriTooLong();
     error MultiVault_BurnFromZeroAddress();
@@ -33,7 +32,7 @@ library Errors {
     error MultiVault_TransferFailed();
     error MultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
     error MultiVault_VaultDoesNotExist();
-    error MultiVault_VaultIsTriple();
+    error MultiVault_VaultIsTriple(uint256 vaultId);
     error MultiVault_VaultNotAtom();
     error MultiVault_VaultNotTriple();
 

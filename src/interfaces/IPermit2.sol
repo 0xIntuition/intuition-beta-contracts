@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// Minimal Permit2 interface, derived from
+// Minimal Permit2 interface, derived from:
 // https://github.com/Uniswap/permit2/blob/main/src/interfaces/ISignatureTransfer.sol
 interface IPermit2 {
     // Token and amount in a permit message.

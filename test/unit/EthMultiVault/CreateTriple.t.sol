@@ -43,7 +43,7 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
         uint256 protocolDepositFee = protocolFeeAmount(testDepositAmountTriple - getTripleCost(), id);
         uint256 protocolVaultBalanceAfterLessFees =
-            protocolVaultBalanceAfter - protocolDepositFee - getTripleCreationFee();
+            protocolVaultBalanceAfter - protocolDepositFee - getTripleCreationProtocolFee();
         assertEq(protocolVaultBalanceBefore, protocolVaultBalanceAfterLessFees);
 
         vm.stopPrank();
@@ -79,10 +79,10 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 testDepositAmountTriple = 0.01 ether;
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector, 0));
         ethMultiVault.createTriple{value: testDepositAmountTriple}(0, 0, 0);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AtomDoesNotExist.selector, 7));
         ethMultiVault.createTriple{value: testDepositAmountTriple}(7, 8, 9);
 
         vm.stopPrank();
@@ -103,13 +103,13 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
         assertEq(ethMultiVault.count(), 4);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector, positiveVaultId));
         ethMultiVault.createTriple{value: testDepositAmountTriple}(positiveVaultId, predicateId, objectId);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector, positiveVaultId));
         ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, positiveVaultId, objectId);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultIsTriple.selector, positiveVaultId));
         ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, positiveVaultId);
 
         vm.stopPrank();

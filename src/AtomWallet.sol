@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -10,9 +10,7 @@ import {Errors} from "./libraries/Errors.sol";
 
 /**
  * @title  AtomWallet
- * @author 0xIntuition
- * @notice Core contract of the Intuition protocol. This contract is the abstract account
- *         associated to a corresponding atom.
+ * @notice This contract is an abstract account associated with a corresponding atom.
  */
 contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     using ECDSA for bytes32;

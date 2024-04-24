@@ -88,7 +88,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // execute interaction - create a triple
         uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_DepositOrWithdrawZeroShares.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector));
         // execute interaction - deposit triple
         ethMultiVault.depositTriple{value: 0}(address(1), id);
 

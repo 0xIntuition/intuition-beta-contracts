@@ -97,16 +97,16 @@ contract DeployEthMultiVaultScript is Script {
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
-            minDelay: 5 minutes // minimum delay for timelocked transactions
+            minDelay: 2 days // minimum delay for timelocked transactions
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomShareLockFee: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-            atomCreationFee: 0.0002 ether // Fee charged for creating an atom
+            atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationFee: 0.0003 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 
@@ -117,7 +117,7 @@ contract DeployEthMultiVaultScript is Script {
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 100 // Protocol fee for vault 0
@@ -126,7 +126,7 @@ contract DeployEthMultiVaultScript is Script {
         address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
             "EthMultiVault.sol",
             address(timelock),
-            abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig)),
+            abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees)),
             opts
         );
 

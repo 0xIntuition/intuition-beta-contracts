@@ -42,12 +42,12 @@ contract TimelockControllerParametersScript is Script {
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomShareLockFee: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-            atomCreationFee: 0.0021 ether // Fee charged for creating an atom
+            atomWalletInitialDepositAmount: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0021 ether // Fee charged for creating an atom
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationFee: 0.0021 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0021 ether, // Fee for creating a triple
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 
@@ -58,7 +58,7 @@ contract TimelockControllerParametersScript is Script {
             atomWalletBeacon: _atomWalletBeacon // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 100 // Protocol fee for vault 0
@@ -73,7 +73,7 @@ contract TimelockControllerParametersScript is Script {
         uint256 delay = 2 days;
 
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVaultV2.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
+            EthMultiVaultV2.initialize.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
         bytes memory timelockControllerData = abi.encodeWithSelector(
