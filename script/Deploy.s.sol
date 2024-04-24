@@ -117,7 +117,7 @@ contract DeployEthMultiVaultScript is Script {
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 100 // Protocol fee for vault 0
@@ -126,7 +126,7 @@ contract DeployEthMultiVaultScript is Script {
         address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
             "EthMultiVault.sol",
             address(timelock),
-            abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig)),
+            abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees)),
             opts
         );
 

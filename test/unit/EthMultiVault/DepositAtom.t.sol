@@ -47,7 +47,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
 
-        uint256 assetsExpected = previewRedeem(sharesGot, id);
+        uint256 assetsExpected = convertToAssets(sharesGot, id);
 
         assertEq(assetsExpected, assetsGot);
         assertEq(sharesExpected, sharesGot);

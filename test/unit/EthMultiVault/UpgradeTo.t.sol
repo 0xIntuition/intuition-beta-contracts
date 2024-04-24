@@ -103,7 +103,7 @@ contract UpgradeTo is Test {
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig = IEthMultiVault.VaultConfig({
+        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 100 // Protocol fee for vault 0
@@ -114,7 +114,7 @@ contract UpgradeTo is Test {
 
         // // Prepare data for initializer function
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig
+            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
         // // Deploy EthMultiVaultProxy

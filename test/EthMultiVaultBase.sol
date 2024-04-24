@@ -71,11 +71,11 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
             atomWalletBeacon: address(atomWalletBeacon)
         });
 
-        IEthMultiVault.VaultConfig memory vaultConfig =
-            IEthMultiVault.VaultConfig({entryFee: 500, exitFee: 500, protocolFee: 100});
+        IEthMultiVault.VaultFees memory vaultFees =
+            IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
 
         ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultConfig);
+        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);
@@ -127,9 +127,9 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.protocolFeeAmount(assets, id);
     }
 
-    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256) {
-        (uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemValues(shares, id);
-        return (assetsForReceiver, protocolFee, exitFees);
+    function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
+        (uint256 totalUserAssets, uint256 redeemableAssets, uint256 protocolFee, uint256 exitFees) = ethMultiVault.getRedeemValues(shares, id);
+        return (totalUserAssets, redeemableAssets, protocolFee, exitFees);
     }
 
     //////// Generate Memes ////////
