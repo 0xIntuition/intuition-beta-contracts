@@ -19,20 +19,20 @@ contract RedeemAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(bob, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(bob, id);
 
         // snapshots before redeem
         uint256 userSharesBeforeRedeem = getSharesInVault(id, bob);
@@ -61,13 +61,13 @@ contract RedeemAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(alice, id);
 
         // snapshots before redeem
         uint256 userSharesBeforeRedeem = getSharesInVault(id, alice);
@@ -87,13 +87,13 @@ contract RedeemAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(alice, id);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_DepositOrWithdrawZeroShares.selector));
         // execute interaction - redeem all atom shares
@@ -110,13 +110,13 @@ contract RedeemAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 

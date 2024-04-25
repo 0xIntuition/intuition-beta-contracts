@@ -41,7 +41,7 @@ interface IEthMultiVault {
         /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationProtocolFee;
         /// @notice static fee going towards increasing the amount of assets in the underlying atom vaults
-        uint256 atomEntryFeeOnTripleCreation;
+        uint256 atomDepositFractionOnTripleCreation;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomDepositFractionForTriple;
     }
@@ -174,7 +174,7 @@ interface IEthMultiVault {
     /// @return netUserAssets net assets that go towards minting shares for the user
     /// @return totalAssetsDelta changes in vault's total assets
     /// @return sharesForReceiver shares owed to receiver
-    function getDepositValues(uint256 assets, uint256 id) external view returns (uint256, uint256, uint256);
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) external view returns (uint256, uint256, uint256);
 
     /// @notice returns the assets that would be returned to the receiver of the redeem and protocol fees
     /// @param shares amount of `shares` to calculate fees on
@@ -183,7 +183,10 @@ interface IEthMultiVault {
     /// @return redeemableAssets amount of assets that is redeemable by the receiver
     /// @return protocolFees amount of assets that would be sent to the protocol vault
     /// @return exitFees amount of assets that would be charged for the exit fee
-    function getRedeemValues(uint256 shares, uint256 id) external view returns (uint256, uint256, uint256, uint256);
+    function getRedeemAssetsAndFees(uint256 shares, uint256 id)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
 
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on

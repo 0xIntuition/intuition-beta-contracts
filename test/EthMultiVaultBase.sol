@@ -61,7 +61,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether,
-            atomEntryFeeOnTripleCreation: 0.0003 ether,
+            atomDepositFractionOnTripleCreation: 0.0003 ether,
             atomDepositFractionForTriple: 1500
         });
 
@@ -130,7 +130,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
 
     function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
         (uint256 totalUserAssets, uint256 redeemableAssets, uint256 protocolFee, uint256 exitFees) =
-            ethMultiVault.getRedeemValues(shares, id);
+            ethMultiVault.getRedeemAssetsAndFees(shares, id);
         return (totalUserAssets, redeemableAssets, protocolFee, exitFees);
     }
 
