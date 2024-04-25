@@ -17,10 +17,6 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     // msg.value - atomCreationProtocolFee - protocolFees
 
     /// @notice constants
-    // vault fees
-    uint256 entryFeeDefault = 1e3;
-    uint256 exitFeeDefault = 1e3;
-    uint256 protocolFeeDefault = 1e3;
     // initial eth amounts
     uint256 initialEth = 1000 ether;
 
@@ -50,19 +46,24 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: msg.sender,
             protocolVault: address(0xbeef),
-            feeDenominator: 1e4,
-            minDeposit: 1e15,
+            feeDenominator: 10000,
+            minDeposit: 0.0003 ether,
             minShare: 1e5,
             atomUriMaxLength: 250,
             decimalPrecision: 1e18,
-            minDelay: 12 hours
+            minDelay: 2 days
         });
 
-        IEthMultiVault.AtomConfig memory atomConfig =
-            IEthMultiVault.AtomConfig({atomWalletInitialDepositAmount: 1e15, atomCreationProtocolFee: 5e14});
+        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+            atomWalletInitialDepositAmount: 0.0001 ether,
+            atomCreationProtocolFee: 0.0002 ether
+        });
 
-        IEthMultiVault.TripleConfig memory tripleConfig =
-            IEthMultiVault.TripleConfig({tripleCreationProtocolFee: 2e15, atomDepositFractionForTriple: 1e3});
+        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+            tripleCreationProtocolFee: 0.0002 ether,
+            atomEntryFeeOnTripleCreation: 0.0003 ether,
+            atomDepositFractionForTriple: 1500
+        });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
@@ -100,7 +101,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     }
 
     function vaultBalanceOf(uint256 id, address account) public view returns (uint256 shares) {
-        (shares, ) = ethMultiVault.getVaultStateForUser(id, account);
+        (shares,) = ethMultiVault.getVaultStateForUser(id, account);
     }
 
     function getVaultStateForUser(uint256 id, address account) public view returns (uint256 shares, uint256 assets) {

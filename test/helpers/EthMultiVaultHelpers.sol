@@ -46,7 +46,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getTripleCreationProtocolFee() public view returns (uint256 tripleCreationProtocolFee) {
-        (tripleCreationProtocolFee,) = ethMultiVault.tripleConfig();
+        (tripleCreationProtocolFee,,) = ethMultiVault.tripleConfig();
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
@@ -65,8 +65,12 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (,,,,,,, minDelay) = ethMultiVault.generalConfig();
     }
 
+    function getAtomEntryFeeOnTripleCreation() public view returns (uint256 atomEntryFeeOnTripleCreation) {
+        (, atomEntryFeeOnTripleCreation,) = ethMultiVault.tripleConfig();
+    }
+
     function getAtomDepositFraction() public view returns (uint256 atomDepositFractionForTriple) {
-        (, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
+        (,, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
     }
 
     function getAtomWalletAddr(uint256 id) public view returns (address) {
@@ -82,7 +86,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getSharesInVault(uint256 vaultId, address user) public view returns (uint256) {
-        (uint256 shares, ) = ethMultiVault.getVaultStateForUser(vaultId, user);
+        (uint256 shares,) = ethMultiVault.getVaultStateForUser(vaultId, user);
         return shares;
     }
 

@@ -132,6 +132,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return tripleCost the cost of creating a triple
     function getTripleCost() public view returns (uint256) {
         uint256 tripleCost = tripleConfig.tripleCreationProtocolFee // paid to protocol
+            + tripleConfig.atomEntryFeeOnTripleCreation // goes towards increasing the amount of assets in the underlying atom vaults
             + generalConfig.minShare * 2; // for purchasing ghost shares for the positive and counter triple vaults
         return tripleCost;
     }
@@ -938,11 +939,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the deposit
     /// Additionally, initializes a counter vault with ghost shares.
     function _depositOnVaultCreation(uint256 id, address receiver, uint256 assets) internal {
-        // calculate atom deposit fraction for triple vaults
-        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
+        // include the atom entry fee on triple creation to the total atom deposit fraction
+        uint256 totalAtomDepositFraction = atomDepositFractionAmount(assets, id) + tripleConfig.atomEntryFeeOnTripleCreation;
 
-        // subtract atom deposit fraction from assets 
-        uint256 userDeposit = assets- atomDepositFraction;
+        // subtract atom deposit fraction from assets (atomEntryFeeOnTripleCreation has already been deducted in _createTriple)
+        uint256 userDeposit = assets - atomDepositFractionAmount(assets, id);
 
         bool isAtomWallet = receiver == computeAtomWalletAddr(id);
 
@@ -984,7 +985,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             // mint `sharesForZeroAddress` shares to zero address to initialize the vault
             _mint(address(0), counterVaultId, sharesForZeroAddress);
 
-            _depositAtomFraction(id, receiver, atomDepositFraction);
+            _depositAtomFraction(id, receiver, totalAtomDepositFraction);
         }
 
         emit Deposited(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, totalDelta, id);

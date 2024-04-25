@@ -33,21 +33,22 @@ contract TimelockControllerParametersScript is Script {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: _admin, // Admin address for the EthMultiVault contract
             protocolVault: _protocolVault, // Intuition protocol vault address (should be a multisig in production)
-            feeDenominator: 1e4, // Common denominator for fee calculations
-            minDeposit: 1e15, // Minimum deposit amount in wei
+            feeDenominator: 10000, // Common denominator for fee calculations
+            minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
-            minDelay: 5 minutes // minimum delay for timelocked transactions
+            minDelay: 2 days // minimum delay for timelocked transactions
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomWalletInitialDepositAmount: 0.0021 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-            atomCreationProtocolFee: 0.0021 ether // Fee charged for creating an atom
+            atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationProtocolFee: 0.0021 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
+            atomEntryFeeOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 

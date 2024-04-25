@@ -78,7 +78,7 @@ contract UpgradeTo is Test {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
             protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
-            feeDenominator: 1e4, // Common denominator for fee calculations
+            feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
@@ -92,7 +92,8 @@ contract UpgradeTo is Test {
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
+            atomEntryFeeOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 

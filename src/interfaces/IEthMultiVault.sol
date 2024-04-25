@@ -40,6 +40,8 @@ interface IEthMultiVault {
     struct TripleConfig {
         /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationProtocolFee;
+        /// @notice static fee going towards increasing the amount of assets in the underlying atom vaults
+        uint256 atomEntryFeeOnTripleCreation;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomDepositFractionForTriple;
     }
