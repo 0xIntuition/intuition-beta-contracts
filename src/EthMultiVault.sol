@@ -403,14 +403,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*        Misc. Helpers       */
     /* -------------------------- */
 
-    /// @notice returns the number of shares user has in the vault
-    /// @param vaultId vault id of the vault
-    /// @param receiver address of the receiver
-    /// @return balance number of shares user has in the vault
-    function getVaultBalance(uint256 vaultId, address receiver) external view returns (uint256) {
-        return vaults[vaultId].balanceOf[receiver];
-    }
-
     /// @notice returns the number of shares and assets (less fees) user has in the vault
     /// @param vaultId vault id of the vault
     /// @param receiver address of the receiver
@@ -946,6 +938,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// change the vault's total assets, total shares and balanceOf mappings to reflect the deposit
     /// Additionally, initializes a counter vault with ghost shares.
     function _depositOnVaultCreation(uint256 id, address receiver, uint256 assets) internal {
+        // calculate atom deposit fraction for triple vaults
+        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
+
+        // subtract atom deposit fraction from assets 
+        uint256 userDeposit = assets- atomDepositFraction;
+
         bool isAtomWallet = receiver == computeAtomWalletAddr(id);
 
         // ghost shares minted to the zero address upon vault creation
@@ -954,7 +952,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // ghost shares for the counter vault
         uint256 assetsForZeroAddressInCounterVault = generalConfig.minShare;
 
-        uint256 sharesForReceiver = assets;
+        uint256 sharesForReceiver = userDeposit;
 
         // changes in vault's total assets or total shares
         uint256 totalDelta = isAtomWallet ? sharesForReceiver : sharesForReceiver + sharesForZeroAddress;
@@ -985,6 +983,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
             // mint `sharesForZeroAddress` shares to zero address to initialize the vault
             _mint(address(0), counterVaultId, sharesForZeroAddress);
+
+            _depositAtomFraction(id, receiver, atomDepositFraction);
         }
 
         emit Deposited(msg.sender, receiver, vaults[id].balanceOf[receiver], assets, totalDelta, id);

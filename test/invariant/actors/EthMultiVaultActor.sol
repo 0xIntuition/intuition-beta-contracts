@@ -53,7 +53,8 @@ contract EthMultiVaultActor is Test {
     }
 
     function getVaultBalanceForAddress(uint256 vaultId, address user) public view returns (uint256) {
-        return actEthMultiVault.getVaultBalance(vaultId, user);
+        (uint256 shares, ) = actEthMultiVault.getVaultStateForUser(vaultId, user);
+        return shares;
     }
 
     function createAtom(bytes calldata _data, uint256 msgValue, uint256 actorIndexSeed)

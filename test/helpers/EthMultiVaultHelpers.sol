@@ -82,7 +82,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getSharesInVault(uint256 vaultId, address user) public view returns (uint256) {
-        return ethMultiVault.getVaultBalance(vaultId, user);
+        (uint256 shares, ) = ethMultiVault.getVaultStateForUser(vaultId, user);
+        return shares;
     }
 
     function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)

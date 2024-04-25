@@ -99,8 +99,8 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         (, totalShares) = ethMultiVault.vaults(id);
     }
 
-    function vaultBalanceOf(uint256 id, address account) public view returns (uint256) {
-        return ethMultiVault.getVaultBalance(id, account);
+    function vaultBalanceOf(uint256 id, address account) public view returns (uint256 shares) {
+        (shares, ) = ethMultiVault.getVaultStateForUser(id, account);
     }
 
     function getVaultStateForUser(uint256 id, address account) public view returns (uint256 shares, uint256 assets) {

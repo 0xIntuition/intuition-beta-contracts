@@ -270,12 +270,6 @@ interface IEthMultiVault {
     /// @param account Address of the account
     function tripleAtomShares(uint256 id, uint256 atomId, address account) external view returns (uint256);
 
-    /// @notice returns the number of shares user has in the vault
-    /// @param vaultId vault id of the vault
-    /// @param receiver address of the receiver
-    /// @return balance number of shares user has in the vault
-    function getVaultBalance(uint256 vaultId, address receiver) external view returns (uint256);
-
     /// @notice returns the number of shares and assets (less fees) user has in the vault
     /// @param vaultId vault id of the vault
     /// @param receiver address of the receiver
