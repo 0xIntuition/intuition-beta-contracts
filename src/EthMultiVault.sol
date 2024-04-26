@@ -156,29 +156,18 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFees)
     /// @param id vault id to get corresponding fees for
     /// @return netUserAssets net assets that go towards minting shares for the user
-    /// @return totalAssetsDelta changes in vault's total assets
     /// @return sharesForReceiver shares owed to receiver
-    function getDepositAssetsAndShares(uint256 assets, uint256 id) public view returns (uint256, uint256, uint256) {
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) public view returns (uint256, uint256) {
         uint256 entryFee = entryFeeAmount(assets, id);
         uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
 
-        // net assets that go towards minting shares for the user
-        uint256 netUserAssets = assets - entryFee - atomDepositFraction;
+        // net assets
+        uint256 netUserAssets = assets - atomDepositFraction;
 
-        // changes in vault's total assets
-        // if the vault is an atom vault `atomDepositFraction` is 0
-        uint256 totalAssetsDelta = assets - atomDepositFraction;
+        // shares
+        uint256 sharesForReceiver = netUserAssets - entryFee;
 
-        uint256 sharesForReceiver;
-
-        if (vaults[id].totalShares == generalConfig.minShare) {
-            sharesForReceiver = assets; // shares owed to receiver
-        } else {
-            // user receives entryFeeAmount less shares than assets deposited into the vault
-            sharesForReceiver = convertToShares(netUserAssets, id);
-        }
-
-        return (netUserAssets, totalAssetsDelta, sharesForReceiver);
+        return (netUserAssets, sharesForReceiver);
     }
 
     /// @notice returns the assets for receiver and other important values when redeeming 'shares' from a vault
@@ -771,7 +760,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*    Deposit/Redeem Atom     */
     /* -------------------------- */
 
-    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'receiver'
     /// *payable msg.value amount of eth to deposit
     /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
     /// @param receiver the address to receive the shares
@@ -868,15 +857,21 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFees = protocolFeeAmount(msg.value, id);
+
         uint256 userDepositAfterProtocolFees = msg.value - protocolFees;
 
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+
+        uint256 entryFee = entryFeeAmount(userDepositAfterProtocolFees - atomDepositFraction, id);
+
+        uint256 userDepositAfterTotalfees = userDepositAfterProtocolFees - entryFee - atomDepositFraction;
+
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFees);
+        uint256 shares = _deposit(receiver, id, userDepositAfterTotalfees);
 
         _transferFeesToProtocolVault(protocolFees);
 
-        // distribute atom shares for all 3 atoms that underlie the triple
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+        // distribute atom shares for all 3 atoms that underly the triple
         _depositAtomFraction(id, receiver, atomDepositFraction);
 
         return shares;
@@ -1008,18 +1003,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        (uint256 netUserAssets, uint256 totalAssetsDelta, uint256 sharesForReceiver) =
-            getDepositAssetsAndShares(value, id);
+        (uint256 netUserAssets, uint256 sharesForReceiver) = getDepositAssetsAndShares(value, id);
 
         if (netUserAssets <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
-        // changes in vault's total shares
-        uint256 totalSharesDelta = sharesForReceiver;
-
         // set vault totals (assets and shares)
-        _setVaultTotals(id, vaults[id].totalAssets + totalAssetsDelta, vaults[id].totalShares + totalSharesDelta);
+        _setVaultTotals(id, vaults[id].totalAssets + netUserAssets, vaults[id].totalShares + sharesForReceiver);
 
         // mint `sharesOwed` shares to sender factoring in fees
         _mint(receiver, id, sharesForReceiver);

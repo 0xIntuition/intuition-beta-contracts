@@ -124,6 +124,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.atomDepositFractionAmount(assets, id);
     }
 
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) public view returns (uint256, uint256) {
+        return ethMultiVault.getDepositAssetsAndShares(assets, id);
+    }
+
     function protocolFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
         return ethMultiVault.protocolFeeAmount(assets, id);
     }

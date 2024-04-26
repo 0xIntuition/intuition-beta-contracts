@@ -172,9 +172,8 @@ interface IEthMultiVault {
     /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFees)
     /// @param id vault id to get corresponding fees for
     /// @return netUserAssets net assets that go towards minting shares for the user
-    /// @return totalAssetsDelta changes in vault's total assets
     /// @return sharesForReceiver shares owed to receiver
-    function getDepositAssetsAndShares(uint256 assets, uint256 id) external view returns (uint256, uint256, uint256);
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) external view returns (uint256, uint256);
 
     /// @notice returns the assets that would be returned to the receiver of the redeem and protocol fees
     /// @param shares amount of `shares` to calculate fees on

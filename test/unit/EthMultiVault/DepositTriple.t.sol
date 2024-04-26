@@ -11,26 +11,23 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         _setUp();
     }
 
-    function testDepositTriple() external {
+    function testDepositTripleAtomDeposit() external {
         vm.startPrank(alice, alice);
 
         // test values
-        uint256 testAtomCost = getAtomCost();
-        uint256 testDepositAmount = 0.01 ether;
+        uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
-        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
-        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}("predicate");
-        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}("object");
+        uint256 subjectId = ethMultiVault.createAtom{value: getAtomCost()}("subject");
+        uint256 predicateId = ethMultiVault.createAtom{value: getAtomCost()}("predicate");
+        uint256 objectId = ethMultiVault.createAtom{value: getAtomCost()}("object");
 
-        // execute interaction - create a triple using test deposit amount for triple (0.01 ether)
+        // execute interaction - create a triple
         uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(subjectId, predicateId, objectId);
 
         vm.stopPrank();
 
         // snapshots before interaction
-        uint256 totalAssetsBefore = vaultTotalAssets(id);
-        uint256 totalSharesBefore = vaultTotalShares(id);
         uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         uint256[3] memory totalAssetsBeforeAtomVaults =
@@ -40,17 +37,15 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDepositAmount}(address(1), id);
+        // execute interaction - deposit triple
+        ethMultiVault.depositTriple{value: testDepositAmountTriple}(address(1), id);
 
-        uint256 valueToDeposit = testDepositAmount - getProtocolFeeAmount(testDepositAmount, id);
+        uint256 userDepositAfterProtocolFees =
+            testDepositAmountTriple - getProtocolFeeAmount(testDepositAmountTriple, id);
 
-        checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
+        checkProtocolVaultBalance(id, testDepositAmountTriple, protocolVaultBalanceBefore);
 
-        checkProtocolVaultBalance(id, testDepositAmount, protocolVaultBalanceBefore);
-
-        // ------ Check Deposit Atom Fraction ------ //
-        uint256 amountToDistribute = atomDepositFractionAmount(valueToDeposit, id);
+        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
@@ -64,11 +59,6 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         checkDepositIntoVault(
             distributeAmountPerAtomVault, objectId, totalAssetsBeforeAtomVaults[2], totalSharesBeforeAtomVaults[2]
         );
-
-        // execute interaction - deposit triple into counter vault
-        uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
-
-        ethMultiVault.depositTriple{value: testDepositAmount}(address(2), counterId);
 
         vm.stopPrank();
     }

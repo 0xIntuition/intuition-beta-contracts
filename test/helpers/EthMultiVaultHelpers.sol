@@ -310,74 +310,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 entryFee = entryFeeAmount(amount, id);
         uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
 
-        uint256 totalAssetsDeltaExpected = amount - atomDepositFraction;
-        uint256 netUserAssets = amount - entryFee - atomDepositFraction;
-        console.log("totalAssetsBefore", totalAssetsBefore);
-        console.log("totalSharesBefore", totalSharesBefore);
-        console.log("amount", amount);
-        console.log("entryFee", entryFee);
-        console.log("atomDepositFraction", atomDepositFraction);
-
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-        console.log("totalAssetsDeltaExpected", totalAssetsDeltaExpected);
-        console.log("totalAssetsDeltaGot", totalAssetsDeltaGot);
+        uint256 totalAssetsDeltaExpected = amount - atomDepositFraction;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
         // vault's total shares should have gone up
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
-        // uint256 totalSharesDeltaExpected = totalAssetsDeltaExpected - entryFee;
-        uint256 totalSharesDeltaExpected = convertToShares(netUserAssets, id);
-        // console.log("totalSharesDeltaExpected", totalAssetsDeltaGot - entryFee - );
-        console.log("totalSharesDeltaGot", totalSharesDeltaGot);
-        console.log("totalSharesDeltaExpected", totalSharesDeltaExpected);
-        // console.log("diff:", totalAssetsDeltaGot - totalSharesDeltaGot - entr);
-
-        // user receives entryFeeAmount less shares than assets deposited into the vault
-        // assertEq(totalAssetsDeltaGot, totalSharesDeltaGot + entryFee);
+        uint256 totalSharesDeltaExpected = totalAssetsDeltaExpected - entryFee;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
-
-    //     function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)
-    //     public
-    //     payable
-    // {
-    //     // Calculate the entry fee and atom deposit fraction based on the amount to be deposited.
-    //     uint256 entryFee = entryFeeAmount(amount, id);
-    //     uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
-
-    //     // Calculate the net amount after subtracting entry fee and atom deposit fraction.
-    //     uint256 netAmount = amount - entryFee - atomDepositFraction;
-
-    //     // Get the calculated shares that would be minted from the deposit values.
-    //     (uint256 netUserAssets, , uint256 sharesForReceiver) = ethMultiVault.getDepositAssetsAndShares(amount, id);
-    //     console.log("sharesForReceiver", sharesForReceiver);
-
-    //     // Calculate the expected change in vault's total shares.
-    //     uint256 totalSharesDeltaExpected = sharesForReceiver;
-
-    //     // Calculate the expected change in vault's total assets.
-    //     uint256 totalAssetsDeltaExpected = netAmount;
-
-    //     // Get the actual changes in total assets and total shares after the transaction.
-    //     uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-    //     uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
-
-    //     // Log the expected and actual changes for debugging.
-    //     console.log("totalAssetsBefore", totalAssetsBefore);
-    //     console.log("totalSharesBefore", totalSharesBefore);
-    //     console.log("amount", amount);
-    //     console.log("entryFee", entryFee);
-    //     console.log("atomDepositFraction", atomDepositFraction);
-    //     console.log("totalAssetsDeltaExpected", totalAssetsDeltaExpected);
-    //     console.log("totalAssetsDeltaGot", totalAssetsDeltaGot);
-    //     console.log("totalSharesDeltaExpected", totalSharesDeltaExpected);
-    //     console.log("totalSharesDeltaGot", totalSharesDeltaGot);
-
-    //     // Assert that the expected and actual deltas match.
-    //     assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
-    //     assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
-    // }
 
     function checkDepositOnAtomVaultCreation(
         uint256 id,
@@ -420,19 +362,12 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 sharesForZeroAddress = getMinShare();
 
         uint256 totalAssetsDeltaExpected = userDepositAfterProtocolFees - atomDepositFraction + sharesForZeroAddress;
+        uint256 totalSharesDeltaExpected = totalAssetsDeltaExpected;
 
-        // calculate expected total shares delta
-        uint256 sharesForDepositor = userDepositAfterProtocolFees - atomDepositFraction;
-        uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress;
-
-        // vault's total assets should have gone up
+        // vault's total assets and shares should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
-
-        // vault's total shares should have gone up
-        // uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
