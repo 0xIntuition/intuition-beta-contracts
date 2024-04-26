@@ -11,53 +11,105 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         _setUp();
     }
 
-    function testDepositTripleAtomDeposit() external {
+    function testDepositTriple() external {
         vm.startPrank(alice, alice);
 
         // test values
-        uint256 testDepositAmountTriple = 0.01 ether;
+        uint256 testAtomCost = getAtomCost();
+        uint256 testDepositAmount = 0.01 ether;
 
         // execute interaction - create atoms
-        uint256 subjectId = ethMultiVault.createAtom{value: getAtomCost()}("subject");
-        uint256 predicateId = ethMultiVault.createAtom{value: getAtomCost()}("predicate");
-        uint256 objectId = ethMultiVault.createAtom{value: getAtomCost()}("object");
+        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "subject"
+        );
+        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}(
+            "predicate"
+        );
+        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "object"
+        );
 
-        // execute interaction - create a triple
-        uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(subjectId, predicateId, objectId);
+        // execute interaction - create a triple using test deposit amount for triple (0.01 ether)
+        uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(
+            subjectId,
+            predicateId,
+            objectId
+        );
 
         vm.stopPrank();
 
         // snapshots before interaction
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 totalAssetsBefore = vaultTotalAssets(id);
+        uint256 totalSharesBefore = vaultTotalShares(id);
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
+            .balance;
 
-        uint256[3] memory totalAssetsBeforeAtomVaults =
-            [vaultTotalAssets(subjectId), vaultTotalAssets(predicateId), vaultTotalAssets(objectId)];
-        uint256[3] memory totalSharesBeforeAtomVaults =
-            [vaultTotalShares(subjectId), vaultTotalShares(predicateId), vaultTotalShares(objectId)];
+        uint256[3] memory totalAssetsBeforeAtomVaults = [
+            vaultTotalAssets(subjectId),
+            vaultTotalAssets(predicateId),
+            vaultTotalAssets(objectId)
+        ];
+        uint256[3] memory totalSharesBeforeAtomVaults = [
+            vaultTotalShares(subjectId),
+            vaultTotalShares(predicateId),
+            vaultTotalShares(objectId)
+        ];
 
         vm.startPrank(bob, bob);
 
-        // execute interaction - deposit triple
-        ethMultiVault.depositTriple{value: testDepositAmountTriple}(address(1), id);
+        // execute interaction - deposit atoms
+        ethMultiVault.depositTriple{value: testDepositAmount}(address(1), id);
 
-        uint256 userDepositAfterProtocolFees =
-            testDepositAmountTriple - getProtocolFeeAmount(testDepositAmountTriple, id);
+        uint256 userDepositAfterProtocolFees = testDepositAmount -
+            getProtocolFeeAmount(testDepositAmount, id);
 
-        checkProtocolVaultBalance(id, testDepositAmountTriple, protocolVaultBalanceBefore);
+        checkDepositIntoVault(
+            userDepositAfterProtocolFees,
+            id,
+            totalAssetsBefore,
+            totalSharesBefore
+        );
 
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+        checkProtocolVaultBalance(
+            id,
+            testDepositAmount,
+            protocolVaultBalanceBefore
+        );
+
+        // ------ Check Deposit Atom Fraction ------ //
+        uint256 amountToDistribute = atomDepositFractionAmount(
+            userDepositAfterProtocolFees,
+            id
+        );
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault, subjectId, totalAssetsBeforeAtomVaults[0], totalSharesBeforeAtomVaults[0]
+            distributeAmountPerAtomVault,
+            subjectId,
+            totalAssetsBeforeAtomVaults[0],
+            totalSharesBeforeAtomVaults[0]
         );
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault, predicateId, totalAssetsBeforeAtomVaults[1], totalSharesBeforeAtomVaults[1]
+            distributeAmountPerAtomVault,
+            predicateId,
+            totalAssetsBeforeAtomVaults[1],
+            totalSharesBeforeAtomVaults[1]
         );
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault, objectId, totalAssetsBeforeAtomVaults[2], totalSharesBeforeAtomVaults[2]
+            distributeAmountPerAtomVault,
+            objectId,
+            totalAssetsBeforeAtomVaults[2],
+            totalSharesBeforeAtomVaults[2]
+        );
+
+        // execute interaction - deposit triple into counter vault
+        uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
+
+        ethMultiVault.depositTriple{value: testDepositAmount}(
+            address(2),
+            counterId
         );
 
         vm.stopPrank();
@@ -71,14 +123,26 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
-        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
-        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}("predicate");
-        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}("object");
+        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "subject"
+        );
+        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}(
+            "predicate"
+        );
+        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "object"
+        );
 
         // execute interaction - create a triple
-        uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
+        uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(
+            subjectId,
+            predicateId,
+            objectId
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector)
+        );
         // execute interaction - deposit triple
         ethMultiVault.depositTriple{value: 0}(address(1), id);
 
@@ -95,16 +159,31 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
-        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
-        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}("predicate");
-        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}("object");
+        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "subject"
+        );
+        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}(
+            "predicate"
+        );
+        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "object"
+        );
 
         // execute interaction - create a triple
-        uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
+        uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(
+            subjectId,
+            predicateId,
+            objectId
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector)
+        );
         // execute interaction - deposit triple
-        ethMultiVault.depositTriple{value: testDepositAmount - 1}(address(1), id);
+        ethMultiVault.depositTriple{value: testDepositAmount - 1}(
+            address(1),
+            id
+        );
 
         vm.stopPrank();
     }
@@ -117,16 +196,31 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
-        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
-        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}("predicate");
-        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}("object");
+        uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "subject"
+        );
+        uint256 predicateId = ethMultiVault.createAtom{value: testAtomCost}(
+            "predicate"
+        );
+        uint256 objectId = ethMultiVault.createAtom{value: testAtomCost}(
+            "object"
+        );
 
         // execute interaction - create a triple
-        ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
+        ethMultiVault.createTriple{value: testDepositAmountTriple}(
+            subjectId,
+            predicateId,
+            objectId
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotTriple.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.MultiVault_VaultNotTriple.selector)
+        );
         // execute interaction - deposit triple
-        ethMultiVault.depositTriple{value: testDepositAmountTriple}(address(1), subjectId);
+        ethMultiVault.depositTriple{value: testDepositAmountTriple}(
+            address(1),
+            subjectId
+        );
 
         vm.stopPrank();
     }
