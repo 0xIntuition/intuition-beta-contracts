@@ -133,12 +133,7 @@ interface IEthMultiVault {
     /// @param atomWallet address of the atom's associated abstract account
     /// @param atomData the atom's respective string
     /// @param vaultID the vault id of the atom
-    event AtomCreated(
-        address indexed creator,
-        address indexed atomWallet,
-        bytes atomData,
-        uint256 vaultID
-    );
+    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultID);
 
     /// @notice emitted upon creation of a triple
     /// @param creator address of the triple creator
@@ -147,22 +142,14 @@ interface IEthMultiVault {
     /// @param objectId the triple's respective object atom
     /// @param vaultID the vault id of the triple
     event TripleCreated(
-        address indexed creator,
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId,
-        uint256 vaultID
+        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
 
     /// @notice emitted upon the transfer of fees to the protocol vault
     /// @param sender address of the sender
     /// @param protocolVault address of the protocol vault
     /// @param amount amount of fees transferred
-    event FeesTransferred(
-        address indexed sender,
-        address indexed protocolVault,
-        uint256 amount
-    );
+    event FeesTransferred(address indexed sender, address indexed protocolVault, uint256 amount);
 
     /* =================================================== */
     /*                       FUNCTIONS                     */
@@ -180,19 +167,13 @@ interface IEthMultiVault {
     /// @param assets amount of `assets` to calculate fees on
     /// @param id vault id to get corresponding fees for
     /// @return totalFees total fees that would be charged for depositing 'assets' into a vault
-    function getDepositFees(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function getDepositFees(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFees)
     /// @param id vault id to get corresponding fees for
     /// @return totalAssetsDelta changes in vault's total assets
     /// @return totalSharesDelta changes in vault's total shares (shares owed to receiver)
-    function getDepositAssetsAndShares(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256, uint256);
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) external view returns (uint256, uint256);
 
     /// @notice returns the assets that would be returned to the receiver of the redeem and protocol fees
     /// @param shares amount of `shares` to calculate fees on
@@ -201,20 +182,17 @@ interface IEthMultiVault {
     /// @return redeemableAssets amount of assets that is redeemable by the receiver
     /// @return protocolFees amount of assets that would be sent to the protocol vault
     /// @return exitFees amount of assets that would be charged for the exit fee
-    function getRedeemAssetsAndFees(
-        uint256 shares,
-        uint256 id
-    ) external view returns (uint256, uint256, uint256, uint256);
+    function getRedeemAssetsAndFees(uint256 shares, uint256 id)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
 
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id to get corresponding fees for
     /// @return feeAmount amount of assets that would be charged for the entry fee
     /// NOTE: if the vault being deposited on has a vault total shares of 0, the entry fee is not applied
-    function entryFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function entryFeeAmount(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice returns amount of assets that would be charged for the exit fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
@@ -222,42 +200,27 @@ interface IEthMultiVault {
     /// @return feeAmount amount of assets that would be charged for the exit fee
     /// NOTE: if the vault  being redeemed from given the shares to redeem results in a total shares after of 0,
     ///       the exit fee is not applied
-    function exitFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function exitFeeAmount(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice returns amount of assets that would be charged by a vault on protocol fee given amount of 'assets'
     ///         provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id to get corresponding fees for
     /// @return feeAmount amount of assets that would be charged by vault on protocol fee
-    function protocolFeeAmount(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function protocolFeeAmount(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice returns atom deposit fraction given amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id
     /// @return feeAmount amount of assets that would be used as atom deposit fraction
     /// NOTE: only applies to triple vaults
-    function atomDepositFractionAmount(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function atomDepositFractionAmount(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice Amount of shares that would be exchanged with the vault for the amount of assets provided
-    function convertToShares(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function convertToShares(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice Amount of assets that would be exchanged with the vault for the amount of shares provided
-    function convertToAssets(
-        uint256 shares,
-        uint256 id
-    ) external view returns (uint256);
+    function convertToAssets(uint256 shares, uint256 id) external view returns (uint256);
 
     /// @notice returns the current share price for the given vault id
     /// @param id vault id to get corresponding share price for
@@ -265,33 +228,23 @@ interface IEthMultiVault {
     function currentSharePrice(uint256 id) external view returns (uint256);
 
     /// @notice Simulates the effects of depositing assets at the current block
-    function previewDeposit(
-        uint256 assets,
-        uint256 id
-    ) external view returns (uint256);
+    function previewDeposit(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice Simulates the effects of redeeming shares at the current block
-    function previewRedeem(
-        uint256 shares,
-        uint256 id
-    ) external view returns (uint256);
+    function previewRedeem(uint256 shares, uint256 id) external view returns (uint256);
 
     /// @notice Max amount of shares that can be redeemed from the 'owner' balance through a redeem call
-    function maxRedeem(
-        address owner,
-        uint256 id
-    ) external view returns (uint256);
+    function maxRedeem(address owner, uint256 id) external view returns (uint256);
 
     /// @notice returns the corresponding hash for the given RDF triple, given the atoms that make up the triple
     /// @param subjectId the subject atom's vault id
     /// @param predicateId the predicate atom's vault id
     /// @param objectId the object atom's vault id
     /// @return hash the corresponding hash for the given RDF triple based on the atom vault ids
-    function tripleHashFromAtoms(
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
-    ) external pure returns (bytes32);
+    function tripleHashFromAtoms(uint256 subjectId, uint256 predicateId, uint256 objectId)
+        external
+        pure
+        returns (bytes32);
 
     /// @notice returns the corresponding hash for the given RDF triple, given the triple vault id
     /// @param id vault id of the triple
@@ -305,9 +258,7 @@ interface IEthMultiVault {
 
     /// @notice return the underlying atom vault ids given a triple vault id
     /// @param id Vault ID
-    function getTripleAtoms(
-        uint256 id
-    ) external view returns (uint256, uint256, uint256);
+    function getTripleAtoms(uint256 id) external view returns (uint256, uint256, uint256);
 
     /// @notice returns the Triple ID for the given counter triple ID
     /// @param id Counter Triple ID
@@ -321,21 +272,14 @@ interface IEthMultiVault {
     /// @param id Vault ID
     /// @param atomId Id of the atom
     /// @param account Address of the account
-    function tripleAtomShares(
-        uint256 id,
-        uint256 atomId,
-        address account
-    ) external view returns (uint256);
+    function tripleAtomShares(uint256 id, uint256 atomId, address account) external view returns (uint256);
 
     /// @notice returns the number of shares and assets (less fees) user has in the vault
     /// @param vaultId vault id of the vault
     /// @param receiver address of the receiver
     /// @return shares number of shares user has in the vault
     /// @return assets number of assets user has in the vault
-    function getVaultStateForUser(
-        uint256 vaultId,
-        address receiver
-    ) external view returns (uint256, uint256);
+    function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
 
     /// @notice returns the Atom Wallet address for the given atom data
     /// @param id vault id of the atom associated to the atom wallet
@@ -368,17 +312,13 @@ interface IEthMultiVault {
     /// @param atomUri atom data to create atom with
     /// @return id vault id of the atom
     /// NOTE: This function will revert if called with less than `getAtomCost()` in `msg.value`
-    function createAtom(
-        bytes calldata atomUri
-    ) external payable returns (uint256);
+    function createAtom(bytes calldata atomUri) external payable returns (uint256);
 
     /// @notice Batch create atoms and return their vault ids
     /// @param atomUris atom data array to create atoms with
     /// @return ids vault ids array of the atoms
     /// NOTE: This function will revert if called with less than `getAtomCost()` * `atomUris.length` in `msg.value`
-    function batchCreateAtom(
-        bytes[] calldata atomUris
-    ) external payable returns (uint256[] memory);
+    function batchCreateAtom(bytes[] calldata atomUris) external payable returns (uint256[] memory);
 
     /// @notice create a triple and return its vault id
     /// @param subjectId vault id of the subject atom
@@ -387,11 +327,10 @@ interface IEthMultiVault {
     /// @return id vault id of the triple
     /// NOTE: This function will revert if called with less than `getTripleCost()` in `msg.value`.
     ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
-    function createTriple(
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
-    ) external payable returns (uint256);
+    function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
+        external
+        payable
+        returns (uint256);
 
     /// @notice batch create triples and return their vault ids
     /// @param subjectIds vault ids array of subject atoms
@@ -413,21 +352,14 @@ interface IEthMultiVault {
     /// @return shares the amount of shares minted
     /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
-    function depositAtom(
-        address receiver,
-        uint256 id
-    ) external payable returns (uint256);
+    function depositAtom(address receiver, uint256 id) external payable returns (uint256);
 
     /// @notice redeem assets from an atom vault
     /// @param shares the amount of shares to redeem
     /// @param receiver the address to receiver the assets
     /// @param id the vault ID of the atom
     /// @return assets the amount of assets/eth withdrawn
-    function redeemAtom(
-        uint256 shares,
-        address receiver,
-        uint256 id
-    ) external returns (uint256);
+    function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
     /// @notice deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'reciever'
     /// *payable msg.value amount of eth to deposit
@@ -437,10 +369,7 @@ interface IEthMultiVault {
     /// @return shares the amount of shares minted
     /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not a triple.
-    function depositTriple(
-        address receiver,
-        uint256 id
-    ) external payable returns (uint256);
+    function depositTriple(address receiver, uint256 id) external payable returns (uint256);
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
     ///         from the multiVault to 'reciever' factoring in exit fees
@@ -448,11 +377,7 @@ interface IEthMultiVault {
     /// @param receiver the address to receiver the assets
     /// @param id the vault ID of the triple
     /// @return assets the amount of assets/eth withdrawn
-    function redeemTriple(
-        uint256 shares,
-        address receiver,
-        uint256 id
-    ) external returns (uint256);
+    function redeemTriple(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
     /// @dev pause the pausable contract methods
     function pause() external;
@@ -463,10 +388,7 @@ interface IEthMultiVault {
     /// @dev schedule an operation to be executed after a delay
     /// @param operationId unique identifier for the operation
     /// @param data data to be executed
-    function scheduleOperation(
-        bytes32 operationId,
-        bytes calldata data
-    ) external;
+    function scheduleOperation(bytes32 operationId, bytes calldata data) external;
 
     /// @dev execute a scheduled operation
     /// @param operationId unique identifier for the operation
@@ -495,28 +417,20 @@ interface IEthMultiVault {
 
     /// @dev sets the atom share lock fee
     /// @param atomWalletInitialDepositAmount new atom share lock fee
-    function setAtomWalletInitialDepositAmount(
-        uint256 atomWalletInitialDepositAmount
-    ) external;
+    function setAtomWalletInitialDepositAmount(uint256 atomWalletInitialDepositAmount) external;
 
     /// @dev sets the atom creation fee
     /// @param atomCreationProtocolFee new atom creation fee
-    function setAtomCreationProtocolFee(
-        uint256 atomCreationProtocolFee
-    ) external;
+    function setAtomCreationProtocolFee(uint256 atomCreationProtocolFee) external;
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
     /// @param tripleCreationProtocolFee new fee in wei
-    function setTripleCreationProtocolFee(
-        uint256 tripleCreationProtocolFee
-    ) external;
+    function setTripleCreationProtocolFee(uint256 tripleCreationProtocolFee) external;
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit fraction percentage
-    function setAtomDepositFractionForTriple(
-        uint256 atomDepositFractionForTriple
-    ) external;
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
