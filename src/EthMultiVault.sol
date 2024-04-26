@@ -20,7 +20,6 @@ import {Errors} from "src/libraries/Errors.sol";
  * @notice Manages the creation and management of vaults associated with atoms & triples.
  */
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
-contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
 
