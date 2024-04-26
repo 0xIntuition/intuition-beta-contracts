@@ -131,7 +131,7 @@ contract DeployEthMultiVaultScript is Script {
             opts
         );
 
-        console.log("TransparentUpgradableProxy:", ethMultiVaultProxy);
+        console.log("transparentUpgradableProxy:", ethMultiVaultProxy);
 
         vm.stopBroadcast();
     }
