@@ -123,7 +123,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalSharesDeltaExpected;
 
         if (totalSharesBefore == getMinShare()) {
-            totalSharesDeltaExpected = userAssetsAfterTotalFees; // shares owed to receiver
+            totalSharesDeltaExpected = userAssetsAfterAtomDepositFraction; // shares owed to receiver
         } else {
             // user receives entryFeeAmount less shares than assets deposited into the vault
             totalSharesDeltaExpected =

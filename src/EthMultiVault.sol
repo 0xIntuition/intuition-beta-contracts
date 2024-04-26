@@ -20,6 +20,7 @@ import {Errors} from "src/libraries/Errors.sol";
  * @notice Manages the creation and management of vaults associated with atoms & triples.
  */
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
+contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
 
@@ -174,7 +175,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 totalSharesDelta;
 
         if (vaults[id].totalShares == generalConfig.minShare) {
-            totalSharesDelta = userAssetsAfterTotalFees; // shares owed to receiver
+            totalSharesDelta = userAssetsAfterAtomDepositFraction; // shares owed to receiver
         } else {
             // user receives entryFeeAmount less shares than assets deposited into the vault
             totalSharesDelta = convertToShares(userAssetsAfterTotalFees, id);
@@ -288,7 +289,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
     function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 shares = supply == 0 ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
+        uint256 shares = supply <= generalConfig.minShare ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
         return shares;
     }
 
@@ -298,7 +299,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
     function convertToAssets(uint256 shares, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 assets = supply == 0 ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
+        uint256 assets = supply <= generalConfig.minShare ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
         return assets;
     }
 
