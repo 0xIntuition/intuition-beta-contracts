@@ -138,6 +138,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return (totalUserAssets, redeemableAssets, protocolFee, exitFees);
     }
 
+    function currentSharePrice(uint256 id) public view returns (uint256) {
+        return ethMultiVault.currentSharePrice(id);
+    }
+
     //////// Generate Memes ////////
 
     function _generateMemes() internal {

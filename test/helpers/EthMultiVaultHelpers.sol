@@ -94,12 +94,35 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         return shares;
     }
 
-    function convertToSharesCalculation(
-        uint256 userAssetsAfterTotalFees,
+    function convertToSharesCalculation(uint256 assets, uint256 totalSharesBefore, uint256 totalAssetsBefore)
+        public
+        pure
+        returns (uint256)
+    {
+        return (assets * totalSharesBefore) / totalAssetsBefore;
+    }
+
+    function getDepositAssetsAndSharesCalculation(
+        uint256 assets,
+        uint256 id,
         uint256 totalSharesBefore,
         uint256 totalAssetsBefore
-    ) public pure returns (uint256) {
-        return (userAssetsAfterTotalFees * totalSharesBefore) / totalAssetsBefore;
+    ) public view returns (uint256, uint256) {
+        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
+        uint256 userAssetsAfterAtomDepositFraction = assets - atomDepositFraction;
+        uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
+
+        uint256 totalAssetsDelta = userAssetsAfterAtomDepositFraction;
+        uint256 totalSharesDelta;
+        if (totalAssetsBefore == 1e5) {
+            totalSharesDelta = totalAssetsDelta;
+        } else {
+            totalSharesDelta = convertToSharesCalculation(
+                userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore
+            );
+        }
+
+        return (totalAssetsDelta, totalSharesDelta);
     }
 
     function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)
@@ -108,18 +131,13 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     {
         uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
         uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
-
         uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
         uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
 
-        uint256 totalAssetsDeltaExpected = amount - atomDepositFraction;
-
-        // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
-
-        // vault's total shares should have gone up
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
+
+        uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
         uint256 totalSharesDeltaExpected;
 
         if (totalSharesBefore == getMinShare()) {
@@ -130,8 +148,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
                 convertToSharesCalculation(userAssetsAfterTotalFees, totalSharesBefore, totalAssetsBefore);
         }
 
-        // assertEq(totalSharesDeltaGot + entryFee, totalAssetsDeltaGot);
+        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
+
+        if (totalSharesBefore == getMinShare()) {
+            assertEq(totalSharesDeltaGot, totalAssetsDeltaGot);
+        } else {
+            uint256 totalSharesDeltaGotBeforeConverting =
+                (totalAssetsDeltaGot - entryFee) * (totalAssetsBefore / totalAssetsBefore);
+            assertEq(totalSharesDeltaGotBeforeConverting + entryFee, totalAssetsDeltaGot);
+        }
     }
 
     function checkDepositOnAtomVaultCreation(
