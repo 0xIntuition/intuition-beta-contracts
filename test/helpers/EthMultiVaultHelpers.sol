@@ -132,10 +132,6 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
         uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
         uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
-        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
-
-        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
 
         uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
         uint256 totalSharesDeltaExpected;
@@ -145,8 +141,11 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         } else {
             // user receives entryFeeAmount less shares than assets deposited into the vault
             totalSharesDeltaExpected =
-                convertToSharesCalculation(userAssetsAfterTotalFees, totalSharesBefore, totalAssetsBefore);
+                convertToSharesCalculation(userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore);
         }
+
+        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
 
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
@@ -154,9 +153,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         if (totalSharesBefore == getMinShare()) {
             assertEq(totalSharesDeltaGot, totalAssetsDeltaGot);
         } else {
-            uint256 totalSharesDeltaGotBeforeConverting =
-                (totalAssetsDeltaGot - entryFee) * (totalAssetsBefore / totalAssetsBefore);
-            assertEq(totalSharesDeltaGotBeforeConverting + entryFee, totalAssetsDeltaGot);
+            uint256 diff = userAssetsAfterAtomDepositFraction - totalSharesDeltaExpected;
+            assertEq(totalSharesDeltaGot + diff, totalAssetsDeltaGot);
         }
     }
 
