@@ -140,8 +140,9 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
             totalSharesDeltaExpected = userAssetsAfterAtomDepositFraction; // shares owed to receiver
         } else {
             // user receives entryFeeAmount less shares than assets deposited into the vault
-            totalSharesDeltaExpected =
-                convertToSharesCalculation(userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore);
+            totalSharesDeltaExpected = convertToSharesCalculation(
+                userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore
+            );
         }
 
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
