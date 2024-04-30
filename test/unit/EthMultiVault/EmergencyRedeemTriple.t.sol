@@ -19,7 +19,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -31,14 +31,14 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDespositAmount}(bob, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(bob, id);
 
         // snapshots before redeem
         uint256 userSharesBeforeRedeem = getSharesInVault(id, bob);
@@ -88,7 +88,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -105,14 +105,14 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getSharesInVault(counterId, address(0)), getMinShare());
 
         // execute interaction - deposit triple
-        ethMultiVault.depositTriple{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit triple
-        ethMultiVault.depositTriple{value: testDespositAmount}(bob, counterId);
+        ethMultiVault.depositTriple{value: testDepositAmount}(bob, counterId);
 
         // snapshots before redeem
         uint256 userSharesBeforeRedeem = getSharesInVault(counterId, bob);
@@ -151,7 +151,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -163,7 +163,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 
@@ -190,7 +190,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -202,7 +202,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(id, alice);
@@ -232,7 +232,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -244,7 +244,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositTriple{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 

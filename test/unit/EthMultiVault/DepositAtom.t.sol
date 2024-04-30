@@ -19,7 +19,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
@@ -35,17 +35,17 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        uint256 protocolFee = getProtocolFeeAmount(testDespositAmount, id);
-        uint256 valueToDeposit = testDespositAmount - protocolFee;
+        uint256 protocolFee = getProtocolFeeAmount(testDepositAmount, id);
+        uint256 valueToDeposit = testDepositAmount - protocolFee;
 
         uint256 sharesExpected = convertToShares(valueToDeposit - entryFeeAmount(valueToDeposit, id), id);
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
 
         checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalance(id, testDespositAmount, protocolVaultBalanceBefore);
+        checkProtocolVaultBalance(id, testDepositAmount, protocolVaultBalanceBefore);
 
         (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
 
@@ -63,7 +63,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit / 2;
+        uint256 testDepositAmount = testMinDesposit / 2;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
@@ -74,7 +74,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - deposit atoms
         vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector));
-        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
 
         vm.stopPrank();
     }
@@ -85,7 +85,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
@@ -96,7 +96,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - deposit atoms
         vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector));
-        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), id + 1);
+        ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id + 1);
 
         vm.stopPrank();
     }
@@ -107,7 +107,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
         uint256 testDepositAmountTriple = 0.01 ether;
 
         // execute interaction - create atoms
@@ -125,7 +125,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - deposit atoms
         vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
-        ethMultiVault.depositAtom{value: testDespositAmount}(address(1), positiveVaultId);
+        ethMultiVault.depositAtom{value: testDepositAmount}(address(1), positiveVaultId);
 
         vm.stopPrank();
     }

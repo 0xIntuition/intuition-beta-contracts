@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
 import {IPermit2} from "./IPermit2.sol";
@@ -40,6 +40,8 @@ interface IEthMultiVault {
     struct TripleConfig {
         /// @notice fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationProtocolFee;
+        /// @notice static fee going towards increasing the amount of assets in the underlying atom vaults
+        uint256 atomDepositFractionOnTripleCreation;
         /// @notice % of the Triple deposit amount that is used to purchase equity in the underlying atoms
         uint256 atomDepositFractionForTriple;
     }
@@ -96,15 +98,17 @@ interface IEthMultiVault {
     /// @param sender initializer of the deposit
     /// @param receiver beneficiary of the minted shares
     /// @param vaultBalance total assets held in the vault
-    /// @param assets total assets transferred
-    /// @param shares total shares transferred
+    /// @param userAssetsAfterTotalFees total assets that go towards minting shares for the receiver
+    /// @param sharesForReceiver total shares transferred
+    /// @param entryFee total fee amount collected for entering the vault
     /// @param id vault id
     event Deposited(
         address indexed sender,
         address indexed receiver,
         uint256 vaultBalance,
-        uint256 assets,
-        uint256 shares,
+        uint256 userAssetsAfterTotalFees,
+        uint256 sharesForReceiver,
+        uint256 entryFee,
         uint256 id
     );
 
@@ -112,7 +116,7 @@ interface IEthMultiVault {
     /// @param sender initializer of the withdrawal
     /// @param owner owner of the shares that were redeemed
     /// @param vaultBalance total assets held in the vault
-    /// @param assets quantity of assets withdrawn
+    /// @param assetsForReceiver quantity of assets withdrawn by the receiver
     /// @param shares quantity of shares redeemed
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param id vault id
@@ -120,7 +124,7 @@ interface IEthMultiVault {
         address indexed sender,
         address indexed owner,
         uint256 vaultBalance,
-        uint256 assets,
+        uint256 assetsForReceiver,
         uint256 shares,
         uint256 exitFee,
         uint256 id
@@ -169,19 +173,26 @@ interface IEthMultiVault {
 
     /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFees)
     /// @param id vault id to get corresponding fees for
-    /// @return netUserAssets net assets that go towards minting shares for the user
     /// @return totalAssetsDelta changes in vault's total assets
-    /// @return sharesForReceiver shares owed to receiver
-    function getDepositValues(uint256 assets, uint256 id) external view returns (uint256, uint256, uint256);
+    /// @return sharesForReceiver changes in vault's total shares (shares owed to receiver)
+    /// @return userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver
+    /// @return entryFee amount of assets that would be charged for the entry fee
+    function getDepositSharesAndFees(uint256 assets, uint256 id)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
 
     /// @notice returns the assets that would be returned to the receiver of the redeem and protocol fees
     /// @param shares amount of `shares` to calculate fees on
     /// @param id vault id to get corresponding fees for
     /// @return totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees
-    /// @return redeemableAssets amount of assets that is redeemable by the receiver
+    /// @return assetsForReceiver amount of assets that is redeemable by the receiver
     /// @return protocolFees amount of assets that would be sent to the protocol vault
     /// @return exitFees amount of assets that would be charged for the exit fee
-    function getRedeemValues(uint256 shares, uint256 id) external view returns (uint256, uint256, uint256, uint256);
+    function getRedeemAssetsAndFees(uint256 shares, uint256 id)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
 
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     /// @param assets amount of assets to calculate fee on
@@ -269,12 +280,6 @@ interface IEthMultiVault {
     /// @param atomId Id of the atom
     /// @param account Address of the account
     function tripleAtomShares(uint256 id, uint256 atomId, address account) external view returns (uint256);
-
-    /// @notice returns the number of shares user has in the vault
-    /// @param vaultId vault id of the vault
-    /// @param receiver address of the receiver
-    /// @return balance number of shares user has in the vault
-    function getVaultBalance(uint256 vaultId, address receiver) external view returns (uint256);
 
     /// @notice returns the number of shares and assets (less fees) user has in the vault
     /// @param vaultId vault id of the vault

@@ -20,13 +20,13 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // test values
         uint256 testAtomCost = getAtomCost();
         uint256 testMinDesposit = getMinDeposit();
-        uint256 testDespositAmount = testMinDesposit;
+        uint256 testDepositAmount = testMinDesposit;
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtom{value: testDespositAmount}(alice, id);
+        ethMultiVault.depositAtom{value: testDepositAmount}(alice, id);
 
         vm.stopPrank();
 

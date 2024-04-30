@@ -46,7 +46,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getTripleCreationProtocolFee() public view returns (uint256 tripleCreationProtocolFee) {
-        (tripleCreationProtocolFee,) = ethMultiVault.tripleConfig();
+        (tripleCreationProtocolFee,,) = ethMultiVault.tripleConfig();
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
@@ -65,8 +65,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (,,,,,,, minDelay) = ethMultiVault.generalConfig();
     }
 
+    function getAtomDepositFractionOnTripleCreation()
+        public
+        view
+        returns (uint256 atomDepositFractionOnTripleCreation)
+    {
+        (, atomDepositFractionOnTripleCreation,) = ethMultiVault.tripleConfig();
+    }
+
     function getAtomDepositFraction() public view returns (uint256 atomDepositFractionForTriple) {
-        (, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
+        (,, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
     }
 
     function getAtomWalletAddr(uint256 id) public view returns (address) {
@@ -82,26 +90,43 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getSharesInVault(uint256 vaultId, address user) public view returns (uint256) {
-        return ethMultiVault.getVaultBalance(vaultId, user);
+        (uint256 shares,) = ethMultiVault.getVaultStateForUser(vaultId, user);
+        return shares;
     }
 
     function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)
         public
         payable
     {
-        uint256 entryFee = entryFeeAmount(amount, id);
+        uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
+        uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
 
-        uint256 totalAssetsDeltaExpected = amount - atomDepositFractionAmount(amount, id);
+        uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
 
-        // vault's total assets should have gone up
+        uint256 entryFee;
+
+        if (totalSharesBefore == getMinShare()) {
+            entryFee = 0;
+        } else {
+            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
+        }
+
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
+
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
-        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
-
-        // vault's total shares should have gone up
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
 
-        // user receives entryFeeAmount less shares than assets deposited into the vault
-        assertEq(totalAssetsDeltaGot, totalSharesDeltaGot + entryFee);
+        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
+
+        uint256 totalSharesDeltaExpected;
+        if (totalSharesBefore == 0) {
+            totalSharesDeltaExpected = userAssetsAfterTotalFees;
+        } else {
+            totalSharesDeltaExpected = userAssetsAfterTotalFees.mulDiv(totalSharesBefore, totalAssetsBefore);
+        }
+
+        // Assert the calculated shares delta is as expected based on the backwards calculation from `convertToShares`
+        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
     function checkDepositOnAtomVaultCreation(
@@ -132,25 +157,32 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
     function checkDepositOnTripleVaultCreation(
         uint256 id,
-        uint256 atomCost,
+        uint256 value,
         uint256 totalAssetsBefore,
         uint256 totalSharesBefore
     ) public view {
         // calculate expected total assets delta
-        uint256 assetsDeposited = atomCost - getTripleCreationProtocolFee();
-        uint256 totalAssetsDeltaExpected = assetsDeposited - getProtocolFeeAmount(atomCost, id);
+        uint256 userDeposit = value - getTripleCost();
+        uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
+        uint256 userDepositAfterProtocolFees = userDeposit - protocolDepositFee;
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+
+        uint256 sharesForZeroAddress = getMinShare();
+
+        uint256 totalAssetsDeltaExpected = userDepositAfterProtocolFees - atomDepositFraction + sharesForZeroAddress;
 
         // calculate expected total shares delta
-        uint256 sharesForDepositor = totalAssetsDeltaExpected;
-        uint256 sharesForZeroAddress = getMinShare();
+        uint256 sharesForDepositor = userDepositAfterProtocolFees - atomDepositFraction;
         uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress;
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
+
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
         // vault's total shares should have gone up
-        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
+        // uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
