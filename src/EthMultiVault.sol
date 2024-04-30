@@ -142,13 +142,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding fees for
     /// @return totalFees total fees that would be charged for depositing 'assets' into a vault
     function getDepositFees(uint256 assets, uint256 id) public view returns (uint256) {
-        uint256 protocolFees = protocolFeeAmount(assets, id);
-        uint256 assetsAfterProtocolFees = assets - protocolFees;
+        uint256 protocolFee = protocolFeeAmount(assets, id);
+        uint256 userAssetsAfterProtocolFees = assets - protocolFee;
 
-        uint256 entryFee = entryFeeAmount(assetsAfterProtocolFees, id);
-        uint256 atomDepositFraction = atomDepositFractionAmount(assetsAfterProtocolFees, id);
+        uint256 atomDepositFraction = atomDepositFractionAmount(userAssetsAfterProtocolFees, id);
+        uint256 userAssetsAfterProtocolFeesAndAtomDepositFraction = userAssetsAfterProtocolFees - atomDepositFraction;
 
-        uint256 totalFees = entryFee + atomDepositFraction + protocolFees;
+        uint256 entryFee = entryFeeAmount(userAssetsAfterProtocolFeesAndAtomDepositFraction, id);
+        uint256 totalFees = protocolFee + atomDepositFraction + entryFee;
+
         return totalFees;
     }
 
