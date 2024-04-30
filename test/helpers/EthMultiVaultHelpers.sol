@@ -94,69 +94,39 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         return shares;
     }
 
-    function convertToSharesCalculation(uint256 assets, uint256 totalSharesBefore, uint256 totalAssetsBefore)
-        public
-        pure
-        returns (uint256)
-    {
-        return (assets * totalSharesBefore) / totalAssetsBefore;
-    }
-
-    function getDepositAssetsAndSharesCalculation(
-        uint256 assets,
-        uint256 id,
-        uint256 totalSharesBefore,
-        uint256 totalAssetsBefore
-    ) public view returns (uint256, uint256) {
-        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
-        uint256 userAssetsAfterAtomDepositFraction = assets - atomDepositFraction;
-        uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
-
-        uint256 totalAssetsDelta = userAssetsAfterAtomDepositFraction;
-        uint256 totalSharesDelta;
-        if (totalAssetsBefore == 1e5) {
-            totalSharesDelta = totalAssetsDelta;
-        } else {
-            totalSharesDelta = convertToSharesCalculation(
-                userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore
-            );
-        }
-
-        return (totalAssetsDelta, totalSharesDelta);
-    }
-
     function checkDepositIntoVault(uint256 amount, uint256 id, uint256 totalAssetsBefore, uint256 totalSharesBefore)
         public
         payable
     {
         uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
         uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
-        uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
 
         uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
-        uint256 totalSharesDeltaExpected;
+
+        uint256 entryFee;
 
         if (totalSharesBefore == getMinShare()) {
-            totalSharesDeltaExpected = userAssetsAfterAtomDepositFraction; // shares owed to receiver
+            entryFee = 0;
         } else {
-            // user receives entryFeeAmount less shares than assets deposited into the vault
-            totalSharesDeltaExpected = convertToSharesCalculation(
-                userAssetsAfterAtomDepositFraction - entryFee, totalSharesBefore, totalAssetsBefore
-            );
+            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
         }
+
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
 
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
         uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
 
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
-        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
 
-        if (totalSharesBefore == getMinShare()) {
-            assertEq(totalSharesDeltaGot, totalAssetsDeltaGot);
+        uint256 totalSharesDeltaExpected;
+        if (totalSharesBefore == 0) {
+            totalSharesDeltaExpected = userAssetsAfterTotalFees;
         } else {
-            uint256 diff = userAssetsAfterAtomDepositFraction - totalSharesDeltaExpected;
-            assertEq(totalSharesDeltaGot + diff, totalAssetsDeltaGot);
+            totalSharesDeltaExpected = userAssetsAfterTotalFees.mulDiv(totalSharesBefore, totalAssetsBefore);
         }
+
+        // Assert the calculated shares delta is as expected based on the backwards calculation from `convertToShares`
+        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
     function checkDepositOnAtomVaultCreation(

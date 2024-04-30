@@ -161,7 +161,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return sharesForReceiver changes in vault's total shares (shares owed to receiver)
     /// @return userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver
     /// @return entryFee amount of assets that would be charged for the entry fee
-    function getDepositAssetsAndShares(uint256 assets, uint256 id)
+    function getDepositSharesAndFees(uint256 assets, uint256 id)
         public
         view
         returns (uint256, uint256, uint256, uint256)
@@ -169,23 +169,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
         uint256 userAssetsAfterAtomDepositFraction = assets - atomDepositFraction;
 
-        uint256 entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
-
-        // amount of assets that goes towards minting shares for the receiver
-        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
-
         // changes in vault's total assets
         // if the vault is an atom vault `atomDepositFraction` is 0
         uint256 totalAssetsDelta = assets - atomDepositFraction;
 
-        uint256 sharesForReceiver;
+        uint256 entryFee;
 
         if (vaults[id].totalShares == generalConfig.minShare) {
-            sharesForReceiver = userAssetsAfterAtomDepositFraction; // shares owed to receiver
+            entryFee = 0;
         } else {
-            // user receives entryFeeAmount less shares than assets deposited into the vault
-            sharesForReceiver = convertToShares(userAssetsAfterTotalFees, id);
+            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
         }
+
+        // amount of assets that goes towards minting shares for the receiver
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
+
+        // user receives amount of shares as calculated by `convertToShares`
+        uint256 sharesForReceiver = convertToShares(userAssetsAfterTotalFees, id);
 
         return (totalAssetsDelta, sharesForReceiver, userAssetsAfterTotalFees, entryFee);
     }
@@ -295,7 +295,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
     function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 shares = supply <= generalConfig.minShare ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
+        uint256 shares = supply == 0 ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
         return shares;
     }
 
@@ -305,7 +305,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
     function convertToAssets(uint256 shares, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 assets = supply <= generalConfig.minShare ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
+        uint256 assets = supply == 0 ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
         return assets;
     }
 
@@ -330,15 +330,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 assets, // should always be msg.value
         uint256 id
     ) public view returns (uint256) {
-        uint256 totalFees = getDepositFees(assets, id);
-
-        if (assets < totalFees) {
-            revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
-        }
-
-        uint256 totalAssetsDelta = assets - totalFees;
-        uint256 shares = convertToShares(totalAssetsDelta, id);
-        return shares;
+        (, uint256 sharesForReceiver,,) = getDepositSharesAndFees(assets, id);
+        return sharesForReceiver;
     }
 
     /// @notice simulates the effects of the redemption of `shares` and returns the estimated
@@ -1010,7 +1003,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             vaults[id].balanceOf[receiver],
             assets, // userAssetsAfterTotalFees
             totalDelta, // sharesForReceiver
-            0,
+            0, // entryFee is not charged on vault creation
             id
         );
     }
@@ -1026,7 +1019,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         (uint256 totalAssetsDelta, uint256 sharesForReceiver, uint256 userAssetsAfterTotalFees, uint256 entryFee) =
-            getDepositAssetsAndShares(value, id);
+            getDepositSharesAndFees(value, id);
 
         if (totalAssetsDelta <= 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();

@@ -177,7 +177,7 @@ interface IEthMultiVault {
     /// @return sharesForReceiver changes in vault's total shares (shares owed to receiver)
     /// @return userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver
     /// @return entryFee amount of assets that would be charged for the entry fee
-    function getDepositAssetsAndShares(uint256 assets, uint256 id)
+    function getDepositSharesAndFees(uint256 assets, uint256 id)
         external
         view
         returns (uint256, uint256, uint256, uint256);
