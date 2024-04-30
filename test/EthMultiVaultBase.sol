@@ -124,7 +124,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.atomDepositFractionAmount(assets, id);
     }
 
-    function getDepositAssetsAndShares(uint256 assets, uint256 id) public view returns (uint256, uint256) {
+    function getDepositAssetsAndShares(uint256 assets, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
         return ethMultiVault.getDepositAssetsAndShares(assets, id);
     }
 
@@ -133,9 +133,9 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     }
 
     function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
-        (uint256 totalUserAssets, uint256 redeemableAssets, uint256 protocolFee, uint256 exitFees) =
+        (uint256 totalUserAssets, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) =
             ethMultiVault.getRedeemAssetsAndFees(shares, id);
-        return (totalUserAssets, redeemableAssets, protocolFee, exitFees);
+        return (totalUserAssets, assetsForReceiver, protocolFee, exitFees);
     }
 
     function currentSharePrice(uint256 id) public view returns (uint256) {
