@@ -129,6 +129,27 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
+    function checkAtomDepositIntoVaultOnTripleVaultCreation(
+        uint256 proportionalAmount,
+        uint256 staticAmount,
+        uint256 id,
+        uint256 totalAssetsBefore,
+        uint256 totalSharesBefore
+    ) public payable {
+        uint256 totalAssetsDeltaExpected = proportionalAmount + staticAmount;
+        uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
+
+        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
+
+        uint256 entryFee = entryFeeAmount(proportionalAmount, id);
+        uint256 userAssetsAfterEntryFee = proportionalAmount - entryFee;
+
+        uint256 totalSharesDeltaExpected = userAssetsAfterEntryFee.mulDiv(totalSharesBefore, totalAssetsBefore);
+        uint256 totalSharesDeltaGot = vaultTotalShares(id) - totalSharesBefore;
+
+        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
+    }
+
     function checkDepositOnAtomVaultCreation(
         uint256 id,
         uint256 value, // msg.value

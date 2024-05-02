@@ -79,16 +79,28 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() / 3;
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, subjectId, totalAssetsBeforeAtomVaults[0], totalSharesBeforeAtomVaults[0]
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            subjectId,
+            totalAssetsBeforeAtomVaults[0],
+            totalSharesBeforeAtomVaults[0]
         );
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, predicateId, totalAssetsBeforeAtomVaults[1], totalSharesBeforeAtomVaults[1]
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            predicateId,
+            totalAssetsBeforeAtomVaults[1],
+            totalSharesBeforeAtomVaults[1]
         );
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, objectId, totalAssetsBeforeAtomVaults[2], totalSharesBeforeAtomVaults[2]
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            objectId,
+            totalAssetsBeforeAtomVaults[2],
+            totalSharesBeforeAtomVaults[2]
         );
 
         vm.stopPrank();

@@ -767,11 +767,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         for (uint256 i = 0; i < 3; i++) {
+            uint256 atomId = tripleAtomIds[i];
             // increase the total assets in each underlying atom vault
             _setVaultTotals(
-                tripleAtomIds[i],
-                vaults[id].totalAssets + (tripleConfig.atomDepositFractionOnTripleCreation / 3),
-                vaults[id].totalShares
+                atomId,
+                vaults[atomId].totalAssets + (tripleConfig.atomDepositFractionOnTripleCreation / 3),
+                vaults[atomId].totalShares
             );
         }
 
