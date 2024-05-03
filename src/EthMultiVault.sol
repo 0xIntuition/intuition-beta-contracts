@@ -758,11 +758,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         );
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
-        _depositAtomFraction(
-            id,
-            msg.sender, // receiver
-            atomDepositFraction + tripleConfig.atomDepositFractionOnTripleCreation
-        );
+        if (atomDepositFraction > 0) {
+            _depositAtomFraction(
+                id,
+                msg.sender, // receiver
+                atomDepositFraction
+            );
+        }
+
+        for (uint256 i = 0; i < 3; i++) {
+            uint256 atomId = tripleAtomIds[i];
+            // increase the total assets in each underlying atom vault
+            _setVaultTotals(
+                atomId,
+                vaults[atomId].totalAssets + (tripleConfig.atomDepositFractionOnTripleCreation / 3),
+                vaults[atomId].totalShares
+            );
+        }
 
         emit TripleCreated(msg.sender, subjectId, predicateId, objectId, id);
 

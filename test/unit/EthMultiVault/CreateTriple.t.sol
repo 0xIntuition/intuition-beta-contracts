@@ -74,20 +74,33 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
         uint256 userDepositAfterProtocolFees = userDeposit - protocolDepositFee;
 
-        uint256 atomDepositFraction =
-            atomDepositFractionAmount(userDepositAfterProtocolFees, id) + getAtomDepositFractionOnTripleCreation();
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
         uint256 distributeAmountPerAtomVault = atomDepositFraction / 3;
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, subjectId, totalAssetsBeforeAtomVaults[0], totalSharesBeforeAtomVaults[0]
+        uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() / 3;
+
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            subjectId,
+            totalAssetsBeforeAtomVaults[0],
+            totalSharesBeforeAtomVaults[0]
         );
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, predicateId, totalAssetsBeforeAtomVaults[1], totalSharesBeforeAtomVaults[1]
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            predicateId,
+            totalAssetsBeforeAtomVaults[1],
+            totalSharesBeforeAtomVaults[1]
         );
 
-        checkDepositIntoVault(
-            distributeAmountPerAtomVault, objectId, totalAssetsBeforeAtomVaults[2], totalSharesBeforeAtomVaults[2]
+        checkAtomDepositIntoVaultOnTripleVaultCreation(
+            distributeAmountPerAtomVault,
+            atomDepositFractionOnTripleCreationPerAtom,
+            objectId,
+            totalAssetsBeforeAtomVaults[2],
+            totalSharesBeforeAtomVaults[2]
         );
 
         vm.stopPrank();
