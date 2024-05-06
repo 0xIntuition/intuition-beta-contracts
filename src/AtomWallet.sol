@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -15,6 +16,12 @@ import {Errors} from "./libraries/Errors.sol";
 contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     using ECDSA for bytes32;
 
+    /// @notice The EthMultiVault contract address
+    IEthMultiVault public ethMultiVault;
+
+    /// @notice The flag to indicate if the wallet's ownership has been claimed
+    bool public isClaimed;
+
     IEntryPoint private _entryPoint;
 
     // solhint-disable-next-line no-empty-blocks
@@ -24,10 +31,12 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
      * @notice Initialize the AtomWallet contract
      * @param anEntryPoint the entry point contract address
      * @param anOwner the owner of the contract (`walletConfig.atomWarden` is the initial owner of all atom wallets)
+     * @param _ethMultiVault the EthMultiVault contract address
      */
-    function init(IEntryPoint anEntryPoint, address anOwner) external initializer {
+    function init(IEntryPoint anEntryPoint, address anOwner, IEthMultiVault _ethMultiVault) external initializer {
         __Ownable_init(anOwner);
         _entryPoint = anEntryPoint;
+        ethMultiVault = _ethMultiVault;
     }
 
     /// @notice Get the entry point contract address
@@ -129,18 +138,25 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         }
         _;
     }
-    
-    bool public isClaimed;
 
-    IEthMultiVault public ethMultiVault;
+    /// @notice Transfer ownership of the wallet to a new owner. If the current owner is
+    ///         the atomWarden, the new owner must be a different address. Once claimed,
+    ///         the ownership cannot be transferred back to the atomWarden.
+    function transferOwnership(address newOwner) public override onlyOwner {
+        if (newOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
 
-    function claim() public onlyOwner {
-        require(!isClaimed, "already claimed");
-        isClaimed = true;
+        if (!isClaimed && newOwner != ethMultiVault.getAtomWarden()) {
+            isClaimed = true;
+        }
+
+        _transferOwnership(newOwner);
     }
 
+    /// @notice Returns the owner of the wallet
     function owner() public view override returns (address) {
         OwnableStorage storage $ = _getOwnableStorage();
-        return isClaimed ? $.owner : ethMultiVault.walletConfig.atomWarden;
+        return isClaimed ? $._owner : ethMultiVault.getAtomWarden();
     }
 }

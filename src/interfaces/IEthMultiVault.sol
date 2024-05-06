@@ -294,6 +294,9 @@ interface IEthMultiVault {
     /// NOTE: the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) external view returns (address);
 
+    /// @notice returns the address of the atom warden
+    function getAtomWarden() external view returns (address);
+
     /// @notice deploy a given atom wallet
     /// @param atomId vault id of atom
     /// @return atomWallet the address of the atom wallet

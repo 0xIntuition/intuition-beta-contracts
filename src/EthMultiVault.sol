@@ -444,7 +444,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
         bytes memory initData = abi.encodeWithSelector(
-            AtomWallet.init.selector, IEntryPoint(walletConfig.entryPoint), walletConfig.atomWarden
+            AtomWallet.init.selector, IEntryPoint(walletConfig.entryPoint), walletConfig.atomWarden, address(this)
         );
 
         // encode constructor arguments of the BeaconProxy contract (address beacon, bytes memory data)
@@ -469,6 +469,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         bytes32 rawAddress = keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data)));
 
         return address(bytes20(rawAddress << 96));
+    }
+
+    /// @notice returns the address of the atom warden
+    function getAtomWarden() external view returns (address) {
+        return walletConfig.atomWarden;
     }
 
     /* =================================================== */
@@ -1311,6 +1316,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         vaultFees[id].protocolFee = protocolFee;
+    }
+
+    /// @dev sets the atomWarden address
+    /// @param atomWarden address of the new atomWarden
+    function setAtomWarden(address atomWarden) external onlyAdmin {
+        walletConfig.atomWarden = atomWarden;
     }
 
     /* =================================================== */
