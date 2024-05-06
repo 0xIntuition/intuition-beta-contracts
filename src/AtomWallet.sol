@@ -129,4 +129,18 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
         }
         _;
     }
+    
+    bool public isClaimed;
+
+    IEthMultiVault public ethMultiVault;
+
+    function claim() public onlyOwner {
+        require(!isClaimed, "already claimed");
+        isClaimed = true;
+    }
+
+    function owner() public view override returns (address) {
+        OwnableStorage storage $ = _getOwnableStorage();
+        return isClaimed ? $.owner : ethMultiVault.walletConfig.atomWarden;
+    }
 }
