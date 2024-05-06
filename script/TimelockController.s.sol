@@ -16,18 +16,19 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
  */
 contract TimelockControllerParametersScript is Script {
     /// Just change here for your deployment addresses
-    address _transparentUpgradeableProxy = 0xb243844355d80Ad82031f2e84C48B2e012c72D3b;
-    address _atomWalletBeacon = 0x4c48b6654D5fdfcDFa84ba073563DCA03a0Cc5A2;
-    address _proxyAdmin = 0xE17841F28a47250467f91D5D74a1D86768c182E9;
-    address _timelockController = 0xFb05d31c3D2aa044b3e5Bd6A37807331A261Eed9;
-    address _newImplementation = 0x1E75Db45bC9bd9E7f2866442F94404104c0898dF;
+    address _transparentUpgradeableProxy = address(0);
+    address _atomWalletBeacon = address(0);
+    address _proxyAdmin = address(0);
+    address _timelockController = address(0);
+    address _newImplementation = address(0);
+
+    /// Multisig addresses for key roles in the protocol
+    address _admin = address(0);
+    address _protocolVault = address(0);
+    address _atomWarden = address(0);
 
     IPermit2 _permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
     address _entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
-
-    address _admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition multisig
-    address _protocolVault = _admin;
-    address _atomWarden = _admin;
 
     function run() external view {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
@@ -38,7 +39,7 @@ contract TimelockControllerParametersScript is Script {
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
-            minDelay: 2 days // minimum delay for timelocked transactions
+            minDelay: 1 days // minimum delay for timelocked transactions
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
@@ -56,7 +57,7 @@ contract TimelockControllerParametersScript is Script {
             permit2: IPermit2(address(_permit2)), // Permit2 on Base
             entryPoint: _entryPoint, // EntryPoint address on Base
             atomWarden: _atomWarden, // AtomWarden address (should be a multisig in production)
-            atomWalletBeacon: _atomWalletBeacon // Address of the AtomWalletBeacon contract
+            atomWalletBeacon: address(_atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
         IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
@@ -71,10 +72,10 @@ contract TimelockControllerParametersScript is Script {
         uint256 value = 0;
         bytes32 predecessor = bytes32(0);
         bytes32 salt = bytes32(0);
-        uint256 delay = 2 days;
+        uint256 delay = 5 minutes;
 
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVaultV2.initialize.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
+            EthMultiVaultV2.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
         bytes memory timelockControllerData = abi.encodeWithSelector(
