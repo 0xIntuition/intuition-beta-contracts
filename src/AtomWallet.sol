@@ -19,7 +19,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /// @notice The EthMultiVault contract address
     IEthMultiVault public ethMultiVault;
 
-    /// @notice The flag to indicate if the wallet's ownership has been claimed
+    /// @notice The flag to indicate if the wallet's ownership has been claimed by the user
     bool public isClaimed;
 
     IEntryPoint private _entryPoint;
