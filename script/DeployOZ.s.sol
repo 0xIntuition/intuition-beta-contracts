@@ -77,51 +77,51 @@ contract DeployEthMultiVaultScript is Script {
 
         console.log("atomWalletBeacon:", address(atomWalletBeacon));
 
-        // // // ======== Deploy EthMultiVault ========
+        // ======== Deploy EthMultiVault ========
 
-        // IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
-        //     admin: admin, // Admin address for the EthMultiVault contract
-        //     protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
-        //     feeDenominator: 10000, // Common denominator for fee calculations
-        //     minDeposit: 0.0003 ether, // Minimum deposit amount in wei
-        //     minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
-        //     atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
-        //     decimalPrecision: 1e18, // decimal precision used for calculating share prices
-        //     minDelay: 1 days // minimum delay for timelocked transactions
-        // });
+        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+            admin: admin, // Admin address for the EthMultiVault contract
+            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            feeDenominator: 10000, // Common denominator for fee calculations
+            minDeposit: 0.0003 ether, // Minimum deposit amount in wei
+            minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+            atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
+            decimalPrecision: 1e18, // decimal precision used for calculating share prices
+            minDelay: 1 days // minimum delay for timelocked transactions
+        });
 
-        // IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-        //     atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-        //     atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
-        // });
+        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+            atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
+        });
 
-        // IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-        //     tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
-        //     atomDepositFractionOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
-        //     atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
-        // });
+        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+            tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
+            atomDepositFractionOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
+            atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
+        });
 
-        // IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
-        //     permit2: IPermit2(address(permit2)), // Permit2 on Base
-        //     entryPoint: entryPoint, // EntryPoint address on Base
-        //     atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
-        //     atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
-        // });
+        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+            permit2: IPermit2(address(permit2)), // Permit2 on Base
+            entryPoint: entryPoint, // EntryPoint address on Base
+            atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+            atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
+        });
 
-        // IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
-        //     entryFee: 500, // Entry fee for vault 0
-        //     exitFee: 500, // Exit fee for vault 0
-        //     protocolFee: 100 // Protocol fee for vault 0
-        // });
+        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
+            entryFee: 500, // Entry fee for vault 0
+            exitFee: 500, // Exit fee for vault 0
+            protocolFee: 100 // Protocol fee for vault 0
+        });
 
-        // address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
-        //     "EthMultiVault.sol",
-        //     address(timelock),
-        //     abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees)),
-        //     opts
-        // );
+        address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
+            "EthMultiVault.sol",
+            address(timelock),
+            abi.encodeCall(EthMultiVault.init, (generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees)),
+            opts
+        );
 
-        // console.log("transparentUpgradableProxy:", ethMultiVaultProxy);
+        console.log("transparentUpgradableProxy:", ethMultiVaultProxy);
 
         vm.stopBroadcast();
     }
