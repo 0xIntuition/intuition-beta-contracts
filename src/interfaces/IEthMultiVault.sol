@@ -464,4 +464,8 @@ interface IEthMultiVault {
     /// @param id vault id to set protocol fee for
     /// @param protocolFee protocol fee to set
     function setProtocolFee(uint256 id, uint256 protocolFee) external;
+
+    /// @dev sets the atomWarden address
+    /// @param atomWarden address of the new atomWarden
+    function setAtomWarden(address atomWarden) external;
 }
