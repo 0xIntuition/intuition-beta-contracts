@@ -77,7 +77,7 @@ contract UpgradeTo is Test {
         // Example configurations for EthMultiVault initialization (NOT meant to be used in production)
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            protocolVault: protocolVault, // Protocol vault address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)

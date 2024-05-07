@@ -13,7 +13,7 @@ interface IEthMultiVault {
     struct GeneralConfig {
         /// @notice Admin address
         address admin;
-        /// @notice Intuition Protocol multisig address
+        /// @notice Protocol vault address
         address protocolVault;
         /// @notice Fees are calculated by amount * (fee / feeDenominator);
         uint256 feeDenominator;

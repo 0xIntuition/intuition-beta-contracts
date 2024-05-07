@@ -25,14 +25,14 @@ contract TimelockControllerParametersScript is Script {
     IPermit2 _permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
     address _entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
 
-    address _admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition multisig
+    address _admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Multisig
     address _protocolVault = _admin;
     address _atomWarden = _admin;
 
     function run() external view {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: _admin, // Admin address for the EthMultiVault contract
-            protocolVault: _protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            protocolVault: _protocolVault, // Protocol vault address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
