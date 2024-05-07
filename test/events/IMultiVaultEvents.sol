@@ -1,8 +1,7 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
 /// @title IVaultManager
-/// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IMultiVaultEvents {
     /*////////// EVENTS //////////////////////////////////////////////////////////////////*/
