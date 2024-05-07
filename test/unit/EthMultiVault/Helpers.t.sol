@@ -91,7 +91,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         (, bytes memory returnData2) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
 
         address newOwner = abi.decode(returnData2, (address));
-        
+
         assertEq(newOwner, address(0xabc));
 
         vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableInvalidOwner.selector));
