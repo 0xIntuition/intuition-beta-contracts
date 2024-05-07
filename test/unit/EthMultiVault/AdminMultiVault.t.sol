@@ -216,6 +216,15 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getAtomUriMaxLength(), testValue);
     }
 
+    function testSetAtomWarden() external {
+        address testValue = bob;
+
+        // msg.sender is the caller of EthMultiVaultBase
+        vm.prank(msg.sender);
+        ethMultiVault.setAtomWarden(testValue);
+        assertEq(ethMultiVault.getAtomWarden(), testValue);
+    }
+
     function getAtomCost() public view override returns (uint256) {
         return EthMultiVaultBase.getAtomCost();
     }

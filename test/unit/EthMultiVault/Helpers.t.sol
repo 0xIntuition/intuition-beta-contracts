@@ -6,6 +6,8 @@ import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
 import {Errors} from "../../../src/libraries/Errors.sol";
 import {AtomWallet} from "src/AtomWallet.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {
@@ -67,6 +69,54 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // verify the computed address matches the actual wallet address
         assertEq(computedAddress, atomWalletAddress);
+    }
+
+    function testAtomWalletOwnershipClaim() external {
+        // execute interaction - create atom
+        uint256 atomId = ethMultiVault.createAtom{value: getAtomCost()}("atom1");
+
+        address atomWalletAddress = ethMultiVault.deployAtomWallet(atomId);
+        address payable atomWallet = payable(atomWalletAddress);
+
+        (, bytes memory returnData1) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
+
+        address atomWalletOwner = abi.decode(returnData1, (address));
+        address atomWarden = ethMultiVault.getAtomWarden();
+
+        assertEq(atomWalletOwner, atomWarden);
+
+        vm.startPrank(atomWarden, atomWarden);
+
+        atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0xabc)));
+        (, bytes memory returnData2) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
+
+        address newOwner = abi.decode(returnData2, (address));
+        
+        assertEq(newOwner, address(0xabc));
+
+        vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableInvalidOwner.selector));
+
+        atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0x456)));
+
+        vm.stopPrank();
+
+        // msg.sender = admin
+        vm.startPrank(msg.sender, msg.sender);
+
+        ethMultiVault.setAtomWarden(address(0xdef));
+
+        (, bytes memory returnData3) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
+
+        address atomWalletOwnerAfterUpdate = abi.decode(returnData3, (address));
+
+        // Changing the atomWarden should not affect the ownership of the atom wallet if it has been claimed
+        assertEq(atomWalletOwnerAfterUpdate, address(0xabc));
+
+        address atomWardenAfterUpdate = ethMultiVault.getAtomWarden();
+
+        assertEq(atomWardenAfterUpdate, address(0xdef));
+
+        vm.stopPrank();
     }
 
     function testPlainEtherTransferToContractShouldRevert() external {
