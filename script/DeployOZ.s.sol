@@ -22,10 +22,8 @@ contract DeployEthMultiVaultScript is Script {
 
         // Check if we have deploy and upgrade processes defined
         ApprovalProcessResponse memory deployApprovalProcess = Defender.getDeployApprovalProcess();
-        ApprovalProcessResponse memory upgradeApprovalProcess = Defender.getUpgradeApprovalProcess();
 
         console.log("deploy approval:", deployApprovalProcess.via);
-        console.log("upgrade approval:", upgradeApprovalProcess.via);
 
         if (deployApprovalProcess.via == address(0)) {
             revert(
@@ -37,20 +35,10 @@ contract DeployEthMultiVaultScript is Script {
             );
         }
 
-        if (upgradeApprovalProcess.via == address(0)) {
-            revert(
-                string.concat(
-                    "Upgrade approval process with id ",
-                    upgradeApprovalProcess.approvalProcessId,
-                    " has no assigned address"
-                )
-            );
-        }
-
         // Multisig addresses for key roles in the protocol
         // Should be defined in OpenZeppelin Defender
-        address admin = upgradeApprovalProcess.via;
-        address protocolVault = admin;
+        address protocolVault = 0xa1E8dc85e0478fe6F6E6108fFC077f0a19485ecA;
+        address admin = 0x6717D6384272AC3D5B906FbA1b3D418ed2f907E9;
         address atomWarden = admin;
 
         console.log("admin:", admin);
@@ -97,7 +85,7 @@ contract DeployEthMultiVaultScript is Script {
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
-            minDelay: 2 days // minimum delay for timelocked transactions
+            minDelay: 1 days // minimum delay for timelocked transactions
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
