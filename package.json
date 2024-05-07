@@ -19,6 +19,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@morpho-labs/gnosis-tx-builder": "^2.0.0"
+    "@morpho-labs/gnosis-tx-builder": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^5.7"
   }
 }

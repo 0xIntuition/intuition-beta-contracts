@@ -23,3 +23,4 @@ exports/addresses/local.json
 .idea
 .DS_Store
 script/*.json
+.env_prod
