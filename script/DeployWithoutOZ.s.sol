@@ -16,8 +16,8 @@ import {TimelockController} from "@openzeppelin/contracts/governance/TimelockCon
 contract DeployEthMultiVault is Script {
     address deployer;
 
-    // Multisig addresses for key roles in the protocol (`msg.sender` for should be replaced with the actual multisig addresses for each role in production)
-    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB;
+    // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
+    address admin = 0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5;
     address protocolVault = admin;
     address atomWarden = admin;
 
@@ -69,7 +69,7 @@ contract DeployEthMultiVault is Script {
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
-            minDelay: 2 days // minimum delay for timelocked transactions
+            minDelay: 1 days // minimum delay for timelocked transactions
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
@@ -108,22 +108,20 @@ contract DeployEthMultiVault is Script {
         // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         ethMultiVaultProxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
-            address(timelock), // ProxyAdmin address to manage the proxy contract
+            address(timelock), // Timelock controller address, which will be the owner of the ProxyAdmin contract for the proxy
             initData // Initialization data to call the `init` function in EthMultiVault
         );
         console.logString("deployed TransparentUpgradeableProxy.");
 
-        // Transfer ownership of AtomWalletBeacon to TimelockController to enforce timelock on upgrades for AtomWallet
-        atomWalletBeacon.transferOwnership(address(timelock));
-
         // stop sending tx's
         vm.stopBroadcast();
 
-        console.log("All contracts deployed successfully.");
+        console.log("All contracts deployed successfully:");
+        console.log("TimelockController address:", address(timelock));
         console.log("AtomWallet implementation address:", address(atomWallet));
         console.log("UpgradeableBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
-        console.log("TimelockController address:", address(timelock));
+        console.log("To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event.");
     }
 }
