@@ -22,5 +22,6 @@ exports/addresses/local.json
 .vscode
 .idea
 .DS_Store
-EthMultiVault.abi.json
-TimelockController.abi.json
+_playground/*.json
+.env_mainnet
+.env_testnet

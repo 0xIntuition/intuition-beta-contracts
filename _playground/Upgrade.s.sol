@@ -10,7 +10,7 @@ contract UpgradeScript is Script {
     function setUp() public {}
 
     function run() public {
-        address transparentUpgradeableProxy = 0xD655f1000B6a418e154A7e42eb88D9380649Aa92;
+        address transparentUpgradeableProxy = address(0x0000000000000000000000000000000000000000);
         Options memory opts;
         ProposeUpgradeResponse memory response =
             Defender.proposeUpgrade(transparentUpgradeableProxy, "EthMultiVaultV2.sol", opts);

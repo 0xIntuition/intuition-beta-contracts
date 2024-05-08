@@ -87,7 +87,9 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(atomWarden, atomWarden);
 
-        atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0xabc)));
+        (bool success,) = atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0xabc)));
+        assertEq(success, true);
+
         (, bytes memory returnData2) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
 
         address newOwner = abi.decode(returnData2, (address));
@@ -96,7 +98,9 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableInvalidOwner.selector));
 
-        atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0x456)));
+        (bool success2,) =
+            atomWallet.call(abi.encodeWithSelector(AtomWallet.transferOwnership.selector, address(0x456)));
+        assertEq(success2, false);
 
         vm.stopPrank();
 
