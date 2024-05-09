@@ -35,11 +35,10 @@ contract DeployEthMultiVaultScript is Script {
             );
         }
 
-        // Multisig addresses for key roles in the protocol
-        // Should be defined in OpenZeppelin Defender
-        address protocolVault = 0xa1E8dc85e0478fe6F6E6108fFC077f0a19485ecA;
-        address admin = 0x6717D6384272AC3D5B906FbA1b3D418ed2f907E9;
-        address atomWarden = admin;
+        // ======== Multisig addresses for key roles in the protocol ========
+        address protocolVault = address(0x0000000000000000000000000000000000000000);
+        address admin = address(0x0000000000000000000000000000000000000000);
+        address atomWarden = address(0x0000000000000000000000000000000000000000);
 
         console.log("admin:", admin);
 
