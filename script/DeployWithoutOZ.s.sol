@@ -17,7 +17,7 @@ contract DeployEthMultiVault is Script {
     address deployer;
 
     // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
-    address admin = 0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5;
+    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition testnet multisig address
     address protocolVault = admin;
     address atomWarden = admin;
 
@@ -58,7 +58,7 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed AtomWallet.");
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
-        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), msg.sender);
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), address(timelock));
         console.logString("deployed UpgradeableBeacon.");
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
