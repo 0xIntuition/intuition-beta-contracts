@@ -2,22 +2,23 @@
 pragma solidity ^0.8.18;
 
 import {Script, console} from "forge-std/Script.sol";
-import {EthMultiVault} from "src/EthMultiVault.sol";
-import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
-import {AtomWallet} from "src/AtomWallet.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {
     TransparentUpgradeableProxy,
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {AtomWallet} from "src/AtomWallet.sol";
+import {IPermit2} from "src/interfaces/IPermit2.sol";
+
 contract DeployEthMultiVault is Script {
     address deployer;
 
     // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
-    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Intuition testnet multisig address
+    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Testnet multisig Safe address
     address protocolVault = admin;
     address atomWarden = admin;
 
@@ -63,7 +64,7 @@ contract DeployEthMultiVault is Script {
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            protocolVault: protocolVault, // Protocol vault address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)

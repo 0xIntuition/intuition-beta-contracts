@@ -96,12 +96,18 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
     function testSetEntryFee() external {
         uint256 testVaultId = 0;
-        uint256 testValue = 1000;
+        uint256 validEntryFee = getFeeDenominator() / 20; // Valid entry fee within allowed range
+        uint256 invalidEntryFee = getFeeDenominator() / 5; // Invalid entry fee, exceeding allowed range
 
-        // msg.sender is the caller of EthMultiVaultBase
+        // Attempt to set exit fee higher than allowed, should revert
         vm.prank(msg.sender);
-        ethMultiVault.setEntryFee(testVaultId, testValue);
-        assertEq(getEntryFee(testVaultId), testValue);
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidEntryFee.selector));
+        ethMultiVault.setEntryFee(testVaultId, invalidEntryFee);
+
+        /// Sets a valid entry fee
+        vm.prank(msg.sender);
+        ethMultiVault.setEntryFee(testVaultId, validEntryFee);
+        assertEq(getEntryFee(testVaultId), validEntryFee);
     }
 
     function testSetExitFee() external {
@@ -145,12 +151,18 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
     function testSetProtocolFee() external {
         uint256 testVaultId = 0;
-        uint256 testValue = 1000;
+        uint256 validProtocolFee = getFeeDenominator() / 20; // Valid protocol fee within allowed range
+        uint256 invalidProtocolFee = getFeeDenominator() / 5; // Invalid protocol fee, exceeding allowed range
 
-        // msg.sender is the caller of EthMultiVaultBase
+        // Attempt to set protocol fee higher than allowed, should revert
         vm.prank(msg.sender);
-        ethMultiVault.setProtocolFee(testVaultId, testValue);
-        assertEq(getProtocolFee(testVaultId), testValue);
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidProtocolFee.selector));
+        ethMultiVault.setProtocolFee(testVaultId, invalidProtocolFee);
+
+        /// Sets a valid protocol fee
+        vm.prank(msg.sender);
+        ethMultiVault.setProtocolFee(testVaultId, validProtocolFee);
+        assertEq(getProtocolFee(testVaultId), validProtocolFee);
     }
 
     function testSetAtomWalletInitialDepositAmount() external {

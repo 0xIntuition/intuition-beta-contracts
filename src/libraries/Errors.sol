@@ -20,8 +20,9 @@ library Errors {
     error MultiVault_InsufficientDepositAmountToCoverFees();
     error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error MultiVault_InsufficientSharesInVault();
+    error MultiVault_InvalidEntryFee();
     error MultiVault_InvalidExitFee();
-    error MultiVault_InvalidFeeSet();
+    error MultiVault_InvalidProtocolFee();
     error MultiVault_MinimumDeposit();
     error MultiVault_NoAtomWalletRewards();
     error MultiVault_OperationAlreadyExecuted();

@@ -17,7 +17,6 @@ import {Errors} from "src/libraries/Errors.sol";
 
 /**
  * @title  EthMultiVaultV2
- * @author 0xIntuition
  * @notice V2 test version of the original EthMultiVault contract, used for testing upgradeability features
  */
 /// @custom:oz-upgrades-from EthMultiVault
