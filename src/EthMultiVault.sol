@@ -27,7 +27,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
-    
+
     // Operation identifiers
     bytes32 public constant SET_ADMIN = keccak256("setAdmin");
     bytes32 public constant SET_EXIT_FEE = keccak256("setExitFee");
@@ -319,7 +319,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param protocolFee protocol fee to set
     function setProtocolFee(uint256 id, uint256 protocolFee) external onlyAdmin {
         uint256 maxProtocolFeePercentage = generalConfig.feeDenominator / 10;
-        
+
         if (protocolFee > maxProtocolFeePercentage) {
             revert Errors.MultiVault_InvalidProtocolFee();
         }
