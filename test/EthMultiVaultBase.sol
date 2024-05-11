@@ -23,8 +23,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     /// @notice dummy addresses for testing
     uint256 constant PK_BOB = 111; // priv key for REVM to consume
     uint256 constant PK_ALICE = 222;
+    uint256 constant PK_RICH = 333;
     address immutable bob = vm.addr(PK_BOB);
     address immutable alice = vm.addr(PK_ALICE);
+    address immutable rich = vm.addr(PK_RICH);
 
     /// @notice core contracts
     EthMultiVault ethMultiVault;
@@ -82,6 +84,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         vm.deal(address(this), initialEth);
         vm.deal(bob, 100 ether);
         vm.deal(alice, 100 ether);
+        vm.deal(rich, 20000 ether);
     }
 
     function getAtomCost() public view virtual returns (uint256 atomCost) {
