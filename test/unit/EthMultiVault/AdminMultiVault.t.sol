@@ -192,6 +192,15 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getTripleCreationProtocolFee(), testValue);
     }
 
+    function testSetAtomDepositFractionOnTripleCreation() external {
+        uint256 testValue = 0.0006 ether;
+
+        // msg.sender is the caller of EthMultiVaultBase
+        vm.prank(msg.sender);
+        ethMultiVault.setAtomDepositFractionOnTripleCreation(testValue);
+        assertEq(getAtomDepositFractionOnTripleCreation(), testValue);
+    }
+
     function testSetAtomDepositFractionForTriple() external {
         uint256 testValue = 1000;
 

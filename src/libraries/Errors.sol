@@ -24,7 +24,6 @@ library Errors {
     error MultiVault_InvalidExitFee();
     error MultiVault_InvalidProtocolFee();
     error MultiVault_MinimumDeposit();
-    error MultiVault_NoAtomWalletRewards();
     error MultiVault_OperationAlreadyExecuted();
     error MultiVault_OperationAlreadyScheduled();
     error MultiVault_OperationNotScheduled();
