@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 /// @title  Errors Library
 /// @notice Library containing all custom errors detailing cases in which the contracts should revert
 library Errors {
-    /*//////////// MULTIVAULT ERRORS //////////////////////////////////////////////////////*/
+    ////////////// MULTIVAULT ERRORS ////////////////////////////////////////////////////////
 
     error MultiVault_AdminOnly();
     error MultiVault_ArraysNotSameLength();
@@ -37,7 +37,7 @@ library Errors {
     error MultiVault_VaultNotAtom();
     error MultiVault_VaultNotTriple();
 
-    /*/////// ATOMWALLET ERRORS ///////////////////////////////////////////////////////////*/
+    ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
     error AtomWallet_OnlyOwner();
     error AtomWallet_OnlyOwnerOrEntryPoint();

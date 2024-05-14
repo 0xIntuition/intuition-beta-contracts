@@ -1289,9 +1289,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             _mint(address(0), id, sharesForZeroAddress);
         }
 
-        /*
-         * Initialize the counter triple vault with ghost shares if it is a triple creation flow
-         */
+        /// Initialize the counter triple vault with ghost shares if it is a triple creation flow
         if (isTripleId(id)) {
             uint256 counterVaultId = getCounterIdFromTriple(id);
 
