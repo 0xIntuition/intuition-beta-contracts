@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 /// @title  Errors Library
 /// @notice Library containing all custom errors detailing cases in which the contracts should revert
 library Errors {
-    /*//////////// MULTIVAULT ERRORS //////////////////////////////////////////////////////*/
+    ////////////// MULTIVAULT ERRORS ////////////////////////////////////////////////////////
 
     error MultiVault_AdminOnly();
     error MultiVault_ArraysNotSameLength();
@@ -20,10 +20,10 @@ library Errors {
     error MultiVault_InsufficientDepositAmountToCoverFees();
     error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error MultiVault_InsufficientSharesInVault();
+    error MultiVault_InvalidEntryFee();
     error MultiVault_InvalidExitFee();
-    error MultiVault_InvalidFeeSet();
+    error MultiVault_InvalidProtocolFee();
     error MultiVault_MinimumDeposit();
-    error MultiVault_NoAtomWalletRewards();
     error MultiVault_OperationAlreadyExecuted();
     error MultiVault_OperationAlreadyScheduled();
     error MultiVault_OperationNotScheduled();
@@ -36,7 +36,7 @@ library Errors {
     error MultiVault_VaultNotAtom();
     error MultiVault_VaultNotTriple();
 
-    /*/////// ATOMWALLET ERRORS ///////////////////////////////////////////////////////////*/
+    ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
     error AtomWallet_OnlyOwner();
     error AtomWallet_OnlyOwnerOrEntryPoint();

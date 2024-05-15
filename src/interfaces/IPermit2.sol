@@ -6,33 +6,38 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // Minimal Permit2 interface, derived from:
 // https://github.com/Uniswap/permit2/blob/main/src/interfaces/ISignatureTransfer.sol
 interface IPermit2 {
-    // Token and amount in a permit message.
+    /// @notice Token and amount in a permit message
     struct TokenPermissions {
-        // Token to transfer.
+        /// @dev Token to transfer
         IERC20 token;
-        // Amount to transfer.
+        /// @dev Amount to transfer
         uint256 amount;
     }
 
-    // The permit2 message.
+    /// @notice The permit2 message
     struct PermitTransferFrom {
-        // Permitted token and amount.
+        /// @dev Permitted token and amount
         TokenPermissions permitted;
-        // Unique identifier for this permit.
+        /// @dev Unique identifier for this permit
         uint256 nonce;
-        // Expiration for this permit.
+        /// @dev Expiration for this permit
         uint256 deadline;
     }
 
-    // Transfer details for permitTransferFrom().
+    /// @notice Transfer details for permitTransferFrom()
     struct SignatureTransferDetails {
-        // Recipient of tokens.
+        /// @dev Recipient of tokens
         address to;
-        // Amount to transfer.
+        /// @dev Amount to transfer
         uint256 requestedAmount;
     }
 
-    // Consume a permit2 message and transfer tokens.
+    /// @notice Consume a permit2 message and transfer tokens
+    ///
+    /// @param permit The permit message
+    /// @param transferDetails Details for the transfer
+    /// @param owner The owner of the tokens
+    /// @param signature The signature for the permit message
     function permitTransferFrom(
         PermitTransferFrom calldata permit,
         SignatureTransferDetails calldata transferDetails,

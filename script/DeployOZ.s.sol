@@ -2,13 +2,14 @@
 pragma solidity ^0.8.21;
 
 import {Script, console} from "forge-std/Script.sol";
-import {EthMultiVault} from "src/EthMultiVault.sol";
-import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
-import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
+
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 contract DeployEthMultiVaultScript is Script {
     function run() external {
@@ -78,7 +79,7 @@ contract DeployEthMultiVaultScript is Script {
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            protocolVault: protocolVault, // Protocol vault address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)

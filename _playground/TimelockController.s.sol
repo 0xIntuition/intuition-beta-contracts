@@ -10,7 +10,6 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 /**
  * @title  Timelock Controller Parameters
- * @author 0xIntuition
  * @notice Generates the parameters that should be used to call TimelockController to schedule
  *         the upgrade of our contract on Safe Transaction Builder
  */
@@ -33,7 +32,7 @@ contract TimelockControllerParametersScript is Script {
     function run() external view {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: _admin, // Admin address for the EthMultiVault contract
-            protocolVault: _protocolVault, // Intuition protocol vault address (should be a multisig in production)
+            protocolVault: _protocolVault, // Protocol vault address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
@@ -75,7 +74,7 @@ contract TimelockControllerParametersScript is Script {
         uint256 delay = 5 minutes;
 
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVaultV2.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
+            EthMultiVaultV2.initialize.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
         bytes memory timelockControllerData = abi.encodeWithSelector(
