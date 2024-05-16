@@ -103,6 +103,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         (, totalShares) = ethMultiVault.vaults(id);
     }
 
+    function getCounterIdFromTriple(uint256 id) public view returns (uint256 counterId) {
+        counterId = ethMultiVault.getCounterIdFromTriple(id);
+    }
+
     function vaultBalanceOf(uint256 id, address account) public view returns (uint256 shares) {
         (shares,) = ethMultiVault.getVaultStateForUser(id, account);
     }
