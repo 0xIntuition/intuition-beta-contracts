@@ -4,8 +4,9 @@ pragma solidity ^0.8.21;
 import "forge-std/Test.sol";
 
 import {EthMultiVault} from "src/EthMultiVault.sol";
+import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
 
-contract EthMultiVaultSingleVaultActor is Test {
+contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
     // actor arrays
     uint256[] public actorPks;
     address[] public actors;
@@ -35,10 +36,6 @@ contract EthMultiVaultSingleVaultActor is Test {
         //vm.deal(actors[0], 1 ether);
         //vm.prank(actors[0]);
         //actEthMultiVault.createAtom{value: actEthMultiVault.getAtomCost()}("PEPE");
-    }
-
-    function getAtomCost() public view returns (uint256 atomCost) {
-        (atomCost,) = actEthMultiVault.atomConfig();
     }
 
     function getVaultTotalAssets(uint256 vaultId) public view returns (uint256 totalAssets) {
@@ -77,7 +74,21 @@ contract EthMultiVaultSingleVaultActor is Test {
         // bound msgValue to between minDeposit and 10 ether
         msgValue = bound(msgValue, getAtomCost(), 10 ether);
         vm.deal(currentActor, msgValue);
+
+        uint256 totalAssetsBefore = vaultTotalAssets(_vaultId);
+        uint256 totalSharesBefore = vaultTotalShares(_vaultId);
+
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+
+        // deposit atom
         uint256 shares = actEthMultiVault.depositAtom{value: msgValue}(_receiver, _vaultId);
+
+        checkDepositIntoVault(
+            msgValue - getProtocolFeeAmount(msgValue, _vaultId), _vaultId, totalAssetsBefore, totalSharesBefore
+        );
+
+        checkProtocolVaultBalance(_vaultId, msgValue, protocolVaultBalanceBefore);
+
         // logs
         emit log_named_uint(
             "------------------------------------ POST STATE -------------------------------------------", 6000000009
@@ -127,8 +138,25 @@ contract EthMultiVaultSingleVaultActor is Test {
         emit log_named_uint("before vaultTAssets------", getVaultTotalAssets(_vaultId));
         emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(_vaultId, currentActor));
 
+        // snapshots before redeem
+        // uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 userSharesBeforeRedeem = getSharesInVault(_vaultId, _receiver);
+        uint256 userBalanceBeforeRedeem = address(_receiver).balance;
+
+        // (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) = actEthMultiVault.getRedeemAssetsAndFees(userSharesBeforeRedeem, _vaultId);
+        // uint256 assetsForReceiverBeforeFees = calculatedAssetsForReceiver + protocolFees + exitFees;
+
         // redeem atom
-        uint256 assets = actEthMultiVault.redeemAtom(_shares2Redeem, _receiver, _vaultId);
+        uint256 assetsForReceiver = actEthMultiVault.redeemAtom(_shares2Redeem, _receiver, _vaultId);
+
+        // checkProtocolVaultBalance(_vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+
+        // snapshots after redeem
+        uint256 userSharesAfterRedeem = getSharesInVault(_vaultId, _receiver);
+        uint256 userBalanceAfterRedeem = address(_receiver).balance;
+
+        assertEq(userSharesAfterRedeem, userSharesBeforeRedeem - _shares2Redeem);
+        assertEq(userBalanceAfterRedeem - userBalanceBeforeRedeem, assetsForReceiver);
 
         // logs
         emit log_named_uint(
@@ -138,9 +166,9 @@ contract EthMultiVaultSingleVaultActor is Test {
         emit log_named_uint("vaultTAssets------", getVaultTotalAssets(_vaultId));
         emit log_named_uint("vaultBalanceOf----", getVaultBalanceForAddress(_vaultId, currentActor));
         emit log_named_uint(
-            "==================================== ACTOR redeemAtom END ====================================", assets
+            "==================================== ACTOR redeemAtom END ====================================", assetsForReceiver
         );
-        return assets;
+        return assetsForReceiver;
     }
 
     receive() external payable {}
