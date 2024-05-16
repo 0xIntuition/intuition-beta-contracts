@@ -51,6 +51,12 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         return shares;
     }
 
+    function getAssetsForReceiverBeforeFees(uint256 shares, uint256 vaultId) public view returns (uint256) {
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+            actEthMultiVault.getRedeemAssetsAndFees(shares, vaultId);
+        return calculatedAssetsForReceiver + protocolFees + exitFees;
+    }
+
     function depositAtom(address _receiver, uint256 msgValue, uint256 actorIndexSeed)
         public
         useActor(actorIndexSeed)
@@ -139,17 +145,16 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(_vaultId, currentActor));
 
         // snapshots before redeem
-        // uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(_vaultId, _receiver);
         uint256 userBalanceBeforeRedeem = address(_receiver).balance;
 
-        // (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) = actEthMultiVault.getRedeemAssetsAndFees(userSharesBeforeRedeem, _vaultId);
-        // uint256 assetsForReceiverBeforeFees = calculatedAssetsForReceiver + protocolFees + exitFees;
+        uint256 assetsForReceiverBeforeFees = getAssetsForReceiverBeforeFees(userSharesBeforeRedeem, _vaultId);
 
         // redeem atom
         uint256 assetsForReceiver = actEthMultiVault.redeemAtom(_shares2Redeem, _receiver, _vaultId);
 
-        // checkProtocolVaultBalance(_vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+        checkProtocolVaultBalance(_vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(_vaultId, _receiver);
@@ -166,7 +171,8 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         emit log_named_uint("vaultTAssets------", getVaultTotalAssets(_vaultId));
         emit log_named_uint("vaultBalanceOf----", getVaultBalanceForAddress(_vaultId, currentActor));
         emit log_named_uint(
-            "==================================== ACTOR redeemAtom END ====================================", assetsForReceiver
+            "==================================== ACTOR redeemAtom END ====================================",
+            assetsForReceiver
         );
         return assetsForReceiver;
     }
