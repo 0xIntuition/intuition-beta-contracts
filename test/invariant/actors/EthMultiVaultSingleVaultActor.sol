@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import {EthMultiVault} from "src/EthMultiVault.sol";
 import "forge-std/Test.sol";
+
+import {EthMultiVault} from "src/EthMultiVault.sol";
 
 contract EthMultiVaultSingleVaultActor is Test {
     // actor arrays
