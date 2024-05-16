@@ -280,7 +280,8 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         emit log_named_uint("vaultTAssets------", getVaultTotalShares(_vaultId));
         emit log_named_uint("vaultBalanceOf----", getVaultBalanceForAddress(_vaultId, currentActor));
         emit log_named_uint(
-            "==================================== ACTOR redeemAtom END ====================================", assetsForReceiver
+            "==================================== ACTOR redeemAtom END ====================================",
+            assetsForReceiver
         );
         return assetsForReceiver;
     }

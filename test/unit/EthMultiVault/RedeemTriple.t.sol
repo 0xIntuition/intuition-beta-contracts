@@ -45,7 +45,8 @@ contract RedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 userSharesBeforeRedeem = getSharesInVault(id, bob);
         uint256 userBalanceBeforeRedeem = address(bob).balance;
 
-        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) = ethMultiVault.getRedeemAssetsAndFees(userSharesBeforeRedeem, id);
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+            ethMultiVault.getRedeemAssetsAndFees(userSharesBeforeRedeem, id);
         uint256 assetsForReceiverBeforeFees = calculatedAssetsForReceiver + protocolFees + exitFees;
 
         // execute interaction - redeem all positive triple vault shares for bob
