@@ -35,11 +35,18 @@ contract RedeemAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         ethMultiVault.depositAtom{value: testDepositAmount}(bob, id);
 
         // snapshots before redeem
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(id, bob);
         uint256 userBalanceBeforeRedeem = address(bob).balance;
 
-        // execute interaction - redeem all atom shares
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+            ethMultiVault.getRedeemAssetsAndFees(userSharesBeforeRedeem, id);
+        uint256 assetsForReceiverBeforeFees = calculatedAssetsForReceiver + protocolFees + exitFees;
+
+        // execute interaction - redeem all atom shares for bob
         uint256 assetsForReceiver = ethMultiVault.redeemAtom(userSharesBeforeRedeem, bob, id);
+
+        checkProtocolVaultBalance(id, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(id, bob);

@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
+
 import {EthMultiVaultSingleVaultActor} from "./actors/EthMultiVaultSingleVaultActor.sol";
 import {InvariantEthMultiVaultBase} from "./InvariantEthMultiVaultBase.sol";
 
