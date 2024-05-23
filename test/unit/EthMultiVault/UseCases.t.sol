@@ -32,8 +32,18 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         UseCaseAtom obj;
     }
 
+    struct UseCaseRedeemAtom {
+        uint256 value;
+        uint256 shares;
+        uint256 assets;
+        uint256 totalRemainingShares;
+        uint256 totalRemainingAssets;
+        uint256 protocolVaultAssets;
+    }
+
     UseCaseAtom[] useCaseAtoms;
     UseCaseTriple[] useCaseTriples;
+    UseCaseRedeemAtom[] useCaseRedeemAtoms;
 
     function setUp() external {
         _setUp();
@@ -220,6 +230,108 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             assertEq(atomWalletShares, u.atomWalletShares);
             assertEq(totalShares, u.totalShares);
             assertEq(totalAssets, u.totalAssets);
+            assertEq(protocolVaultAssets, u.protocolVaultAssets + protocolVaultBalanceBefore);
+
+            protocolVaultBalanceBefore = protocolVaultAssets;
+
+            vm.stopPrank();
+        }
+    }
+
+    function testUseCasesRedeemAtom() external {
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 300000000100000,
+                shares: 819530524365958,
+                assets: 830675569788504,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 151492154481026,
+                protocolVaultAssets: 217832276130470
+            })
+        );
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 300000000100001,
+                shares: 819530524365958,
+                assets: 830675569788504,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 151492154481026,
+                protocolVaultAssets: 217832276130474
+            })
+        );
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 1000000000000000000,
+                shares: 3748889220983980557,
+                assets: 3724095382864819517,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 196110643367347144,
+                protocolVaultAssets: 79793973767833339
+            })
+        );
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 10000000000000000000,
+                shares: 37491616096457688477,
+                assets: 37243515383249751406,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 1960290642978322412,
+                protocolVaultAssets: 796193973771926182
+            })
+        );
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 100000000000000000000,
+                shares: 374918884846505054817,
+                assets: 372437715383288241292,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 19602090642939423277,
+                protocolVaultAssets: 7960193973772335431
+            })
+        );
+        useCaseRedeemAtoms.push(
+            UseCaseRedeemAtom({
+                value: 1000000000000000000000,
+                shares: 3749191572346509791407,
+                assets: 3724379715383292090248,
+                totalRemainingShares: 100000000100000,
+                totalRemainingAssets: 196020090642935533396,
+                protocolVaultAssets: 79600193973772376356
+            })
+        );
+
+        uint256 length = useCaseRedeemAtoms.length;
+        uint256 protocolVaultBalanceBefore;
+
+        for (uint256 i = 0; i < length; i++) {
+            UseCaseRedeemAtom storage u = useCaseRedeemAtoms[i];
+
+            vm.startPrank(rich, rich);
+
+            // 1 create atom
+            uint256 id = ethMultiVault.createAtom{value: u.value}(abi.encodePacked("atom", i));
+
+            // 3 deposits to the atom
+            for (uint256 j = 0; j < 3; j++) {
+                ethMultiVault.depositAtom{value: u.value}(rich, id);
+            }
+
+            uint256 shares = vaultBalanceOf(id, rich);
+
+            // 1 redeem total
+            uint256 assets = ethMultiVault.redeemAtom(shares, rich, id);
+
+            // atom values
+            uint256 sharesAfter = vaultBalanceOf(id, rich);
+            uint256 totalShares = vaultTotalShares(id);
+            uint256 totalAssets = vaultTotalAssets(id);
+            uint256 protocolVaultAssets = address(getProtocolVault()).balance;
+
+            assertEq(shares, u.shares);
+            assertEq(0, sharesAfter);
+            assertEq(assets, u.assets);
+            assertEq(totalShares, u.totalRemainingShares);
+            assertEq(totalAssets, u.totalRemainingAssets);
             assertEq(protocolVaultAssets, u.protocolVaultAssets + protocolVaultBalanceBefore);
 
             protocolVaultBalanceBefore = protocolVaultAssets;
