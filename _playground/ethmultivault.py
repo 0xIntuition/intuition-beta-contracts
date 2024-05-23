@@ -50,10 +50,10 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   userDeposit = value - tripleCost
   protocolFeeAmount = math.ceil(userDeposit * Decimal(protocolFee) / Decimal(feeDenominator))
   userDepositAfterProtocolFees = userDeposit - Decimal(protocolFeeAmount)
-  atomDepositFraction = userDepositAfterProtocolFees * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator)
-  perAtom = atomDepositFraction / Decimal(3)
+  atomDepositFraction = math.floor(userDepositAfterProtocolFees * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
+  perAtom = math.floor(atomDepositFraction / Decimal(3))
   userAssetsAfterAtomDepositFraction = userDepositAfterProtocolFees - atomDepositFraction
-  entryFeeAmount = perAtom * Decimal(entryFee) / Decimal(feeDenominator)
+  entryFeeAmount = math.floor(perAtom * Decimal(entryFee) / Decimal(feeDenominator))
   assetsForTheAtom = perAtom - entryFeeAmount
   userSharesAfterTotalFees = assetsForTheAtom # assuming current price = 1 ether
 
@@ -66,7 +66,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
 
   # Underlying atom's vaults
   userSharesAtomVault = userSharesAfterTotalFees
-  totalAssetsAtomVault = assetsForTheAtom + entryFeeAmount + Decimal(atomDepositFractionOnTripleCreation) / Decimal(3)
+  totalAssetsAtomVault = assetsForTheAtom + entryFeeAmount + math.floor(Decimal(atomDepositFractionOnTripleCreation) / Decimal(3))
   totalSharesAtomVault = userSharesAfterTotalFees
 
   # Addresses
@@ -83,8 +83,75 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
           totalAssetsAtomVault,
           protocolVaultAssets)
 
+def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal]:
+  # Variables
+  protocolFeeAmount = math.ceil(value * Decimal(protocolFee) / Decimal(feeDenominator))
+  userDepositAfterProtocolFees = value - Decimal(protocolFeeAmount)
+  entryFeeAmount = math.floor(userDepositAfterProtocolFees * Decimal(entryFee) / Decimal(feeDenominator))
+  assetsForTheAtom = userDepositAfterProtocolFees - entryFeeAmount
+  userSharesForTheAtom = math.floor((assetsForTheAtom * totalShares) / totalAssets)
 
-## ------------ Create atom data ------------
+  # Atom vault
+  totalAssetsAtomVault = totalAssets + assetsForTheAtom + entryFeeAmount
+  totalSharesAtomVault = totalShares + userSharesForTheAtom
+
+  # Addresses
+  protocolVaultAssets = protocolFeeAmount
+
+  return (userSharesForTheAtom, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets)
+
+def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, totalAssetsAtom: Decimal, totalSharesAtom: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
+  # Variables for triple
+  protocolFeeAmount = math.ceil(value * Decimal(protocolFee) / Decimal(feeDenominator))
+  userDepositAfterProtocolFees = value - Decimal(protocolFeeAmount)
+  atomDepositFraction = math.floor(userDepositAfterProtocolFees * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
+  userAssetsAfterAtomDepositFraction = userDepositAfterProtocolFees - atomDepositFraction
+  if (totalShares == minShare):
+    entryFeeAmount = 0
+  else:
+    entryFeeAmount = math.floor(userAssetsAfterAtomDepositFraction * Decimal(entryFee) / Decimal(feeDenominator))
+  assetsAfterEntryFee = userAssetsAfterAtomDepositFraction - entryFeeAmount
+  if (totalShares == 0):
+    userSharesAfterEntryFee = assetsAfterEntryFee
+  else:
+    userSharesAfterEntryFee = math.floor((assetsAfterEntryFee * totalShares) / totalAssets)
+
+  # Triple vaults
+  userSharesPositiveVault = userSharesAfterEntryFee
+  totalAssetsPositiveVault = assetsAfterEntryFee + Decimal(entryFeeAmount)
+  totalSharesPositiveVault = userSharesAfterEntryFee
+
+  # Variables for atom
+  perAtom = math.floor(atomDepositFraction / Decimal(3))
+  if (totalSharesAtom == minShare):
+    entryFeeAmountForAtom = 0
+  else:
+    entryFeeAmountForAtom = math.floor(perAtom * Decimal(entryFee) / Decimal(feeDenominator))
+  assetsForTheAtom = perAtom - entryFeeAmountForAtom
+  if (totalSharesAtom == 0):
+    userSharesForTheAtom = assetsForTheAtom
+  else:  
+    userSharesForTheAtom = math.floor((assetsForTheAtom * totalSharesAtom) / totalAssetsAtom)
+
+  # Underlying atom's vaults
+  userSharesAtomVault = userSharesForTheAtom
+  totalAssetsAtomVault = assetsForTheAtom + entryFeeAmountForAtom
+  totalSharesAtomVault = userSharesForTheAtom
+
+  # Addresses
+  #zeroWalletShares = Decimal(2) * Decimal(minShare)
+  protocolVaultAssets = Decimal(protocolFeeAmount)
+
+  return (userSharesPositiveVault,
+          totalSharesPositiveVault,
+          totalAssetsPositiveVault,
+          userSharesAtomVault,
+          totalSharesAtomVault,
+          totalAssetsAtomVault,
+          protocolVaultAssets)
+
+
+## ------------ Create Atom data ------------
 
 print()
 print("Create atom data")
@@ -129,7 +196,7 @@ for value in [
 
   # Create triple
   (userSharesPositiveVault, totalSharesPositiveVault, totalAssetsPositiveVault, totalSharesNegativeVault,
-    totalAssetsNegativeVault, userSharesAtomVault,totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets) = createTriple(value)
+    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets) = createTriple(value)
 
   print(f"useCaseTriples.push(UseCaseTriple({{ \
     value: {value}, \
@@ -161,6 +228,118 @@ for value in [
       atomWalletShares: {atomWalletShares2}, \
       totalShares: {totalShares2 + totalSharesAtomVault}, \
       totalAssets: {totalAssets2 + totalAssetsAtomVault}, \
+      protocolVaultAssets: {protocolVaultAssets2} \
+    }}) \
+  }}));".replace("  ", ''))
+
+
+## ------------ Deposit Atom data ------------
+
+print()
+print("Deposit atom data")
+
+for value in [
+    atomCost,
+    Decimal(atomCost) + Decimal(1),
+    Web3.to_wei(Decimal('1'), 'ether'),
+    Web3.to_wei(Decimal('10'), 'ether'),
+    Web3.to_wei(Decimal('100'), 'ether'),
+    Web3.to_wei(Decimal('1000'), 'ether'),
+]:
+  (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets) = createAtom(value)
+
+  for _ in range(3):
+    (userSharesFromDeposit, totalShares, totalAssets, protocolVaultAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
+
+    userShares += userSharesFromDeposit
+    protocolVaultAssets += protocolVaultAssetsFromDeposit
+
+  print(f"useCaseAtoms.push(UseCaseAtom({{ \
+    value: {value}, \
+    userShares: {userShares}, \
+    atomWalletShares: {atomWalletShares}, \
+    totalShares: {totalShares}, \
+    totalAssets: {totalAssets}, \
+    protocolVaultAssets: {protocolVaultAssets} \
+  }}));".replace("  ", ''))
+
+
+## ------------ Deposit Triple data ------------
+
+print()
+print("Deposit triple data")
+
+for value in [
+    tripleCost,
+    Decimal(tripleCost) + Decimal(1),
+    Web3.to_wei(Decimal('1'), 'ether'),
+    Web3.to_wei(Decimal('10'), 'ether'),
+    Web3.to_wei(Decimal('100'), 'ether'),
+    Web3.to_wei(Decimal('1000'), 'ether'),
+]:
+  # Create 3 atoms
+  (userShares0, totalShares0, totalAssets0, atomWalletShares0, protocolVaultAssets0) = createAtom(atomCost)
+  (userShares1, totalShares1, totalAssets1, atomWalletShares1, protocolVaultAssets1) = createAtom(atomCost)
+  (userShares2, totalShares2, totalAssets2, atomWalletShares2, protocolVaultAssets2) = createAtom(atomCost)
+
+  userSharesPerAtom = userShares0
+  totalSharesPerAtom = totalShares0
+  totalAssetsPerAtom = totalAssets0
+  protocolVaultAssets = protocolVaultAssets0 + protocolVaultAssets1 + protocolVaultAssets2
+
+  # Create 1 triple
+  (userSharesPositiveVault, totalSharesPositiveVault, totalAssetsPositiveVault, totalSharesNegativeVault,
+    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssetsFromCreation) = createTriple(value)
+
+  userSharesPerAtom += userSharesAtomVault
+  totalSharesPerAtom += totalSharesAtomVault
+  totalAssetsPerAtom += totalAssetsAtomVault
+  protocolVaultAssets += protocolVaultAssetsFromCreation
+
+  for _ in range(3):
+    # Deposits
+    (userSharesPositiveVaultFromDeposit, totalSharesPositiveVaultFromDeposit, totalAssetsPositiveVaultFromDeposit, userSharesAtomVault, totalSharesPerAtomFromDeposit, 
+      totalAssetsPerAtomFromDeposit, protocolVaultAssetsFromDeposit) \
+      = depositTriple(value, totalAssetsPositiveVault, totalSharesPositiveVault, totalAssetsPerAtom, totalSharesPerAtom)
+    
+    userSharesPositiveVault += userSharesPositiveVaultFromDeposit
+    totalAssetsPositiveVault += totalAssetsPositiveVaultFromDeposit
+    totalSharesPositiveVault += totalSharesPositiveVaultFromDeposit
+    userSharesPerAtom += userSharesAtomVault
+    totalSharesPerAtom += totalSharesPerAtomFromDeposit
+    totalAssetsPerAtom += totalAssetsPerAtomFromDeposit
+    protocolVaultAssets += protocolVaultAssetsFromDeposit
+
+  print(f"useCaseTriples.push(UseCaseTriple({{ \
+    value: {value}, \
+    userShares: {userSharesPositiveVault}, \
+    totalSharesPos: {totalSharesPositiveVault}, \
+    totalAssetsPos: {totalAssetsPositiveVault}, \
+    totalSharesNeg: {totalSharesNegativeVault}, \
+    totalAssetsNeg: {totalAssetsNegativeVault}, \
+    protocolVaultAssets: {protocolVaultAssets}, \
+    subject:UseCaseAtom({{ \
+      value: {atomCost}, \
+      userShares: {userSharesPerAtom}, \
+      atomWalletShares: {atomWalletShares0}, \
+      totalShares: {totalSharesPerAtom}, \
+      totalAssets: {totalAssetsPerAtom}, \
+      protocolVaultAssets: {protocolVaultAssets0} \
+    }}), \
+    predicate:UseCaseAtom({{ \
+      value: {atomCost}, \
+      userShares: {userSharesPerAtom}, \
+      atomWalletShares: {atomWalletShares1}, \
+      totalShares: {totalSharesPerAtom}, \
+      totalAssets: {totalAssetsPerAtom}, \
+      protocolVaultAssets: {protocolVaultAssets1} \
+    }}), \
+    obj:UseCaseAtom({{ \
+      value: {atomCost}, \
+      userShares: {userSharesPerAtom}, \
+      atomWalletShares: {atomWalletShares2}, \
+      totalShares: {totalSharesPerAtom}, \
+      totalAssets: {totalAssetsPerAtom}, \
       protocolVaultAssets: {protocolVaultAssets2} \
     }}) \
   }}));".replace("  ", ''))
