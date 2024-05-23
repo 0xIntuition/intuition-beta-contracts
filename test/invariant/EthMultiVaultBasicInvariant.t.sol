@@ -24,10 +24,13 @@ contract EthMultiVaultBasicInvariantTest is InvariantEthMultiVaultBase {
         targetContract(address(actor));
 
         // selectors for actor functions
-        bytes4[] memory selectors = new bytes4[](3);
+        bytes4[] memory selectors = new bytes4[](6);
         selectors[0] = actor.createAtom.selector; // createAtom
         selectors[1] = actor.depositAtom.selector; // depositAtom
         selectors[2] = actor.redeemAtom.selector; // redeemAtom
+        selectors[3] = actor.createTriple.selector; // createTriple
+        selectors[4] = actor.depositTriple.selector; // depositTriple
+        selectors[5] = actor.redeemTriple.selector; // redeemTriple
 
         FuzzSelector memory fuzzSelector = FuzzSelector({addr: address(actor), selectors: selectors});
 
@@ -39,11 +42,15 @@ contract EthMultiVaultBasicInvariantTest is InvariantEthMultiVaultBase {
         // assets less than or equal to eth balance
         invariant_ethMultiVault_asset_solvency();
         // shares less than or equal to assets
-        //invariant_ethMultiVault_share_solvency();
+        invariant_ethMultiVault_share_solvency();
+
         emit log_named_uint("actor.numberOfCalls()---", actor.numberOfCalls());
         emit log_named_uint("actor.numberOfAtoms()---", actor.numberOfAtoms());
-        emit log_named_uint("actor.numberOfDeposits()", actor.numberOfDeposits());
-        emit log_named_uint("actor.numberOfRedeems()-", actor.numberOfRedeems());
+        emit log_named_uint("actor.numberOfAtomDeposits()", actor.numberOfAtomDeposits());
+        emit log_named_uint("actor.numberOfAtomRedeems()-", actor.numberOfAtomRedeems());
+        emit log_named_uint("actor.numberOfTriples()---", actor.numberOfTriples());
+        emit log_named_uint("actor.numberOfTripleDeposits()", actor.numberOfTripleDeposits());
+        emit log_named_uint("actor.numberOfTripleRedeems()", actor.numberOfTripleRedeems());
         emit log_named_uint("ETHMULTIVAULT ETH BALANCE---", address(ethMultiVault).balance);
     }
 }
