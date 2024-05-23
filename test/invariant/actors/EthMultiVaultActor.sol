@@ -43,47 +43,30 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
     receive() external payable {}
 
-    function getVaultTotalAssets(
-        uint256 vaultId
-    ) public view returns (uint256 totalAssets) {
-        (totalAssets, ) = actEthMultiVault.vaults(vaultId);
+    function getVaultTotalAssets(uint256 vaultId) public view returns (uint256 totalAssets) {
+        (totalAssets,) = actEthMultiVault.vaults(vaultId);
     }
 
-    function getVaultTotalShares(
-        uint256 vaultId
-    ) public view returns (uint256 totalShares) {
+    function getVaultTotalShares(uint256 vaultId) public view returns (uint256 totalShares) {
         (, totalShares) = actEthMultiVault.vaults(vaultId);
     }
 
-    function getVaultBalanceForAddress(
-        uint256 vaultId,
-        address user
-    ) public view returns (uint256) {
-        (uint256 shares, ) = actEthMultiVault.getVaultStateForUser(
-            vaultId,
-            user
-        );
+    function getVaultBalanceForAddress(uint256 vaultId, address user) public view returns (uint256) {
+        (uint256 shares,) = actEthMultiVault.getVaultStateForUser(vaultId, user);
         return shares;
     }
 
-    function getAssetsForReceiverBeforeFees(
-        uint256 shares,
-        uint256 vaultId
-    ) public view returns (uint256) {
-        (
-            ,
-            uint256 calculatedAssetsForReceiver,
-            uint256 protocolFees,
-            uint256 exitFees
-        ) = actEthMultiVault.getRedeemAssetsAndFees(shares, vaultId);
+    function getAssetsForReceiverBeforeFees(uint256 shares, uint256 vaultId) public view returns (uint256) {
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+            actEthMultiVault.getRedeemAssetsAndFees(shares, vaultId);
         return calculatedAssetsForReceiver + protocolFees + exitFees;
     }
 
-    function createAtom(
-        bytes calldata _data,
-        uint256 msgValue,
-        uint256 actorIndexSeed
-    ) public useActor(actorIndexSeed) returns (uint256) {
+    function createAtom(bytes calldata data, uint256 msgValue, uint256 actorIndexSeed)
+        public
+        useActor(actorIndexSeed)
+        returns (uint256)
+    {
         numberOfCalls++;
         numberOfAtoms++;
         emit log_named_uint(
@@ -107,204 +90,128 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                 vm.deal(currentActor, msgValue);
             }
         }
-        emit log_named_uint(
-            "msg.sender.balance Right before create",
-            currentActor.balance
-        );
+        emit log_named_uint("msg.sender.balance Right before create", currentActor.balance);
         emit log_named_address("msg.sender-----", currentActor);
 
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
         uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
         // create atom
-        uint256 id = actEthMultiVault.createAtom{value: msgValue}(_data);
+        uint256 id = actEthMultiVault.createAtom{value: msgValue}(data);
         assertEq(id, actEthMultiVault.count());
 
-        checkDepositOnAtomVaultCreation(
-            id,
-            msgValue,
-            totalAssetsBefore,
-            totalSharesBefore
-        );
+        checkDepositOnAtomVaultCreation(id, msgValue, totalAssetsBefore, totalSharesBefore);
 
         uint256 userDeposit = msgValue - getAtomCost();
 
-        checkProtocolVaultBalanceOnVaultCreation(
-            id,
-            userDeposit,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalanceOnVaultCreation(id, userDeposit, protocolVaultBalanceBefore);
 
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE ------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE ------------------------------------------", 6000000009
         );
         emit log_named_uint("msg.sender.balance", currentActor.balance);
         emit log_named_uint("vaultTotalShares--", getVaultTotalAssets(id));
         emit log_named_uint("vaultTAssets------", getVaultTotalShares(id));
         emit log_named_uint(
-            "==================================== ACTOR createAtom END ====================================",
-            id
+            "==================================== ACTOR createAtom END ====================================", id
         );
         return id;
     }
 
     function depositAtom(
-        address _receiver,
-        uint256 _vaultId,
+        address receiver,
+        uint256 vaultId,
         uint256 msgValue,
-        bytes calldata _data,
+        bytes calldata data,
         uint256 actorIndexSeed
     ) public useActor(actorIndexSeed) returns (uint256) {
         numberOfCalls++;
         numberOfAtomDeposits++;
         emit log_named_uint(
-            "==================================== ACTOR depositAtom ====================================",
-            6000000009
+            "==================================== ACTOR depositAtom ====================================", 6000000009
         );
         emit log_named_address("currentActor-----", currentActor);
         emit log_named_uint("currentActor.balance", currentActor.balance);
         emit log_named_uint("msgValue------------", msgValue);
-        // bound _receiver to msg.sender always
-        _receiver = currentActor;
+        // bound receiver to msg.sender always
+        receiver = currentActor;
         uint256 shares;
         // if no atom exist yet, create and deposit on one
         if (actEthMultiVault.count() == 0) {
             vm.deal(currentActor, getAtomCost());
-            _vaultId = actEthMultiVault.createAtom{value: getAtomCost()}(_data);
-            emit log_named_uint(
-                "vaultTotalAssets----",
-                getVaultTotalShares(_vaultId)
-            );
-            emit log_named_uint(
-                "vaultTotalShares----",
-                getVaultTotalAssets(_vaultId)
-            );
-            emit log_named_uint(
-                "vaultBalanceOf------",
-                getVaultBalanceForAddress(_vaultId, currentActor)
-            );
+            vaultId = actEthMultiVault.createAtom{value: getAtomCost()}(data);
+            emit log_named_uint("vaultTotalAssets----", getVaultTotalShares(vaultId));
+            emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+            emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
             msgValue = bound(msgValue, getMinDeposit(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||",
-                1
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||", 1);
 
-            uint256 totalAssetsBefore = vaultTotalAssets(_vaultId);
-            uint256 totalSharesBefore = vaultTotalShares(_vaultId);
+            uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
+            uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-            uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-                .balance;
+            uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
-            shares = actEthMultiVault.depositAtom{value: msgValue}(
-                _receiver,
-                _vaultId
-            );
+            shares = actEthMultiVault.depositAtom{value: msgValue}(receiver, vaultId);
 
             checkDepositIntoVault(
-                msgValue - getProtocolFeeAmount(msgValue, _vaultId),
-                _vaultId,
-                totalAssetsBefore,
-                totalSharesBefore
+                msgValue - getProtocolFeeAmount(msgValue, vaultId), vaultId, totalAssetsBefore, totalSharesBefore
             );
 
-            checkProtocolVaultBalance(
-                _vaultId,
-                msgValue,
-                protocolVaultBalanceBefore
-            );
+            checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
         } else {
             // deposit on existing vault
-            // bound _vaultId between 1 and count()
-            if (_vaultId == 0 || _vaultId > actEthMultiVault.count()) {
-                _vaultId = bound(_vaultId, 1, actEthMultiVault.count());
+            // bound vaultId between 1 and count()
+            if (vaultId == 0 || vaultId > actEthMultiVault.count()) {
+                vaultId = bound(vaultId, 1, actEthMultiVault.count());
             }
-            emit log_named_uint(
-                "vaultTotalAssets----",
-                getVaultTotalShares(_vaultId)
-            );
-            emit log_named_uint(
-                "vaultTotalShares----",
-                getVaultTotalAssets(_vaultId)
-            );
-            emit log_named_uint(
-                "vaultBalanceOf------",
-                getVaultBalanceForAddress(_vaultId, currentActor)
-            );
+            emit log_named_uint("vaultTotalAssets----", getVaultTotalShares(vaultId));
+            emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+            emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
             // bound msgValue to between minDeposit and 10 ether
             msgValue = bound(msgValue, getAtomCost(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 2|||||||||||||||||||||||||||||||||||",
-                2
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 2|||||||||||||||||||||||||||||||||||", 2);
 
-            uint256 totalAssetsBefore = vaultTotalAssets(_vaultId);
-            uint256 totalSharesBefore = vaultTotalShares(_vaultId);
+            uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
+            uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-            uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-                .balance;
+            uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
-            shares = actEthMultiVault.depositAtom{value: msgValue}(
-                _receiver,
-                _vaultId
-            );
+            shares = actEthMultiVault.depositAtom{value: msgValue}(receiver, vaultId);
 
             checkDepositIntoVault(
-                msgValue - getProtocolFeeAmount(msgValue, _vaultId),
-                _vaultId,
-                totalAssetsBefore,
-                totalSharesBefore
+                msgValue - getProtocolFeeAmount(msgValue, vaultId), vaultId, totalAssetsBefore, totalSharesBefore
             );
 
-            checkProtocolVaultBalance(
-                _vaultId,
-                msgValue,
-                protocolVaultBalanceBefore
-            );
+            checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
         }
         // deposit atom
         emit log_named_uint("balance currentActor", currentActor.balance);
-        emit log_named_uint(
-            "balance EthMultiVaultbal-",
-            address(actEthMultiVault).balance
-        );
+        emit log_named_uint("balance EthMultiVaultbal-", address(actEthMultiVault).balance);
         emit log_named_uint("balance this--------", address(this).balance);
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE -------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE -------------------------------------------", 6000000009
         );
+        emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+        emit log_named_uint("vaultTAssets--------", getVaultTotalShares(vaultId));
+        emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
         emit log_named_uint(
-            "vaultTotalShares----",
-            getVaultTotalAssets(_vaultId)
-        );
-        emit log_named_uint(
-            "vaultTAssets--------",
-            getVaultTotalShares(_vaultId)
-        );
-        emit log_named_uint(
-            "vaultBalanceOf------",
-            getVaultBalanceForAddress(_vaultId, currentActor)
-        );
-        emit log_named_uint(
-            "==================================== ACTOR depositAtom ====================================",
-            shares
+            "==================================== ACTOR depositAtom ====================================", shares
         );
         return shares;
     }
 
     function redeemAtom(
-        uint256 _shares2Redeem,
-        address _receiver,
-        uint256 _vaultId,
+        uint256 shares2Redeem,
+        address receiver,
+        uint256 vaultId,
         uint256 msgValue,
-        bytes calldata _data,
+        bytes calldata data,
         uint256 actorIndexSeed
     ) public useActor(actorIndexSeed) returns (uint256) {
         numberOfCalls++;
@@ -319,136 +226,65 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         // if no atom vaults exist create one and deposit on it
         if (actEthMultiVault.count() == 0) {
             vm.deal(currentActor, getAtomCost());
-            _vaultId = actEthMultiVault.createAtom{value: getAtomCost()}(_data);
+            vaultId = actEthMultiVault.createAtom{value: getAtomCost()}(data);
             msgValue = bound(msgValue, getMinDeposit(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||",
-                1
-            );
-            _shares2Redeem = actEthMultiVault.depositAtom{value: msgValue}(
-                currentActor,
-                1
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||", 1);
+            shares2Redeem = actEthMultiVault.depositAtom{value: msgValue}(currentActor, 1);
         } else {
             // vault exists
-            // bound _vaultId between 1 and count()
-            if (_vaultId == 0 || _vaultId > actEthMultiVault.count()) {
-                _vaultId = bound(_vaultId, 1, actEthMultiVault.count());
+            // bound vaultId between 1 and count()
+            if (vaultId == 0 || vaultId > actEthMultiVault.count()) {
+                vaultId = bound(vaultId, 1, actEthMultiVault.count());
             }
             // if vault balance of the selected vault is 0, deposit minDeposit
-            if (getVaultBalanceForAddress(_vaultId, currentActor) == 0) {
+            if (getVaultBalanceForAddress(vaultId, currentActor) == 0) {
                 vm.deal(currentActor, 10 ether);
-                emit log_named_uint(
-                    "vaultTShares--",
-                    getVaultTotalAssets(_vaultId)
-                );
-                emit log_named_uint(
-                    "vaultTAssets--",
-                    getVaultTotalShares(_vaultId)
-                );
-                emit log_named_uint(
-                    "vaultBalanceOf",
-                    getVaultBalanceForAddress(_vaultId, currentActor)
-                );
+                emit log_named_uint("vaultTShares--", getVaultTotalAssets(vaultId));
+                emit log_named_uint("vaultTAssets--", getVaultTotalShares(vaultId));
+                emit log_named_uint("vaultBalanceOf", getVaultBalanceForAddress(vaultId, currentActor));
                 msgValue = bound(msgValue, getAtomCost(), 10 ether);
-                emit log_named_uint(
-                    "REEEE getVaultTotalAssets(_vaultId)",
-                    getVaultTotalAssets(_vaultId)
-                );
-                emit log_named_uint(
-                    "REEEE getVaultTotalShares(_vaultId)",
-                    getVaultTotalShares(_vaultId)
-                );
-                emit log_named_uint(
-                    "|||||||||||||||||||||||||||||||BRANCH 2||||||||||||||||||||||||||||||||||||",
-                    2
-                );
-                _shares2Redeem = actEthMultiVault.depositAtom{value: msgValue}(
-                    currentActor,
-                    _vaultId
-                );
-                emit log_named_uint("_shares2Redeem", _shares2Redeem);
+                emit log_named_uint("REEEE getVaultTotalAssets(vaultId)", getVaultTotalAssets(vaultId));
+                emit log_named_uint("REEEE getVaultTotalShares(vaultId)", getVaultTotalShares(vaultId));
+                emit log_named_uint("|||||||||||||||||||||||||||||||BRANCH 2||||||||||||||||||||||||||||||||||||", 2);
+                shares2Redeem = actEthMultiVault.depositAtom{value: msgValue}(currentActor, vaultId);
+                emit log_named_uint("shares2Redeem", shares2Redeem);
             } else {
-                emit log_named_uint(
-                    "|||||||||||||||||||||||||||||||BRANCH 3||||||||||||||||||||||||||||||||||||",
-                    3
-                );
-                // bound _shares2Redeem to between 1 and vaultBalanceOf
-                _shares2Redeem = bound(
-                    _shares2Redeem,
-                    1,
-                    getVaultBalanceForAddress(_vaultId, currentActor)
-                );
-                emit log_named_uint("_shares2Redeem", _shares2Redeem);
+                emit log_named_uint("|||||||||||||||||||||||||||||||BRANCH 3||||||||||||||||||||||||||||||||||||", 3);
+                // bound shares2Redeem to between 1 and vaultBalanceOf
+                shares2Redeem = bound(shares2Redeem, 1, getVaultBalanceForAddress(vaultId, currentActor));
+                emit log_named_uint("shares2Redeem", shares2Redeem);
             }
         }
         // use the redeemer as the receiver always
-        _receiver = currentActor;
+        receiver = currentActor;
 
-        emit log_named_uint(
-            "before vaultTotalShares--",
-            getVaultTotalAssets(_vaultId)
-        );
-        emit log_named_uint(
-            "before vaultTAssets------",
-            getVaultTotalShares(_vaultId)
-        );
-        emit log_named_uint(
-            "before vaultBalanceOf----",
-            getVaultBalanceForAddress(_vaultId, currentActor)
-        );
+        emit log_named_uint("before vaultTotalShares--", getVaultTotalAssets(vaultId));
+        emit log_named_uint("before vaultTAssets------", getVaultTotalShares(vaultId));
+        emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
 
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
-        uint256 userSharesBeforeRedeem = getSharesInVault(_vaultId, _receiver);
-        uint256 userBalanceBeforeRedeem = address(_receiver).balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
+        uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
-        uint256 assetsForReceiverBeforeFees = getAssetsForReceiverBeforeFees(
-            userSharesBeforeRedeem,
-            _vaultId
-        );
+        uint256 assetsForReceiverBeforeFees = getAssetsForReceiverBeforeFees(userSharesBeforeRedeem, vaultId);
 
         // redeem atom
-        uint256 assetsForReceiver = actEthMultiVault.redeemAtom(
-            _shares2Redeem,
-            _receiver,
-            _vaultId
-        );
+        uint256 assetsForReceiver = actEthMultiVault.redeemAtom(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(
-            _vaultId,
-            assetsForReceiverBeforeFees,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
 
-        assertEq(
-            getSharesInVault(_vaultId, _receiver),
-            userSharesBeforeRedeem - _shares2Redeem
-        );
-        assertEq(
-            address(_receiver).balance - userBalanceBeforeRedeem,
-            assetsForReceiver
-        );
+        assertEq(getSharesInVault(vaultId, receiver), userSharesBeforeRedeem - shares2Redeem);
+        assertEq(address(receiver).balance - userBalanceBeforeRedeem, assetsForReceiver);
 
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE -------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE -------------------------------------------", 6000000009
         );
-        emit log_named_uint(
-            "vaultTotalShares--",
-            getVaultTotalAssets(_vaultId)
-        );
-        emit log_named_uint(
-            "vaultTAssets------",
-            getVaultTotalShares(_vaultId)
-        );
-        emit log_named_uint(
-            "vaultBalanceOf----",
-            getVaultBalanceForAddress(_vaultId, currentActor)
-        );
+        emit log_named_uint("vaultTotalShares--", getVaultTotalAssets(vaultId));
+        emit log_named_uint("vaultTAssets------", getVaultTotalShares(vaultId));
+        emit log_named_uint("vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
         emit log_named_uint(
             "==================================== ACTOR redeemAtom END ====================================",
             assetsForReceiver
@@ -486,86 +322,56 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                 vm.deal(currentActor, msgValue);
             }
         }
-        emit log_named_uint(
-            "msg.sender.balance Right before create",
-            currentActor.balance
-        );
+        emit log_named_uint("msg.sender.balance Right before create", currentActor.balance);
         emit log_named_address("msg.sender-----", currentActor);
 
-        uint256 vaultId = _createTripleChecks(
-            msgValue,
-            subjectId,
-            predicateId,
-            objectId
-        );
+        uint256 vaultId = _createTripleChecks(msgValue, subjectId, predicateId, objectId);
 
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE ------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE ------------------------------------------", 6000000009
         );
         emit log_named_uint("msg.sender.balance", currentActor.balance);
         emit log_named_uint("vaultTotalShares--", getVaultTotalAssets(vaultId));
         emit log_named_uint("vaultTAssets------", getVaultTotalShares(vaultId));
         emit log_named_uint(
-            "==================================== ACTOR createTriple END ====================================",
-            vaultId
+            "==================================== ACTOR createTriple END ====================================", vaultId
         );
         return vaultId;
     }
 
-    function depositTriple(
-        address receiver,
-        uint256 vaultId,
-        uint256 msgValue,
-        uint256 actorIndexSeed
-    ) public useActor(actorIndexSeed) returns (uint256) {
+    function depositTriple(address receiver, uint256 vaultId, uint256 msgValue, uint256 actorIndexSeed)
+        public
+        useActor(actorIndexSeed)
+        returns (uint256)
+    {
         numberOfCalls++;
         numberOfTripleDeposits++;
         emit log_named_uint(
-            "==================================== ACTOR depositTriple ====================================",
-            6000000009
+            "==================================== ACTOR depositTriple ====================================", 6000000009
         );
         emit log_named_address("currentActor-----", currentActor);
         emit log_named_uint("currentActor.balance", currentActor.balance);
         emit log_named_uint("msgValue------------", msgValue);
-        // bound _receiver to msg.sender always
+        // bound receiver to msg.sender always
         receiver = currentActor;
         uint256 shares;
         // if no triple exist yet, create and deposit on one
         if (actEthMultiVault.count() == 0) {
             vm.deal(currentActor, getTripleCost());
-            vaultId = actEthMultiVault.createTriple{value: getTripleCost()}(
-                1,
-                2,
-                3
-            );
-            emit log_named_uint(
-                "vaultTotalAssets----",
-                getVaultTotalShares(vaultId)
-            );
-            emit log_named_uint(
-                "vaultTotalShares----",
-                getVaultTotalAssets(vaultId)
-            );
-            emit log_named_uint(
-                "vaultBalanceOf------",
-                getVaultBalanceForAddress(vaultId, currentActor)
-            );
+            vaultId = actEthMultiVault.createTriple{value: getTripleCost()}(1, 2, 3);
+            emit log_named_uint("vaultTotalAssets----", getVaultTotalShares(vaultId));
+            emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+            emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
             msgValue = bound(msgValue, getMinDeposit(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||",
-                1
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||", 1);
 
             _createTripleChecks(msgValue, 1, 2, 3);
         } else {
             // vault exists
             if (vaultId == 0 || vaultId > actEthMultiVault.count()) {
-                uint256[] memory tripleVaults = new uint256[](
-                    actEthMultiVault.count()
-                );
+                uint256[] memory tripleVaults = new uint256[](actEthMultiVault.count());
                 uint256 tripleVaultsCount = 0;
                 for (uint256 i = 1; i <= actEthMultiVault.count(); i++) {
                     if (actEthMultiVault.isTripleId(i)) {
@@ -574,60 +380,32 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                     }
                 }
 
-                vaultId = tripleVaults[
-                    bound(actorIndexSeed, 0, tripleVaultsCount - 1)
-                ];
+                vaultId = tripleVaults[bound(actorIndexSeed, 0, tripleVaultsCount - 1)];
             }
 
-            emit log_named_uint(
-                "vaultTotalAssets----",
-                getVaultTotalShares(vaultId)
-            );
-            emit log_named_uint(
-                "vaultTotalShares----",
-                getVaultTotalAssets(vaultId)
-            );
-            emit log_named_uint(
-                "vaultBalanceOf------",
-                getVaultBalanceForAddress(vaultId, currentActor)
-            );
+            emit log_named_uint("vaultTotalAssets----", getVaultTotalShares(vaultId));
+            emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+            emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
             // bound msgValue to between minDeposit and 10 ether
             msgValue = bound(msgValue, getTripleCost(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 2|||||||||||||||||||||||||||||||||||",
-                2
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 2|||||||||||||||||||||||||||||||||||", 2);
 
             shares = _depositTripleChecks(vaultId, msgValue, receiver);
         }
         // deposit triple
         emit log_named_uint("balance currentActor", currentActor.balance);
-        emit log_named_uint(
-            "balance EthMultiVaultbal-",
-            address(actEthMultiVault).balance
-        );
+        emit log_named_uint("balance EthMultiVaultbal-", address(actEthMultiVault).balance);
         emit log_named_uint("balance this--------", address(this).balance);
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE -------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE -------------------------------------------", 6000000009
         );
+        emit log_named_uint("vaultTotalShares----", getVaultTotalAssets(vaultId));
+        emit log_named_uint("vaultTAssets--------", getVaultTotalShares(vaultId));
+        emit log_named_uint("vaultBalanceOf------", getVaultBalanceForAddress(vaultId, currentActor));
         emit log_named_uint(
-            "vaultTotalShares----",
-            getVaultTotalAssets(vaultId)
-        );
-        emit log_named_uint(
-            "vaultTAssets--------",
-            getVaultTotalShares(vaultId)
-        );
-        emit log_named_uint(
-            "vaultBalanceOf------",
-            getVaultBalanceForAddress(vaultId, currentActor)
-        );
-        emit log_named_uint(
-            "==================================== ACTOR depositTriple ====================================",
-            shares
+            "==================================== ACTOR depositTriple ====================================", shares
         );
         return shares;
     }
@@ -655,21 +433,12 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
             msgValue = bound(msgValue, getMinDeposit(), 10 ether);
             vm.deal(currentActor, msgValue);
-            emit log_named_uint(
-                "|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||",
-                1
-            );
-            shares2Redeem = _depositTripleChecks(
-                vaultId,
-                msgValue,
-                currentActor
-            );
+            emit log_named_uint("|||||||||||||||||||||||||||||||||||BRANCH 1|||||||||||||||||||||||||||||||||||", 1);
+            shares2Redeem = _depositTripleChecks(vaultId, msgValue, currentActor);
         } else {
             // vault exists
             if (vaultId == 0 || vaultId > actEthMultiVault.count()) {
-                uint256[] memory tripleVaults = new uint256[](
-                    actEthMultiVault.count()
-                );
+                uint256[] memory tripleVaults = new uint256[](actEthMultiVault.count());
                 uint256 tripleVaultsCount = 0;
                 for (uint256 i = 1; i <= actEthMultiVault.count(); i++) {
                     if (actEthMultiVault.isTripleId(i)) {
@@ -678,92 +447,45 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                     }
                 }
 
-                vaultId = tripleVaults[
-                    bound(actorIndexSeed, 0, tripleVaultsCount - 1)
-                ];
+                vaultId = tripleVaults[bound(actorIndexSeed, 0, tripleVaultsCount - 1)];
             }
 
             // if vault balance of the selected vault is 0, deposit minDeposit
             if (getVaultBalanceForAddress(vaultId, currentActor) == 0) {
                 vm.deal(currentActor, 10 ether);
-                emit log_named_uint(
-                    "vaultTShares--",
-                    getVaultTotalAssets(vaultId)
-                );
-                emit log_named_uint(
-                    "vaultTAssets--",
-                    getVaultTotalShares(vaultId)
-                );
-                emit log_named_uint(
-                    "vaultBalanceOf",
-                    getVaultBalanceForAddress(vaultId, currentActor)
-                );
+                emit log_named_uint("vaultTShares--", getVaultTotalAssets(vaultId));
+                emit log_named_uint("vaultTAssets--", getVaultTotalShares(vaultId));
+                emit log_named_uint("vaultBalanceOf", getVaultBalanceForAddress(vaultId, currentActor));
                 msgValue = bound(msgValue, getTripleCost(), 10 ether);
-                emit log_named_uint(
-                    "REEEE getVaultTotalAssets(_vaultId)",
-                    getVaultTotalAssets(vaultId)
-                );
-                emit log_named_uint(
-                    "REEEE getVaultTotalShares(_vaultId)",
-                    getVaultTotalShares(vaultId)
-                );
-                emit log_named_uint(
-                    "|||||||||||||||||||||||||||||||BRANCH 2||||||||||||||||||||||||||||||||||||",
-                    2
-                );
-                shares2Redeem = actEthMultiVault.depositTriple{value: msgValue}(
-                    currentActor,
-                    vaultId
-                );
+                emit log_named_uint("REEEE getVaultTotalAssets(vaultId)", getVaultTotalAssets(vaultId));
+                emit log_named_uint("REEEE getVaultTotalShares(vaultId)", getVaultTotalShares(vaultId));
+                emit log_named_uint("|||||||||||||||||||||||||||||||BRANCH 2||||||||||||||||||||||||||||||||||||", 2);
+                shares2Redeem = actEthMultiVault.depositTriple{value: msgValue}(currentActor, vaultId);
                 _depositTripleChecks(vaultId, msgValue, receiver);
-                emit log_named_uint("_shares2Redeem", shares2Redeem);
+                emit log_named_uint("shares2Redeem", shares2Redeem);
             } else {
-                emit log_named_uint(
-                    "|||||||||||||||||||||||||||||||BRANCH 3||||||||||||||||||||||||||||||||||||",
-                    3
-                );
-                // bound _shares2Redeem to between 1 and vaultBalanceOf
-                shares2Redeem = bound(
-                    shares2Redeem,
-                    1,
-                    getVaultBalanceForAddress(vaultId, currentActor)
-                );
-                emit log_named_uint("_shares2Redeem", shares2Redeem);
+                emit log_named_uint("|||||||||||||||||||||||||||||||BRANCH 3||||||||||||||||||||||||||||||||||||", 3);
+                // bound shares2Redeem to between 1 and vaultBalanceOf
+                shares2Redeem = bound(shares2Redeem, 1, getVaultBalanceForAddress(vaultId, currentActor));
+                emit log_named_uint("shares2Redeem", shares2Redeem);
             }
         }
         // use the redeemer as the receiver always
         receiver = currentActor;
 
-        emit log_named_uint(
-            "before vaultTotalShares--",
-            getVaultTotalAssets(vaultId)
-        );
-        emit log_named_uint(
-            "before vaultTAssets------",
-            getVaultTotalShares(vaultId)
-        );
-        emit log_named_uint(
-            "before vaultBalanceOf----",
-            getVaultBalanceForAddress(vaultId, currentActor)
-        );
+        emit log_named_uint("before vaultTotalShares--", getVaultTotalAssets(vaultId));
+        emit log_named_uint("before vaultTAssets------", getVaultTotalShares(vaultId));
+        emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
 
-        uint256 assetsForReceiver = _redeemTripleChecks(
-            shares2Redeem,
-            receiver,
-            vaultId
-        );
+        uint256 assetsForReceiver = _redeemTripleChecks(shares2Redeem, receiver, vaultId);
 
         // logs
         emit log_named_uint(
-            "------------------------------------ POST STATE -------------------------------------------",
-            6000000009
+            "------------------------------------ POST STATE -------------------------------------------", 6000000009
         );
         emit log_named_uint("vaultTotalShares--", getVaultTotalAssets(vaultId));
         emit log_named_uint("vaultTAssets------", getVaultTotalShares(vaultId));
-        emit log_named_uint(
-            "vaultBalanceOf----",
-            getVaultBalanceForAddress(vaultId, currentActor)
-        );
+        emit log_named_uint("vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
         emit log_named_uint(
             "==================================== ACTOR redeemTriple END ====================================",
             assetsForReceiver
@@ -771,51 +493,32 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         return assetsForReceiver;
     }
 
-    function _createTripleChecks(
-        uint256 msgValue,
-        uint256 subjectId,
-        uint256 predicateId,
-        uint256 objectId
-    ) internal returns (uint256 vaultId) {
+    function _createTripleChecks(uint256 msgValue, uint256 subjectId, uint256 predicateId, uint256 objectId)
+        internal
+        returns (uint256 vaultId)
+    {
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
         uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
-        uint256[3] memory totalAssetsBeforeAtomVaults = [
-            vaultTotalAssets(subjectId),
-            vaultTotalAssets(predicateId),
-            vaultTotalAssets(objectId)
-        ];
-        uint256[3] memory totalSharesBeforeAtomVaults = [
-            vaultTotalShares(subjectId),
-            vaultTotalShares(predicateId),
-            vaultTotalShares(objectId)
-        ];
+        uint256[3] memory totalAssetsBeforeAtomVaults =
+            [vaultTotalAssets(subjectId), vaultTotalAssets(predicateId), vaultTotalAssets(objectId)];
+        uint256[3] memory totalSharesBeforeAtomVaults =
+            [vaultTotalShares(subjectId), vaultTotalShares(predicateId), vaultTotalShares(objectId)];
 
         // create triple
-        vaultId = actEthMultiVault.createTriple{value: msgValue}(
-            subjectId,
-            predicateId,
-            objectId
-        );
+        vaultId = actEthMultiVault.createTriple{value: msgValue}(subjectId, predicateId, objectId);
         assertEq(vaultId, actEthMultiVault.count());
 
-        checkDepositOnTripleVaultCreation(
-            vaultId,
-            msgValue,
-            totalAssetsBefore,
-            totalSharesBefore
-        );
+        checkDepositOnTripleVaultCreation(vaultId, msgValue, totalAssetsBefore, totalSharesBefore);
 
         // snapshots after creating a triple
         assertEq(
             protocolVaultBalanceBefore,
             // protocolVaultBalanceAfterLessFees
-            address(getProtocolVault()).balance -
-                protocolFeeAmount(msgValue - getTripleCost(), vaultId) -
-                getTripleCreationProtocolFee()
+            address(getProtocolVault()).balance - protocolFeeAmount(msgValue - getTripleCost(), vaultId)
+                - getTripleCreationProtocolFee()
         );
 
         _checkUnderlyingAtomDepositsOnTripleCreation(
@@ -835,14 +538,10 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, atomIds[0]);
         uint256 userDepositAfterProtocolFees = userDeposit - protocolDepositFee;
 
-        uint256 atomDepositFraction = atomDepositFractionAmount(
-            userDepositAfterProtocolFees,
-            atomIds[0]
-        );
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, atomIds[0]);
         uint256 distributeAmountPerAtomVault = atomDepositFraction / 3;
 
-        uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() /
-                3;
+        uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() / 3;
 
         for (uint256 i = 0; i < 3; i++) {
             checkAtomDepositIntoVaultOnTripleVaultCreation(
@@ -855,119 +554,63 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         }
     }
 
-    function _depositTripleChecks(
-        uint256 vaultId,
-        uint256 msgValue,
-        address receiver
-    ) internal returns (uint256 shares) {
+    function _depositTripleChecks(uint256 vaultId, uint256 msgValue, address receiver)
+        internal
+        returns (uint256 shares)
+    {
         uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
         uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
 
-        (
-            uint256 subjectId,
-            uint256 predicateId,
-            uint256 objectId
-        ) = actEthMultiVault.getTripleAtoms(vaultId);
+        (uint256 subjectId, uint256 predicateId, uint256 objectId) = actEthMultiVault.getTripleAtoms(vaultId);
 
-        uint256[3] memory totalAssetsBeforeAtomVaults = [
-            vaultTotalAssets(subjectId),
-            vaultTotalAssets(predicateId),
-            vaultTotalAssets(objectId)
-        ];
-        uint256[3] memory totalSharesBeforeAtomVaults = [
-            vaultTotalShares(subjectId),
-            vaultTotalShares(predicateId),
-            vaultTotalShares(objectId)
-        ];
+        uint256[3] memory totalAssetsBeforeAtomVaults =
+            [vaultTotalAssets(subjectId), vaultTotalAssets(predicateId), vaultTotalAssets(objectId)];
+        uint256[3] memory totalSharesBeforeAtomVaults =
+            [vaultTotalShares(subjectId), vaultTotalShares(predicateId), vaultTotalShares(objectId)];
 
         // deposit triple
-        shares = actEthMultiVault.depositTriple{value: msgValue}(
-            receiver,
-            vaultId
-        );
+        shares = actEthMultiVault.depositTriple{value: msgValue}(receiver, vaultId);
 
-        uint256 userDepositAfterProtocolFees = msgValue -
-            getProtocolFeeAmount(msgValue, vaultId);
+        uint256 userDepositAfterProtocolFees = msgValue - getProtocolFeeAmount(msgValue, vaultId);
 
-        checkDepositIntoVault(
-            userDepositAfterProtocolFees,
-            vaultId,
-            totalAssetsBefore,
-            totalSharesBefore
-        );
+        checkDepositIntoVault(userDepositAfterProtocolFees, vaultId, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalance(
-            vaultId,
-            msgValue,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
 
-        uint256 amountToDistribute = atomDepositFractionAmount(
-            userDepositAfterProtocolFees,
-            vaultId
-        );
+        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterProtocolFees, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault,
-            subjectId,
-            totalAssetsBeforeAtomVaults[0],
-            totalSharesBeforeAtomVaults[0]
+            distributeAmountPerAtomVault, subjectId, totalAssetsBeforeAtomVaults[0], totalSharesBeforeAtomVaults[0]
         );
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault,
-            predicateId,
-            totalAssetsBeforeAtomVaults[1],
-            totalSharesBeforeAtomVaults[1]
+            distributeAmountPerAtomVault, predicateId, totalAssetsBeforeAtomVaults[1], totalSharesBeforeAtomVaults[1]
         );
 
         checkDepositIntoVault(
-            distributeAmountPerAtomVault,
-            objectId,
-            totalAssetsBeforeAtomVaults[2],
-            totalSharesBeforeAtomVaults[2]
+            distributeAmountPerAtomVault, objectId, totalAssetsBeforeAtomVaults[2], totalSharesBeforeAtomVaults[2]
         );
     }
 
-    function _redeemTripleChecks(
-        uint256 shares2Redeem,
-        address receiver,
-        uint256 vaultId
-    ) internal returns (uint256 assetsForReceiver) {
+    function _redeemTripleChecks(uint256 shares2Redeem, address receiver, uint256 vaultId)
+        internal
+        returns (uint256 assetsForReceiver)
+    {
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault())
-            .balance;
+        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
         uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
-        uint256 assetsForReceiverBeforeFees = getAssetsForReceiverBeforeFees(
-            userSharesBeforeRedeem,
-            vaultId
-        );
+        uint256 assetsForReceiverBeforeFees = getAssetsForReceiverBeforeFees(userSharesBeforeRedeem, vaultId);
         // redeem triple
-        assetsForReceiver = actEthMultiVault.redeemTriple(
-            shares2Redeem,
-            receiver,
-            vaultId
-        );
+        assetsForReceiver = actEthMultiVault.redeemTriple(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(
-            vaultId,
-            assetsForReceiverBeforeFees,
-            protocolVaultBalanceBefore
-        );
+        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
 
-        assertEq(
-            getSharesInVault(vaultId, receiver),
-            userSharesBeforeRedeem - shares2Redeem
-        );
-        assertEq(
-            address(receiver).balance - userBalanceBeforeRedeem,
-            assetsForReceiver
-        );
+        assertEq(getSharesInVault(vaultId, receiver), userSharesBeforeRedeem - shares2Redeem);
+        assertEq(address(receiver).balance - userBalanceBeforeRedeem, assetsForReceiver);
     }
 }
