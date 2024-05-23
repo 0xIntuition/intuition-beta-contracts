@@ -20,6 +20,13 @@ contract EthMultiVaultSingleVaultInvariantTest is InvariantEthMultiVaultBase {
         // create single vault
         ethMultiVault.createAtom{value: 100 ether}("PEPE");
 
+        // create 2 more atoms for the triple vault
+        ethMultiVault.createAtom{value: 100 ether}("WIF");
+        ethMultiVault.createAtom{value: 100 ether}("BASE");
+
+        // create triple vault
+        ethMultiVault.createTriple{value: 100 ether}(1, 2, 3);
+
         // deploy actor
         actor = new EthMultiVaultSingleVaultActor(ethMultiVault);
 
