@@ -560,12 +560,12 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
             vm.startPrank(rich, rich);
 
-            // create atoms
+            // 3 create atoms
             uint256 subjectId = ethMultiVault.createAtom{value: u.subject.value}(abi.encodePacked("subject", i));
             uint256 predicateId = ethMultiVault.createAtom{value: u.predicate.value}(abi.encodePacked("predicate", i));
             uint256 objectId = ethMultiVault.createAtom{value: u.obj.value}(abi.encodePacked("object", i));
 
-            // create triple
+            // 1 create triple
             uint256 id = ethMultiVault.createTriple{value: u.value}(subjectId, predicateId, objectId);
 
             // check subject atom values
@@ -828,15 +828,15 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
             vm.startPrank(rich, rich);
 
-            // create atoms
+            // 3 create atoms
             uint256 subjectId = ethMultiVault.createAtom{value: u.subject.value}(abi.encodePacked("subject", i));
             uint256 predicateId = ethMultiVault.createAtom{value: u.predicate.value}(abi.encodePacked("predicate", i));
             uint256 objectId = ethMultiVault.createAtom{value: u.obj.value}(abi.encodePacked("object", i));
 
-            // create triple
+            // 1 create triple
             uint256 id = ethMultiVault.createTriple{value: u.value}(subjectId, predicateId, objectId);
 
-            // 3 deposits to the tripe
+            // 3 deposits to the triple
             for (uint256 j = 0; j < 3; j++) {
                 ethMultiVault.depositTriple{value: u.value}(rich, id);
             }

@@ -40,10 +40,10 @@ def createAtom(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Deci
 
   # Addresses
   atomWalletShares = Decimal(atomWalletInitialDepositAmount)
-  zeroWalletShares = minShare
   protocolVaultAssets = Decimal(atomCreationProtocolFee) + Decimal(protocolFeeAmount)
 
   return (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets)
+
 
 def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
   # Variables
@@ -70,7 +70,6 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   totalSharesAtomVault = userSharesAfterTotalFees
 
   # Addresses
-  #zeroWalletShares = Decimal(2) * Decimal(minShare)
   protocolVaultAssets = Decimal(tripleCreationProtocolFee) + Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
@@ -82,6 +81,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
           totalSharesAtomVault,
           totalAssetsAtomVault,
           protocolVaultAssets)
+
 
 def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal]:
   # Variables
@@ -99,6 +99,7 @@ def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> t
   protocolVaultAssets = protocolFeeAmount
 
   return (userSharesForTheAtom, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets)
+
 
 def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, totalAssetsAtom: Decimal, totalSharesAtom: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
   # Variables for triple
@@ -139,7 +140,6 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
   totalSharesAtomVault = userSharesForTheAtom
 
   # Addresses
-  #zeroWalletShares = Decimal(2) * Decimal(minShare)
   protocolVaultAssets = Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
@@ -150,6 +150,7 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
           totalAssetsAtomVault,
           protocolVaultAssets)
 
+
 def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
   if (totalShares == 0):
     userAssets = shares
@@ -157,7 +158,6 @@ def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
     userAssets = math.floor((shares * totalAssets) / totalShares)
 
   protocolFeeAmount = math.ceil(Decimal(userAssets) * Decimal(protocolFee) / Decimal(feeDenominator))
-  
   userAssetsAfterProtocolFees = Decimal(userAssets) - Decimal(protocolFeeAmount)
 
   if (totalShares - shares == minShare):
@@ -168,6 +168,7 @@ def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
   userAssetsAfterExitFees = userAssetsAfterProtocolFees - Decimal(exitFeeAmount)
   
   return (userAssetsAfterExitFees, protocolFeeAmount, exitFeeAmount)
+
 
 ## ------------ Create Atom data ------------
 
