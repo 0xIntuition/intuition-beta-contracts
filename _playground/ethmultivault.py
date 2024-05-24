@@ -18,6 +18,7 @@ atomDepositFractionForTriple = 1500 # 15%
 minShare = Web3.to_wei(Decimal('0.0000000000001'), 'ether')
 protocolFee = 100 # 1%
 entryFee = 500 # 5%
+exitFee = 500 # 5%
 feeDenominator = 10000
 
 # Costs
@@ -163,7 +164,7 @@ def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
   if (totalShares - shares == minShare):
     exitFeeAmount = 0
   else:
-    exitFeeAmount = math.ceil(userAssetsAfterProtocolFees * Decimal(entryFee) / Decimal(feeDenominator))
+    exitFeeAmount = math.ceil(userAssetsAfterProtocolFees * Decimal(exitFee) / Decimal(feeDenominator))
 
   userAssetsAfterExitFees = userAssetsAfterProtocolFees - Decimal(exitFeeAmount)
   
