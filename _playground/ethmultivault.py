@@ -18,6 +18,7 @@ atomDepositFractionForTriple = 1500 # 15%
 minShare = Web3.to_wei(Decimal('0.0000000000001'), 'ether')
 protocolFee = 100 # 1%
 entryFee = 500 # 5%
+exitFee = 500 # 5%
 feeDenominator = 10000
 
 # Costs
@@ -40,10 +41,10 @@ def createAtom(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Deci
 
   # Addresses
   atomWalletShares = Decimal(atomWalletInitialDepositAmount)
-  zeroWalletShares = minShare
   protocolVaultAssets = Decimal(atomCreationProtocolFee) + Decimal(protocolFeeAmount)
 
   return (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets)
+
 
 def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
   # Variables
@@ -70,7 +71,6 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   totalSharesAtomVault = userSharesAfterTotalFees
 
   # Addresses
-  #zeroWalletShares = Decimal(2) * Decimal(minShare)
   protocolVaultAssets = Decimal(tripleCreationProtocolFee) + Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
@@ -82,6 +82,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
           totalSharesAtomVault,
           totalAssetsAtomVault,
           protocolVaultAssets)
+
 
 def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal]:
   # Variables
@@ -99,6 +100,7 @@ def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> t
   protocolVaultAssets = protocolFeeAmount
 
   return (userSharesForTheAtom, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets)
+
 
 def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, totalAssetsAtom: Decimal, totalSharesAtom: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
   # Variables for triple
@@ -139,7 +141,6 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
   totalSharesAtomVault = userSharesForTheAtom
 
   # Addresses
-  #zeroWalletShares = Decimal(2) * Decimal(minShare)
   protocolVaultAssets = Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
@@ -149,6 +150,25 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
           totalSharesAtomVault,
           totalAssetsAtomVault,
           protocolVaultAssets)
+
+
+def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
+  if (totalShares == 0):
+    userAssets = shares
+  else:
+    userAssets = math.floor((shares * totalAssets) / totalShares)
+
+  protocolFeeAmount = math.ceil(Decimal(userAssets) * Decimal(protocolFee) / Decimal(feeDenominator))
+  userAssetsAfterProtocolFees = Decimal(userAssets) - Decimal(protocolFeeAmount)
+
+  if (totalShares - shares == minShare):
+    exitFeeAmount = 0
+  else:
+    exitFeeAmount = math.ceil(userAssetsAfterProtocolFees * Decimal(exitFee) / Decimal(feeDenominator))
+
+  userAssetsAfterExitFees = userAssetsAfterProtocolFees - Decimal(exitFeeAmount)
+  
+  return (userAssetsAfterExitFees, protocolFeeAmount, exitFeeAmount)
 
 
 ## ------------ Create Atom data ------------
@@ -342,4 +362,41 @@ for value in [
       totalAssets: {totalAssetsPerAtom}, \
       protocolVaultAssets: {protocolVaultAssets2} \
     }}) \
+  }}));".replace("  ", ''))
+
+
+## ------------ Redeem Atom data ------------
+
+print()
+print("Redeem atom data")
+
+for value in [
+    atomCost,
+    Decimal(atomCost) + Decimal(1),
+    Web3.to_wei(Decimal('1'), 'ether'),
+    Web3.to_wei(Decimal('10'), 'ether'),
+    Web3.to_wei(Decimal('100'), 'ether'),
+    Web3.to_wei(Decimal('1000'), 'ether'),
+]:
+  (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets) = createAtom(value)
+
+  for _ in range(3):
+    (userSharesFromDeposit, totalShares, totalAssets, protocolVaultAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
+
+    userShares += userSharesFromDeposit
+    protocolVaultAssets += protocolVaultAssetsFromDeposit
+
+  (userAssets, protocolFeeAmount, exitFeeAmount) = redeemAtom(userShares, totalAssets, totalShares)
+
+  totalRemainingShares = totalShares - userShares
+  totalRemainingAssets = totalAssets - userAssets - protocolFeeAmount
+  protocolVaultAssets += protocolFeeAmount
+
+  print(f"useCaseRedeemAtoms.push(UseCaseRedeemAtom({{ \
+    value: {value}, \
+    shares: {userShares}, \
+    assets: {userAssets}, \
+    totalRemainingShares: {totalRemainingShares}, \
+    totalRemainingAssets: {totalRemainingAssets}, \
+    protocolVaultAssets: {protocolVaultAssets} \
   }}));".replace("  ", ''))
