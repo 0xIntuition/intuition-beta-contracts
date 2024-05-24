@@ -423,11 +423,12 @@ interface IEthMultiVault {
     /// @return totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees
     /// @return assetsForReceiver amount of assets that is redeemable by the receiver
     /// @return protocolFees amount of assets that would be sent to the protocol vault
+    /// @return atomDepositFraction amount of assets that would be used as atom deposit fraction
     /// @return exitFees amount of assets that would be charged for the exit fee
     function getRedeemAssetsAndFees(uint256 shares, uint256 id)
         external
         view
-        returns (uint256, uint256, uint256, uint256);
+        returns (uint256, uint256, uint256, uint256, uint256);
 
     /// @notice returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided
     ///

@@ -52,9 +52,9 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
     }
 
     function getAssetsForReceiverBeforeFees(uint256 shares, uint256 vaultId) public view returns (uint256) {
-        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 atomDepositFraction, uint256 exitFees) =
             actEthMultiVault.getRedeemAssetsAndFees(shares, vaultId);
-        return calculatedAssetsForReceiver + protocolFees + exitFees;
+        return calculatedAssetsForReceiver + protocolFees + atomDepositFraction + exitFees;
     }
 
     function depositAtom(address _receiver, uint256 msgValue, uint256 actorIndexSeed)
