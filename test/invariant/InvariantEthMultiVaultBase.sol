@@ -18,12 +18,32 @@ contract InvariantEthMultiVaultBase is EthMultiVaultBase {
         for (uint256 i = 1; i <= ethMultiVault.count(); i++) {
             totalAssetsAcrossAllVaults += super.vaultTotalAssets(i);
         }
+
+        uint256 totalAssetsAcrossAllCounterTripleVaults;
+        uint256 counterTripleId = type(uint256).max - 1;
+        for (uint256 i = 1; i <= ethMultiVault.count(); i++) {
+            if (ethMultiVault.isTripleId(i)) {
+                totalAssetsAcrossAllCounterTripleVaults += super.vaultTotalAssets(counterTripleId);
+                counterTripleId--;
+            }
+        }
+
+        totalAssetsAcrossAllVaults += totalAssetsAcrossAllCounterTripleVaults;
+
         assertLe(totalAssetsAcrossAllVaults, address(ethMultiVault).balance);
     }
 
     function invariant_ethMultiVault_share_solvency() internal view {
         for (uint256 i = 1; i <= ethMultiVault.count(); i++) {
             assertLe(super.vaultTotalShares(i), super.vaultTotalAssets(i));
+        }
+
+        uint256 counterTripleId = type(uint256).max;
+        for (uint256 i = 1; i <= ethMultiVault.count(); i++) {
+            if (ethMultiVault.isTripleId(i)) {
+                assertLe(super.vaultTotalShares(counterTripleId), super.vaultTotalAssets(counterTripleId));
+                counterTripleId--;
+            }
         }
     }
 }
