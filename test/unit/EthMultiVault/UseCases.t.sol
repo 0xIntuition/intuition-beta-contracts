@@ -32,7 +32,7 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         UseCaseAtom obj;
     }
 
-    struct UseCaseRedeemAtom {
+    struct UseCaseRedeem {
         uint256 value;
         uint256 shares;
         uint256 assets;
@@ -43,7 +43,7 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
     UseCaseAtom[] useCaseAtoms;
     UseCaseTriple[] useCaseTriples;
-    UseCaseRedeemAtom[] useCaseRedeemAtoms;
+    UseCaseRedeem[] useCaseRedeems;
 
     function setUp() external {
         _setUp();
@@ -239,8 +239,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testUseCasesRedeemAtom() external {
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 300000000100000,
                 shares: 819530524365958,
                 assets: 830675569788504,
@@ -249,8 +249,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 protocolVaultAssets: 217832276130470
             })
         );
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 300000000100001,
                 shares: 819530524365958,
                 assets: 830675569788504,
@@ -259,8 +259,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 protocolVaultAssets: 217832276130474
             })
         );
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 1000000000000000000,
                 shares: 3748889220983980557,
                 assets: 3724095382864819517,
@@ -269,8 +269,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 protocolVaultAssets: 79793973767833339
             })
         );
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 10000000000000000000,
                 shares: 37491616096457688477,
                 assets: 37243515383249751406,
@@ -279,8 +279,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 protocolVaultAssets: 796193973771926182
             })
         );
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 100000000000000000000,
                 shares: 374918884846505054817,
                 assets: 372437715383288241292,
@@ -289,8 +289,8 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
                 protocolVaultAssets: 7960193973772335431
             })
         );
-        useCaseRedeemAtoms.push(
-            UseCaseRedeemAtom({
+        useCaseRedeems.push(
+            UseCaseRedeem({
                 value: 1000000000000000000000,
                 shares: 3749191572346509791407,
                 assets: 3724379715383292090248,
@@ -300,11 +300,11 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             })
         );
 
-        uint256 length = useCaseRedeemAtoms.length;
+        uint256 length = useCaseRedeems.length;
         uint256 protocolVaultBalanceBefore;
 
         for (uint256 i = 0; i < length; i++) {
-            UseCaseRedeemAtom storage u = useCaseRedeemAtoms[i];
+            UseCaseRedeem storage u = useCaseRedeems[i];
 
             vm.startPrank(rich, rich);
 
@@ -873,6 +873,103 @@ contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             uint256 protocolVaultAssets = address(getProtocolVault()).balance;
 
             // check protocol vault
+            assertEq(protocolVaultAssets, u.protocolVaultAssets + protocolVaultBalanceBefore);
+
+            protocolVaultBalanceBefore = protocolVaultAssets;
+
+            vm.stopPrank();
+        }
+    }
+
+    function testUseCasesRedeemTriple() external {
+        useCaseRedeems.push(
+            UseCaseRedeem({
+                value: 500000000200000,
+                shares: 1210182187985260,
+                assets: 1249627500495591,
+                totalRemainingShares: 100000,
+                totalRemainingAssets: 104303,
+                protocolVaultAssets: 827622500011006
+            })
+        );
+        useCaseRedeems.push(
+            UseCaseRedeem({
+                value: 500000000200001,
+                shares: 1210182187985260,
+                assets: 1249627500495591,
+                totalRemainingShares: 100000,
+                totalRemainingAssets: 104303,
+                protocolVaultAssets: 827622500011010
+            })
+        );
+        useCaseRedeems.push(
+            UseCaseRedeem({
+                value: 1000000000000000000,
+                shares: 3186380266276360948,
+                assets: 3331923457499827815,
+                totalRemainingShares: 100000,
+                totalRemainingAssets: 105624,
+                protocolVaultAssets: 74450792499996261
+            })
+        );
+        useCaseRedeems.push(
+            UseCaseRedeem({
+                value: 10000000000000000000,
+                shares: 31867698112568949759,
+                assets: 33322983457499827816,
+                totalRemainingShares: 100000,
+                totalRemainingAssets: 105623,
+                protocolVaultAssets: 737390792499996261
+            })
+        );
+        useCaseRedeems.push(
+            UseCaseRedeem({
+                value: 100000000000000000000,
+                shares: 318680876550323148598,
+                assets: 333233583457499827816,
+                totalRemainingShares: 100000,
+                totalRemainingAssets: 105623,
+                protocolVaultAssets: 7366790792499996261
+            })
+        );
+
+        uint256 length = useCaseRedeems.length;
+        uint256 protocolVaultBalanceBefore;
+
+        for (uint256 i = 0; i < length; i++) {
+            UseCaseRedeem storage u = useCaseRedeems[i];
+
+            vm.startPrank(rich, rich);
+
+            // 3 create atoms
+            uint256 subjectId = ethMultiVault.createAtom{value: getAtomCost()}(abi.encodePacked("subject", i));
+            uint256 predicateId = ethMultiVault.createAtom{value: getAtomCost()}(abi.encodePacked("predicate", i));
+            uint256 objectId = ethMultiVault.createAtom{value: getAtomCost()}(abi.encodePacked("object", i));
+
+            // 1 create triple
+            uint256 id = ethMultiVault.createTriple{value: u.value}(subjectId, predicateId, objectId);
+
+            // 3 deposits to the triple
+            for (uint256 j = 0; j < 3; j++) {
+                ethMultiVault.depositTriple{value: u.value}(rich, id);
+            }
+
+            uint256 shares = vaultBalanceOf(id, rich);
+
+            // 1 redeem total
+            uint256 assets = ethMultiVault.redeemTriple(shares, rich, id);
+
+            // atom values
+            uint256 sharesAfter = vaultBalanceOf(id, rich);
+            uint256 totalShares = vaultTotalShares(id);
+            uint256 totalAssets = vaultTotalAssets(id);
+            uint256 protocolVaultAssets = address(getProtocolVault()).balance;
+
+            assertEq(shares, u.shares);
+            assertEq(0, sharesAfter);
+            assertEq(assets, u.assets);
+            assertEq(totalShares, u.totalRemainingShares);
+            assertEq(totalAssets, u.totalRemainingAssets);
             assertEq(protocolVaultAssets, u.protocolVaultAssets + protocolVaultBalanceBefore);
 
             protocolVaultBalanceBefore = protocolVaultAssets;

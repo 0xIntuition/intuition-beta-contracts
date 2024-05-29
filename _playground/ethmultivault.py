@@ -152,7 +152,7 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
           protocolVaultAssets)
 
 
-def redeemAtom(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
+def redeem(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
   if (totalShares == 0):
     userAssets = shares
   else:
@@ -378,7 +378,7 @@ for value in [
     Web3.to_wei(Decimal('100'), 'ether'),
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
-  (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets) = createAtom(value)
+  (userShares, totalShares, totalAssets, _, protocolVaultAssets) = createAtom(value)
 
   for _ in range(3):
     (userSharesFromDeposit, totalShares, totalAssets, protocolVaultAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
@@ -386,13 +386,64 @@ for value in [
     userShares += userSharesFromDeposit
     protocolVaultAssets += protocolVaultAssetsFromDeposit
 
-  (userAssets, protocolFeeAmount, exitFeeAmount) = redeemAtom(userShares, totalAssets, totalShares)
+  (userAssets, protocolFeeAmount, exitFeeAmount) = redeem(userShares, totalAssets, totalShares)
 
   totalRemainingShares = totalShares - userShares
   totalRemainingAssets = totalAssets - userAssets - protocolFeeAmount
   protocolVaultAssets += protocolFeeAmount
 
-  print(f"useCaseRedeemAtoms.push(UseCaseRedeemAtom({{ \
+  print(f"useCaseRedeems.push(UseCaseRedeem({{ \
+    value: {value}, \
+    shares: {userShares}, \
+    assets: {userAssets}, \
+    totalRemainingShares: {totalRemainingShares}, \
+    totalRemainingAssets: {totalRemainingAssets}, \
+    protocolVaultAssets: {protocolVaultAssets} \
+  }}));".replace("  ", ''))
+
+
+## ------------ Redeem Triple data ------------
+
+print()
+print("Redeem triple data")
+
+for value in [
+    tripleCost,
+    Decimal(tripleCost) + Decimal(1),
+    Web3.to_wei(Decimal('1'), 'ether'),
+    Web3.to_wei(Decimal('10'), 'ether'),
+    Web3.to_wei(Decimal('100'), 'ether'),
+    Web3.to_wei(Decimal('1000'), 'ether'),
+]:
+  # Create 3 atoms
+  (_, _, _, _, protocolVaultAssets0) = createAtom(atomCost)
+  (_, _, _, _, protocolVaultAssets1) = createAtom(atomCost)
+  (_, _, _, _, protocolVaultAssets2) = createAtom(atomCost)
+
+  protocolVaultAssets = protocolVaultAssets0 + protocolVaultAssets1 + protocolVaultAssets2
+
+  # Create 1 triple
+  (userShares, totalShares, totalAssets, _, _, _, _, _, protocolFeeAmount) = createTriple(value)
+
+  protocolVaultAssets += protocolFeeAmount
+
+  for _ in range(3):
+    # Deposits
+    (userSharesFromDeposit, totalSharesPositiveVaultFromDeposit, totalAssetsPositiveVaultFromDeposit, _, _, _, protocolFeeAmount) = \
+      depositTriple(value, totalAssets, totalShares, 1, 1) # any atom totals, not used in this case
+    
+    userShares += userSharesFromDeposit
+    totalShares += totalSharesPositiveVaultFromDeposit
+    totalAssets += totalAssetsPositiveVaultFromDeposit
+    protocolVaultAssets += protocolFeeAmount
+
+  (userAssets, protocolFeeAmount, exitFeeAmount) = redeem(userShares, totalAssets, totalShares)
+
+  totalRemainingShares = totalShares - userShares
+  totalRemainingAssets = totalAssets - userAssets - protocolFeeAmount
+  protocolVaultAssets += protocolFeeAmount
+
+  print(f"useCaseRedeems.push(UseCaseRedeem({{ \
     value: {value}, \
     shares: {userShares}, \
     assets: {userAssets}, \
