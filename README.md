@@ -2,7 +2,7 @@
 
 ### PreRequisites
 
-- Foundry
+- [Foundry](https://getfoundry.sh)
 - (Optional) [VSCode Hardhat Solidity Plugin](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)
 - (Optional) [VSCode Coverage Gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
 
@@ -33,7 +33,7 @@ To deploy the v1 smart contract system on to a public testnet or mainnet, you’
 - Set the credentials DEFENDER_KEY and DEFENDER_SECRET on a .env file
 - RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain in the testnet phase)
 - Export private key of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments
-- For Base Sepolia, there is a reliable [testnet faucet](https://www.alchemy.com/faucets/base-sepolia) deployed by Alchemy
+- For Base Sepolia, there is a reliable [testnet faucet](https://alchemy.com/faucets/base-sepolia) deployed by Alchemy
 - Deploy smart contracts using the following command:
 
 ```shell
@@ -70,10 +70,20 @@ $ forge script script/TimelockController.s.sol
 
 <details>
 
+<summary>Base Mainnet</summary>
+
+- [AtomWallet implementation](https://basescan.org/address/0x17a923696036e6af9ed92a50444dcc8872e35a28)
+- [UpgradeableBeacon](https://basescan.org/address/0xb665e0cb8c5520f3894a68a4e077dcc7e2d6443b)
+- [EthMultiVault implementation](https://basescan.org/address/0x0028ce4f7ba7f738766008457ca36eef7712d0e5)
+- [EthMultiVault proxy](https://basescan.org/address/0x73edf2a6aca5ac52041d1d14deb3157a33b9ab6d)
+- [ProxyAdmin](https://basescan.org/address/0x4Cc0d2D03dF9eea7fed2C94A53e0A54f7B4EB121)
+- [TimelockController](https://basescan.org/address/0xe203084f698140BA986ceADa7E14E2FE077e51dA)
+
 <summary>Base Sepolia</summary>
 
-- [AtomWallet implementation](https://sepolia.basescan.org/address/0x67601BcddCD15C1da7dbb449ec196b9eAc84A4c6)
-- [AtomWalletBeacon](https://sepolia.basescan.org/address/0x9fBb10f4027f001c12086f98CE5145B694B4016C)
-- [EthMultiVault implementation](https://sepolia.basescan.org/address/0x54d9e246D1DE5ff8bF196d5585D5D625Def86871)
-- [EthMultiVault proxy](https://sepolia.basescan.org/address/0x2a30dCDAd9fe511A358F5C99060068956c00edb4)
-- [ProxyAdmin](https://sepolia.basescan.org/address/0x76A44BaDDD4c490273E7D39D0276CfFAaC6eD275)
+- [AtomWallet implementation](https://sepolia.basescan.org/address/0xBA33302d829aCe2a26F1b40C6F8F7736390d096C)
+- [UpgradeableBeacon](https://sepolia.basescan.org/address/0xE67B767bc5f0f6Aacb9647c46A2D3Cb03E1DC053)
+- [EthMultiVault implementation](https://sepolia.basescan.org/address/0x3C760876f5199065ED35D167e93D79c20a1f168E)
+- [EthMultiVault proxy](https://sepolia.basescan.org/address/0x78f576A734dEEFFd0C3550E6576fFf437933D9D5)
+- [ProxyAdmin](https://sepolia.basescan.org/address/0x8279459E49727Fb71ba423C9bFcF601547D8a00a)
+- [TimelockController](https://sepolia.basescan.org/address/0x00D4BBE40d9689AAbfB68A222790081BD3cdCc56)

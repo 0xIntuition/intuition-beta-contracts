@@ -12,7 +12,9 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
 /**
  * @title  AtomWallet
- * @notice This contract is an abstract account associated with a corresponding atom.
+ * @author 0xIntuition
+ * @notice Core contract of the Intuition protocol. This contract is an abstract account
+ *         associated with a corresponding atom.
  */
 contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     using ECDSA for bytes32;
