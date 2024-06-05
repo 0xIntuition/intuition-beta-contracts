@@ -18,7 +18,9 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 /**
  * @title  EthMultiVault
- * @notice Manages the creation and management of vaults associated with atoms & triples.
+ * @author 0xIntuition
+ * @notice Core contract of the Intuition protocol. Manages the creation and management of vaults
+ *         associated with atoms & triples.
  */
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;

@@ -2,7 +2,8 @@
 pragma solidity ^0.8.21;
 
 /// @title  Errors Library
-/// @notice Library containing all custom errors detailing cases in which the contracts should revert
+/// @author 0xIntuition
+/// @notice Library containing all custom errors detailing cases where the Intuition Protocol may revert.
 library Errors {
     ////////////// MULTIVAULT ERRORS ////////////////////////////////////////////////////////
 
