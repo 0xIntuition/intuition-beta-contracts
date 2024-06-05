@@ -1,6 +1,6 @@
 ## Instructions
 
-### PreRequisites
+### Prerequisites
 
 - [Foundry](https://getfoundry.sh)
 - (Optional) [VSCode Hardhat Solidity Plugin](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)
