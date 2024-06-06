@@ -5,7 +5,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 
 import {Errors} from "src/libraries/Errors.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
-import {Multicall3} from "src/utils/MultiCall3.sol";
+import {Multicall3} from "src/utils/Multicall3.sol";
 
 /**
  * @title  AtomWallet
