@@ -41,4 +41,9 @@ library Errors {
     error AtomWallet_OnlyOwner();
     error AtomWallet_OnlyOwnerOrEntryPoint();
     error AtomWallet_WrongArrayLengths();
+
+    ///////// MULTICALL3 ERRORS /////////////////////////////////////////////////////////////
+
+    error Multicall3_InvalidAtomUrisLength();
+    error Multicall3_InvalidValue();
 }
