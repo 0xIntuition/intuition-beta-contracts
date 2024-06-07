@@ -43,6 +43,24 @@ $ forge build
 $ forge test -vvv
 ```
 
+#### Run Fuzz Tests
+
+- Make sure you have at least node 16 and python 3.6 installed on your local machine
+- Add your FUZZ_AP_KEY to the .env file locally
+- Run the following command to install the `diligence-fuzzing` package:
+
+```shell
+$ pip3 install diligence-fuzzing
+```
+
+- After the installation is completed, run the fuzzing CLI:
+
+```shell
+$ fuzz forge test
+```
+
+- Finally, check your Diligence Fuzzing dashboard to see the results of the fuzzing tests
+
 ### Deployment Process using OpenZeppelin Defender
 
 To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:
