@@ -45,5 +45,7 @@ library Errors {
     ///////// MULTICALL3 ERRORS /////////////////////////////////////////////////////////////
 
     error Multicall3_InvalidAtomUrisLength();
+    error Multicall3_InvalidValuesLength();
+    error Multicall3_InsufficientValue();
     error Multicall3_InvalidValue();
 }
