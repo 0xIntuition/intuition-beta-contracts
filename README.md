@@ -19,9 +19,8 @@ To build the project and run tests, follow these steps:
 
 ### Prerequisites
 
+- [Node.js](https://nodejs.org/en/download/)
 - [Foundry](https://getfoundry.sh)
-- (Optional) [VSCode Hardhat Solidity Plugin](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity)
-- (Optional) [VSCode Coverage Gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
 
 ### Step by Step Guide
 
@@ -68,7 +67,7 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 ```
 
 **Notes:**
-- When verifying your smart conttacts, you can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
+- When verifying your smart contracts, you can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
 - The chain ID for Base Sepolia is `84532`, whereas the chain ID for Base Mainnet is `8453`
 
 ### Upgrade Process
