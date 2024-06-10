@@ -13,6 +13,12 @@ To get a basic understanding of the Intuition protocol, please check out the fol
 - [Official Documentation](https://docs.intuition.systems)
 - [Deep Dive into Our Smart Contracts](https://intuition.gitbook.io/intuition-or-beta-contracts)
 
+### Known Nuances 
+
+- Share prices are weird, but elegantly achieve our desired functionality - which is, Users earn fee revenue when they are shareholders of a vault and other users deposit/redeem from the vault while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.
+  - For example: User A deposits 1 ETH into a vault with a share price of 1 ETH. There is a 5% entry fee applied. User receives 0.95 shares. Assuming no other depositors in the vault, the Vault now has 1 ETH and 0.95 shares outstanding -> share price is now 1.052.
+  - User A now redeems their shares from the pool, paying a 5% exit fee to the vault. The vault now has 0.05 ETH and 0 shares; for this reason, we mint some number of 'ghost shares' to the 0 address upon vault instantiation, so that the number of outstanding shares will never be 0; however, because of the small number of outstanding 'ghost' shares, share price becomes arbitrarily high because of the large discrepancy between [Oustanding Shares] and [Assets in the Vault]. 
+
 ## Building and Running Tests
 
 To build the project and run tests, follow these steps:
@@ -99,11 +105,3 @@ $ forge script script/TimelockController.s.sol
 ```
 
 - After the delay passes (e.g. 2 days) you can call this again, just change the method on the target to `execute`
-
-
-| Name | Proxy | Implementation | Notes |
-| -------- | -------- | -------- | -------- |
-| [`AtomWallet`](https://github.com/0xIntuition/intuition-contracts/blob/tob-audit/src/AtomWallet.sol) | [`0xE67B767bc5f0f6Aacb9647c46A2D3Cb03E1DC053`](https://sepolia.basescan.org/address/0xE67B767bc5f0f6Aacb9647c46A2D3Cb03E1DC053) | [`0xBA33302d829aCe2a26F1b40C6F8F7736390d096C`](https://sepolia.basescan.org/address/0xBA33302d829aCe2a26F1b40C6F8F7736390d096C) | AtomWalletBeacon: [`BeaconProxy`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/beacon/BeaconProxy.sol) <br /> Atom Wallets: [`UpgradeableBeacon`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/beacon/UpgradeableBeacon.sol) |
-| [`EthMultiVault`](https://github.com/0xIntuition/intuition-contracts/blob/tob-audit/src/EthMultiVault.sol) | [`0x78f576A734dEEFFd0C3550E6576fFf437933D9D5`](https://sepolia.basescan.org/address/0x78f576A734dEEFFd0C3550E6576fFf437933D9D5) | [`0x3C760876f5199065ED35D167e93D79c20a1f168E`](https://sepolia.basescan.org/address/0x3C760876f5199065ED35D167e93D79c20a1f168E) | Proxy: [`TUP@5.0.2`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/transparent/TransparentUpgradeableProxy.sol) |
-| [`ProxyAdmin`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/transparent/ProxyAdmin.sol) | - | [`0x8279459E49727Fb71ba423C9bFcF601547D8a00a`](https://sepolia.basescan.org/address/0x8279459E49727Fb71ba423C9bFcF601547D8a00a) | Used for upgrading `EthMultiVault` proxy contract |
-| [`TimelockController`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/governance/TimelockController.sol) | - | [`0x00D4BBE40d9689AAbfB68A222790081BD3cdCc56`](https://sepolia.basescan.org/address/0x00D4BBE40d9689AAbfB68A222790081BD3cdCc56) | Owner of the `ProxyAdmin` and `AtomWalletBeacon` |
