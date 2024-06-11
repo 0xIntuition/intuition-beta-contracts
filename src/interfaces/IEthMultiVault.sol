@@ -126,6 +126,7 @@ interface IEthMultiVault {
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
     ///
     /// @param sender initializer of the withdrawal (owner of the shares)
+    /// @param receiver beneficiary of the withdrawn assets (can be different from the sender)
     /// @param vaultBalance total assets held in the vault
     /// @param assetsForReceiver quantity of assets withdrawn by the receiver
     /// @param shares quantity of shares redeemed
@@ -133,6 +134,7 @@ interface IEthMultiVault {
     /// @param vaultId vault id of the vault being redeemed from
     event Redeemed(
         address indexed sender,
+        address indexed receiver,
         uint256 vaultBalance,
         uint256 assetsForReceiver,
         uint256 shares,

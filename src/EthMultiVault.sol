@@ -532,9 +532,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     /// @notice batch create triples and return their vault ids
+    ///
     /// @param subjectIds vault ids array of subject atoms
     /// @param predicateIds vault ids array of predicate atoms
     /// @param objectIds vault ids array of object atoms
+    ///
     /// NOTE: This function will revert if called with less than `getTripleCost()` * `array.length` in `msg.value`.
     ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
     function batchCreateTriple(
@@ -720,7 +722,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, shares);
+        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, receiver, shares);
 
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
@@ -800,7 +802,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, shares);
+        (uint256 assets, uint256 protocolFees) = _redeem(id, msg.sender, receiver, shares);
 
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
@@ -818,6 +820,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /* =================================================== */
 
     /// @dev transfer fees to the protocol vault
+    /// @param value the amount of eth to transfer
     function _transferFeesToProtocolVault(uint256 value) internal {
         if (value == 0) return;
 
@@ -836,6 +839,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id the vault ID of the triple
     /// @param receiver the address to receive the shares
     /// @param amount the amount of eth to deposit
+    ///
     /// NOTE: assumes funds have already been transferred to this contract
     function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal {
         // load atom IDs
@@ -956,20 +960,25 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev redeem shares out of a given vault.
     ///      Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal
     ///
+    /// @param id the vault ID of the atom or triple
+    /// @param owner the address to redeem the shares from
+    /// @param receiver the address to receive the assets
+    /// @param shares the amount of shares to redeem
+    ///
     /// @return assetsForReceiver the amount of assets/eth to be transferred to the receiver
     /// @return protocolFees the amount of protocol fees deducted
-    function _redeem(uint256 id, address owner, uint256 shares) internal returns (uint256, uint256) {
+    function _redeem(uint256 id, address owner, address receiver, uint256 shares) internal returns (uint256, uint256) {
         if (shares == 0) {
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (vaults[id].balanceOf[msg.sender] < shares) {
+        if (vaults[id].balanceOf[owner] < shares) {
             revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
-        uint256 remainingShares = vaults[id].totalShares - shares;
-        if (remainingShares < generalConfig.minShare) {
-            revert Errors.MultiVault_InsufficientRemainingSharesInVault(remainingShares);
+        // uint256 remainingShares = vaults[id].totalShares - shares;
+        if (vaults[id].totalShares - shares < generalConfig.minShare) {
+            revert Errors.MultiVault_InsufficientRemainingSharesInVault(vaults[id].totalShares - shares);
         }
 
         (, uint256 assetsForReceiver, uint256 protocolFees, uint256 exitFees) = getRedeemAssetsAndFees(shares, id);
@@ -984,7 +993,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Redeemed(owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
+        emit Redeemed(owner, receiver, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
 
         return (assetsForReceiver, protocolFees);
     }
