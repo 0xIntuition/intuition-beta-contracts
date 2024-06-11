@@ -984,7 +984,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // burn shares, then transfer assets to receiver
         _burn(owner, id, shares);
 
-        emit Redeemed(msg.sender, owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
+        emit Redeemed(owner, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFees, id);
 
         return (assetsForReceiver, protocolFees);
     }

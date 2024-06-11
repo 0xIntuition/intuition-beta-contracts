@@ -112,7 +112,7 @@ interface IEthMultiVault {
     /// @param userAssetsAfterTotalFees total assets that go towards minting shares for the receiver
     /// @param sharesForReceiver total shares transferred
     /// @param entryFee total fee amount collected for entering the vault
-    /// @param id vault id
+    /// @param vaultId vault id of the vault being deposited into
     event Deposited(
         address indexed sender,
         address indexed receiver,
@@ -120,26 +120,24 @@ interface IEthMultiVault {
         uint256 userAssetsAfterTotalFees,
         uint256 sharesForReceiver,
         uint256 entryFee,
-        uint256 id
+        uint256 vaultId
     );
 
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
     ///
-    /// @param sender initializer of the withdrawal
-    /// @param owner owner of the shares that were redeemed
+    /// @param sender initializer of the withdrawal (owner of the shares)
     /// @param vaultBalance total assets held in the vault
     /// @param assetsForReceiver quantity of assets withdrawn by the receiver
     /// @param shares quantity of shares redeemed
     /// @param exitFee total fee amount collected for exiting the vault
-    /// @param id vault id
+    /// @param vaultId vault id of the vault being redeemed from
     event Redeemed(
         address indexed sender,
-        address indexed owner,
         uint256 vaultBalance,
         uint256 assetsForReceiver,
         uint256 shares,
         uint256 exitFee,
-        uint256 id
+        uint256 vaultId
     );
 
     /// @notice emitted upon creation of an atom
