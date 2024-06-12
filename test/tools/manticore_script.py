@@ -27,7 +27,14 @@ m.transaction(caller=user_account, address=contract_account, data=symbolic_data,
 for state in m.running_states:
     world = state.platform
     contract_balance = world.get_balance(contract_account.address)
+    m.terminate()
     print(f"Contract balance: {contract_balance}")
 
-# Terminate Manticore
-m.finalize()
+# Analyze issues
+for state in m.terminated_states:
+    for address, account in state.platform.items():
+        if account.storage:
+            for k, v in account.storage.items():
+                print(f"Address: {address}, Key: {k}, Value: {v}")
+
+    m.generate_testcase(state, name="test_case")
