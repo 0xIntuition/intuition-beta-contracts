@@ -15,7 +15,7 @@ contract CreateProxy is EthMultiVaultBase {
         _setUp();
     }
 
-    function testThing() external {
+    function testChangeAdmin() external {
         emit log_named_address("test 0", address(0));
         // deploy new proxy factory
         proxyFactory = new ERC1967Factory();
