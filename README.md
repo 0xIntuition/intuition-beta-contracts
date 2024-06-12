@@ -9,19 +9,22 @@ The Intuition Knowledge Graph will be recognized as an organic flywheel, where t
 ## Documentation
 
 To get a basic understanding of the Intuition protocol, please check out the following:
+
 - [Official Website](https://intuition.systems)
 - [Official Documentation](https://docs.intuition.systems)
 - [Deep Dive into Our Smart Contracts](https://intuition.gitbook.io/intuition-or-beta-contracts)
 
-### Known Nuances 
+### Known Nuances
 
 - Share prices are weird, but elegantly achieve our desired functionality - which is, Users earn fee revenue when they are shareholders of a vault and other users deposit/redeem from the vault while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.
   - For example: User A deposits 1 ETH into a vault with a share price of 1 ETH. There is a 5% entry fee applied. User receives 0.95 shares. Assuming no other depositors in the vault, the Vault now has 1 ETH and 0.95 shares outstanding -> share price is now 1.052.
-  - User A now redeems their shares from the pool, paying a 5% exit fee to the vault. The vault now has 0.05 ETH and 0 shares; for this reason, we mint some number of 'ghost shares' to the 0 address upon vault instantiation, so that the number of outstanding shares will never be 0; however, because of the small number of outstanding 'ghost' shares, share price becomes arbitrarily high because of the large discrepancy between [Oustanding Shares] and [Assets in the Vault]. 
+  - User A now redeems their shares from the pool, paying a 5% exit fee to the vault. The vault now has 0.05 ETH and 0 shares; for this reason, we mint some number of 'ghost shares' to the 0 address upon vault instantiation, so that the number of outstanding shares will never be 0; however, because of the small number of outstanding 'ghost' shares, share price becomes arbitrarily high because of the large discrepancy between [Oustanding Shares] and [Assets in the Vault].
 
 ## Building and Running Tests
 
 To build the project and run tests, follow these steps:
+
+### Prerequisites
 
 ### Prerequisites
 
@@ -70,6 +73,7 @@ $ fuzz forge test
 ### Deployment Process using OpenZeppelin Defender
 
 To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:
+
 - Set the credentials DEFENDER_KEY and DEFENDER_SECRET on a .env file
 - RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain for the testnet deployments)
 - Export private key of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments
@@ -91,12 +95,14 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 ```
 
 **Notes:**
+
 - When verifying your smart contracts, you can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
 - The chain ID for Base Sepolia is `84532`, whereas the chain ID for Base Mainnet is `8453`
 
 ### Upgrade Process
 
 To upgrade the smart contract you need:
+
 - Deploy a new version of contracts you want to upgrade, for example `EthMultiVault`. You need to add the directive `@custom:oz-upgrades-from` on the line before where you define the contract and set the version of the upgrade on the `init` function (e.g. `reinitializer(2)`)
 - If using a multisig as an upgrade admin, schedule the upgrade for some time in the future (e.g. 2 days) using this script to generate the parameters that can be used in Safe Transaction Builder:
 
