@@ -84,7 +84,7 @@ $ fuzz forge test
   $ npm run slither
 ```
 
-#### Run Manticore (Symbol Execution)
+#### Run Manticore (Symbolic Execution)
 
 - Make sure you have [Docker](https://docker.com/products/docker-desktop) installed on your local machine
 
