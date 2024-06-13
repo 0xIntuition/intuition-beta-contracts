@@ -1,6 +1,19 @@
+import os
+import subprocess
+import sys
+import json
 from manticore.ethereum import ManticoreEVM
 from manticore.core.smtlib import Operators
-import json
+
+# Ensure Manticore is installed
+def install_manticore():
+    try:
+        import manticore
+    except ImportError:
+        print("Manticore is not installed. Installing now...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "manticore"])
+
+install_manticore()
 
 # Initialize Manticore EVM
 m = ManticoreEVM()
@@ -9,7 +22,12 @@ m = ManticoreEVM()
 user_account = m.create_account(balance=1000)
 
 # Load the compiled contract
-with open('out/EthMultiVault/EthMultiVault.json') as f:
+contract_path = 'out/EthMultiVault/EthMultiVault.json'
+if not os.path.isfile(contract_path):
+    print(f"Contract file not found at {contract_path}")
+    sys.exit(1)
+
+with open(contract_path) as f:
     contract_json = json.load(f)
     bytecode = contract_json['bytecode']['object']
 
