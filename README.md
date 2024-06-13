@@ -84,7 +84,7 @@ $ fuzz forge test
   $ npm run slither
 ```
 
-### Run Manticore (Symbol Execution)
+#### Run Manticore (Symbol Execution)
 
 - Make sure you have [Docker](https://docker.com/products/docker-desktop) installed on your local machine
 
@@ -99,8 +99,6 @@ $ fuzz forge test
 ```shell
   $ docker run --rm -v "$(pwd)":/app manticore-analysis
 ```
-
-#### Run 
 
 ### Deployment Process using OpenZeppelin Defender
 
