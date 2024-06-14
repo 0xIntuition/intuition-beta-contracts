@@ -8,10 +8,10 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {Multicall3} from "src/utils/Multicall3.sol";
 
 /**
- * @title  AtomWallet
+ * @title  CustomMulticall3 Library
  * @author 0xIntuition
- * @notice Core contract of the Intuition protocol. This contract is an abstract account
- *         associated with a corresponding atom.
+ * @notice A utility contract of the Intuition protocol. 
+           It allows for the creation of claims (triples) based on atom URIs in a single transaction.
  */
 contract CustomMulticall3 is Initializable, Multicall3 {
     /// @notice EthMultiVault contract
