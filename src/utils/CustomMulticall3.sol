@@ -10,8 +10,8 @@ import {Multicall3} from "src/utils/Multicall3.sol";
 /**
  * @title  CustomMulticall3 Library
  * @author 0xIntuition
- * @notice A utility contract of the Intuition protocol. 
-           It allows for the creation of claims (triples) based on atom URIs in a single transaction.
+ * @notice A utility contract of the Intuition protocol.
+ *         It allows for the creation of claims (triples) based on atom URIs in a single transaction.
  */
 contract CustomMulticall3 is Initializable, Multicall3 {
     /// @notice EthMultiVault contract
