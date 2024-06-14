@@ -25,3 +25,5 @@ exports/addresses/local.json
 _playground/*.json
 .env_mainnet
 .env_testnet
+venv
+test/tools/__pycache__

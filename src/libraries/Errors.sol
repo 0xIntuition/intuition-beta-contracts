@@ -42,10 +42,11 @@ library Errors {
     error AtomWallet_OnlyOwnerOrEntryPoint();
     error AtomWallet_WrongArrayLengths();
 
-    ///////// MULTICALL3 ERRORS /////////////////////////////////////////////////////////////
+    ///////// CUSTOMMULTICALL3 ERRORS /////////////////////////////////////////////////////////////
 
-    error Multicall3_InvalidAtomUrisLength();
-    error Multicall3_InvalidValuesLength();
-    error Multicall3_InsufficientValue();
-    error Multicall3_InvalidValue();
+    error CustomMulticall3_InsufficientValue();
+    error CustomMulticall3_InvalidAtomIdsLength();
+    error CustomMulticall3_InvalidAtomUrisLength();
+    error CustomMulticall3_InvalidValue();
+    error CustomMulticall3_InvalidValuesLength();
 }

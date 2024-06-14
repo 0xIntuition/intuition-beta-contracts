@@ -24,16 +24,18 @@ contract CustomMulticall3 is Initializable, Multicall3 {
     }
 
     /// @notice Creates a claim (triple) based on the provided atom URIs in a single transaction
+    ///
     /// @param atomUris Array of atom URIs to create an atom for
     /// @param values Array of values to create the atoms and the triple
+    ///
     /// @return tripleId The ID of the created triple
     function createClaim(bytes[] calldata atomUris, uint256[] calldata values) external payable returns (uint256) {
         if (atomUris.length != 3) {
-            revert Errors.Multicall3_InvalidAtomUrisLength();
+            revert Errors.CustomMulticall3_InvalidAtomUrisLength();
         }
 
         if (values.length != 4) {
-            revert Errors.Multicall3_InvalidValuesLength();
+            revert Errors.CustomMulticall3_InvalidValuesLength();
         }
 
         uint256 atomCost = ethMultiVault.getAtomCost();
@@ -42,11 +44,11 @@ contract CustomMulticall3 is Initializable, Multicall3 {
         uint256 tripleCost = ethMultiVault.getTripleCost();
 
         if ((totalAtomCost + tripleCost) > msg.value) {
-            revert Errors.Multicall3_InsufficientValue();
+            revert Errors.CustomMulticall3_InsufficientValue();
         }
 
         if (values[0] < atomCost || values[1] < atomCost || values[2] < atomCost || values[3] < tripleCost) {
-            revert Errors.Multicall3_InvalidValue();
+            revert Errors.CustomMulticall3_InvalidValue();
         }
 
         uint256[] memory atomIds = new uint256[](length);
@@ -56,6 +58,45 @@ contract CustomMulticall3 is Initializable, Multicall3 {
         }
 
         uint256 tripleId = ethMultiVault.createTriple{value: values[3]}(atomIds[0], atomIds[1], atomIds[2]);
+
+        return tripleId;
+    }
+
+    /// @notice Creates a following claim based on the provided atom URI (i.e. a user) in a single transaction
+    ///         Example use case: First two atoms are "I" and "follow", and the third atom is the user to follow
+    ///
+    /// @param atomUri Atom URI to create an atom for
+    /// @param atomIds Array of atom IDs to create the triple with
+    /// @param values Array of values to create the atom and the triple
+    ///
+    /// @return tripleId The ID of the created triple
+    function createFollowing(bytes calldata atomUri, uint256[] calldata atomIds, uint256[] calldata values)
+        external
+        payable
+        returns (uint256)
+    {
+        if (atomIds.length != 2) {
+            revert Errors.CustomMulticall3_InvalidAtomIdsLength();
+        }
+
+        if (values.length != 2) {
+            revert Errors.CustomMulticall3_InvalidValuesLength();
+        }
+
+        uint256 atomCost = ethMultiVault.getAtomCost();
+        uint256 tripleCost = ethMultiVault.getTripleCost();
+
+        if ((atomCost + tripleCost) > msg.value) {
+            revert Errors.CustomMulticall3_InsufficientValue();
+        }
+
+        if (values[0] < atomCost || values[1] < tripleCost) {
+            revert Errors.CustomMulticall3_InvalidValue();
+        }
+
+        uint256 newAtomId = ethMultiVault.createAtom{value: values[0]}(atomUri);
+
+        uint256 tripleId = ethMultiVault.createTriple{value: values[1]}(atomIds[0], atomIds[1], newAtomId);
 
         return tripleId;
     }
