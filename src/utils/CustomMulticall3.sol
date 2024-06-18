@@ -23,13 +23,14 @@ contract CustomMulticall3 is Initializable, Multicall3 {
         ethMultiVault = _ethMultiVault;
     }
 
-    /// @notice Creates a claim (triple) based on the provided atom URIs in a single transaction
+    /// @notice Creates a claim (triple) based on the provided atom URIs in a single transaction,
+    ///         in situations where none of the atoms comprising the triple exist yet
     ///
     /// @param atomUris Array of atom URIs to create an atom for
     /// @param values Array of values to create the atoms and the triple
     ///
     /// @return tripleId The ID of the created triple
-    function createClaim(bytes[] calldata atomUris, uint256[] calldata values) external payable returns (uint256) {
+    function createTripleFromNewAtoms(bytes[] calldata atomUris, uint256[] calldata values) external payable returns (uint256) {
         if (atomUris.length != 3) {
             revert Errors.CustomMulticall3_InvalidAtomUrisLength();
         }
@@ -62,15 +63,16 @@ contract CustomMulticall3 is Initializable, Multicall3 {
         return tripleId;
     }
 
-    /// @notice Creates a following claim based on the provided atom URI (i.e. a user) in a single transaction
-    ///         Example use case: First two atoms are "I" and "follow", and the third atom is the user to follow
+    /// @notice Creates a triple with a new atom based on the provided atom URI in a single transaction, in
+    ///         situations where two of the atoms comprising the triple are known, and the third atom is new
+    ///         Example use case: First two atoms are known, e.g. "I" and "follow", and the third atom is the user to follow
     ///
     /// @param atomUri Atom URI to create an atom for
     /// @param atomIds Array of atom IDs to create the triple with
     /// @param values Array of values to create the atom and the triple
     ///
     /// @return tripleId The ID of the created triple
-    function createFollowing(bytes calldata atomUri, uint256[] calldata atomIds, uint256[] calldata values)
+    function createTripleWithNewAtom(bytes calldata atomUri, uint256[] calldata atomIds, uint256[] calldata values)
         external
         payable
         returns (uint256)
