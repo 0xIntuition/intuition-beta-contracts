@@ -34,7 +34,11 @@ contract CustomMulticall3 is Initializable, OwnableUpgradeable, Multicall3 {
     /// @param values Array of values to create the atoms and the triple
     ///
     /// @return tripleId The ID of the created triple
-    function createTripleFromNewAtoms(bytes[] calldata atomUris, uint256[] calldata values) external payable returns (uint256) {
+    function createTripleFromNewAtoms(bytes[] calldata atomUris, uint256[] calldata values)
+        external
+        payable
+        returns (uint256)
+    {
         if (atomUris.length != 3) {
             revert Errors.CustomMulticall3_InvalidAtomUrisLength();
         }
