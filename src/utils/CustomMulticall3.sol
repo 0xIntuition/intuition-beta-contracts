@@ -2,6 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -13,13 +14,16 @@ import {Multicall3} from "src/utils/Multicall3.sol";
  * @notice A utility contract of the Intuition protocol.
  *         It allows for the creation of claims (triples) based on atom URIs in a single transaction.
  */
-contract CustomMulticall3 is Initializable, Multicall3 {
+contract CustomMulticall3 is Initializable, OwnableUpgradeable, Multicall3 {
     /// @notice EthMultiVault contract
     IEthMultiVault public ethMultiVault;
 
     /// @notice Initializes the CustomMulticall3 contract
+    ///
     /// @param _ethMultiVault EthMultiVault contract
-    function init(IEthMultiVault _ethMultiVault) external initializer {
+    /// @param admin The address of the admin
+    function init(IEthMultiVault _ethMultiVault, address admin) external initializer {
+        __Ownable_init(admin);
         ethMultiVault = _ethMultiVault;
     }
 
@@ -101,5 +105,11 @@ contract CustomMulticall3 is Initializable, Multicall3 {
         uint256 tripleId = ethMultiVault.createTriple{value: values[1]}(atomIds[0], atomIds[1], newAtomId);
 
         return tripleId;
+    }
+
+    /// @notice Sets the EthMultiVault contract address
+    /// @param _ethMultiVault EthMultiVault contract address
+    function setEthMultiVault(IEthMultiVault _ethMultiVault) external onlyOwner {
+        ethMultiVault = _ethMultiVault;
     }
 }
