@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
@@ -15,7 +15,7 @@ contract CreateProxy is EthMultiVaultBase {
         _setUp();
     }
 
-    function testThing() external {
+    function testCreateProxy() external {
         emit log_named_address("test 0", address(0));
         // deploy new proxy factory
         proxyFactory = new ERC1967Factory();
