@@ -43,14 +43,14 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // execute interaction - deposit atoms
         ethMultiVault.depositTriple{value: testDepositAmount}(address(1), id);
 
-        uint256 userDepositAfterProtocolFees = testDepositAmount - getProtocolFeeAmount(testDepositAmount, id);
+        uint256 userDepositAfterprotocolFee = testDepositAmount - getProtocolFeeAmount(testDepositAmount, id);
 
-        checkDepositIntoVault(userDepositAfterProtocolFees, id, totalAssetsBefore, totalSharesBefore);
+        checkDepositIntoVault(userDepositAfterprotocolFee, id, totalAssetsBefore, totalSharesBefore);
 
         checkProtocolVaultBalance(id, testDepositAmount, protocolVaultBalanceBefore);
 
         // ------ Check Deposit Atom Fraction ------ //
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(

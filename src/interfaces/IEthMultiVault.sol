@@ -404,7 +404,7 @@ interface IEthMultiVault {
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a vault
     ///
-    /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFees)
+    /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFee)
     /// @param id vault id to get corresponding fees for
     ///
     /// @return totalAssetsDelta changes in vault's total assets
@@ -423,8 +423,8 @@ interface IEthMultiVault {
     ///
     /// @return totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees
     /// @return assetsForReceiver amount of assets that is redeemable by the receiver
-    /// @return protocolFees amount of assets that would be sent to the protocol vault
-    /// @return exitFees amount of assets that would be charged for the exit fee
+    /// @return protocolFee amount of assets that would be sent to the protocol vault
+    /// @return exitFee amount of assets that would be charged for the exit fee
     function getRedeemAssetsAndFees(uint256 shares, uint256 id)
         external
         view

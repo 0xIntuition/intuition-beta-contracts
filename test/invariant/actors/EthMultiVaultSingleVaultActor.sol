@@ -53,9 +53,9 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
     }
 
     function getAssetsForReceiverBeforeFees(uint256 shares, uint256 vaultId) public view returns (uint256) {
-        (, uint256 calculatedAssetsForReceiver, uint256 protocolFees, uint256 exitFees) =
+        (, uint256 calculatedAssetsForReceiver, uint256 protocolFee, uint256 exitFee) =
             actEthMultiVault.getRedeemAssetsAndFees(shares, vaultId);
-        return calculatedAssetsForReceiver + protocolFees + exitFees;
+        return calculatedAssetsForReceiver + protocolFee + exitFee;
     }
 
     function depositAtom(address receiver, uint256 msgValue, uint256 actorIndexSeed)
@@ -289,13 +289,13 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
 
         shares = actEthMultiVault.depositTriple{value: msgValue}(receiver, vaultId);
 
-        uint256 userDepositAfterProtocolFees = msgValue - getProtocolFeeAmount(msgValue, vaultId);
+        uint256 userDepositAfterprotocolFee = msgValue - getProtocolFeeAmount(msgValue, vaultId);
 
-        checkDepositIntoVault(userDepositAfterProtocolFees, vaultId, totalAssetsBefore, totalSharesBefore);
+        checkDepositIntoVault(userDepositAfterprotocolFee, vaultId, totalAssetsBefore, totalSharesBefore);
 
         checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
 
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterProtocolFees, vaultId);
+        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(

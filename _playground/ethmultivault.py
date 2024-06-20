@@ -32,11 +32,11 @@ def createAtom(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Deci
   # Variables
   userDeposit = value - atomCost
   protocolFeeAmount = math.ceil(userDeposit * Decimal(protocolFee) / Decimal(feeDenominator))
-  userDepositAfterProtocolFees = userDeposit - Decimal(protocolFeeAmount)
+  userDepositAfterprotocolFee = userDeposit - Decimal(protocolFeeAmount)
 
   # Atom vault
-  userShares = userDepositAfterProtocolFees
-  totalShares = userDepositAfterProtocolFees + Decimal(atomWalletInitialDepositAmount) + Decimal(minShare)
+  userShares = userDepositAfterprotocolFee
+  totalShares = userDepositAfterprotocolFee + Decimal(atomWalletInitialDepositAmount) + Decimal(minShare)
   totalAssets = totalShares
 
   # Addresses
@@ -50,10 +50,10 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   # Variables
   userDeposit = value - tripleCost
   protocolFeeAmount = math.ceil(userDeposit * Decimal(protocolFee) / Decimal(feeDenominator))
-  userDepositAfterProtocolFees = userDeposit - Decimal(protocolFeeAmount)
-  atomDepositFraction = math.floor(userDepositAfterProtocolFees * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
+  userDepositAfterprotocolFee = userDeposit - Decimal(protocolFeeAmount)
+  atomDepositFraction = math.floor(userDepositAfterprotocolFee * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
   perAtom = math.floor(atomDepositFraction / Decimal(3))
-  userAssetsAfterAtomDepositFraction = userDepositAfterProtocolFees - atomDepositFraction
+  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDepositFraction
   entryFeeAmount = math.floor(perAtom * Decimal(entryFee) / Decimal(feeDenominator))
   assetsForTheAtom = perAtom - entryFeeAmount
   userSharesAfterTotalFees = assetsForTheAtom # assuming current price = 1 ether
@@ -87,9 +87,9 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
 def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal]:
   # Variables
   protocolFeeAmount = math.ceil(value * Decimal(protocolFee) / Decimal(feeDenominator))
-  userDepositAfterProtocolFees = value - Decimal(protocolFeeAmount)
-  entryFeeAmount = math.floor(userDepositAfterProtocolFees * Decimal(entryFee) / Decimal(feeDenominator))
-  assetsForTheAtom = userDepositAfterProtocolFees - entryFeeAmount
+  userDepositAfterprotocolFee = value - Decimal(protocolFeeAmount)
+  entryFeeAmount = math.floor(userDepositAfterprotocolFee * Decimal(entryFee) / Decimal(feeDenominator))
+  assetsForTheAtom = userDepositAfterprotocolFee - entryFeeAmount
   userSharesForTheAtom = math.floor((assetsForTheAtom * totalShares) / totalAssets)
 
   # Atom vault
@@ -105,9 +105,9 @@ def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> t
 def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, totalAssetsAtom: Decimal, totalSharesAtom: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
   # Variables for triple
   protocolFeeAmount = math.ceil(value * Decimal(protocolFee) / Decimal(feeDenominator))
-  userDepositAfterProtocolFees = value - Decimal(protocolFeeAmount)
-  atomDepositFraction = math.floor(userDepositAfterProtocolFees * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
-  userAssetsAfterAtomDepositFraction = userDepositAfterProtocolFees - atomDepositFraction
+  userDepositAfterprotocolFee = value - Decimal(protocolFeeAmount)
+  atomDepositFraction = math.floor(userDepositAfterprotocolFee * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
+  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDepositFraction
   if (totalShares == minShare):
     entryFeeAmount = 0
   else:
@@ -159,16 +159,16 @@ def redeem(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
     userAssets = math.floor((shares * totalAssets) / totalShares)
 
   protocolFeeAmount = math.ceil(Decimal(userAssets) * Decimal(protocolFee) / Decimal(feeDenominator))
-  userAssetsAfterProtocolFees = Decimal(userAssets) - Decimal(protocolFeeAmount)
+  userAssetsAfterprotocolFee = Decimal(userAssets) - Decimal(protocolFeeAmount)
 
   if (totalShares - shares == minShare):
     exitFeeAmount = 0
   else:
-    exitFeeAmount = math.ceil(userAssetsAfterProtocolFees * Decimal(exitFee) / Decimal(feeDenominator))
+    exitFeeAmount = math.ceil(userAssetsAfterprotocolFee * Decimal(exitFee) / Decimal(feeDenominator))
 
-  userAssetsAfterExitFees = userAssetsAfterProtocolFees - Decimal(exitFeeAmount)
+  userAssetsAfterexitFee = userAssetsAfterprotocolFee - Decimal(exitFeeAmount)
   
-  return (userAssetsAfterExitFees, protocolFeeAmount, exitFeeAmount)
+  return (userAssetsAfterexitFee, protocolFeeAmount, exitFeeAmount)
 
 
 ## ------------ Create Atom data ------------
