@@ -72,9 +72,9 @@ contract CreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 userDeposit = testDepositAmountTriple - getTripleCost();
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
-        uint256 userDepositAfterProtocolFees = userDeposit - protocolDepositFee;
+        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
 
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
         uint256 distributeAmountPerAtomVault = atomDepositFraction / 3;
 
         uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() / 3;

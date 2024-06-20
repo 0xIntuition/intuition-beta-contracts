@@ -185,15 +185,15 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         // calculate expected total assets delta
         uint256 userDeposit = value - getTripleCost();
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
-        uint256 userDepositAfterProtocolFees = userDeposit - protocolDepositFee;
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
+        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
 
         uint256 sharesForZeroAddress = getMinShare();
 
-        uint256 totalAssetsDeltaExpected = userDepositAfterProtocolFees - atomDepositFraction + sharesForZeroAddress;
+        uint256 totalAssetsDeltaExpected = userDepositAfterprotocolFee - atomDepositFraction + sharesForZeroAddress;
 
         // calculate expected total shares delta
-        uint256 sharesForDepositor = userDepositAfterProtocolFees - atomDepositFraction;
+        uint256 sharesForDepositor = userDepositAfterprotocolFee - atomDepositFraction;
         uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress;
 
         // vault's total assets should have gone up
@@ -226,14 +226,14 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 protocolVaultBalanceBefore
     ) public view {
         uint256 length = ids.length;
-        uint256 protocolFees;
+        uint256 protocolFee;
 
         for (uint256 i = 0; i < length; i++) {
             // calculate expected protocol vault balance delta
-            protocolFees += getProtocolFeeAmount(valuePerAtom, i);
+            protocolFee += getProtocolFeeAmount(valuePerAtom, i);
         }
 
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() * length + protocolFees;
+        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() * length + protocolFee;
 
         // protocol vault's balance should have gone up
         uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;

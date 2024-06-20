@@ -14,7 +14,7 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 import {IEthMultiVaultEvents} from "./events/IEthMultiVaultEvents.sol";
 
 contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
-    // msg.value - atomCreationProtocolFee - protocolFees
+    // msg.value - atomCreationProtocolFee - protocolFee
 
     /// @notice constants
     // initial eth amounts
@@ -144,9 +144,9 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
     }
 
     function getRedeemFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256) {
-        (uint256 totalUserAssets, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFees) =
+        (uint256 totalUserAssets, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) =
             ethMultiVault.getRedeemAssetsAndFees(shares, id);
-        return (totalUserAssets, assetsForReceiver, protocolFee, exitFees);
+        return (totalUserAssets, assetsForReceiver, protocolFee, exitFee);
     }
 
     function currentSharePrice(uint256 id) public view returns (uint256) {

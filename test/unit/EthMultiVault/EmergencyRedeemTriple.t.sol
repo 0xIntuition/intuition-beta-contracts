@@ -54,11 +54,11 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        (,, uint256 protocolFees, uint256 exitFees) = getRedeemFees(userSharesBeforeRedeem, id);
+        (,, uint256 protocolFee, uint256 exitFee) = getRedeemFees(userSharesBeforeRedeem, id);
 
         // protocol fees and exit fees are not charged in the emergency redeem
-        assertEq(protocolFees, 0);
-        assertEq(exitFees, 0);
+        assertEq(protocolFee, 0);
+        assertEq(exitFee, 0);
 
         uint256 protocolVaultBalanceBeforeRedeem = address(getProtocolVault()).balance;
 
