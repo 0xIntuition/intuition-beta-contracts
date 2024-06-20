@@ -108,36 +108,40 @@ interface IEthMultiVault {
     ///
     /// @param sender initializer of the deposit
     /// @param receiver beneficiary of the minted shares
-    /// @param vaultBalance total assets held in the vault
-    /// @param userAssetsAfterTotalFees total assets that go towards minting shares for the receiver
-    /// @param sharesForReceiver total shares transferred
+    /// @param receiverTotalSharesInVault total shares held by the receiver in the vault
+    /// @param senderAssetsAfterTotalFees total assets that go towards minting shares for the receiver
+    /// @param sharesForReceiver total shares minted for the receiver
     /// @param entryFee total fee amount collected for entering the vault
     /// @param vaultId vault id of the vault being deposited into
+    /// @param isTriple whether the vault is a triple vault or not
+    /// @param isAtomWallet whether the receiver is an atom wallet or not
     event Deposited(
         address indexed sender,
         address indexed receiver,
-        uint256 vaultBalance,
-        uint256 userAssetsAfterTotalFees,
+        uint256 receiverTotalSharesInVault,
+        uint256 senderAssetsAfterTotalFees,
         uint256 sharesForReceiver,
         uint256 entryFee,
-        uint256 vaultId
+        uint256 vaultId,
+        bool isTriple,
+        bool isAtomWallet
     );
 
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
     ///
     /// @param sender initializer of the withdrawal (owner of the shares)
     /// @param receiver beneficiary of the withdrawn assets (can be different from the sender)
-    /// @param vaultBalance total assets held in the vault
+    /// @param senderTotalSharesInVault total shares held by the sender in the vault
     /// @param assetsForReceiver quantity of assets withdrawn by the receiver
-    /// @param shares quantity of shares redeemed
+    /// @param sharesRedeemedBySender quantity of shares redeemed by the sender
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param vaultId vault id of the vault being redeemed from
     event Redeemed(
         address indexed sender,
         address indexed receiver,
-        uint256 vaultBalance,
+        uint256 senderTotalSharesInVault,
         uint256 assetsForReceiver,
-        uint256 shares,
+        uint256 sharesRedeemedBySender,
         uint256 exitFee,
         uint256 vaultId
     );
