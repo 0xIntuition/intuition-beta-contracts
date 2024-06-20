@@ -1,6 +1,6 @@
 {
-  "name": "@0xintuition/intuition-contracts",
-  "version": "0.0.1",
+  "name": "@0xintuition/intuition-beta-contracts",
+  "version": "0.1.0",
   "description": "Core contracts for the Intuition protocol",
   "type": "module",
   "main": "index.js",
