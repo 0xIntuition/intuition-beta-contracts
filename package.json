@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "fmt:check": "forge fmt --check"
+    "fmt:check": "forge fmt --check",
+    "slither": "./test/tools/slither.sh"
   },
   "keywords": [],
   "author": "",

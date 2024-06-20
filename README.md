@@ -70,6 +70,36 @@ $ fuzz forge test
 
 - Finally, check your Diligence Fuzzing dashboard to see the results of the fuzzing tests
 
+#### Run Slither (Static Analysis)
+
+- Install the `slither-analyzer` package:
+  
+```shell
+  $ pip3 install slither-analyzer
+```
+
+- After the installation is completed, run the slither analysis bash script:
+
+```shell
+  $ npm run slither
+```
+
+#### Run Manticore (Symbolic Execution)
+
+- Make sure you have [Docker](https://docker.com/products/docker-desktop) installed on your local machine
+
+- Build the Docker image:
+
+```shell
+  $ docker build -t manticore-analysis .
+```
+
+- Run the Docker container:
+
+```shell
+  $ docker run --rm -v "$(pwd)":/app manticore-analysis
+```
+
 ### Deployment Process using OpenZeppelin Defender
 
 To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:

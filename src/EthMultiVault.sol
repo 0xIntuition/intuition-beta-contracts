@@ -774,11 +774,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // deposit eth into vault and mint shares for the receiver
         uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFees);
 
-        _transferFeesToProtocolVault(protocolFees);
-
         // distribute atom shares for all 3 atoms that underly the triple
         uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterProtocolFees, id);
         _depositAtomFraction(id, receiver, atomDepositFraction);
+
+        _transferFeesToProtocolVault(protocolFees);
 
         return shares;
     }

@@ -26,4 +26,4 @@ _playground/*.json
 .env_mainnet
 .env_testnet
 venv
-test/tools/__pycache__
+test/tools/__pycache__/
