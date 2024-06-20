@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.21;
 
 import {Script, console} from "forge-std/Script.sol";
-import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {
     TransparentUpgradeableProxy,
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
+import {AtomWallet} from "src/AtomWallet.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
-import {AtomWallet} from "src/AtomWallet.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 contract DeployEthMultiVault is Script {
@@ -102,7 +102,7 @@ contract DeployEthMultiVault is Script {
             EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
-        // log initData for contract verification on Etherscan
+        // Deploy EthMultiVault implementation contract
         ethMultiVault = new EthMultiVault();
         console.logString("deployed EthMultiVault.");
 

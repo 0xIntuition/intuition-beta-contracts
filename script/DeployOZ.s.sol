@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
+import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
 import {EthMultiVault} from "src/EthMultiVault.sol";
