@@ -869,11 +869,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     function _depositOnVaultCreation(uint256 id, address receiver, uint256 assets) internal {
         bool isAtomWallet = receiver == computeAtomWalletAddr(id);
 
-        // ghost shares minted to the zero address upon vault creation
+        // ghost shares minted to the zero address upon vault creation for all newly created vaults
         uint256 sharesForZeroAddress = generalConfig.minShare;
-
-        // ghost shares for the counter vault
-        uint256 assetsForZeroAddressInCounterVault = generalConfig.minShare;
 
         uint256 sharesForReceiver = assets;
 
@@ -898,7 +895,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             // set vault totals
             _setVaultTotals(
                 counterVaultId,
-                vaults[counterVaultId].totalAssets + assetsForZeroAddressInCounterVault,
+                vaults[counterVaultId].totalAssets + sharesForZeroAddress,
                 vaults[counterVaultId].totalShares + sharesForZeroAddress
             );
 
@@ -913,7 +910,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             assets, // userAssetsAfterTotalFees
             totalDelta, // sharesForReceiver
             0, // entryFee is not charged on vault creation
-            id
+            id,
+            isTripleId(id),
+            isAtomWallet
         );
     }
 
@@ -936,10 +935,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
-        uint256 totalSharesDelta = sharesForReceiver;
-
         // set vault totals (assets and shares)
-        _setVaultTotals(id, vaults[id].totalAssets + totalAssetsDelta, vaults[id].totalShares + totalSharesDelta);
+        _setVaultTotals(
+            id,
+            vaults[id].totalAssets + totalAssetsDelta,
+            vaults[id].totalShares + sharesForReceiver // totalSharesDelta
+        );
 
         // mint `sharesOwed` shares to sender factoring in fees
         _mint(receiver, id, sharesForReceiver);
@@ -951,7 +952,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             userAssetsAfterTotalFees,
             sharesForReceiver,
             entryFee,
-            id
+            id,
+            isTripleId(id),
+            false
         );
 
         return sharesForReceiver;
@@ -961,18 +964,21 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///      Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal
     ///
     /// @param id the vault ID of the atom or triple
-    /// @param owner the address to redeem the shares from
+    /// @param sender the address to redeem the shares from
     /// @param receiver the address to receive the assets
     /// @param shares the amount of shares to redeem
     ///
     /// @return assetsForReceiver the amount of assets/eth to be transferred to the receiver
     /// @return protocolFee the amount of protocol fees deducted
-    function _redeem(uint256 id, address owner, address receiver, uint256 shares) internal returns (uint256, uint256) {
+    function _redeem(uint256 id, address sender, address receiver, uint256 shares)
+        internal
+        returns (uint256, uint256)
+    {
         if (shares == 0) {
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (vaults[id].balanceOf[owner] < shares) {
+        if (vaults[id].balanceOf[sender] < shares) {
             revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
@@ -991,9 +997,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         );
 
         // burn shares, then transfer assets to receiver
-        _burn(owner, id, shares);
+        _burn(sender, id, shares);
 
-        emit Redeemed(owner, receiver, vaults[id].balanceOf[owner], assetsForReceiver, shares, exitFee, id);
+        emit Redeemed(sender, receiver, vaults[id].balanceOf[sender], assetsForReceiver, shares, exitFee, id);
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1244,14 +1250,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return price;
     }
 
-    /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call
+    /// @notice returns max amount of shares that can be redeemed from the 'sender' balance through a redeem call
     ///
-    /// @param owner address of the account to get max redeemable shares for
+    /// @param sender address of the account to get max redeemable shares for
     /// @param id vault id to get corresponding shares for
     ///
-    /// @return shares amount of shares that can be redeemed from the 'owner' balance through a redeem call
-    function maxRedeem(address owner, uint256 id) external view returns (uint256) {
-        uint256 shares = vaults[id].balanceOf[owner];
+    /// @return shares amount of shares that can be redeemed from the 'sender' balance through a redeem call
+    function maxRedeem(address sender, uint256 id) external view returns (uint256) {
+        uint256 shares = vaults[id].balanceOf[sender];
         return shares;
     }
 
