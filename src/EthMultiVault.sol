@@ -177,10 +177,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         timelocks[operationHash] = Timelock({data: data, readyTime: readyTime, executed: false});
     }
 
-    /// @dev execute a scheduled operation
+    /// @dev cancel a scheduled operation
     ///
     /// @param operationId unique identifier for the operation
-    /// @param data data to be executed
+    /// @param data data of the operation to be cancelled
     function cancelOperation(bytes32 operationId, bytes calldata data) external onlyAdmin {
         // Generate the operation hash
         bytes32 operationHash = keccak256(abi.encodePacked(operationId, data, generalConfig.minDelay));
@@ -700,7 +700,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    /// @notice redeem assets from an atom vault
+    /// @notice redeem shares from an atom vault
     ///
     /// @param shares the amount of shares to redeem
     /// @param receiver the address to receiver the assets
@@ -874,7 +874,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         uint256 sharesForReceiver = assets;
 
-        // changes in vault's total assets or total shares
+        // changes in vault's total assets and total shares (because ratio is 1:1 on vault creation)
         uint256 totalDelta = isAtomWallet ? sharesForReceiver : sharesForReceiver + sharesForZeroAddress;
 
         // set vault totals for the vault

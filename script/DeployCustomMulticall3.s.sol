@@ -15,6 +15,7 @@ contract DeployCustomMulticall3 is Script {
 
     address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Testnet multisig Safe address
     address ethMultiVault = 0x78f576A734dEEFFd0C3550E6576fFf437933D9D5; // EthMultiVault proxy address on testnet
+    address multicallAdmin = 0xaAE94A934c070F4a57303f436fb3599CBd5497C6; // Testnet admin address (should be replaced by a multisig in production)
 
     CustomMulticall3 customMulticall3;
     TransparentUpgradeableProxy customMulticall3Proxy;
@@ -24,7 +25,7 @@ contract DeployCustomMulticall3 is Script {
         vm.startBroadcast();
 
         // Prepare data for initializer function
-        bytes memory initData = abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVault));
+        bytes memory initData = abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVault), multicallAdmin);
 
         // deploy CustomMulticall3 implementation contract
         customMulticall3 = new CustomMulticall3();
