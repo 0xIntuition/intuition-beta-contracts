@@ -49,12 +49,16 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 atomId = 1;
 
         // should not be able to deploy atom wallet for atom that has not been created yet
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
         // execute interaction - deploy atom wallet
         ethMultiVault.deployAtomWallet(atomId);
 
-        // execute interaction - create atom
-        ethMultiVault.createAtom{value: getAtomCost()}("atom1");
+        // execute interaction - create atoms and a triple
+        uint256 atomId1 = ethMultiVault.createAtom{value: getAtomCost()}("atom1");
+        uint256 atomId2 = ethMultiVault.createAtom{value: getAtomCost()}("atom2");
+        uint256 atomId3 = ethMultiVault.createAtom{value: getAtomCost()}("atom3");
+
+        uint256 tripleId = ethMultiVault.createTriple{value: getTripleCost()}(atomId1, atomId2, atomId3);
 
         address atomWalletAddress = ethMultiVault.deployAtomWallet(atomId);
         address payable atomWallet = payable(atomWalletAddress);
@@ -69,6 +73,11 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // verify the computed address matches the actual wallet address
         assertEq(computedAddress, atomWalletAddress);
+
+        // should not be able to deploy an atom wallet for a triple vault
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
+        // execute interaction - deploy atom wallet
+        ethMultiVault.deployAtomWallet(tripleId);
     }
 
     function testAtomWalletOwnershipClaim() external {

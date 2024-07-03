@@ -172,6 +172,118 @@ interface IEthMultiVault {
     /// @param amount amount of fees transferred
     event FeesTransferred(address indexed sender, address indexed protocolVault, uint256 amount);
 
+    /// @notice emitted upon scheduling an operation
+    ///
+    /// @param operationId unique identifier for the operation
+    /// @param data data to be executed
+    /// @param readyTime block number when the operation is ready
+    event OperationScheduled(bytes32 indexed operationId, bytes data, uint256 readyTime);
+
+    /// @notice emitted upon cancelling an operation
+    ///
+    /// @param operationId unique identifier for the operation
+    /// @param data data of the operation that was cancelled
+    event OperationCancelled(bytes32 indexed operationId, bytes data);
+
+    /// @notice emitted upon changing the admin
+    ///
+    /// @param newAdmin address of the new admin
+    /// @param oldAdmin address of the old admin
+    event AdminSet(address indexed newAdmin, address indexed oldAdmin);
+
+    /// @notice emitted upon changing the protocol vault
+    ///
+    /// @param newProtocolVault address of the new protocol vault
+    /// @param oldProtocolVault address of the old protocol vault
+    event ProtocolVaultSet(address indexed newProtocolVault, address indexed oldProtocolVault);
+
+    /// @notice emitted upon changing the minimum deposit amount
+    ///
+    /// @param newMinDeposit new minimum deposit amount
+    /// @param oldMinDeposit old minimum deposit amount
+    event MinDepositSet(uint256 newMinDeposit, uint256 oldMinDeposit);
+
+    /// @notice emitted upon changing the minimum share amount
+    ///
+    /// @param newMinShare new minimum share amount
+    /// @param oldMinShare old minimum share amount
+    event MinShareSet(uint256 newMinShare, uint256 oldMinShare);
+
+    /// @notice emitted upon changing the atom URI max length
+    ///
+    /// @param newAtomUriMaxLength new atom URI max length
+    /// @param oldAtomUriMaxLength old atom URI max length
+    event AtomUriMaxLengthSet(uint256 newAtomUriMaxLength, uint256 oldAtomUriMaxLength);
+
+    /// @notice emitted upon changing the atom share lock fee
+    ///
+    /// @param newAtomWalletInitialDepositAmount new atom share lock fee
+    /// @param oldAtomWalletInitialDepositAmount old atom share lock fee
+    event AtomWalletInitialDepositAmountSet(
+        uint256 newAtomWalletInitialDepositAmount, uint256 oldAtomWalletInitialDepositAmount
+    );
+
+    /// @notice emitted upon changing the atom creation fee
+    ///
+    /// @param newAtomCreationProtocolFee new atom creation fee
+    /// @param oldAtomCreationProtocolFee old atom creation fee
+    event AtomCreationProtocolFeeSet(uint256 newAtomCreationProtocolFee, uint256 oldAtomCreationProtocolFee);
+
+    /// @notice emitted upon changing the triple creation fee
+    ///
+    /// @param newTripleCreationProtocolFee new triple creation fee
+    /// @param oldTripleCreationProtocolFee old triple creation fee
+    event TripleCreationProtocolFeeSet(uint256 newTripleCreationProtocolFee, uint256 oldTripleCreationProtocolFee);
+
+    /// @notice emitted upon changing the atom deposit fraction on triple creation
+    ///
+    /// @param newAtomDepositFractionOnTripleCreation new atom deposit fraction on triple creation
+    /// @param oldAtomDepositFractionOnTripleCreation old atom deposit fraction on triple creation
+    event AtomDepositFractionOnTripleCreationSet(
+        uint256 newAtomDepositFractionOnTripleCreation, uint256 oldAtomDepositFractionOnTripleCreation
+    );
+
+    /// @notice emitted upon changing the atom deposit fraction for triples
+    ///
+    /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
+    /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
+    event AtomDepositFractionForTripleSet(
+        uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple
+    );
+
+    /// @notice emitted upon changing the entry fee
+    ///
+    /// @param id vault id to set entry fee for
+    /// @param newEntryFee new entry fee for the vault
+    /// @param oldEntryFee old entry fee for the vault
+    event EntryFeeSet(uint256 id, uint256 newEntryFee, uint256 oldEntryFee);
+
+    /// @notice emitted upon changing the exit fee
+    ///
+    /// @param id vault id to set exit fee for
+    /// @param newExitFee new exit fee for the vault
+    /// @param oldExitFee old exit fee for the vault
+    event ExitFeeSet(uint256 id, uint256 newExitFee, uint256 oldExitFee);
+
+    /// @notice emitted upon changing the protocol fee
+    ///
+    /// @param id vault id to set protocol fee for
+    /// @param newProtocolFee new protocol fee for the vault
+    /// @param oldProtocolFee old protocol fee for the vault
+    event ProtocolFeeSet(uint256 id, uint256 newProtocolFee, uint256 oldProtocolFee);
+
+    /// @notice emitted upon changing the atomWarden
+    ///
+    /// @param newAtomWarden address of the new atomWarden
+    /// @param oldAtomWarden address of the old atomWarden
+    event AtomWardenSet(address indexed newAtomWarden, address indexed oldAtomWarden);
+
+    /// @notice emitted upon deploying an atom wallet
+    ///
+    /// @param vaultId vault id of the atom
+    /// @param atomWallet address of the atom wallet
+    event AtomWalletDeployed(uint256 indexed vaultId, address indexed atomWallet);
+
     /* =================================================== */
     /*                    INITIALIZER                      */
     /* =================================================== */

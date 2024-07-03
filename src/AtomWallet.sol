@@ -32,6 +32,9 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /// @notice The entry point contract address
     IEntryPoint private _entryPoint;
 
+    /// @dev Gap for upgrade safety
+    uint256[50] private __gap;
+
     /// @dev Modifier to allow only the owner or entry point to call a function
     modifier onlyOwnerOrEntryPoint() {
         if (!(msg.sender == address(entryPoint()) || msg.sender == owner())) {
@@ -58,7 +61,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /// @param dest the target address
     /// @param value the value to send
     /// @param func the function call data
-    function execute(address dest, uint256 value, bytes calldata func) external onlyOwnerOrEntryPoint {
+    function execute(address dest, uint256 value, bytes calldata func) external payable onlyOwnerOrEntryPoint {
         _call(dest, value, func);
     }
 
@@ -66,7 +69,7 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     ///
     /// @param dest the target addresses array
     /// @param func the function call data array
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external onlyOwnerOrEntryPoint {
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external payable onlyOwnerOrEntryPoint {
         if (dest.length != func.length) {
             revert Errors.AtomWallet_WrongArrayLengths();
         }
