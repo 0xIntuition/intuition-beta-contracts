@@ -25,7 +25,8 @@ contract DeployCustomMulticall3 is Script {
         vm.startBroadcast();
 
         // Prepare data for initializer function
-        bytes memory initData = abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVault), multicallAdmin);
+        bytes memory initData =
+            abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVault), multicallAdmin);
 
         // deploy CustomMulticall3 implementation contract
         customMulticall3 = new CustomMulticall3();
