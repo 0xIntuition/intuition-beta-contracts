@@ -306,6 +306,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit fraction percentage
     function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
+        if (atomDepositFractionForTriple > generalConfig.feeDenominator) {
+            revert Errors.MultiVault_InvalidAtomDepositFractionAmount();
+        }
+
         uint256 oldAtomDepositFractionForTriple = tripleConfig.atomDepositFractionForTriple;
 
         tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
