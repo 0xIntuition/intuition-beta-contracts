@@ -700,7 +700,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    /// @notice redeem shares from an atom vault
+    /// @notice redeem shares from an atom vault for assets
     ///
     /// @param shares the amount of shares to redeem
     /// @param receiver the address to receiver the assets
