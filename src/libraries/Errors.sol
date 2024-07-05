@@ -14,6 +14,8 @@ library Errors {
     error MultiVault_AtomUriTooLong();
     error MultiVault_BurnFromZeroAddress();
     error MultiVault_BurnInsufficientBalance();
+    error MultiVault_CannotApproveSelf();
+    error MultiVault_CannotRevokeSelf();
     error MultiVault_DeployAccountFailed();
     error MultiVault_DepositOrWithdrawZeroShares();
     error MultiVault_HasCounterStake();
@@ -29,6 +31,8 @@ library Errors {
     error MultiVault_OperationAlreadyScheduled();
     error MultiVault_OperationNotScheduled();
     error MultiVault_ReceiveNotAllowed();
+    error MultiVault_SenderAlreadyApproved();
+    error MultiVault_SenderNotApproved();
     error MultiVault_TimelockNotExpired();
     error MultiVault_TransferFailed();
     error MultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);

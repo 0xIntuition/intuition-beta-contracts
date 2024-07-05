@@ -51,6 +51,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     // Vault ID -> Vault Fees
     mapping(uint256 vaultId => VaultFees vaultFees) public vaultFees;
 
+    /// @notice Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver
+    // Receiver -> Sender -> Is Approved
+    mapping(address receiver => mapping(address sender => bool isApproved)) public approvals;
+
     /// @notice RDF (Resource Description Framework)
     // mapping of vault ID to atom data
     // Vault ID -> Atom Data
@@ -384,6 +388,46 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     /* -------------------------- */
+    /*         Approvals          */
+    /* -------------------------- */
+
+    /// @notice approve a sender to deposit assets on behalf of the receiver
+    /// @param sender address to approve
+    function approveSender(address sender) external {
+        address receiver = msg.sender;
+
+        if (receiver == sender) {
+            revert Errors.MultiVault_CannotApproveSelf();
+        }
+
+        if (approvals[receiver][sender]) {
+            revert Errors.MultiVault_SenderAlreadyApproved();
+        }
+
+        approvals[receiver][sender] = true;
+
+        emit SenderApproved(receiver, sender, true);
+    }
+
+    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
+    /// @param sender address to revoke
+    function revokeSender(address sender) external {
+        address receiver = msg.sender;
+
+        if (receiver == sender) {
+            revert Errors.MultiVault_CannotRevokeSelf();
+        }
+
+        if (!approvals[receiver][sender]) {
+            revert Errors.MultiVault_SenderNotApproved();
+        }
+
+        approvals[receiver][sender] = false;
+
+        emit SenderRevoked(receiver, sender, false);
+    }
+
+    /* -------------------------- */
     /*         Create Atom        */
     /* -------------------------- */
 
@@ -677,6 +721,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
     function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256) {
+        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+            revert Errors.MultiVault_SenderNotApproved();
+        }
+        
         if (id == 0 || id > count) {
             revert Errors.MultiVault_VaultDoesNotExist();
         }
@@ -756,6 +804,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
+        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+            revert Errors.MultiVault_SenderNotApproved();
+        }
+
         if (!isTripleId(id)) {
             revert Errors.MultiVault_VaultNotTriple();
         }

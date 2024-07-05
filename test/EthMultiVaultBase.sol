@@ -153,6 +153,10 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         return ethMultiVault.currentSharePrice(id);
     }
 
+    function getApproval(address receiver, address sender) public view returns (bool) {
+        return ethMultiVault.approvals(receiver, sender);
+    }
+
     //////// Generate Memes ////////
 
     function _generateMemes() internal {
