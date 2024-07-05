@@ -724,7 +724,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
             revert Errors.MultiVault_SenderNotApproved();
         }
-        
+
         if (id == 0 || id > count) {
             revert Errors.MultiVault_VaultDoesNotExist();
         }
