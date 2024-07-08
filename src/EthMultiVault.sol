@@ -419,7 +419,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return atomWallet the address of the atom wallet
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external whenNotPaused returns (address) {
-        if (atomId == 0 || atomId > count || isTripleId(atomId)) {
+        if (atomId == 0 || atomId > count) {
+            revert Errors.MultiVault_VaultDoesNotExist();
+        }
+
+        if (isTripleId(atomId)) {
             revert Errors.MultiVault_VaultNotAtom();
         }
 

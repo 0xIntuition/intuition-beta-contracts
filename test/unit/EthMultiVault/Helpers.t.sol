@@ -49,7 +49,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 atomId = 1;
 
         // should not be able to deploy atom wallet for atom that has not been created yet
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector));
         // execute interaction - deploy atom wallet
         ethMultiVault.deployAtomWallet(atomId);
 
