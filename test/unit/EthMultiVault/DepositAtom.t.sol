@@ -40,7 +40,21 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 sharesExpected = convertToShares(valueToDeposit - entryFeeAmount(valueToDeposit, id), id);
 
-        // execute interaction - deposit atoms
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_SenderNotApproved.selector));
+        ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
+
+        vm.stopPrank();
+
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
+
+        vm.stopPrank();
+
+        vm.startPrank(bob, bob);
+
+        // execute interaction - deposit atom
         ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
 
         checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
@@ -65,8 +79,15 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 testMinDesposit = getMinDeposit();
         uint256 testDepositAmount = testMinDesposit / 2;
 
-        // execute interaction - create atoms
+        // execute interaction - create atom
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
+
+        vm.stopPrank();
+
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
 
         vm.stopPrank();
 
@@ -89,6 +110,13 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // execute interaction - create atoms
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
+
+        vm.stopPrank();
+
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
 
         vm.stopPrank();
 
@@ -118,6 +146,13 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // execute interaction - create a triple
         uint256 positiveVaultId =
             ethMultiVault.createTriple{value: testDepositAmountTriple}(subjectId, predicateId, objectId);
+
+        vm.stopPrank();
+
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
 
         vm.stopPrank();
 

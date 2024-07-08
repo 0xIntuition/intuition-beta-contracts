@@ -104,6 +104,20 @@ interface IEthMultiVault {
     /*                       EVENTS                        */
     /* =================================================== */
 
+    /// @notice Emitted when a receiver approves a sender to deposit assets on their behalf
+    ///
+    /// @param sender address of the sender
+    /// @param receiver address of the receiver
+    /// @param approved whether the sender is approved or not
+    event SenderApproved(address indexed sender, address indexed receiver, bool approved);
+
+    /// @notice Emitted when a receiver revokes a sender's approval to deposit assets on their behalf
+    ///
+    /// @param sender address of the sender
+    /// @param receiver address of the receiver
+    /// @param approved whether the sender is approved or not
+    event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
+
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
     /// @param sender initializer of the deposit
@@ -300,6 +314,14 @@ interface IEthMultiVault {
     /// @return atomWallet the address of the atom wallet
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external returns (address);
+
+    /// @notice approve a sender to deposit assets on behalf of the receiver
+    /// @param sender address of the sender
+    function approveSender(address sender) external;
+
+    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
+    /// @param sender address of the sender
+    function revokeSender(address sender) external;
 
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with

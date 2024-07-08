@@ -38,6 +38,20 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256[3] memory totalSharesBeforeAtomVaults =
             [vaultTotalShares(subjectId), vaultTotalShares(predicateId), vaultTotalShares(objectId)];
 
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
+
+        vm.stopPrank();
+
+        vm.startPrank(address(2), address(2));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(bob);
+
+        vm.stopPrank();
+
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
@@ -74,6 +88,13 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testDepositTripleZeroShares() external {
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(alice);
+
+        vm.stopPrank();
+
         vm.startPrank(alice, alice);
 
         // test values
@@ -96,6 +117,13 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testDepositTripleBelowMinimumDeposit() external {
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(alice);
+
+        vm.stopPrank();
+
         vm.startPrank(alice, alice);
 
         // test values
@@ -120,6 +148,13 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testDepositTripleIsNotTriple() external {
+        vm.startPrank(address(1), address(1));
+
+        // execute interaction - approve sender
+        ethMultiVault.approveSender(alice);
+
+        vm.stopPrank();
+
         vm.startPrank(alice, alice);
 
         // test values
