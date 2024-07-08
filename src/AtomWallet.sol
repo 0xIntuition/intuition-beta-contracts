@@ -6,6 +6,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -16,7 +17,7 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
  * @notice Core contract of the Intuition protocol. This contract is an abstract account
  *         associated with a corresponding atom.
  */
-contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
+contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using ECDSA for bytes32;
 
     /// @notice The EthMultiVault contract address
@@ -31,6 +32,9 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
 
     /// @notice The entry point contract address
     IEntryPoint private _entryPoint;
+
+    /// @dev Gap for upgrade safety
+    uint256[50] private __gap;
 
     /// @dev Modifier to allow only the owner or entry point to call a function
     modifier onlyOwnerOrEntryPoint() {
@@ -47,6 +51,8 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /// @param _ethMultiVault the EthMultiVault contract address
     function init(IEntryPoint anEntryPoint, address anOwner, IEthMultiVault _ethMultiVault) external initializer {
         __Ownable_init(anOwner);
+        __ReentrancyGuard_init();
+
         _entryPoint = anEntryPoint;
         ethMultiVault = _ethMultiVault;
     }
@@ -58,7 +64,12 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     /// @param dest the target address
     /// @param value the value to send
     /// @param func the function call data
-    function execute(address dest, uint256 value, bytes calldata func) external onlyOwnerOrEntryPoint {
+    function execute(address dest, uint256 value, bytes calldata func)
+        external
+        payable
+        onlyOwnerOrEntryPoint
+        nonReentrant
+    {
         _call(dest, value, func);
     }
 
@@ -66,13 +77,18 @@ contract AtomWallet is Initializable, BaseAccount, OwnableUpgradeable {
     ///
     /// @param dest the target addresses array
     /// @param func the function call data array
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external onlyOwnerOrEntryPoint {
-        if (dest.length != func.length) {
+    function executeBatch(address[] calldata dest, uint256[] calldata values, bytes[] calldata func)
+        external
+        payable
+        onlyOwnerOrEntryPoint
+        nonReentrant
+    {
+        if (dest.length != values.length || values.length != func.length) {
             revert Errors.AtomWallet_WrongArrayLengths();
         }
 
         for (uint256 i = 0; i < dest.length; i++) {
-            _call(dest[i], 0, func[i]);
+            _call(dest[i], values[i], func[i]);
         }
     }
 

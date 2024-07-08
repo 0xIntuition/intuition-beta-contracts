@@ -202,12 +202,18 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     }
 
     function testSetAtomDepositFractionForTriple() external {
-        uint256 testValue = 1000;
+        uint256 validAtomDepositFractionForTriple = getFeeDenominator() / 10; // 10% of the deposit
+        uint256 invalidAtomDepositFractionForTriple = getFeeDenominator(); // 100% of the deposit
 
-        // msg.sender is the caller of EthMultiVaultBase
+        // Attempt to set atom deposit fraction higher than allowed, should revert
         vm.prank(msg.sender);
-        ethMultiVault.setAtomDepositFractionForTriple(testValue);
-        assertEq(getAtomDepositFraction(), testValue);
+        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidAtomDepositFractionForTriple.selector));
+        ethMultiVault.setAtomDepositFractionForTriple(invalidAtomDepositFractionForTriple);
+
+        // Set a valid atom deposit fraction for triple
+        vm.prank(msg.sender);
+        ethMultiVault.setAtomDepositFractionForTriple(validAtomDepositFractionForTriple);
+        assertEq(getAtomDepositFraction(), validAtomDepositFractionForTriple);
     }
 
     function testSetMinDeposit() external {

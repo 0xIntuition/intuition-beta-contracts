@@ -76,15 +76,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     // Vault ID -> (Is Triple)
     mapping(uint256 vaultId => bool isTriple) public isTriple;
 
-    /// @notice Atom Shares Tracking
-    /// used to enable atom shares earned from triple deposits to be redeemed proportionally
-    /// to the triple shares that earned them upon redemption/withdraw
-    /// Triple ID -> Atom ID -> Account Address -> Atom Share Balance
-    mapping(uint256 tripleId => mapping(uint256 atomId => mapping(address account => uint256 balance))) public
-        tripleAtomShares;
-
     /// @notice Timelock mapping (operation hash -> timelock struct)
     mapping(bytes32 operationHash => Timelock timelock) public timelocks;
+
+    /// @dev Gap for upgrade safety
+    uint256[50] private __gap;
 
     /* =================================================== */
     /*                    MODIFIERS                        */
@@ -179,6 +175,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 readyTime = block.timestamp + minDelay;
 
         timelocks[operationHash] = Timelock({data: data, readyTime: readyTime, executed: false});
+
+        emit OperationScheduled(operationId, data, readyTime);
     }
 
     /// @dev cancel a scheduled operation
@@ -200,11 +198,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         delete timelocks[operationHash];
+
+        emit OperationCancelled(operationId, data);
     }
 
     /// @dev set admin
     /// @param admin address of the new admin
     function setAdmin(address admin) external onlyAdmin {
+        address oldAdmin = generalConfig.admin;
+
         // Generate the operation hash
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, admin);
         bytes32 opHash = keccak256(abi.encodePacked(SET_ADMIN, data, generalConfig.minDelay));
@@ -217,62 +219,108 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
+
+        emit AdminSet(admin, oldAdmin);
     }
 
     /// @dev set protocol vault
     /// @param protocolVault address of the new protocol vault
     function setProtocolVault(address protocolVault) external onlyAdmin {
+        address oldProtocolVault = generalConfig.protocolVault;
+
         generalConfig.protocolVault = protocolVault;
+
+        emit ProtocolVaultSet(protocolVault, oldProtocolVault);
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples
     /// @param minDeposit new minimum deposit amount
     function setMinDeposit(uint256 minDeposit) external onlyAdmin {
+        uint256 oldMinDeposit = generalConfig.minDeposit;
+
         generalConfig.minDeposit = minDeposit;
+
+        emit MinDepositSet(minDeposit, oldMinDeposit);
     }
 
     /// @dev sets the minimum share amount for atoms and triples
     /// @param minShare new minimum share amount
     function setMinShare(uint256 minShare) external onlyAdmin {
+        uint256 oldMinShare = generalConfig.minShare;
+
         generalConfig.minShare = minShare;
+
+        emit MinShareSet(minShare, oldMinShare);
     }
 
     /// @dev sets the atom URI max length
     /// @param atomUriMaxLength new atom URI max length
     function setAtomUriMaxLength(uint256 atomUriMaxLength) external onlyAdmin {
+        uint256 oldAtomUriMaxLength = generalConfig.atomUriMaxLength;
+
         generalConfig.atomUriMaxLength = atomUriMaxLength;
+
+        emit AtomUriMaxLengthSet(atomUriMaxLength, oldAtomUriMaxLength);
     }
 
     /// @dev sets the atom share lock fee
     /// @param atomWalletInitialDepositAmount new atom share lock fee
     function setAtomWalletInitialDepositAmount(uint256 atomWalletInitialDepositAmount) external onlyAdmin {
+        uint256 oldAtomWalletInitialDepositAmount = atomConfig.atomWalletInitialDepositAmount;
+
         atomConfig.atomWalletInitialDepositAmount = atomWalletInitialDepositAmount;
+
+        emit AtomWalletInitialDepositAmountSet(atomWalletInitialDepositAmount, oldAtomWalletInitialDepositAmount);
     }
 
     /// @dev sets the atom creation fee
     /// @param atomCreationProtocolFee new atom creation fee
     function setAtomCreationProtocolFee(uint256 atomCreationProtocolFee) external onlyAdmin {
+        uint256 oldAtomCreationProtocolFee = atomConfig.atomCreationProtocolFee;
+
         atomConfig.atomCreationProtocolFee = atomCreationProtocolFee;
+
+        emit AtomCreationProtocolFeeSet(atomCreationProtocolFee, oldAtomCreationProtocolFee);
     }
 
     /// @dev sets fee charged in wei when creating a triple to protocol vault
     /// @param tripleCreationProtocolFee new fee in wei
     function setTripleCreationProtocolFee(uint256 tripleCreationProtocolFee) external onlyAdmin {
+        uint256 oldTripleCreationProtocolFee = tripleConfig.tripleCreationProtocolFee;
+
         tripleConfig.tripleCreationProtocolFee = tripleCreationProtocolFee;
+
+        emit TripleCreationProtocolFeeSet(tripleCreationProtocolFee, oldTripleCreationProtocolFee);
     }
 
     /// @dev sets the atom deposit fraction on triple creation used to increase the amount of assets
     ///      in the underlying atom vaults on triple creation
     /// @param atomDepositFractionOnTripleCreation new atom deposit fraction on triple creation
     function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external onlyAdmin {
+        uint256 oldAtomDepositFractionOnTripleCreation = tripleConfig.atomDepositFractionOnTripleCreation;
+
         tripleConfig.atomDepositFractionOnTripleCreation = atomDepositFractionOnTripleCreation;
+
+        emit AtomDepositFractionOnTripleCreationSet(
+            atomDepositFractionOnTripleCreation, oldAtomDepositFractionOnTripleCreation
+        );
     }
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit fraction percentage
     function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
+        uint256 maxAtomDepositFractionForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
+
+        if (atomDepositFractionForTriple > maxAtomDepositFractionForTriple) {
+            revert Errors.MultiVault_InvalidAtomDepositFractionForTriple();
+        }
+
+        uint256 oldAtomDepositFractionForTriple = tripleConfig.atomDepositFractionForTriple;
+
         tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
+
+        emit AtomDepositFractionForTripleSet(atomDepositFractionForTriple, oldAtomDepositFractionForTriple);
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -290,7 +338,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InvalidEntryFee();
         }
 
+        uint256 oldEntryFee = vaultFees[id].entryFee;
+
         vaultFees[id].entryFee = entryFee;
+
+        emit EntryFeeSet(id, entryFee, oldEntryFee);
     }
 
     /// @dev sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -308,6 +360,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InvalidExitFee();
         }
 
+        uint256 oldExitFee = vaultFees[id].exitFee;
+
         // Generate the operation hash
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setExitFee.selector, id, exitFee);
         bytes32 opHash = keccak256(abi.encodePacked(SET_EXIT_FEE, data, generalConfig.minDelay));
@@ -320,6 +374,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // Mark the operation as executed
         timelocks[opHash].executed = true;
+
+        emit ExitFeeSet(id, exitFee, oldExitFee);
     }
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -337,13 +393,21 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_InvalidProtocolFee();
         }
 
+        uint256 oldProtocolFee = vaultFees[id].protocolFee;
+
         vaultFees[id].protocolFee = protocolFee;
+
+        emit ProtocolFeeSet(id, protocolFee, oldProtocolFee);
     }
 
     /// @dev sets the atomWarden address
     /// @param atomWarden address of the new atomWarden
     function setAtomWarden(address atomWarden) external onlyAdmin {
+        address oldAtomWarden = walletConfig.atomWarden;
+
         walletConfig.atomWarden = atomWarden;
+
+        emit AtomWardenSet(atomWarden, oldAtomWarden);
     }
 
     /* =================================================== */
@@ -361,6 +425,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     function deployAtomWallet(uint256 atomId) external whenNotPaused returns (address) {
         if (atomId == 0 || atomId > count) {
             revert Errors.MultiVault_VaultDoesNotExist();
+        }
+
+        if (isTripleId(atomId)) {
+            revert Errors.MultiVault_VaultNotAtom();
         }
 
         // compute salt for create2
@@ -381,8 +449,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         if (atomWallet == address(0)) {
-            revert Errors.MultiVault_DeployAccountFailed();
+            atomWallet = computeAtomWalletAddr(atomId);
+
+            if (atomWallet.code.length != 0) {
+                revert Errors.MultiVault_DeployAccountFailed();
+            }
         }
+
+        emit AtomWalletDeployed(atomId, atomWallet);
 
         return atomWallet;
     }
@@ -828,7 +902,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // distribute atom shares for all 3 atoms that underly the triple
         uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
-        _depositAtomFraction(id, receiver, atomDepositFraction);
+
+        // deposit assets into each underlying atom vault and mint shares for the receiver
+        if (atomDepositFraction > 0) {
+            _depositAtomFraction(id, receiver, atomDepositFraction);
+        }
 
         _transferFeesToProtocolVault(protocolFee);
 
@@ -904,10 +982,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // distribute proportional shares to each atom
         for (uint256 i = 0; i < 3; i++) {
             // deposit assets into each atom vault and mint shares for the receiver
-            uint256 shares = _deposit(receiver, atomsIds[i], perAtom);
-
-            // update the mapping which tracks atom shares
-            tripleAtomShares[id][atomsIds[i]][receiver] += shares;
+            _deposit(receiver, atomsIds[i], perAtom);
         }
     }
 
@@ -983,7 +1058,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         (uint256 totalAssetsDelta, uint256 sharesForReceiver, uint256 userAssetsAfterTotalFees, uint256 entryFee) =
             getDepositSharesAndFees(value, id);
 
-        if (totalAssetsDelta <= 0) {
+        if (totalAssetsDelta == 0) {
             revert Errors.MultiVault_InsufficientDepositAmountToCoverFees();
         }
 
@@ -1030,7 +1105,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.MultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (vaults[id].balanceOf[sender] < shares) {
+        if (maxRedeem(sender, id) < shares) {
             revert Errors.MultiVault_InsufficientSharesInVault();
         }
 
@@ -1302,13 +1377,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return price;
     }
 
+    /// @notice returns max amount of eth that can be deposited into the vault
+    /// @return maxDeposit max amount of eth that can be deposited into the vault
+    function maxDeposit() public pure returns (uint256) {
+        return type(uint256).max;
+    }
+
     /// @notice returns max amount of shares that can be redeemed from the 'sender' balance through a redeem call
     ///
     /// @param sender address of the account to get max redeemable shares for
     /// @param id vault id to get corresponding shares for
     ///
     /// @return shares amount of shares that can be redeemed from the 'sender' balance through a redeem call
-    function maxRedeem(address sender, uint256 id) external view returns (uint256) {
+    function maxRedeem(address sender, uint256 id) public view returns (uint256) {
         uint256 shares = vaults[id].balanceOf[sender];
         return shares;
     }
