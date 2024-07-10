@@ -1565,10 +1565,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // BeaconProxy creation code
         bytes memory code = type(BeaconProxy).creationCode;
 
-        // encode the init function of the AtomWallet contract with the entryPoint and atomWarden as constructor arguments
-        bytes memory initData = abi.encodeWithSelector(
-            AtomWallet.init.selector, IEntryPoint(walletConfig.entryPoint), walletConfig.atomWarden, address(this)
-        );
+        // encode the init function of the AtomWallet contract with constructor arguments
+        bytes memory initData =
+            abi.encodeWithSelector(AtomWallet.init.selector, IEntryPoint(walletConfig.entryPoint), address(this));
 
         // encode constructor arguments of the BeaconProxy contract (address beacon, bytes memory data)
         bytes memory encodedArgs = abi.encode(beaconAddress, initData);
