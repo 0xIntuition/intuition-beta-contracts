@@ -123,7 +123,7 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
 
         Ownable2StepStorage storage $ = _getAtomWalletPendingOwnerStorage();
         $._pendingOwner = newOwner;
-        
+
         emit OwnershipTransferStarted(owner(), newOwner);
     }
 
@@ -181,7 +181,16 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
     {
         bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash));
 
-        (address recovered,,) = ECDSA.tryRecover(hash, userOp.signature);
+        (address recovered, ECDSA.RecoverError recoverError, bytes32 errorArg) =
+            ECDSA.tryRecover(hash, userOp.signature);
+
+        if (recoverError == ECDSA.RecoverError.InvalidSignature) {
+            revert Errors.AtomWallet_InvalidSignature();
+        } else if (recoverError == ECDSA.RecoverError.InvalidSignatureLength) {
+            revert Errors.AtomWallet_InvalidSignatureLength(uint256(errorArg));
+        } else if (recoverError == ECDSA.RecoverError.InvalidSignatureS) {
+            revert Errors.AtomWallet_InvalidSignatureS(errorArg);
+        }
 
         if (recovered != owner()) {
             return SIG_VALIDATION_FAILED;

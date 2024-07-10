@@ -44,6 +44,9 @@ library Errors {
 
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
+    error AtomWallet_InvalidSignature();
+    error AtomWallet_InvalidSignatureLength(uint256 length);
+    error AtomWallet_InvalidSignatureS(bytes32 s);
     error AtomWallet_OnlyOwner();
     error AtomWallet_OnlyOwnerOrEntryPoint();
     error AtomWallet_WrongArrayLengths();
