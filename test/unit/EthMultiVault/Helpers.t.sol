@@ -61,15 +61,14 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 tripleId = ethMultiVault.createTriple{value: getTripleCost()}(atomId1, atomId2, atomId3);
 
         address atomWalletAddress = ethMultiVault.deployAtomWallet(atomId);
-        address payable atomWallet = payable(atomWalletAddress);
 
         address computedAddress = ethMultiVault.computeAtomWalletAddr(atomId);
 
         // verify the returned atomWallet address is not zero
-        assertNotEq(atomWallet, address(0));
+        assertNotEq(atomWalletAddress, address(0));
 
         // verify atomWallet is a contract
-        assertTrue(isContract(atomWallet));
+        assertTrue(isContract(atomWalletAddress));
 
         // verify the computed address matches the actual wallet address
         assertEq(computedAddress, atomWalletAddress);
@@ -78,6 +77,10 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
         // execute interaction - deploy atom wallet
         ethMultiVault.deployAtomWallet(tripleId);
+
+        // try to deploy atom wallet for an atom that has already been created (should return the same address)
+        address atomWalletAddressAlreadyCreated = ethMultiVault.deployAtomWallet(atomId);
+        assertEq(atomWalletAddress, atomWalletAddressAlreadyCreated);
     }
 
     function testAtomWalletOwnershipClaim() external {

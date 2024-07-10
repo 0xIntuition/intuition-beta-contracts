@@ -437,7 +437,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // get contract deployment data
         bytes memory data = _getDeploymentData();
 
-        address atomWallet;
+        address predictedAtomWalletAddress = computeAtomWalletAddr(atomId);
+
+        uint256 codeLengthBefore = predictedAtomWalletAddress.code.length;
+
+        address deployedAtomWalletAddress;
 
         // deploy atom wallet with create2:
         // value sent in wei,
@@ -445,20 +449,20 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // length of `code` (first 32 bytes of code),
         // salt for create2
         assembly {
-            atomWallet := create2(0, add(data, 0x20), mload(data), salt)
+            deployedAtomWalletAddress := create2(0, add(data, 0x20), mload(data), salt)
         }
 
-        if (atomWallet == address(0)) {
-            atomWallet = computeAtomWalletAddr(atomId);
-
-            if (atomWallet.code.length != 0) {
+        if (deployedAtomWalletAddress == address(0)) {
+            if (codeLengthBefore == 0) {
                 revert Errors.MultiVault_DeployAccountFailed();
+            } else {
+                return predictedAtomWalletAddress;
             }
         }
 
-        emit AtomWalletDeployed(atomId, atomWallet);
+        emit AtomWalletDeployed(atomId, deployedAtomWalletAddress);
 
-        return atomWallet;
+        return predictedAtomWalletAddress;
     }
 
     /* -------------------------- */
