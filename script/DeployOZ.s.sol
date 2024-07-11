@@ -4,9 +4,11 @@ pragma solidity ^0.8.21;
 import {Defender, ApprovalProcessResponse} from "openzeppelin-foundry-upgrades/Defender.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import {Upgrades, Options} from "openzeppelin-foundry-upgrades/Defender.sol";
 
+import {CustomMulticall3} from "src/utils/CustomMulticall3.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
@@ -75,7 +77,7 @@ contract DeployEthMultiVaultScript is Script {
 
         console.log("atomWalletBeacon:", address(atomWalletBeacon));
 
-        // // ======== Deploy EthMultiVault ========
+        // ======== Deploy EthMultiVault ========
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
@@ -120,6 +122,26 @@ contract DeployEthMultiVaultScript is Script {
         );
 
         console.log("transparentUpgradableProxy:", ethMultiVaultProxy);
+
+        // ======== Deploy CustomMulticall3 ========
+
+        // Prepare data for initializer function
+        bytes memory initData =
+            abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVaultProxy), admin);
+
+        // deploy CustomMulticall3 implementation contract
+        CustomMulticall3 customMulticall3 = new CustomMulticall3();
+        console.logString("deployed CustomMulticall3.");
+
+        // deploy TransparentUpgradeableProxy for CustomMulticall3
+        TransparentUpgradeableProxy customMulticall3Proxy = new TransparentUpgradeableProxy(
+            address(customMulticall3), // logic contract address
+            admin, // initial owner of the ProxyAdmin instance tied to the proxy
+            initData // data to pass to the logic contract's initializer function
+        );
+
+        console.log("customMulticall3 implementation:", address(customMulticall3));
+        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
 
         vm.stopBroadcast();
     }
