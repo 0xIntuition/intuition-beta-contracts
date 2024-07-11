@@ -44,6 +44,7 @@ library Errors {
 
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
+    error AtomWallet_InvalidCallDataLength();
     error AtomWallet_InvalidSignature();
     error AtomWallet_InvalidSignatureLength(uint256 length);
     error AtomWallet_InvalidSignatureS(bytes32 s);
