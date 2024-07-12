@@ -179,6 +179,12 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
         override
         returns (uint256 validationData)
     {
+        (uint256 validUntil, uint256 validAfter,) = extractValidUntilAndValidAfter(userOp.callData);
+
+        if (block.timestamp < validAfter || block.timestamp > validUntil) {
+            return SIG_VALIDATION_FAILED;
+        }
+
         bytes32 hash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", userOpHash));
 
         (address recovered, ECDSA.RecoverError recoverError, bytes32 errorArg) =
@@ -211,6 +217,28 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
                 revert(add(result, 32), mload(result))
             }
         }
+    }
+
+    /// @notice Extract the validUntil and validAfter from the call data
+    /// @param callData the call data
+    ///
+    /// @return validUntil the valid until timestamp
+    /// @return validAfter the valid after timestamp
+    /// @return actualCallData the actual call data of the user operation
+    function extractValidUntilAndValidAfter(bytes calldata callData)
+        internal
+        pure
+        returns (uint256 validUntil, uint256 validAfter, bytes memory actualCallData)
+    {
+        if (callData.length < 24) {
+            revert Errors.AtomWallet_InvalidCallDataLength();
+        }
+
+        validUntil = abi.decode(callData[:12], (uint256));
+        validAfter = abi.decode(callData[12:24], (uint256));
+        actualCallData = callData[24:];
+
+        return (validUntil, validAfter, actualCallData);
     }
 
     /// @dev Get the storage slot for the AtomWallet contract owner

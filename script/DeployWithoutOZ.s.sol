@@ -10,6 +10,7 @@ import {
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
 import {AtomWallet} from "src/AtomWallet.sol";
+import {CustomMulticall3} from "src/utils/CustomMulticall3.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
@@ -114,6 +115,26 @@ contract DeployEthMultiVault is Script {
         );
         console.logString("deployed TransparentUpgradeableProxy.");
 
+        // ======== Deploy CustomMulticall3 ========
+
+        // Prepare data for initializer function
+        bytes memory multicallInitData =
+            abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(address(ethMultiVaultProxy)), admin);
+
+        // deploy CustomMulticall3 implementation contract
+        CustomMulticall3 customMulticall3 = new CustomMulticall3();
+        console.logString("deployed CustomMulticall3.");
+
+        // deploy TransparentUpgradeableProxy for CustomMulticall3
+        TransparentUpgradeableProxy customMulticall3Proxy = new TransparentUpgradeableProxy(
+            address(customMulticall3), // logic contract address
+            admin, // initial owner of the ProxyAdmin instance tied to the proxy
+            multicallInitData // data to pass to the logic contract's initializer function
+        );
+
+        console.log("customMulticall3 implementation:", address(customMulticall3));
+        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
+
         // stop sending tx's
         vm.stopBroadcast();
 
@@ -124,7 +145,9 @@ contract DeployEthMultiVault is Script {
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
         console.log(
-            "To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event."
+            "To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event. Same applies to the CustomMulticall3 proxy contract."
         );
+        console.log("customMulticall3 implementation:", address(customMulticall3));
+        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
     }
 }
