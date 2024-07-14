@@ -181,7 +181,8 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
     {
         (uint256 validUntil, uint256 validAfter,) = extractValidUntilAndValidAfter(userOp.callData);
 
-        if (block.timestamp < validAfter || block.timestamp > validUntil) {
+        // validUntil can be 0, meaning there won't be an expiration
+        if (block.timestamp <= validAfter || (block.timestamp >= validUntil && validUntil != 0)) {
             return SIG_VALIDATION_FAILED;
         }
 
