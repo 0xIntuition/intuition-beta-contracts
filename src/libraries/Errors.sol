@@ -5,42 +5,42 @@ pragma solidity ^0.8.21;
 /// @author 0xIntuition
 /// @notice Library containing all custom errors detailing cases where the Intuition Protocol may revert.
 library Errors {
-    ////////////// MULTIVAULT ERRORS ////////////////////////////////////////////////////////
+    ////////////// ETHMULTIVAULT ERRORS /////////////////////////////////////////////////////
 
-    error MultiVault_AdminOnly();
-    error MultiVault_ArraysNotSameLength();
-    error MultiVault_AtomDoesNotExist(uint256 atomId);
-    error MultiVault_AtomExists(bytes atomUri);
-    error MultiVault_AtomUriTooLong();
-    error MultiVault_BurnFromZeroAddress();
-    error MultiVault_BurnInsufficientBalance();
-    error MultiVault_CannotApproveSelf();
-    error MultiVault_CannotRevokeSelf();
-    error MultiVault_DeployAccountFailed();
-    error MultiVault_DepositOrWithdrawZeroShares();
-    error MultiVault_HasCounterStake();
-    error MultiVault_InsufficientBalance();
-    error MultiVault_InsufficientDepositAmountToCoverFees();
-    error MultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
-    error MultiVault_InsufficientSharesInVault();
-    error MultiVault_InvalidAtomDepositFractionForTriple();
-    error MultiVault_InvalidEntryFee();
-    error MultiVault_InvalidExitFee();
-    error MultiVault_InvalidProtocolFee();
-    error MultiVault_MinimumDeposit();
-    error MultiVault_OperationAlreadyExecuted();
-    error MultiVault_OperationAlreadyScheduled();
-    error MultiVault_OperationNotScheduled();
-    error MultiVault_ReceiveNotAllowed();
-    error MultiVault_SenderAlreadyApproved();
-    error MultiVault_SenderNotApproved();
-    error MultiVault_TimelockNotExpired();
-    error MultiVault_TransferFailed();
-    error MultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
-    error MultiVault_VaultDoesNotExist();
-    error MultiVault_VaultIsTriple(uint256 vaultId);
-    error MultiVault_VaultNotAtom();
-    error MultiVault_VaultNotTriple();
+    error EthMultiVault_AdminOnly();
+    error EthMultiVault_ArraysNotSameLength();
+    error EthMultiVault_AtomDoesNotExist(uint256 atomId);
+    error EthMultiVault_AtomExists(bytes atomUri);
+    error EthMultiVault_AtomUriTooLong();
+    error EthMultiVault_BurnFromZeroAddress();
+    error EthMultiVault_BurnInsufficientBalance();
+    error EthMultiVault_CannotApproveSelf();
+    error EthMultiVault_CannotRevokeSelf();
+    error EthMultiVault_DeployAccountFailed();
+    error EthMultiVault_DepositOrWithdrawZeroShares();
+    error EthMultiVault_HasCounterStake();
+    error EthMultiVault_InsufficientBalance();
+    error EthMultiVault_InsufficientDepositAmountToCoverFees();
+    error EthMultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
+    error EthMultiVault_InsufficientSharesInVault();
+    error EthMultiVault_InvalidAtomDepositFractionForTriple();
+    error EthMultiVault_InvalidEntryFee();
+    error EthMultiVault_InvalidExitFee();
+    error EthMultiVault_InvalidProtocolFee();
+    error EthMultiVault_MinimumDeposit();
+    error EthMultiVault_OperationAlreadyExecuted();
+    error EthMultiVault_OperationAlreadyScheduled();
+    error EthMultiVault_OperationNotScheduled();
+    error EthMultiVault_ReceiveNotAllowed();
+    error EthMultiVault_SenderAlreadyApproved();
+    error EthMultiVault_SenderNotApproved();
+    error EthMultiVault_TimelockNotExpired();
+    error EthMultiVault_TransferFailed();
+    error EthMultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
+    error EthMultiVault_VaultDoesNotExist();
+    error EthMultiVault_VaultIsTriple(uint256 vaultId);
+    error EthMultiVault_VaultNotAtom();
+    error EthMultiVault_VaultNotTriple();
 
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 

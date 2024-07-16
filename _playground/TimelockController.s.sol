@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
-import {EthMultiVaultV2} from "./EthMultiVaultV2.sol";
+import {EthMultiVaultV2} from "test/EthMultiVaultV2.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
@@ -23,7 +23,7 @@ contract TimelockControllerParametersScript is Script {
 
     /// Multisig addresses for key roles in the protocol
     address _admin = address(0x0000000000000000000000000000000000000000);
-    address _protocolVault = address(0x0000000000000000000000000000000000000000);
+    address _protocolMultisig = address(0x0000000000000000000000000000000000000000);
     address _atomWarden = address(0x0000000000000000000000000000000000000000);
 
     IPermit2 _permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
@@ -32,7 +32,7 @@ contract TimelockControllerParametersScript is Script {
     function run() external view {
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: _admin, // Admin address for the EthMultiVault contract
-            protocolVault: _protocolVault, // Protocol vault address (should be a multisig in production)
+            protocolMultisig: _protocolMultisig, // Protocol multisig address (should be a multisig in production)
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.0003 ether, // Minimum deposit amount in wei
             minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
@@ -74,7 +74,7 @@ contract TimelockControllerParametersScript is Script {
         uint256 delay = 5 minutes;
 
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVaultV2.initialize.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
+            EthMultiVaultV2.initV2.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
         );
 
         bytes memory timelockControllerData = abi.encodeWithSelector(

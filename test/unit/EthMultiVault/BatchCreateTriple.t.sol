@@ -34,7 +34,7 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         objectIds[1] = ethMultiVault.createAtom{value: testAtomCost}("object2");
 
         // snapshots before creating a triple
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         uint256 lastVaultIdBeforeCreatingTriple = ethMultiVault.count();
         assertEq(lastVaultIdBeforeCreatingTriple, 3 * triplesToCreate);
@@ -57,7 +57,7 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(ids.length, triplesToCreate);
 
         // snapshots after creating a triple
-        uint256 protocolVaultBalanceAfter = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceAfter = address(getProtocolMultisig()).balance;
 
         // sum up all protocol deposit fees and creation fees
         uint256 protocolFeeTotal;
@@ -65,9 +65,9 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             protocolFeeTotal += protocolFeeAmount(testDepositAmountTriple - getTripleCost(), ids[i]);
         }
 
-        uint256 protocolVaultBalanceAfterLessFees =
-            protocolVaultBalanceAfter - protocolFeeTotal - (getTripleCreationProtocolFee() * triplesToCreate);
-        assertEq(protocolVaultBalanceBefore, protocolVaultBalanceAfterLessFees);
+        uint256 protocolMultisigBalanceAfterLessFees =
+            protocolMultisigBalanceAfter - protocolFeeTotal - (getTripleCreationProtocolFee() * triplesToCreate);
+        assertEq(protocolMultisigBalanceBefore, protocolMultisigBalanceAfterLessFees);
 
         vm.stopPrank();
     }
@@ -118,7 +118,7 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             predicateIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("predicate"), i));
             objectIds[i] = ethMultiVault.createAtom{value: testAtomCost}(abi.encodePacked(bytes("object"), i));
         }
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientBalance.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InsufficientBalance.selector));
         ethMultiVault.batchCreateTriple{value: testAtomCost * (triplesToCreate - 1)}(
             subjectIds, predicateIds, objectIds
         );
@@ -151,7 +151,7 @@ contract BatchCreateTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
             newSubjectIds[i] = subjectIds[i];
         }
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_ArraysNotSameLength.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_ArraysNotSameLength.selector));
         ethMultiVault.batchCreateTriple{value: testAtomCost * (triplesToCreate - 1)}(
             newSubjectIds, predicateIds, objectIds
         );

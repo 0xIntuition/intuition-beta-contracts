@@ -20,7 +20,7 @@ contract DeployEthMultiVault is Script {
 
     // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
     address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Testnet multisig Safe address
-    address protocolVault = admin;
+    address protocolMultisig = admin;
     address atomWarden = admin;
 
     // Constants from Base
@@ -65,10 +65,10 @@ contract DeployEthMultiVault is Script {
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Protocol vault address (should be a multisig in production)
+            protocolMultisig: protocolMultisig, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
-            minDeposit: 0.0003 ether, // Minimum deposit amount in wei
-            minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+            minDeposit: 0.00069 ether, // Minimum deposit amount in wei
+            minShare: 1e6, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
             minDelay: 1 days // minimum delay for timelocked transactions
@@ -81,21 +81,21 @@ contract DeployEthMultiVault is Script {
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
-            atomDepositFractionOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
+            atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
-            atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+            atomWarden: atomWarden, // atomWarden address (same as admin)
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
         IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
-            protocolFee: 100 // Protocol fee for vault 0
+            protocolFee: 250 // Protocol fee for vault 0
         });
 
         // Prepare data for initializer function

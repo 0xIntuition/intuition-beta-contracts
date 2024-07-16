@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {EthMultiVaultV2} from "./_playground/EthMultiVaultV2.sol";
+import {EthMultiVaultV2} from "test/EthMultiVaultV2.sol";
 
 contract UpgradeV2Script is Script {
     function run() public {

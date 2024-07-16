@@ -85,7 +85,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
         uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         // deposit atom
         uint256 shares = actEthMultiVault.depositAtom{value: msgValue}(receiver, vaultId);
@@ -94,7 +94,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
             msgValue - getProtocolFeeAmount(msgValue, vaultId), vaultId, totalAssetsBefore, totalSharesBefore
         );
 
-        checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
 
         // logs
         emit log_named_uint(
@@ -146,7 +146,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
 
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
         uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
@@ -155,7 +155,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         // redeem atom
         uint256 assetsForReceiver = actEthMultiVault.redeemAtom(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, assetsForReceiverBeforeFees, protocolMultisigBalanceBefore);
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(vaultId, receiver);
@@ -278,7 +278,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
         uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         (uint256 subjectId, uint256 predicateId, uint256 objectId) = actEthMultiVault.getTripleAtoms(vaultId);
 
@@ -293,7 +293,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
 
         checkDepositIntoVault(userDepositAfterprotocolFee, vaultId, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
 
         uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
@@ -316,7 +316,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         returns (uint256 assetsForReceiver)
     {
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
         uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
@@ -324,7 +324,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
         // redeem triple
         assetsForReceiver = actEthMultiVault.redeemTriple(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, assetsForReceiverBeforeFees, protocolMultisigBalanceBefore);
 
         assertEq(getSharesInVault(vaultId, receiver), userSharesBeforeRedeem - shares2Redeem);
         assertEq(address(receiver).balance - userBalanceBeforeRedeem, assetsForReceiver);

@@ -68,7 +68,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // should revert if not admin
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_AdminOnly.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AdminOnly.selector));
         ethMultiVault.setAdmin(newAdmin);
 
         // Execute the scheduled operation
@@ -85,13 +85,13 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertTrue(executed);
     }
 
-    function testSetProtocolVault() external {
+    function testSetProtocolMultisig() external {
         address testValue = bob;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setProtocolVault(testValue);
-        assertEq(getProtocolVault(), testValue);
+        ethMultiVault.setProtocolMultisig(testValue);
+        assertEq(getProtocolMultisig(), testValue);
     }
 
     function testSetEntryFee() external {
@@ -101,7 +101,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Attempt to set exit fee higher than allowed, should revert
         vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidEntryFee.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidEntryFee.selector));
         ethMultiVault.setEntryFee(testVaultId, invalidEntryFee);
 
         /// Sets a valid entry fee
@@ -132,7 +132,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Attempt to set exit fee higher than allowed, should revert
         vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidExitFee.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidExitFee.selector));
         ethMultiVault.setExitFee(vaultId, invalidExitFee);
 
         // Set a valid exit fee
@@ -156,7 +156,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Attempt to set protocol fee higher than allowed, should revert
         vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidProtocolFee.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidProtocolFee.selector));
         ethMultiVault.setProtocolFee(testVaultId, invalidProtocolFee);
 
         /// Sets a valid protocol fee
@@ -207,7 +207,7 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Attempt to set atom deposit fraction higher than allowed, should revert
         vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InvalidAtomDepositFractionForTriple.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidAtomDepositFractionForTriple.selector));
         ethMultiVault.setAtomDepositFractionForTriple(invalidAtomDepositFractionForTriple);
 
         // Set a valid atom deposit fraction for triple

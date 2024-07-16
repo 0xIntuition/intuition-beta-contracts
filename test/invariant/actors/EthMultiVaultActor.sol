@@ -96,7 +96,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
         uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         // create atom
         uint256 id = actEthMultiVault.createAtom{value: msgValue}(data);
@@ -106,7 +106,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
         uint256 userDeposit = msgValue - getAtomCost();
 
-        checkProtocolVaultBalanceOnVaultCreation(id, userDeposit, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalanceOnVaultCreation(id, userDeposit, protocolMultisigBalanceBefore);
 
         // logs
         emit log_named_uint(
@@ -153,7 +153,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
             uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
             uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-            uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+            uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
             shares = actEthMultiVault.depositAtom{value: msgValue}(receiver, vaultId);
 
@@ -161,7 +161,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                 msgValue - getProtocolFeeAmount(msgValue, vaultId), vaultId, totalAssetsBefore, totalSharesBefore
             );
 
-            checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
+            checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
         } else {
             // deposit on existing vault
             // bound vaultId between 1 and count()
@@ -179,7 +179,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
             uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
             uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-            uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+            uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
             shares = actEthMultiVault.depositAtom{value: msgValue}(receiver, vaultId);
 
@@ -187,7 +187,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
                 msgValue - getProtocolFeeAmount(msgValue, vaultId), vaultId, totalAssetsBefore, totalSharesBefore
             );
 
-            checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
+            checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
         }
         // deposit atom
         emit log_named_uint("balance currentActor", currentActor.balance);
@@ -264,7 +264,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         emit log_named_uint("before vaultBalanceOf----", getVaultBalanceForAddress(vaultId, currentActor));
 
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
         uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
@@ -273,7 +273,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         // redeem atom
         uint256 assetsForReceiver = actEthMultiVault.redeemAtom(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, assetsForReceiverBeforeFees, protocolMultisigBalanceBefore);
 
         assertEq(getSharesInVault(vaultId, receiver), userSharesBeforeRedeem - shares2Redeem);
         assertEq(address(receiver).balance - userBalanceBeforeRedeem, assetsForReceiver);
@@ -500,7 +500,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         uint256 totalAssetsBefore = vaultTotalAssets(ethMultiVault.count() + 1);
         uint256 totalSharesBefore = vaultTotalShares(ethMultiVault.count() + 1);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         uint256[3] memory totalAssetsBeforeAtomVaults =
             [vaultTotalAssets(subjectId), vaultTotalAssets(predicateId), vaultTotalAssets(objectId)];
@@ -515,9 +515,9 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
         // snapshots after creating a triple
         assertEq(
-            protocolVaultBalanceBefore,
-            // protocolVaultBalanceAfterLessFees
-            address(getProtocolVault()).balance - protocolFeeAmount(msgValue - getTripleCost(), vaultId)
+            protocolMultisigBalanceBefore,
+            // protocolMultisigBalanceAfterLessFees
+            address(getProtocolMultisig()).balance - protocolFeeAmount(msgValue - getTripleCost(), vaultId)
                 - getTripleCreationProtocolFee()
         );
 
@@ -561,7 +561,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         uint256 totalAssetsBefore = vaultTotalAssets(vaultId);
         uint256 totalSharesBefore = vaultTotalShares(vaultId);
 
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         (uint256 subjectId, uint256 predicateId, uint256 objectId) = actEthMultiVault.getTripleAtoms(vaultId);
 
@@ -577,7 +577,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
         checkDepositIntoVault(userDepositAfterprotocolFee, vaultId, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalance(vaultId, msgValue, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
 
         uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
@@ -600,7 +600,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         returns (uint256 assetsForReceiver)
     {
         // snapshots before redeem
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
         uint256 userSharesBeforeRedeem = getSharesInVault(vaultId, receiver);
         uint256 userBalanceBeforeRedeem = address(receiver).balance;
 
@@ -608,7 +608,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         // redeem triple
         assetsForReceiver = actEthMultiVault.redeemTriple(shares2Redeem, receiver, vaultId);
 
-        checkProtocolVaultBalance(vaultId, assetsForReceiverBeforeFees, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(vaultId, assetsForReceiverBeforeFees, protocolMultisigBalanceBefore);
 
         assertEq(getSharesInVault(vaultId, receiver), userSharesBeforeRedeem - shares2Redeem);
         assertEq(address(receiver).balance - userBalanceBeforeRedeem, assetsForReceiver);
