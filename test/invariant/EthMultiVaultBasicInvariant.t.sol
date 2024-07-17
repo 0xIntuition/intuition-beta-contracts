@@ -3,8 +3,8 @@ pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
 
-import {EthMultiVaultActor} from "./actors/EthMultiVaultActor.sol";
-import {InvariantEthMultiVaultBase} from "./InvariantEthMultiVaultBase.sol";
+import {EthMultiVaultActor} from "test/invariant/actors/EthMultiVaultActor.sol";
+import {InvariantEthMultiVaultBase} from "test/invariant/InvariantEthMultiVaultBase.sol";
 
 contract EthMultiVaultBasicInvariantTest is InvariantEthMultiVaultBase {
     // actor contracts

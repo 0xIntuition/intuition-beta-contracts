@@ -2,10 +2,11 @@
 pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
-import {EthMultiVault} from "../../../src/EthMultiVault.sol";
-import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
-import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
-import {Errors} from "../../../src/libraries/Errors.sol";
+
+import {Errors} from "src/libraries/Errors.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
+import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {

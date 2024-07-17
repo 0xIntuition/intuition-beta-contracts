@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import "forge-std/Test.sol";
-import {EthMultiVaultBase} from "../../EthMultiVaultBase.sol";
-import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
-import {Errors} from "../../../src/libraries/Errors.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
+import "forge-std/Test.sol";
+
+import {Errors} from "src/libraries/Errors.sol";
+import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
+import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract UseCasesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     using FixedPointMathLib for uint256;

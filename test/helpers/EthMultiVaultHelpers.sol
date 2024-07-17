@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
-import {EthMultiVaultBase} from "../EthMultiVaultBase.sol";
+import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 
 abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
