@@ -13,8 +13,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (admin,,,,,,,) = ethMultiVault.generalConfig();
     }
 
-    function getProtocolVault() public view returns (address protocolVault) {
-        (, protocolVault,,,,,,) = ethMultiVault.generalConfig();
+    function getProtocolMultisig() public view returns (address protocolMultisig) {
+        (, protocolMultisig,,,,,,) = ethMultiVault.generalConfig();
     }
 
     function getFeeDenominator() public view returns (uint256 feeDenominator) {
@@ -156,16 +156,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalAssetsBefore,
         uint256 totalSharesBefore
     ) public view {
-        uint256 sharesForZeroAddress = getMinShare();
+        uint256 ghostShares = getMinShare();
         uint256 sharesForAtomWallet = getAtomWalletInitialDepositAmount();
         uint256 userDeposit = value - getAtomCost();
         uint256 assets = userDeposit - getProtocolFeeAmount(userDeposit, id);
         uint256 sharesForDepositor = assets;
 
         // calculate expected total assets delta
-        uint256 totalAssetsDeltaExpected = sharesForDepositor + sharesForZeroAddress + sharesForAtomWallet;
+        uint256 totalAssetsDeltaExpected = sharesForDepositor + ghostShares + sharesForAtomWallet;
         // calculate expected total shares delta
-        uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress + sharesForAtomWallet;
+        uint256 totalSharesDeltaExpected = sharesForDepositor + ghostShares + sharesForAtomWallet;
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
@@ -188,13 +188,13 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
         uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
 
-        uint256 sharesForZeroAddress = getMinShare();
+        uint256 ghostShares = getMinShare();
 
-        uint256 totalAssetsDeltaExpected = userDepositAfterprotocolFee - atomDepositFraction + sharesForZeroAddress;
+        uint256 totalAssetsDeltaExpected = userDepositAfterprotocolFee - atomDepositFraction + ghostShares;
 
         // calculate expected total shares delta
         uint256 sharesForDepositor = userDepositAfterprotocolFee - atomDepositFraction;
-        uint256 totalSharesDeltaExpected = sharesForDepositor + sharesForZeroAddress;
+        uint256 totalSharesDeltaExpected = sharesForDepositor + ghostShares;
 
         // vault's total assets should have gone up
         uint256 totalAssetsDeltaGot = vaultTotalAssets(id) - totalAssetsBefore;
@@ -207,47 +207,51 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 
-    function checkProtocolVaultBalanceOnVaultCreation(
+    function checkProtocolMultisigBalanceOnVaultCreation(
         uint256 id,
         uint256 userDeposit,
-        uint256 protocolVaultBalanceBefore
+        uint256 protocolMultisigBalanceBefore
     ) public view {
-        // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() + getProtocolFeeAmount(userDeposit, id);
+        // calculate expected protocol multisig balance delta
+        uint256 protocolMultisigBalanceDeltaExpected =
+            getAtomCreationProtocolFee() + getProtocolFeeAmount(userDeposit, id);
 
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
+        uint256 protocolMultisigBalanceDeltaGot = address(getProtocolMultisig()).balance - protocolMultisigBalanceBefore;
 
-        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
+        assertEq(protocolMultisigBalanceDeltaExpected, protocolMultisigBalanceDeltaGot);
     }
 
-    function checkProtocolVaultBalanceOnVaultBatchCreation(
+    function checkProtocolMultisigBalanceOnVaultBatchCreation(
         uint256[] memory ids,
         uint256 valuePerAtom,
-        uint256 protocolVaultBalanceBefore
+        uint256 protocolMultisigBalanceBefore
     ) public view {
         uint256 length = ids.length;
         uint256 protocolFee;
 
         for (uint256 i = 0; i < length; i++) {
-            // calculate expected protocol vault balance delta
+            // calculate expected protocol multisig balance delta
             protocolFee += getProtocolFeeAmount(valuePerAtom, i);
         }
 
-        uint256 protocolVaultBalanceDeltaExpected = getAtomCreationProtocolFee() * length + protocolFee;
+        uint256 protocolMultisigBalanceDeltaExpected = getAtomCreationProtocolFee() * length + protocolFee;
 
-        // protocol vault's balance should have gone up
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
+        // protocol multisig's balance should have gone up
+        uint256 protocolMultisigBalanceDeltaGot = address(getProtocolMultisig()).balance - protocolMultisigBalanceBefore;
 
-        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
+        assertEq(protocolMultisigBalanceDeltaExpected, protocolMultisigBalanceDeltaGot);
     }
 
-    function checkProtocolVaultBalance(uint256 id, uint256 assets, uint256 protocolVaultBalanceBefore) public view {
-        // calculate expected protocol vault balance delta
-        uint256 protocolVaultBalanceDeltaExpected = getProtocolFeeAmount(assets, id);
+    function checkProtocolMultisigBalance(uint256 id, uint256 assets, uint256 protocolMultisigBalanceBefore)
+        public
+        view
+    {
+        // calculate expected protocol multisig balance delta
+        uint256 protocolMultisigBalanceDeltaExpected = getProtocolFeeAmount(assets, id);
 
-        // protocol vault's balance should have gone up
-        uint256 protocolVaultBalanceDeltaGot = address(getProtocolVault()).balance - protocolVaultBalanceBefore;
+        // protocol multisig's balance should have gone up
+        uint256 protocolMultisigBalanceDeltaGot = address(getProtocolMultisig()).balance - protocolMultisigBalanceBefore;
 
-        assertEq(protocolVaultBalanceDeltaExpected, protocolVaultBalanceDeltaGot);
+        assertEq(protocolMultisigBalanceDeltaExpected, protocolMultisigBalanceDeltaGot);
     }
 }

@@ -39,9 +39,8 @@ contract DeployEthMultiVaultScript is Script {
         }
 
         // ======== Multisig addresses for key roles in the protocol ========
-        address protocolVault = address(0x0000000000000000000000000000000000000000);
-        address admin = address(0x0000000000000000000000000000000000000000);
-        address atomWarden = address(0x0000000000000000000000000000000000000000);
+        address protocolMultisig = address(0x0000000000000000000000000000000000000000);
+        address admin = address(0x0000000000000000000000000000000000000000); // admin is also the atomWarden
 
         console.log("admin:", admin);
 
@@ -81,10 +80,10 @@ contract DeployEthMultiVaultScript is Script {
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
-            protocolVault: protocolVault, // Protocol vault address (should be a multisig in production)
+            protocolMultisig: protocolMultisig, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
-            minDeposit: 0.0003 ether, // Minimum deposit amount in wei
-            minShare: 1e5, // Minimum share amount (e.g., for vault initialization)
+            minDeposit: 0.00069 ether, // Minimum deposit amount in wei
+            minShare: 1e6, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
             minDelay: 1 days // minimum delay for timelocked transactions
@@ -97,21 +96,21 @@ contract DeployEthMultiVaultScript is Script {
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
-            atomDepositFractionOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
+            atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
-            atomWarden: atomWarden, // AtomWarden address (should be a multisig in production)
+            atomWarden: admin, // atomWarden address (same as admin)
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
         IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
-            protocolFee: 100 // Protocol fee for vault 0
+            protocolFee: 250 // Protocol fee for vault 0
         });
 
         address ethMultiVaultProxy = Upgrades.deployTransparentProxy(
@@ -122,26 +121,6 @@ contract DeployEthMultiVaultScript is Script {
         );
 
         console.log("transparentUpgradableProxy:", ethMultiVaultProxy);
-
-        // ======== Deploy CustomMulticall3 ========
-
-        // Prepare data for initializer function
-        bytes memory initData =
-            abi.encodeWithSelector(CustomMulticall3.init.selector, IEthMultiVault(ethMultiVaultProxy), admin);
-
-        // deploy CustomMulticall3 implementation contract
-        CustomMulticall3 customMulticall3 = new CustomMulticall3();
-        console.logString("deployed CustomMulticall3.");
-
-        // deploy TransparentUpgradeableProxy for CustomMulticall3
-        TransparentUpgradeableProxy customMulticall3Proxy = new TransparentUpgradeableProxy(
-            address(customMulticall3), // logic contract address
-            admin, // initial owner of the ProxyAdmin instance tied to the proxy
-            initData // data to pass to the logic contract's initializer function
-        );
-
-        console.log("customMulticall3 implementation:", address(customMulticall3));
-        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
 
         vm.stopBroadcast();
     }

@@ -60,12 +60,12 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(protocolFee, 0);
         assertEq(exitFee, 0);
 
-        uint256 protocolVaultBalanceBeforeRedeem = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBeforeRedeem = address(getProtocolMultisig()).balance;
 
         // execute interaction - redeem all atom shares
         uint256 assetsForReceiver = ethMultiVault.redeemTriple(userSharesBeforeRedeem, bob, id);
 
-        uint256 protocolVaultBalanceAfterRedeem = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceAfterRedeem = address(getProtocolMultisig()).balance;
 
         // snapshots after redeem
         uint256 userSharesAfterRedeem = getSharesInVault(id, bob);
@@ -75,7 +75,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         assertEq(userSharesAfterRedeem, 0);
         assertEq(userBalanceDelta, assetsForReceiver);
-        assertEq(protocolVaultBalanceAfterRedeem, protocolVaultBalanceBeforeRedeem);
+        assertEq(protocolMultisigBalanceAfterRedeem, protocolMultisigBalanceBeforeRedeem);
 
         vm.stopPrank();
     }
@@ -101,8 +101,8 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
 
-        assertEq(getSharesInVault(id, address(0)), getMinShare());
-        assertEq(getSharesInVault(counterId, address(0)), getMinShare());
+        assertEq(getSharesInVault(id, getAdmin()), getMinShare());
+        assertEq(getSharesInVault(counterId, getAdmin()), getMinShare());
 
         // execute interaction - deposit triple
         ethMultiVault.depositTriple{value: testDepositAmount}(alice, id);
@@ -175,7 +175,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_DepositOrWithdrawZeroShares.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_DepositOrWithdrawZeroShares.selector));
         // execute interaction - redeem all atom shares
         ethMultiVault.redeemTriple(0, alice, id);
 
@@ -217,7 +217,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(alice, alice);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotTriple.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultNotTriple.selector));
         // execute interaction - redeem all atom shares
         ethMultiVault.redeemTriple(userSharesAfterRedeem, alice, subjectId);
 
@@ -259,7 +259,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_InsufficientSharesInVault.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InsufficientSharesInVault.selector));
         // execute interaction - redeem all atom shares
         ethMultiVault.redeemTriple(userSharesAfterRedeem, bob, id);
 

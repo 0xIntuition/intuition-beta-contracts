@@ -49,7 +49,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 atomId = 1;
 
         // should not be able to deploy atom wallet for atom that has not been created yet
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultDoesNotExist.selector));
         // execute interaction - deploy atom wallet
         ethMultiVault.deployAtomWallet(atomId);
 
@@ -74,7 +74,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(computedAddress, atomWalletAddress);
 
         // should not be able to deploy an atom wallet for a triple vault
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultNotAtom.selector));
         // execute interaction - deploy atom wallet
         ethMultiVault.deployAtomWallet(tripleId);
 
@@ -155,7 +155,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(alice, alice);
 
         // should revert if plain ether transfer is attempted
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_ReceiveNotAllowed.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_ReceiveNotAllowed.selector));
         payable(address(ethMultiVault)).transfer(1 ether);
 
         vm.stopPrank();

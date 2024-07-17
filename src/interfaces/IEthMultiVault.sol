@@ -15,8 +15,8 @@ interface IEthMultiVault {
     struct GeneralConfig {
         /// @dev Admin address
         address admin;
-        /// @dev Protocol vault address
-        address protocolVault;
+        /// @dev Protocol multisig address
+        address protocolMultisig;
         /// @dev Fees are calculated by amount * (fee / feeDenominator);
         uint256 feeDenominator;
         /// @dev minimum amount of assets that must be deposited into an atom/triple vault
@@ -85,7 +85,7 @@ interface IEthMultiVault {
         ///      exit fee for each vault, exit fee for vault 0 is considered the default exit fee
         uint256 exitFee;
         /// @dev protocol fees are charged both when depositing assets and redeeming shares from the vault and
-        ///      they are sent to the protocol vault address, as defined in `generalConfig.protocolVault`
+        ///      they are sent to the protocol multisig address, as defined in `generalConfig.protocolMultisig`
         ///      protocol fee for each vault, protocol fee for vault 0 is considered the default protocol fee
         uint256 protocolFee;
     }
@@ -179,12 +179,12 @@ interface IEthMultiVault {
         address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
     );
 
-    /// @notice emitted upon the transfer of fees to the protocol vault
+    /// @notice emitted upon the transfer of fees to the protocol multisig
     ///
     /// @param sender address of the sender
-    /// @param protocolVault address of the protocol vault
+    /// @param protocolMultisig address of the protocol multisig
     /// @param amount amount of fees transferred
-    event FeesTransferred(address indexed sender, address indexed protocolVault, uint256 amount);
+    event FeesTransferred(address indexed sender, address indexed protocolMultisig, uint256 amount);
 
     /// @notice emitted upon scheduling an operation
     ///
@@ -205,11 +205,11 @@ interface IEthMultiVault {
     /// @param oldAdmin address of the old admin
     event AdminSet(address indexed newAdmin, address indexed oldAdmin);
 
-    /// @notice emitted upon changing the protocol vault
+    /// @notice emitted upon changing the protocol multisig
     ///
-    /// @param newProtocolVault address of the new protocol vault
-    /// @param oldProtocolVault address of the old protocol vault
-    event ProtocolVaultSet(address indexed newProtocolVault, address indexed oldProtocolVault);
+    /// @param newProtocolMultisig address of the new protocol multisig
+    /// @param oldProtocolMultisig address of the old protocol multisig
+    event protocolMultisigSet(address indexed newProtocolMultisig, address indexed oldProtocolMultisig);
 
     /// @notice emitted upon changing the minimum deposit amount
     ///
@@ -302,7 +302,7 @@ interface IEthMultiVault {
     /*                    INITIALIZER                      */
     /* =================================================== */
 
-    /// @notice Initializes the MultiVault contract
+    /// @notice Initializes the EthMultiVault contract
     ///
     /// @param _generalConfig General configuration struct
     /// @param _atomConfig Atom configuration struct
@@ -345,9 +345,9 @@ interface IEthMultiVault {
     /// @param admin address of the new admin
     function setAdmin(address admin) external;
 
-    /// @dev set protocol vault
-    /// @param protocolVault address of the new protocol vault
-    function setProtocolVault(address protocolVault) external;
+    /// @dev set protocol multisig
+    /// @param protocolMultisig address of the new protocol multisig
+    function setProtocolMultisig(address protocolMultisig) external;
 
     /// @dev sets the minimum deposit amount for atoms and triples
     /// @param minDeposit new minimum deposit amount
@@ -369,7 +369,7 @@ interface IEthMultiVault {
     /// @param atomCreationProtocolFee new atom creation fee
     function setAtomCreationProtocolFee(uint256 atomCreationProtocolFee) external;
 
-    /// @dev sets fee charged in wei when creating a triple to protocol vault
+    /// @dev sets fee charged in wei when creating a triple to protocol multisig
     /// @param tripleCreationProtocolFee new fee in wei
     function setTripleCreationProtocolFee(uint256 tripleCreationProtocolFee) external;
 
@@ -509,7 +509,7 @@ interface IEthMultiVault {
     function depositTriple(address receiver, uint256 id) external payable returns (uint256);
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
-    ///         from the multiVault to 'reciever' factoring in exit fees
+    ///         from the contract to 'reciever' factoring in exit fees
     ///
     /// @param shares the amount of shares to redeem
     /// @param receiver the address to receiver the assets
@@ -561,7 +561,7 @@ interface IEthMultiVault {
     ///
     /// @return totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees
     /// @return assetsForReceiver amount of assets that is redeemable by the receiver
-    /// @return protocolFee amount of assets that would be sent to the protocol vault
+    /// @return protocolFee amount of assets that would be sent to the protocol multisig
     /// @return exitFee amount of assets that would be charged for the exit fee
     function getRedeemAssetsAndFees(uint256 shares, uint256 id)
         external

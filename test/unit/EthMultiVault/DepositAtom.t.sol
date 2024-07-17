@@ -31,7 +31,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 totalSharesBefore = vaultTotalShares(id);
         console.log("totalAssetsBefore", totalAssetsBefore);
         console.log("totalSharesBefore", totalSharesBefore);
-        uint256 protocolVaultBalanceBefore = address(getProtocolVault()).balance;
+        uint256 protocolMultisigBalanceBefore = address(getProtocolMultisig()).balance;
 
         vm.startPrank(bob, bob);
 
@@ -40,7 +40,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         uint256 sharesExpected = convertToShares(valueToDeposit - entryFeeAmount(valueToDeposit, id), id);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_SenderNotApproved.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_SenderNotApproved.selector));
         ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
 
         vm.stopPrank();
@@ -59,7 +59,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         checkDepositIntoVault(valueToDeposit, id, totalAssetsBefore, totalSharesBefore);
 
-        checkProtocolVaultBalance(id, testDepositAmount, protocolVaultBalanceBefore);
+        checkProtocolMultisigBalance(id, testDepositAmount, protocolMultisigBalanceBefore);
 
         (uint256 sharesGot, uint256 assetsGot) = getVaultStateForUser(id, address(1));
 
@@ -94,7 +94,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_MinimumDeposit.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_MinimumDeposit.selector));
         ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id);
 
         vm.stopPrank();
@@ -123,7 +123,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultDoesNotExist.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultDoesNotExist.selector));
         ethMultiVault.depositAtom{value: testDepositAmount}(address(1), id + 1);
 
         vm.stopPrank();
@@ -159,7 +159,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
 
         // execute interaction - deposit atoms
-        vm.expectRevert(abi.encodeWithSelector(Errors.MultiVault_VaultNotAtom.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultNotAtom.selector));
         ethMultiVault.depositAtom{value: testDepositAmount}(address(1), positiveVaultId);
 
         vm.stopPrank();

@@ -47,7 +47,7 @@ contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
         // Define the configuration objects
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
             admin: msg.sender,
-            protocolVault: address(0xbeef),
+            protocolMultisig: address(0xbeef),
             feeDenominator: 10000,
             minDeposit: 0.0003 ether,
             minShare: 1e5,

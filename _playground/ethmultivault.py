@@ -41,9 +41,9 @@ def createAtom(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Deci
 
   # Addresses
   atomWalletShares = Decimal(atomWalletInitialDepositAmount)
-  protocolVaultAssets = Decimal(atomCreationProtocolFee) + Decimal(protocolFeeAmount)
+  protocolMultisigAssets = Decimal(atomCreationProtocolFee) + Decimal(protocolFeeAmount)
 
-  return (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets)
+  return (userShares, totalShares, totalAssets, atomWalletShares, protocolMultisigAssets)
 
 
 def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
@@ -71,7 +71,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   totalSharesAtomVault = userSharesAfterTotalFees
 
   # Addresses
-  protocolVaultAssets = Decimal(tripleCreationProtocolFee) + Decimal(protocolFeeAmount)
+  protocolMultisigAssets = Decimal(tripleCreationProtocolFee) + Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
           totalSharesPositiveVault,
@@ -81,7 +81,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
           userSharesAtomVault,
           totalSharesAtomVault,
           totalAssetsAtomVault,
-          protocolVaultAssets)
+          protocolMultisigAssets)
 
 
 def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal]:
@@ -97,9 +97,9 @@ def depositAtom(value: Decimal, totalAssets: Decimal, totalShares: Decimal) -> t
   totalSharesAtomVault = totalShares + userSharesForTheAtom
 
   # Addresses
-  protocolVaultAssets = protocolFeeAmount
+  protocolMultisigAssets = protocolFeeAmount
 
-  return (userSharesForTheAtom, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets)
+  return (userSharesForTheAtom, totalSharesAtomVault, totalAssetsAtomVault, protocolMultisigAssets)
 
 
 def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, totalAssetsAtom: Decimal, totalSharesAtom: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal, Decimal, Decimal]:
@@ -141,7 +141,7 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
   totalSharesAtomVault = userSharesForTheAtom
 
   # Addresses
-  protocolVaultAssets = Decimal(protocolFeeAmount)
+  protocolMultisigAssets = Decimal(protocolFeeAmount)
 
   return (userSharesPositiveVault,
           totalSharesPositiveVault,
@@ -149,7 +149,7 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
           userSharesAtomVault,
           totalSharesAtomVault,
           totalAssetsAtomVault,
-          protocolVaultAssets)
+          protocolMultisigAssets)
 
 
 def redeem(shares: Decimal, totalAssets: Decimal, totalShares: Decimal):
@@ -184,7 +184,7 @@ for value in [
     Web3.to_wei(Decimal('100'), 'ether'),
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
-  (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets) = createAtom(value)
+  (userShares, totalShares, totalAssets, atomWalletShares, protocolMultisigAssets) = createAtom(value)
 
   print(f"useCaseAtoms.push(UseCaseAtom({{ \
     value: {value}, \
@@ -192,7 +192,7 @@ for value in [
     atomWalletShares: {atomWalletShares}, \
     totalShares: {totalShares}, \
     totalAssets: {totalAssets}, \
-    protocolVaultAssets: {protocolVaultAssets} \
+    protocolMultisigAssets: {protocolMultisigAssets} \
   }}));".replace("  ", ''))
 
 
@@ -210,13 +210,13 @@ for value in [
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
   # Create atoms
-  (userShares0, totalShares0, totalAssets0, atomWalletShares0, protocolVaultAssets0) = createAtom(value)
-  (userShares1, totalShares1, totalAssets1, atomWalletShares1, protocolVaultAssets1) = createAtom(value + Decimal(1))
-  (userShares2, totalShares2, totalAssets2, atomWalletShares2, protocolVaultAssets2) = createAtom(value + Decimal(2))
+  (userShares0, totalShares0, totalAssets0, atomWalletShares0, protocolMultisigAssets0) = createAtom(value)
+  (userShares1, totalShares1, totalAssets1, atomWalletShares1, protocolMultisigAssets1) = createAtom(value + Decimal(1))
+  (userShares2, totalShares2, totalAssets2, atomWalletShares2, protocolMultisigAssets2) = createAtom(value + Decimal(2))
 
   # Create triple
   (userSharesPositiveVault, totalSharesPositiveVault, totalAssetsPositiveVault, totalSharesNegativeVault,
-    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssets) = createTriple(value)
+    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolMultisigAssets) = createTriple(value)
 
   print(f"useCaseTriples.push(UseCaseTriple({{ \
     value: {value}, \
@@ -225,14 +225,14 @@ for value in [
     totalAssetsPos: {totalAssetsPositiveVault}, \
     totalSharesNeg: {totalSharesNegativeVault}, \
     totalAssetsNeg: {totalAssetsNegativeVault}, \
-    protocolVaultAssets: {protocolVaultAssets0 + protocolVaultAssets1 + protocolVaultAssets2 + protocolVaultAssets}, \
+    protocolMultisigAssets: {protocolMultisigAssets0 + protocolMultisigAssets1 + protocolMultisigAssets2 + protocolMultisigAssets}, \
     subject:UseCaseAtom({{ \
       value: {value}, \
       userShares: {userShares0 + userSharesAtomVault}, \
       atomWalletShares: {atomWalletShares0}, \
       totalShares: {totalShares0 + totalSharesAtomVault}, \
       totalAssets: {totalAssets0 + totalAssetsAtomVault}, \
-      protocolVaultAssets: {protocolVaultAssets0} \
+      protocolMultisigAssets: {protocolMultisigAssets0} \
     }}), \
     predicate:UseCaseAtom({{ \
       value: {value + Decimal(1)}, \
@@ -240,7 +240,7 @@ for value in [
       atomWalletShares: {atomWalletShares1}, \
       totalShares: {totalShares1 + totalSharesAtomVault}, \
       totalAssets: {totalAssets1 + totalAssetsAtomVault}, \
-      protocolVaultAssets: {protocolVaultAssets1} \
+      protocolMultisigAssets: {protocolMultisigAssets1} \
     }}), \
     obj:UseCaseAtom({{ \
       value: {value + Decimal(2)}, \
@@ -248,7 +248,7 @@ for value in [
       atomWalletShares: {atomWalletShares2}, \
       totalShares: {totalShares2 + totalSharesAtomVault}, \
       totalAssets: {totalAssets2 + totalAssetsAtomVault}, \
-      protocolVaultAssets: {protocolVaultAssets2} \
+      protocolMultisigAssets: {protocolMultisigAssets2} \
     }}) \
   }}));".replace("  ", ''))
 
@@ -266,13 +266,13 @@ for value in [
     Web3.to_wei(Decimal('100'), 'ether'),
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
-  (userShares, totalShares, totalAssets, atomWalletShares, protocolVaultAssets) = createAtom(value)
+  (userShares, totalShares, totalAssets, atomWalletShares, protocolMultisigAssets) = createAtom(value)
 
   for _ in range(3):
-    (userSharesFromDeposit, totalShares, totalAssets, protocolVaultAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
+    (userSharesFromDeposit, totalShares, totalAssets, protocolMultisigAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
 
     userShares += userSharesFromDeposit
-    protocolVaultAssets += protocolVaultAssetsFromDeposit
+    protocolMultisigAssets += protocolMultisigAssetsFromDeposit
 
   print(f"useCaseAtoms.push(UseCaseAtom({{ \
     value: {value}, \
@@ -280,7 +280,7 @@ for value in [
     atomWalletShares: {atomWalletShares}, \
     totalShares: {totalShares}, \
     totalAssets: {totalAssets}, \
-    protocolVaultAssets: {protocolVaultAssets} \
+    protocolMultisigAssets: {protocolMultisigAssets} \
   }}));".replace("  ", ''))
 
 
@@ -298,28 +298,28 @@ for value in [
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
   # Create 3 atoms
-  (userShares0, totalShares0, totalAssets0, atomWalletShares0, protocolVaultAssets0) = createAtom(atomCost)
-  (userShares1, totalShares1, totalAssets1, atomWalletShares1, protocolVaultAssets1) = createAtom(atomCost)
-  (userShares2, totalShares2, totalAssets2, atomWalletShares2, protocolVaultAssets2) = createAtom(atomCost)
+  (userShares0, totalShares0, totalAssets0, atomWalletShares0, protocolMultisigAssets0) = createAtom(atomCost)
+  (userShares1, totalShares1, totalAssets1, atomWalletShares1, protocolMultisigAssets1) = createAtom(atomCost)
+  (userShares2, totalShares2, totalAssets2, atomWalletShares2, protocolMultisigAssets2) = createAtom(atomCost)
 
   userSharesPerAtom = userShares0
   totalSharesPerAtom = totalShares0
   totalAssetsPerAtom = totalAssets0
-  protocolVaultAssets = protocolVaultAssets0 + protocolVaultAssets1 + protocolVaultAssets2
+  protocolMultisigAssets = protocolMultisigAssets0 + protocolMultisigAssets1 + protocolMultisigAssets2
 
   # Create 1 triple
   (userSharesPositiveVault, totalSharesPositiveVault, totalAssetsPositiveVault, totalSharesNegativeVault,
-    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolVaultAssetsFromCreation) = createTriple(value)
+    totalAssetsNegativeVault, userSharesAtomVault, totalSharesAtomVault, totalAssetsAtomVault, protocolMultisigAssetsFromCreation) = createTriple(value)
 
   userSharesPerAtom += userSharesAtomVault
   totalSharesPerAtom += totalSharesAtomVault
   totalAssetsPerAtom += totalAssetsAtomVault
-  protocolVaultAssets += protocolVaultAssetsFromCreation
+  protocolMultisigAssets += protocolMultisigAssetsFromCreation
 
   for _ in range(3):
     # Deposits
     (userSharesPositiveVaultFromDeposit, totalSharesPositiveVaultFromDeposit, totalAssetsPositiveVaultFromDeposit, userSharesAtomVault, totalSharesPerAtomFromDeposit, 
-      totalAssetsPerAtomFromDeposit, protocolVaultAssetsFromDeposit) \
+      totalAssetsPerAtomFromDeposit, protocolMultisigAssetsFromDeposit) \
       = depositTriple(value, totalAssetsPositiveVault, totalSharesPositiveVault, totalAssetsPerAtom, totalSharesPerAtom)
     
     userSharesPositiveVault += userSharesPositiveVaultFromDeposit
@@ -328,7 +328,7 @@ for value in [
     userSharesPerAtom += userSharesAtomVault
     totalSharesPerAtom += totalSharesPerAtomFromDeposit
     totalAssetsPerAtom += totalAssetsPerAtomFromDeposit
-    protocolVaultAssets += protocolVaultAssetsFromDeposit
+    protocolMultisigAssets += protocolMultisigAssetsFromDeposit
 
   print(f"useCaseTriples.push(UseCaseTriple({{ \
     value: {value}, \
@@ -337,14 +337,14 @@ for value in [
     totalAssetsPos: {totalAssetsPositiveVault}, \
     totalSharesNeg: {totalSharesNegativeVault}, \
     totalAssetsNeg: {totalAssetsNegativeVault}, \
-    protocolVaultAssets: {protocolVaultAssets}, \
+    protocolMultisigAssets: {protocolMultisigAssets}, \
     subject:UseCaseAtom({{ \
       value: {atomCost}, \
       userShares: {userSharesPerAtom}, \
       atomWalletShares: {atomWalletShares0}, \
       totalShares: {totalSharesPerAtom}, \
       totalAssets: {totalAssetsPerAtom}, \
-      protocolVaultAssets: {protocolVaultAssets0} \
+      protocolMultisigAssets: {protocolMultisigAssets0} \
     }}), \
     predicate:UseCaseAtom({{ \
       value: {atomCost}, \
@@ -352,7 +352,7 @@ for value in [
       atomWalletShares: {atomWalletShares1}, \
       totalShares: {totalSharesPerAtom}, \
       totalAssets: {totalAssetsPerAtom}, \
-      protocolVaultAssets: {protocolVaultAssets1} \
+      protocolMultisigAssets: {protocolMultisigAssets1} \
     }}), \
     obj:UseCaseAtom({{ \
       value: {atomCost}, \
@@ -360,7 +360,7 @@ for value in [
       atomWalletShares: {atomWalletShares2}, \
       totalShares: {totalSharesPerAtom}, \
       totalAssets: {totalAssetsPerAtom}, \
-      protocolVaultAssets: {protocolVaultAssets2} \
+      protocolMultisigAssets: {protocolMultisigAssets2} \
     }}) \
   }}));".replace("  ", ''))
 
@@ -378,19 +378,19 @@ for value in [
     Web3.to_wei(Decimal('100'), 'ether'),
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
-  (userShares, totalShares, totalAssets, _, protocolVaultAssets) = createAtom(value)
+  (userShares, totalShares, totalAssets, _, protocolMultisigAssets) = createAtom(value)
 
   for _ in range(3):
-    (userSharesFromDeposit, totalShares, totalAssets, protocolVaultAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
+    (userSharesFromDeposit, totalShares, totalAssets, protocolMultisigAssetsFromDeposit) = depositAtom(value, totalAssets, totalShares)
 
     userShares += userSharesFromDeposit
-    protocolVaultAssets += protocolVaultAssetsFromDeposit
+    protocolMultisigAssets += protocolMultisigAssetsFromDeposit
 
   (userAssets, protocolFeeAmount, exitFeeAmount) = redeem(userShares, totalAssets, totalShares)
 
   totalRemainingShares = totalShares - userShares
   totalRemainingAssets = totalAssets - userAssets - protocolFeeAmount
-  protocolVaultAssets += protocolFeeAmount
+  protocolMultisigAssets += protocolFeeAmount
 
   print(f"useCaseRedeems.push(UseCaseRedeem({{ \
     value: {value}, \
@@ -398,7 +398,7 @@ for value in [
     assets: {userAssets}, \
     totalRemainingShares: {totalRemainingShares}, \
     totalRemainingAssets: {totalRemainingAssets}, \
-    protocolVaultAssets: {protocolVaultAssets} \
+    protocolMultisigAssets: {protocolMultisigAssets} \
   }}));".replace("  ", ''))
 
 
@@ -416,16 +416,16 @@ for value in [
     Web3.to_wei(Decimal('1000'), 'ether'),
 ]:
   # Create 3 atoms
-  (_, _, _, _, protocolVaultAssets0) = createAtom(atomCost)
-  (_, _, _, _, protocolVaultAssets1) = createAtom(atomCost)
-  (_, _, _, _, protocolVaultAssets2) = createAtom(atomCost)
+  (_, _, _, _, protocolMultisigAssets0) = createAtom(atomCost)
+  (_, _, _, _, protocolMultisigAssets1) = createAtom(atomCost)
+  (_, _, _, _, protocolMultisigAssets2) = createAtom(atomCost)
 
-  protocolVaultAssets = protocolVaultAssets0 + protocolVaultAssets1 + protocolVaultAssets2
+  protocolMultisigAssets = protocolMultisigAssets0 + protocolMultisigAssets1 + protocolMultisigAssets2
 
   # Create 1 triple
   (userShares, totalShares, totalAssets, _, _, _, _, _, protocolFeeAmount) = createTriple(value)
 
-  protocolVaultAssets += protocolFeeAmount
+  protocolMultisigAssets += protocolFeeAmount
 
   for _ in range(3):
     # Deposits
@@ -435,13 +435,13 @@ for value in [
     userShares += userSharesFromDeposit
     totalShares += totalSharesPositiveVaultFromDeposit
     totalAssets += totalAssetsPositiveVaultFromDeposit
-    protocolVaultAssets += protocolFeeAmount
+    protocolMultisigAssets += protocolFeeAmount
 
   (userAssets, protocolFeeAmount, exitFeeAmount) = redeem(userShares, totalAssets, totalShares)
 
   totalRemainingShares = totalShares - userShares
   totalRemainingAssets = totalAssets - userAssets - protocolFeeAmount
-  protocolVaultAssets += protocolFeeAmount
+  protocolMultisigAssets += protocolFeeAmount
 
   print(f"useCaseRedeems.push(UseCaseRedeem({{ \
     value: {value}, \
@@ -449,5 +449,5 @@ for value in [
     assets: {userAssets}, \
     totalRemainingShares: {totalRemainingShares}, \
     totalRemainingAssets: {totalRemainingAssets}, \
-    protocolVaultAssets: {protocolVaultAssets} \
+    protocolMultisigAssets: {protocolMultisigAssets} \
   }}));".replace("  ", ''))

@@ -11,24 +11,30 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
 contract EthMultiVaultV2 is EthMultiVault {
     /// @notice test variable to test the upgradeability of the contract
     /// @dev this variable has also been added here to demonstrate how to properly extend the storage layout of the contract
-    bytes32 public VERSION = "V2";
+    bytes32 public VERSION;
 
-    /// @notice Initializes the MultiVault contract
+    /* =================================================== */
+    /*                    INITIALIZER                      */
+    /* =================================================== */
+
+    /// @notice Initializes the EthMultiVaultV2 contract
     /// @param _generalConfig General configuration struct
     /// @param _atomConfig Atom configuration struct
     /// @param _tripleConfig Triple configuration struct
     /// @param _walletConfig Wallet configuration struct
     /// @param _defaultVaultFees Default vault fees struct
     /// @dev This function is called only once (during contract deployment)
-    function initialize(
+    function initV2(
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
         TripleConfig memory _tripleConfig,
         WalletConfig memory _walletConfig,
         VaultFees memory _defaultVaultFees
-    ) external initializer {
+    ) external reinitializer(2) {
         __ReentrancyGuard_init();
         __Pausable_init();
+
+        VERSION = "V2";
 
         generalConfig = _generalConfig;
         atomConfig = _atomConfig;
