@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {EthMultiVault} from "src/EthMultiVault.sol";
-import {EthMultiVaultHelpers} from "../../helpers/EthMultiVaultHelpers.sol";
+import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
     // actor arrays

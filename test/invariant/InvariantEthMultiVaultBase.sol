@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import {EthMultiVaultBase} from "../EthMultiVaultBase.sol";
+import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 
 contract InvariantEthMultiVaultBase is EthMultiVaultBase {
     // inherit setup from AtomBase and generate fuzz actors

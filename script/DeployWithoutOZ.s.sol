@@ -151,3 +151,6 @@ contract DeployEthMultiVault is Script {
         console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
     }
 }
+
+// deploy to Base Sepolia and verify contracts
+// maybe put the base multicall contract to the lib folder instead

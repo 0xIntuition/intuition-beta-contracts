@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
-// core contracts
+import {AtomWallet} from "src/AtomWallet.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
-import {AtomWallet} from "src/AtomWallet.sol";
-import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
-// test events
-import {IEthMultiVaultEvents} from "./events/IEthMultiVaultEvents.sol";
-
-contract EthMultiVaultBase is Test, IEthMultiVaultEvents {
+contract EthMultiVaultBase is Test {
     // msg.value - atomCreationProtocolFee - protocolFee
 
     /// @notice constants
