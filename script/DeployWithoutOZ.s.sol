@@ -148,6 +148,3 @@ contract DeployEthMultiVault is Script {
         console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
     }
 }
-
-// Add testnet deployment and add addresses to readme here and in the public repo
-// Remove duplicate console logs for the custommulticall3

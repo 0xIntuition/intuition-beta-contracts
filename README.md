@@ -141,3 +141,14 @@ $ forge script script/TimelockController.s.sol
 ```
 
 - After the delay passes (e.g. 2 days) you can call this again, just change the method on the target to `execute`
+
+## Deployments
+
+### Base Sepolia Testnet
+
+| Name | Proxy | Implementation | Notes |
+| -------- | -------- | -------- | -------- |
+| [`AtomWallet`](https://github.com/0xIntuition/intuition-contracts/blob/tob-audit/src/AtomWallet.sol) | [`0x69eaaae77Fb6be0D3c423fe5e5A982d53a1C8CBc`](https://sepolia.basescan.org/address/0x69eaaae77Fb6be0D3c423fe5e5A982d53a1C8CBc) | [`0xDF0d74A6325082b9E6041e4A5F8a6d52E0e8de46`](https://sepolia.basescan.org/address/0xDF0d74A6325082b9E6041e4A5F8a6d52E0e8de46) | AtomWalletBeacon: [`BeaconProxy`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/beacon/BeaconProxy.sol) <br /> Atom Wallets: [`UpgradeableBeacon`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/beacon/UpgradeableBeacon.sol) |
+| [`EthMultiVault`](https://github.com/0xIntuition/intuition-contracts/blob/tob-audit/src/EthMultiVault.sol) | [`0x61200E985eF40c676b58Ac42012Fa924981d88FB`](https://sepolia.basescan.org/address/0x61200E985eF40c676b58Ac42012Fa924981d88FB) | [`0x43eF3B52BE0DDD1112E87d0ea492d9eF38786659`](https://sepolia.basescan.org/address/0x43eF3B52BE0DDD1112E87d0ea492d9eF38786659) | Proxy: [`TUP@5.0.2`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/transparent/TransparentUpgradeableProxy.sol) |
+| [`ProxyAdmin`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/proxy/transparent/ProxyAdmin.sol) | - | [`0x8e2b6ad9B28d5e239EE779814b23d4766A9a3600`](https://sepolia.basescan.org/address/0x8e2b6ad9B28d5e239EE779814b23d4766A9a3600) | Used for upgrading `EthMultiVault` proxy contract |
+| [`TimelockController`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.2/contracts/governance/TimelockController.sol) | - | [`0xd75B08Ff002BE0B1ce43A91aE6Eabf5Ef04ec8ab`](https://sepolia.basescan.org/address/0xd75B08Ff002BE0B1ce43A91aE6Eabf5Ef04ec8ab) | Owner of the `ProxyAdmin` and `AtomWalletBeacon` |
