@@ -8,4 +8,8 @@ build_info = true
 extra_output = ["storageLayout"]
 evm_version = "Cancun"
 
+[etherscan]
+base = { key = "${ETHERSCAN_API_KEY}" }
+base-sepolia = { key = "${ETHERSCAN_API_KEY}" }
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -86,6 +86,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*                    MODIFIERS                        */
     /* =================================================== */
 
+    /// @notice Modifier to restrict a function to the admin
     modifier onlyAdmin() {
         if (msg.sender != generalConfig.admin) {
             revert Errors.EthMultiVault_AdminOnly();

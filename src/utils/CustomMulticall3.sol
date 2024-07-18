@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -13,9 +13,13 @@ import {Multicall3} from "src/utils/Multicall3.sol";
  * @author 0xIntuition
  * @notice A utility contract of the Intuition protocol. It allows for custom multicall operations.
  */
-contract CustomMulticall3 is Initializable, OwnableUpgradeable, Multicall3 {
+contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 {
     /// @notice EthMultiVault contract
     IEthMultiVault public ethMultiVault;
+
+    /// @notice Event emitted when the EthMultiVault contract address is set
+    /// @param ethMultiVault EthMultiVault contract address
+    event EthMultiVaultSet(IEthMultiVault ethMultiVault);
 
     /// @notice Initializes the CustomMulticall3 contract
     ///
@@ -113,6 +117,12 @@ contract CustomMulticall3 is Initializable, OwnableUpgradeable, Multicall3 {
     /// @notice Sets the EthMultiVault contract address
     /// @param _ethMultiVault EthMultiVault contract address
     function setEthMultiVault(IEthMultiVault _ethMultiVault) external onlyOwner {
+        if (address(_ethMultiVault) == address(0)) {
+            revert Errors.CustomMulticall3_InvalidEthMultiVaultAddress();
+        }
+
         ethMultiVault = _ethMultiVault;
+
+        emit EthMultiVaultSet(_ethMultiVault);
     }
 }

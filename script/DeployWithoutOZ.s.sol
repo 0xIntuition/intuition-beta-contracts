@@ -132,9 +132,6 @@ contract DeployEthMultiVault is Script {
             multicallInitData // data to pass to the logic contract's initializer function
         );
 
-        console.log("customMulticall3 implementation:", address(customMulticall3));
-        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
-
         // stop sending tx's
         vm.stopBroadcast();
 
@@ -151,3 +148,6 @@ contract DeployEthMultiVault is Script {
         console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
     }
 }
+
+// Add testnet deployment and add addresses to readme here and in the public repo
+// Remove duplicate console logs for the custommulticall3
