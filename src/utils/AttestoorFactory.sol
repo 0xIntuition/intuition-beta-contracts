@@ -69,7 +69,7 @@ contract AttestoorFactory is Initializable, Ownable2StepUpgradeable {
             revert Errors.Attestoor_DeployAttestoorFailed();
         }
 
-        count++;
+        ++count;
 
         emit AttestoorDeployed(attestoorAddress, admin);
 
