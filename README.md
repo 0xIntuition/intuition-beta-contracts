@@ -70,6 +70,16 @@ $ fuzz forge test
 
 - Finally, check your Diligence Fuzzing dashboard to see the results of the fuzzing tests
 
+- On newer versions of Python, you may receive this error:
+```shell
+ModuleNotFoundError: No module named 'distutils'
+```
+
+In this case, you just need to install setuptools because distutils was deprecated in Python 3.10:
+```shell
+$ pip3 install setuptools
+```
+
 ### Deployment Process using OpenZeppelin Defender
 
 To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:
