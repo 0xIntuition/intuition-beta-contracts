@@ -8,4 +8,12 @@ build_info = true
 extra_output = ["storageLayout"]
 evm_version = "Cancun"
 
+[etherscan]
+base = { key = "${ETHERSCAN_API_KEY}", url = "https://api.basescan.org/api" }
+base-sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api" }
+
+[rpc_endpoints]
+base = "https://base.blockpi.network/v1/rpc/public"
+base-sepolia = "https://base-sepolia.blockpi.network/v1/rpc/public"
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

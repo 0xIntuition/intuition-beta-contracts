@@ -1,7 +1,7 @@
 {
   "name": "@0xintuition/intuition-beta-contracts",
-  "version": "0.1.0",
-  "description": "Core contracts for the Intuition protocol",
+  "version": "1.0.0",
+  "description": "Core contracts of the Intuition protocol.",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "slither": "./test/tools/slither.sh"
   },
   "keywords": [],
-  "author": "",
+  "author": "0xIntuition",
   "license": "BUSL-1.1",
   "devDependencies": {
     "@account-abstraction/contracts": "^0.6.0",

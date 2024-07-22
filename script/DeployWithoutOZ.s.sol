@@ -82,7 +82,7 @@ contract DeployEthMultiVault is Script {
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
             atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
-            atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
+            atomDepositFractionForTriple: 900 // Fee for equity in atoms when creating a triple
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
@@ -131,9 +131,6 @@ contract DeployEthMultiVault is Script {
             admin, // initial owner of the ProxyAdmin instance tied to the proxy
             multicallInitData // data to pass to the logic contract's initializer function
         );
-
-        console.log("customMulticall3 implementation:", address(customMulticall3));
-        console.log("customMulticall3Proxy:", address(customMulticall3Proxy));
 
         // stop sending tx's
         vm.stopBroadcast();

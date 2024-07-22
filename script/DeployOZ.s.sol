@@ -97,7 +97,7 @@ contract DeployEthMultiVaultScript is Script {
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
             atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
-            atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
+            atomDepositFractionForTriple: 900 // Fee for equity in atoms when creating a triple
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
