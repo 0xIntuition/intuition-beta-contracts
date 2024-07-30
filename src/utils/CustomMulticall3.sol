@@ -125,4 +125,41 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
 
         emit EthMultiVaultSet(_ethMultiVault);
     }
+
+    /// @notice Gets the user's ETH balance in a particular vault
+    ///
+    /// @param vaultId The ID of the vault
+    /// @param user The address of the user
+    ///
+    /// @return The user's ETH balance in the vault
+    function getUserEthBalanceInVault(uint256 vaultId, address user) public view returns (uint256) {
+        (uint256 shares,) = ethMultiVault.getVaultStateForUser(vaultId, user);
+        uint256 sharePrice = ethMultiVault.currentSharePrice(vaultId);
+
+        return shares * sharePrice;
+    }
+
+    /// @notice Gets the user's ETH balances in multiple vaults
+    ///
+    /// @param vaultIds Array of vault IDs
+    /// @param user The address of the user
+    ///
+    /// @return Array of user's ETH balances in the vaults
+    function getBatchUserEthBalancesInVault(uint256[] calldata vaultIds, address user)
+        external
+        view
+        returns (uint256[] memory)
+    {
+        if (vaultIds.length == 0) {
+            revert Errors.CustomMulticall3_ZeroLengthArray();
+        }
+
+        uint256[] memory balances = new uint256[](vaultIds.length);
+
+        for (uint256 i = 0; i < vaultIds.length; i++) {
+            balances[i] = getUserEthBalanceInVault(vaultIds[i], user);
+        }
+
+        return balances;
+    }
 }
