@@ -145,7 +145,7 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
     /// @param user The address of the user
     ///
     /// @return Array of user's ETH balances in the vaults
-    function getBatchUserEthBalancesInVault(uint256[] calldata vaultIds, address user)
+    function getBatchUserEthBalancesInVaults(uint256[] calldata vaultIds, address user)
         external
         view
         returns (uint256[] memory)
