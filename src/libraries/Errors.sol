@@ -60,6 +60,7 @@ library Errors {
     error CustomMulticall3_InvalidEthMultiVaultAddress();
     error CustomMulticall3_InvalidValue();
     error CustomMulticall3_InvalidValuesLength();
+    error CustomMulticall3_ZeroLengthArray();
 
     ///////// ATTESTOOR ERRORS ////////////////////////////////////////////////////////////////////
 
