@@ -32,10 +32,7 @@ contract iWeETHVault is ERC20, Ownable {
         uint256 exchangeRate = weETHContract.getRate();
         weETHContract.transferFrom(msg.sender, address(this), amount);
 
-        userStakes[msg.sender].push(Stake({
-            amountStakedInWeETH: amount,
-            initialExchangeRate: exchangeRate
-        }));
+        userStakes[msg.sender].push(Stake({amountStakedInWeETH: amount, initialExchangeRate: exchangeRate}));
 
         _mint(msg.sender, amount);
 
@@ -54,7 +51,8 @@ contract iWeETHVault is ERC20, Ownable {
             Stake storage stake = userStakes[msg.sender][i];
 
             if (stake.amountStakedInWeETH > 0) {
-                uint256 redeemAmount = remainingAmount < stake.amountStakedInWeETH ? remainingAmount : stake.amountStakedInWeETH;
+                uint256 redeemAmount =
+                    remainingAmount < stake.amountStakedInWeETH ? remainingAmount : stake.amountStakedInWeETH;
                 uint256 yield = ((currentExchangeRate - stake.initialExchangeRate) * redeemAmount) / 1 ether;
                 totalYield += yield;
                 stake.amountStakedInWeETH -= redeemAmount;
