@@ -57,12 +57,6 @@ contract iWeETHVault is ERC20, Ownable {
                 totalYield += yield;
                 stake.amountStakedInWeETH -= redeemAmount;
                 remainingAmount -= redeemAmount;
-
-                if (stake.amountStakedInWeETH == 0) {
-                    // Remove the stake if fully redeemed
-                    _removeStake(msg.sender, i);
-                    i--; // Adjust index after removal
-                }
             }
         }
 
@@ -71,19 +65,9 @@ contract iWeETHVault is ERC20, Ownable {
 
         _burn(msg.sender, amount);
         weETHContract.transfer(msg.sender, amount + yieldAfterFee);
+        weETHContract.transfer(owner(), fee);
 
         emit Redeemed(msg.sender, amount, totalYield, fee);
-    }
-
-    function _removeStake(address user, uint256 index) internal {
-        require(index < userStakes[user].length, "Index out of bounds");
-
-        // Move the last stake to the deleted position to maintain the array structure
-        if (index < userStakes[user].length - 1) {
-            userStakes[user][index] = userStakes[user][userStakes[user].length - 1];
-        }
-
-        userStakes[user].pop();
     }
 
     function getUserStakes(address user) external view returns (Stake[] memory) {
