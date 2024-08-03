@@ -24,7 +24,6 @@ contract iWeETHVault is ERC20, Ownable {
     mapping(address => Stake) public userStakes;
 
     uint256 public constant SCRAPE_PERCENTAGE = 10; // 10%
-    uint256 public constant POINTS_RATE = 1000; // 1000 points per weETH per day
 
     event Deposited(address indexed user, uint256 amount, uint256 exchangeRate);
     event Redeemed(address indexed user, uint256 amount, uint256 yield, uint256 fee);
