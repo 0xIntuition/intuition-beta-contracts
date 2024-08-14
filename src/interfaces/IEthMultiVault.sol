@@ -209,7 +209,7 @@ interface IEthMultiVault {
     ///
     /// @param newProtocolMultisig address of the new protocol multisig
     /// @param oldProtocolMultisig address of the old protocol multisig
-    event protocolMultisigSet(address indexed newProtocolMultisig, address indexed oldProtocolMultisig);
+    event ProtocolMultisigSet(address indexed newProtocolMultisig, address indexed oldProtocolMultisig);
 
     /// @notice emitted upon changing the minimum deposit amount
     ///

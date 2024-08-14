@@ -231,7 +231,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         generalConfig.protocolMultisig = protocolMultisig;
 
-        emit protocolMultisigSet(protocolMultisig, oldProtocolMultisig);
+        emit ProtocolMultisigSet(protocolMultisig, oldProtocolMultisig);
     }
 
     /// @dev sets the minimum deposit amount for atoms and triples
