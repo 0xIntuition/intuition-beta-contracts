@@ -53,7 +53,7 @@ contract DeployEthMultiVaultScript is Script {
 
         // ======== Deploy TimelockController ========
 
-        uint256 minDelay = 2 days;
+        uint256 minDelay = 3 days;
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
 
