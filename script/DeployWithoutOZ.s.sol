@@ -18,10 +18,10 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 contract DeployEthMultiVault is Script {
     address deployer;
 
-    // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
-    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Testnet multisig Safe address
-    address protocolMultisig = admin;
-    address atomWarden = admin;
+    // Multisig addresses for key roles in the protocol
+    address admin = 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480;
+    address protocolMultisig = 0xC03F0dE5b34339e1B968e4f317Cd7e7FBd421FD1;
+    address atomWarden = 0xC35DFCFE50da58d957fc47C7063f56135aFF61B8;
 
     // Constants from Base
     IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
@@ -39,7 +39,7 @@ contract DeployEthMultiVault is Script {
         vm.startBroadcast();
 
         // TimelockController parameters
-        uint256 minDelay = 2 days;
+        uint256 minDelay = 3 days;
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
 
@@ -67,7 +67,7 @@ contract DeployEthMultiVault is Script {
             admin: admin, // Admin address for the EthMultiVault contract
             protocolMultisig: protocolMultisig, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
-            minDeposit: 0.00069 ether, // Minimum deposit amount in wei
+            minDeposit: 0.00042 ether, // Minimum deposit amount in wei
             minShare: 1e6, // Minimum share amount (e.g., for vault initialization)
             atomUriMaxLength: 250, // Maximum length of the atom URI data that can be passed when creating atom vaults
             decimalPrecision: 1e18, // decimal precision used for calculating share prices
@@ -75,12 +75,12 @@ contract DeployEthMultiVault is Script {
         });
 
         IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomWalletInitialDepositAmount: 0.0001 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
-            atomCreationProtocolFee: 0.0002 ether // Fee charged for creating an atom
+            atomWalletInitialDepositAmount: 0.00003 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
+            atomCreationProtocolFee: 0.0003 ether // Fee charged for creating an atom
         });
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
-            tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
+            tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
             atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 900 // Fee for equity in atoms when creating a triple
         });
