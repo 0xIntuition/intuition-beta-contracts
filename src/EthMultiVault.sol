@@ -1531,12 +1531,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     /// @notice returns the Atom Wallet address for the given atom data
-    /// @param id vault id of the atom associated to the atom wallet
+    /// @param atomId vault id of the atom associated to the atom wallet
     /// @return atomWallet the address of the atom wallet
     /// NOTE: the create2 salt is based off of the vault ID
-    function computeAtomWalletAddr(uint256 id) public view returns (address) {
+    function computeAtomWalletAddr(uint256 atomId) public view returns (address) {
         // compute salt for create2
-        bytes32 salt = bytes32(id);
+        bytes32 salt = bytes32(atomId);
 
         // get contract deployment data
         bytes memory data = _getDeploymentData();

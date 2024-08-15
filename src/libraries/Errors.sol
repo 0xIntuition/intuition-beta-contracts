@@ -70,4 +70,10 @@ library Errors {
     error Attestoor_NotAWhitelistedAttestor();
     error Attestoor_SharesCannotBeRedeeemed();
     error Attestoor_WrongArrayLengths();
+
+    ///////// ATOMWARDEN ERRORS ///////////////////////////////////////////////////////////////////
+
+    error AtomWarden_AtomIdOutOfBounds();
+    error AtomWarden_ClaimOwnershipFailed();
+    error AtomWarden_InvalidEthMultiVaultAddress();
 }
