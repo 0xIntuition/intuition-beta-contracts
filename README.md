@@ -111,7 +111,7 @@ To deploy the v1 smart contract system on to a public testnet or mainnet, you’
 - Deploy smart contracts using the following command:
 
 ```shell
-$ forge script script/Deploy.s.sol --broadcast --rpc-url <your_rpc_url> --private-key $PRIVATE_KEY
+$ forge script script/DeployWithoutOZ.s.sol --broadcast --rpc-url <your_rpc_url> --private-key $PRIVATE_KEY
 ```
 
 After the deployment go to the Deploy dashboard on OpenZeppelin Defender and approve
