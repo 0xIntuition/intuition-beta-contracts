@@ -100,18 +100,16 @@ $ fuzz forge test
   $ docker run --rm -v "$(pwd)":/app manticore-analysis
 ```
 
-### Deployment Process using OpenZeppelin Defender
+### Deployment Process
 
-To deploy the V1 Beta smart contract system on to a public testnet or mainnet, you’ll need the following:
-
-- Set the credentials DEFENDER_KEY and DEFENDER_SECRET on a .env file
+To deploy the Beta smart contract system on to a public testnet or mainnet, you’ll need the following:
 - RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain for the testnet deployments)
-- Export private key of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments
+- Export `PRIVATE_KEY` of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments
 - For Base Sepolia, there is a reliable [testnet faucet](https://alchemy.com/faucets/base-sepolia) deployed by Alchemy
 - Deploy smart contracts using the following command:
 
 ```shell
-$ forge script script/DeployWithoutOZ.s.sol --broadcast --rpc-url <your_rpc_url> --private-key $PRIVATE_KEY
+$ forge script script/Deploy.s.sol --broadcast --rpc-url <your_rpc_url> --private-key $PRIVATE_KEY
 ```
 
 After the deployment go to the Deploy dashboard on OpenZeppelin Defender and approve
@@ -128,16 +126,3 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 
 - When verifying your smart contracts, you can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
 - The chain ID for Base Sepolia is `84532`, whereas the chain ID for Base Mainnet is `8453`
-
-### Upgrade Process
-
-To upgrade the smart contract you need:
-
-- Deploy a new version of contracts you want to upgrade, for example `EthMultiVault`. You need to add the directive `@custom:oz-upgrades-from` on the line before where you define the contract and set the version of the upgrade on the `init` function (e.g. `reinitializer(2)`)
-- If using a multisig as an upgrade admin, schedule the upgrade for some time in the future (e.g. 2 days) using this script to generate the parameters that can be used in Safe Transaction Builder:
-
-```shell
-$ forge script script/TimelockController.s.sol
-```
-
-- After the delay passes (e.g. 2 days) you can call this again, just change the method on the target to `execute`
