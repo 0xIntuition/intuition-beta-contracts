@@ -6,6 +6,23 @@ In bringing this new data layer to the decentralized web, weâ€™re opening the fl
 
 The Intuition Knowledge Graph will be recognized as an organic flywheel, where the more developers that implement it, the more valuable the data it houses becomes.
 
+## Getting Started
+- [Intuition Protocol](#intuition-protocol)
+  - [Getting Started](#getting-started)
+  - [Documentation](#documentation)
+    - [Known Nuances](#known-nuances)
+  - [Building and Running Tests](#building-and-running-tests)
+    - [Prerequisites](#prerequisites)
+    - [Step by Step Guide](#step-by-step-guide)
+      - [Install Dependencies](#install-dependencies)
+      - [Build](#build)
+      - [Run Tests](#run-tests)
+      - [Run Fuzz Tests](#run-fuzz-tests)
+      - [Run Slither (Static Analysis)](#run-slither-static-analysis)
+      - [Run Manticore (Symbolic Execution)](#run-manticore-symbolic-execution)
+    - [Deployment Process](#deployment-process)
+    - [Deployment Verification](#deployment-verification)
+
 ## Documentation
 
 To get a basic understanding of the Intuition protocol, please check out the following:
@@ -16,15 +33,13 @@ To get a basic understanding of the Intuition protocol, please check out the fol
 
 ### Known Nuances
 
-- Share prices are weird, but elegantly achieve our desired functionality - which is, Users earn fee revenue when they are shareholders of a vault and other users deposit/redeem from the vault while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.
-  - For example: User A deposits 1 ETH into a vault with a share price of 1 ETH. There is a 5% entry fee applied. User receives 0.95 shares. Assuming no other depositors in the vault, the Vault now has 1 ETH and 0.95 shares outstanding -> share price is now 1.052.
-  - User A now redeems their shares from the pool, paying a 5% exit fee to the vault. The vault now has 0.05 ETH and 0 shares; for this reason, we mint some number of 'ghost shares' to the 0 address upon vault instantiation, so that the number of outstanding shares will never be 0; however, because of the small number of outstanding 'ghost' shares, share price becomes arbitrarily high because of the large discrepancy between [Oustanding Shares] and [Assets in the Vault].
+- Share prices may get arbitrarily large as deposits/withdraws occur after Vault asset and share amounts approach 0 (i.e. if all users have withdrawn from the Vault), but this still elegantly achieves our desired functionality  - which is, Users earn fee revenue when they are shareholders of a vault and deposit/redeem activities occur while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.
+- The Admin can pause the contracts, though there is an emergency withdraw that allows users to withdraw from the contract even while paused. This emergency withdraw bypasses all fees, to reduce the surface area of attack.
+- Exit fees are configurable, but have a maximum limit which they can be set to, preventing loss of user funds. Users also have the timelock window to withdraw from the contracts if they do not agree with a parameter change.
 
 ## Building and Running Tests
 
 To build the project and run tests, follow these steps:
-
-### Prerequisites
 
 ### Prerequisites
 
@@ -111,8 +126,6 @@ To deploy the Beta smart contract system on to a public testnet or mainnet, youâ
 ```shell
 $ forge script script/Deploy.s.sol --broadcast --rpc-url <your_rpc_url> --private-key $PRIVATE_KEY
 ```
-
-After the deployment go to the Deploy dashboard on OpenZeppelin Defender and approve
 
 ### Deployment Verification
 
