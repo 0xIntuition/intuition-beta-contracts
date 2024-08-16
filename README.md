@@ -102,7 +102,7 @@ $ fuzz forge test
 
 ### Deployment Process using OpenZeppelin Defender
 
-To deploy the v1 smart contract system on to a public testnet or mainnet, you’ll need the following:
+To deploy the V1 Beta smart contract system on to a public testnet or mainnet, you’ll need the following:
 
 - Set the credentials DEFENDER_KEY and DEFENDER_SECRET on a .env file
 - RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain for the testnet deployments)
