@@ -50,6 +50,10 @@ jobs:
         run: |
           forge test -vvv
 
+      - name: Install Slither
+        run: |
+          pip3 install slither-analyzer
+
       - name: Run Slither
         run: |
           npm run slither
