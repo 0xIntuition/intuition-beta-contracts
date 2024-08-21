@@ -49,3 +49,7 @@ jobs:
       - name: Run Forge tests
         run: |
           forge test -vvv
+
+      - name: Run Slither
+        run: |
+          npm run slither
