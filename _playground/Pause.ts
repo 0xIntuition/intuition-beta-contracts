@@ -11,11 +11,10 @@ const UNPAUSE_FILENAME = "./_playground/Unpause.json";
 // on Safe.Global Transaction Builder
 // > ts-node Pause.ts
 async function main() {
-
   // -----------------------------------------------------------------
   //
   //                               Pause
-  // 
+  //
   // -----------------------------------------------------------------
   const pauseTransaction = [
     {
@@ -24,21 +23,18 @@ async function main() {
       contractMethod: {
         name: "pause",
         inputs: [],
-        payable: true,
+        outputs: [],
+        payable: false,
       },
-      contractInputsValues: {}
+      contractInputsValues: {},
     },
   ];
 
-  const pauseTx = TxBuilder.batch(
-    PROXY_ADDRESS,
-    pauseTransaction,
-    {
-      chainId: CHAIN_ID,
-      name: "pause",
-      description: "Pause the contract"
-    }
-  );
+  const pauseTx = TxBuilder.batch(PROXY_ADDRESS, pauseTransaction, {
+    chainId: CHAIN_ID,
+    name: "pause",
+    description: "Pause the contract",
+  });
 
   fs.writeFileSync(PAUSE_FILENAME, JSON.stringify(pauseTx, null, 2));
   console.log("File for pause:", PAUSE_FILENAME);
@@ -46,7 +42,7 @@ async function main() {
   // -----------------------------------------------------------------
   //
   //                               Unpause
-  // 
+  //
   // -----------------------------------------------------------------
   const unpauseTransaction = [
     {
@@ -55,21 +51,18 @@ async function main() {
       contractMethod: {
         name: "unpause",
         inputs: [],
-        payable: true,
+        outputs: [],
+        payable: false,
       },
-      contractInputsValues: {}
+      contractInputsValues: {},
     },
   ];
 
-  const unpauseTx = TxBuilder.batch(
-    PROXY_ADDRESS,
-    unpauseTransaction,
-    {
-      chainId: CHAIN_ID,
-      name: "UNPAUSE",
-      description: "UNPAUSE the contract"
-    }
-  );
+  const unpauseTx = TxBuilder.batch(PROXY_ADDRESS, unpauseTransaction, {
+    chainId: CHAIN_ID,
+    name: "unpause",
+    description: "Unpause the contract",
+  });
 
   fs.writeFileSync(UNPAUSE_FILENAME, JSON.stringify(unpauseTx, null, 2));
   console.log("File for pause:", UNPAUSE_FILENAME);
