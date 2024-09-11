@@ -65,7 +65,7 @@ contract MockEthMultiVault {
         uint256 initialExitFee
     ) {
         treasury = daoTreasury;
-        supply = 1;
+        supply = 1; // minShare 
         expDenominator = initialExpDenominator;
         minDeposit = initialMinDeposit;
         protocolFee = initialProtocolFee;
@@ -184,7 +184,7 @@ contract MockEthMultiVault {
 
     /// @notice Calculates the current share price based on the total assets and supply of shares in the vault
     /// @dev Uses a linear formula when assets <= 1 ETH, and a customizable formula when assets > 1 ETH
-    function currentSharePrice() external view returns (uint256) {
+    function currentSharePrice() external view virtual returns (uint256) {
         uint256 price;
 
         // Linear growth formula when assets <= 1 ETH
@@ -202,7 +202,7 @@ contract MockEthMultiVault {
 
     /// @notice Converts the deposited assets into shares based on the current share price
     /// @param depositedAssets The amount of assets to convert into shares
-    function convertToShares(uint256 depositedAssets) public view returns (uint256) {
+    function convertToShares(uint256 depositedAssets) public view virtual returns (uint256) {
         uint256 userShares;
 
         if (assets <= 1e18) {
@@ -217,7 +217,7 @@ contract MockEthMultiVault {
 
     /// @notice Converts the user shares into assets based on the current share price
     /// @param userShares The amount of shares to convert into assets
-    function convertToAssets(uint256 userShares) public view returns (uint256) {
+    function convertToAssets(uint256 userShares) public view virtual returns (uint256) {
         uint256 userAssets;
 
         if (assets <= 1e18) {
