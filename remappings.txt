@@ -9,4 +9,5 @@ account-abstraction/=node_modules/@account-abstraction/
 @openzeppelin/=node_modules/@openzeppelin/
 hardhat/=node_modules/hardhat/
 @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
+openzeppelin-contracts=lib/openzeppelin-contracts/
 openzeppelin-foundry-upgrades=lib/openzeppelin-foundry-upgrades/src/

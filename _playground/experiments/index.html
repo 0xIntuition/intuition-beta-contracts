@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Assets vs Shares Curve Visualization</title>
+  <!-- Include Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<!-- Container for the plot -->
+<div id="plot" style="width:100%;max-width:700px;height:500px;"></div>
+
+<script>
+  // Your data in JSON format
+  const data = {
+    "assets": [
+      "0",
+      "0.000100000001",
+      "0.091484048998450625",
+      "0.13219473402958536",
+      "0.201817791856866649",
+      "0.271109399717987115",
+      "0.290402489276062929",
+      "0.386520650653341196",
+      "0.480911590964330791",
+      "0.554384794374836043",
+      "0.598476628900018915",
+      "0.668435909852234508",
+      "0.72285318376228358",
+      "0.753318992777901244",
+      "0.778433340647613738",
+      "0.861669403079420041",
+      "0.910767698027542186",
+      "0.986576086769222959",
+      "0.996948146507644917",
+      "1.086289501612354901"
+    ],
+    "shares": [
+      "0",
+      "0.000100000001",
+      "0.086914846548578093",
+      "0.123658353553903923",
+      "0.185529192247553278",
+      "0.24604335763327454",
+      "0.262677195161519508",
+      "0.345271688902691211",
+      "0.425373472227955397",
+      "0.487112208880941936",
+      "0.523916586581677462",
+      "0.582097950081839683",
+      "0.627117037131082342",
+      "0.652226349640468318",
+      "0.672883239500031633",
+      "0.74123558386577752",
+      "0.781359711556736669",
+      "0.843144884487891634",
+      "0.851565818023547041",
+      "0.924063111076457685"
+    ]
+  };
+
+  // Convert strings to numbers
+  const assets = data.assets.map((x) => parseFloat(x));
+  const shares = data.shares.map((y) => parseFloat(y));
+
+  // Calculate max values from data
+  const maxAssets = Math.max.apply(null, assets);
+  const maxShares = Math.max.apply(null, shares);
+
+  // Optionally, add padding to max values
+  const xMax = maxAssets * 1.05; // Increase by 5%
+  const yMax = maxShares * 1.05; // Increase by 5%
+
+  // Define the trace
+  const trace = {
+    x: assets, // X-axis data
+    y: shares, // Y-axis data
+    mode: 'lines+markers', // Show both lines and markers
+    type: 'scatter', // Scatter plot
+    name: 'Linear Curve' // Name of the trace
+  };
+
+  // Define the layout
+  const layout = {
+    title: 'Linear Curve', // Title of the plot
+    xaxis: {
+      title: 'Assets', // X-axis label
+      showgrid: true, // Show grid lines
+      zeroline: true,  // Show zero line
+      range: [0, xMax] // Set x-axis range
+    },
+    yaxis: {
+      title: 'Shares', // Y-axis label
+      showgrid: true, // Show grid lines
+      zeroline: true,  // Show zero line
+      range: [0, yMax] // Set y-axis range
+    }
+  };
+
+  // Create the plot
+  Plotly.newPlot('plot', [trace], layout);
+</script>
+
+</body>
+</html>

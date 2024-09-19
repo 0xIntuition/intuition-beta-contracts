@@ -2,11 +2,13 @@
   "name": "@0xintuition/intuition-beta-contracts",
   "version": "1.0.0",
   "description": "Core contracts of the Intuition protocol.",
-  "type": "module",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "fmt:check": "forge fmt --check",
-    "slither": "./test/tools/slither.sh"
+    "slither": "./test/tools/slither.sh",
+    "visualizeCurve": "node _playground/experiments/visualizeCurve.js",
+    "visualizeAll": "node _playground/experiments/visualizeAll.js"
   },
   "keywords": [],
   "author": "0xIntuition",
@@ -15,6 +17,11 @@
     "@account-abstraction/contracts": "^0.6.0",
     "@opengsn/contracts": "^3.0.0-beta.10",
     "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2"
+    "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "quickchart-js": "^3.1.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
   }
 }
