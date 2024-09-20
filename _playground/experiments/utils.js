@@ -6,11 +6,59 @@ const QuickChart = require("quickchart-js");
 
 dotenv.config();
 
+const allowedCurves = [
+  "linear",
+  "catmullRom",
+  "cubic",
+  "exponential",
+  "logarithmic",
+  "logarithmicStepCurve",
+  "polynomial",
+  "powerFunction",
+  "quadratic",
+  "skewed",
+  "sqrt",
+  "steppedCurve",
+  "twoStepLinear",
+];
+
+const normalizeCurveName = (curve) => {
+  if (typeof curve !== "string") {
+    throw new TypeError("Input must be a string");
+  }
+
+  if (curve === "sqrt") {
+    return "Square Root";
+  }
+
+  return (
+    curve
+      // Insert space before capital letters
+      .replace(/([A-Z])/g, " $1")
+      // Trim leading/trailing spaces
+      .trim()
+      // Replace multiple spaces with a single space
+      .replace(/\s+/g, " ")
+      // Capitalize each word
+      .replace(/\b\w+/g, function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+  );
+};
+
 const curveContractAddresses = {
   linear: "0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665",
+  catmullRom: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  cubic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
   exponential: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
   logarithmic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  catmullRom: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  logarithmicStepCurve: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  polynomial: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  powerFunction: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  quadratic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  skewed: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  sqrt: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  steppedCurve: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
   twoStepLinear: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
 };
 
@@ -35,16 +83,39 @@ const generateRandomNumbers = (min, max, count) => {
   return Array.from({ length: count }, () => generateRandomNumber(min, max));
 };
 
+const generateSameValueArray = (value, count) => {
+  return Array.from({ length: count }, () => value);
+};
+
 const generateRandomBytes = (length) => {
   return ethers.hexlify(ethers.randomBytes(length));
 };
 
-const rpcUrl = "https://base-sepolia-rpc.publicnode.com"; // "https://sepolia.base.org";
+const rpcUrl =
+  "https://base-sepolia.g.alchemy.com/v2/M4nJgUt8qQiwH9FklBw3o5fAv80gdj1O";
+
+// Other options:
+// https://base-sepolia.blockpi.network/v1/rpc/public
+// "https://base-sepolia-rpc.publicnode.com";
+// https://sepolia.base.org
+
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
 const linearCurveContract = new ethers.Contract(
   curveContractAddresses.linear,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const catmullRomCurveContract = new ethers.Contract(
+  curveContractAddresses.catmullRom,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const cubicCurveContract = new ethers.Contract(
+  curveContractAddresses.cubic,
   ethMultiVaultAbi,
   wallet
 );
@@ -61,8 +132,44 @@ const logarithmicCurveContract = new ethers.Contract(
   wallet
 );
 
-const catmullRomCurveContract = new ethers.Contract(
-  curveContractAddresses.catmullRom,
+const logarithmicStepCurveContract = new ethers.Contract(
+  curveContractAddresses.logarithmicStepCurve,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const polynomialCurveContract = new ethers.Contract(
+  curveContractAddresses.polynomial,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const powerFunctionCurveContract = new ethers.Contract(
+  curveContractAddresses.powerFunction,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const quadraticCurveContract = new ethers.Contract(
+  curveContractAddresses.quadratic,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const skewedCurveContract = new ethers.Contract(
+  curveContractAddresses.skewed,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const sqrtCurveContract = new ethers.Contract(
+  curveContractAddresses.sqrt,
+  ethMultiVaultAbi,
+  wallet
+);
+
+const steppedCurveContract = new ethers.Contract(
+  curveContractAddresses.steppedCurve,
   ethMultiVaultAbi,
   wallet
 );
@@ -75,13 +182,88 @@ const twoStepLinearCurveContract = new ethers.Contract(
 
 const curveContracts = {
   linear: linearCurveContract,
+  catmullRom: catmullRomCurveContract,
+  cubic: cubicCurveContract,
   exponential: exponentialCurveContract,
   logarithmic: logarithmicCurveContract,
-  catmullRom: catmullRomCurveContract,
+  logarithmicStepCurve: logarithmicStepCurveContract,
+  polynomial: polynomialCurveContract,
+  powerFunction: powerFunctionCurveContract,
+  quadratic: quadraticCurveContract,
+  skewed: skewedCurveContract,
+  sqrt: sqrtCurveContract,
+  steppedCurve: steppedCurveContract,
   twoStepLinear: twoStepLinearCurveContract,
 };
 
-// Function to generate the plot and save it as an image
+// Function to generate the plot and save it as an HTML file
+const generateHTMLPlot = async (data, curve, timestamp, htmlPath) => {
+  const assets = data.assets;
+  const shares = data.shares;
+
+  // Prepare the HTML content
+  const title = `${normalizeCurveName(curve)} Curve Visualization`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <!-- Include Plotly.js via CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<div id="plot" style="width:100%;max-width:700px;height:500px;"></div>
+
+<script>
+  // Data arrays
+  const assets = ${JSON.stringify(assets.map(Number))};
+  const shares = ${JSON.stringify(shares.map(Number))};
+
+  // Define the trace
+  const trace = {
+    x: assets,
+    y: shares,
+    mode: 'lines+markers',
+    type: 'scatter',
+    name: '${curve.charAt(0).toUpperCase() + curve.slice(1)} Curve'
+  };
+
+  // Calculate max values for axis scaling
+  const maxAssets = Math.max.apply(null, assets) * 1.05; // 5% padding
+  const maxShares = Math.max.apply(null, shares) * 1.05; // 5% padding
+
+  // Define the layout with axis ranges
+  const layout = {
+    title: '${title}',
+    xaxis: {
+      title: 'Assets',
+      range: [0, maxAssets]
+    },
+    yaxis: {
+      title: 'Shares',
+      range: [0, maxShares]
+    }
+  };
+
+  // Create the plot
+  Plotly.newPlot('plot', [trace], layout);
+</script>
+
+</body>
+</html>
+  `;
+
+  // Save the HTML content to a file
+  fs.writeFileSync(
+    path.join(htmlPath, `${curve}-${timestamp}.html`),
+    htmlContent
+  );
+};
+
+// Function to generate the plot and save it as an image in PNG format
 const generatePlot = async (data, curve, timestamp, imagePath) => {
   const assets = data.assets;
   const shares = data.shares;
@@ -149,10 +331,89 @@ const generatePlot = async (data, curve, timestamp, imagePath) => {
   await chart.toFile(path.join(imagePath, `${curve}-${timestamp}.png`));
 };
 
+// Function to visualize all curves in a single HTML file
+const generateCombinedHTMLPlot = (allData, outputPath) => {
+  const title = "Curve Comparison";
+
+  // Prepare the HTML content
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <!-- Include Plotly.js via CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<div id="plot-all" style="width:100%;max-width:900px;height:600px;"></div>
+<script>
+  const data = [];
+
+  ${allData
+    .map((curveData, index) => {
+      const { curve, data } = curveData;
+      const assets = data.assets.map(Number);
+      const shares = data.shares.map(Number);
+      const title = `${normalizeCurveName(curve)} Curve`;
+
+      return `
+  // Data for ${curve}
+  const trace_${index} = {
+    x: ${JSON.stringify(assets)},
+    y: ${JSON.stringify(shares)},
+    mode: 'lines+markers',
+    type: 'scatter',
+    name: '${title}'
+  };
+  data.push(trace_${index});
+`;
+    })
+    .join("\n")}
+
+  // Calculate global max values for axis scaling
+  const maxAssets = Math.max.apply(null, [].concat(${allData
+    .map((_, index) => `data[${index}].x`)
+    .join(", ")})) * 1.05;
+  const maxShares = Math.max.apply(null, [].concat(${allData
+    .map((_, index) => `data[${index}].y`)
+    .join(", ")})) * 1.05;
+
+  // Define the layout with axis ranges
+  const layout = {
+    title: '${title}',
+    xaxis: {
+      title: 'Assets',
+      range: [0, maxAssets]
+    },
+    yaxis: {
+      title: 'Shares',
+      range: [0, maxShares]
+    }
+  };
+
+  // Create the combined plot
+  Plotly.newPlot('plot-all', data, layout);
+</script>
+
+</body>
+</html>
+  `;
+
+  // Save the HTML content to a file
+  fs.writeFileSync(outputPath, htmlContent);
+};
+
 module.exports = {
+  allowedCurves,
+  generateSameValueArray,
   generateRandomNumbers,
   generateRandomBytes,
   curveContracts,
   wallet,
   generatePlot,
+  generateHTMLPlot,
+  generateCombinedHTMLPlot,
+  normalizeCurveName,
 };

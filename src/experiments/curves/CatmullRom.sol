@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract CatmullRomAssetShares {
+contract CatmullRom {
     struct Vector2D {
         uint256 x;
         uint256 y;

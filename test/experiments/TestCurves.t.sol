@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import {Script, console} from "forge-std/Script.sol";
+// Import Foundry's Test library
+import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
 
+// Import interfaces and contracts
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
-// import {CatmullRom} from "src/experiments/curves/CatmullRom.sol";
+// Curve contracts
+// import {CatmullRomAssetShares} from "src/experiments/curves/CatmullRom.sol";
 import {Cubic} from "src/experiments/curves/Cubic.sol";
 import {Exponential} from "src/experiments/curves/Exponential.sol";
 import {Logarithmic} from "src/experiments/curves/Logarithmic.sol";
@@ -19,16 +23,14 @@ import {SQRT} from "src/experiments/curves/SQRT.sol";
 import {SteppedCurve} from "src/experiments/curves/SteppedCurve.sol";
 import {TwoStepLinear} from "src/experiments/curves/TwoStepLinear.sol";
 
-contract DeployExperimental is Script {
-    // Addresses for key roles in the protocol
-    address public admin = 0xaAE94A934c070F4a57303f436fb3599CBd5497C6; // Experimental admin
-    address public protocolMultisig = 0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5; // Experimental protocol multisig
-    address public atomWarden = admin;
-    address public atomWalletBeacon = 0x9688eAc5757735A4e0F23C05B528Ea1ADcfFeaf1; // AtomWalletBeacon on Base Sepolia
+// Helper libraries
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-    // Constants from Base
-    IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
-    address entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
+contract TestCurves is Test {
+    using Address for address payable;
+
+    // Dummy user
+    address payable public alice;
 
     // Contracts to be deployed
     // CatmullRomAssetShares public catmullRom;
@@ -44,11 +46,30 @@ contract DeployExperimental is Script {
     SteppedCurve public steppedCurve;
     TwoStepLinear public twoStepLinear;
 
-    function run() external {
-        // Begin sending tx's to network
-        vm.startBroadcast();
+    // Addresses for key roles in the protocol
+    address public admin = address(0xaAE94A934c070F4a57303f436fb3599CBd5497C6); // Experimental admin
+    address public protocolMultisig = address(0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5); // Experimental protocol multisig
+    address public atomWarden = address(0xaAE94A934c070F4a57303f436fb3599CBd5497C6);
+    address public atomWalletBeacon = address(0x9688eAc5757735A4e0F23C05B528Ea1ADcfFeaf1); // AtomWalletBeacon on Base Sepolia
 
-        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+    // Constants from Base
+    IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
+    address entryPoint = address(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789); // EntryPoint on Base
+
+    // Vault configuration structs
+    IEthMultiVault.GeneralConfig public generalConfig;
+    IEthMultiVault.AtomConfig public atomConfig;
+    IEthMultiVault.TripleConfig public tripleConfig;
+    IEthMultiVault.WalletConfig public walletConfig;
+    IEthMultiVault.VaultFees public vaultFees;
+
+    function setUp() public {
+        // Create a dummy user called alice and fund her with 100 ether
+        alice = payable(address(0xA11CE));
+        vm.deal(alice, 100 ether);
+
+        // Set up configuration structs
+        generalConfig = IEthMultiVault.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
             protocolMultisig: protocolMultisig, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
@@ -59,125 +80,66 @@ contract DeployExperimental is Script {
             minDelay: 1 days // minimum delay for timelocked transactions
         });
 
-        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+        atomConfig = IEthMultiVault.AtomConfig({
             atomWalletInitialDepositAmount: 0.00003 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
             atomCreationProtocolFee: 0.0003 ether // Fee charged for creating an atom
         });
 
-        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+        tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
             atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 900 // Fee for equity in atoms when creating a triple
         });
 
-        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+        walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
             atomWarden: atomWarden, // atomWarden address
-            atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
+            atomWalletBeacon: atomWalletBeacon // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
+        vaultFees = IEthMultiVault.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 250 // Protocol fee for vault 0
         });
 
-        // Deploy CatmullRom curve
-        // catmullRom = new CatmullRom();
-        // console.logString("deployed CatmullRom curve.");
-
-        // Initialize CatmullRom curve
+        // Deploy and initialize curves
+        // catmullRom = new CatmullRomAssetShares();
         // catmullRom.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        // console.logString("initialized CatmullRom curve.");
 
-        // Deploy Cubic curve
         cubic = new Cubic();
-        console.logString("deployed Cubic curve.");
-
-        // Initialize Cubic curve
         cubic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Cubic curve.");
 
-        // Deploy Exponential curve
         exponential = new Exponential();
-        console.logString("deployed Exponential curve.");
-
-        // Initialize Exponential curve
         exponential.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Exponential curve.");
 
-        // Deploy Logarithmic curve
         logarithmic = new Logarithmic();
-        console.logString("deployed Logarithmic curve.");
-
-        // Initialize Logarithmic curve
         logarithmic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Logarithmic curve.");
 
-        // Deploy LogarithmicStepCurve curve
         logarithmicStepCurve = new LogarithmicStepCurve();
-        console.logString("deployed LogarithmicStepCurve curve.");
-
-        // Initialize LogarithmicStepCurve curve
         logarithmicStepCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized LogarithmicStepCurve curve.");
 
-        // Deploy Polynomial curve
         polynomial = new Polynomial();
-        console.logString("deployed Polynomial curve.");
-
-        // Initialize Polynomial curve
         polynomial.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Polynomial curve.");
 
-        // Deploy PowerFunction curve
         powerFunction = new PowerFunction();
-        console.logString("deployed PowerFunction curve.");
-
-        // Initialize PowerFunction curve
         powerFunction.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized PowerFunction curve.");
 
-        // Deploy Quadratic curve
         quadratic = new Quadratic();
-        console.logString("deployed Quadratic curve.");
-
-        // Initialize Quadratic curve
         quadratic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Quadratic curve.");
 
-        // Deploy Skewed curve
         skewed = new Skewed();
-        console.logString("deployed Skewed curve.");
-
-        // Initialize Skewed curve
         skewed.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Skewed curve.");
 
-        // Deploy SQRT curve
         sqrt = new SQRT();
-        console.logString("deployed SQRT curve.");
-
-        // Initialize SQRT curve
         sqrt.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized SQRT curve.");
 
-        // Deploy SteppedCurve curve
         steppedCurve = new SteppedCurve();
-        console.logString("deployed SteppedCurve curve.");
-
-        // Initialize SteppedCurve curve
         steppedCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized SteppedCurve curve.");
 
-        // Deploy TwoStepLinear curve
         twoStepLinear = new TwoStepLinear();
-        console.logString("deployed TwoStepLinear curve.");
-
-        // Initialize TwoStepLinear curve
         twoStepLinear.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized TwoStepLinear curve.");
 
         console.logString("All curves deployed and initialized.");
         console.log("Cubic: ", address(cubic));
@@ -191,8 +153,76 @@ contract DeployExperimental is Script {
         console.log("SQRT: ", address(sqrt));
         console.log("SteppedCurve: ", address(steppedCurve));
         console.log("TwoStepLinear: ", address(twoStepLinear));
+    }
 
-        // stop sending tx's
-        vm.stopBroadcast();
+    // Helper function to perform the test steps
+    function performCurveTest(IEthMultiVault vault, string memory curveName) internal {
+        // Get the atom cost
+        uint256 atomCost = vault.getAtomCost();
+
+        // alice creates an atom
+        vm.prank(alice);
+        uint256 atomId = vault.createAtom{value: atomCost}(bytes("atom1"));
+
+        // alice deposits into the atom 5 times
+        for (uint256 i = 0; i < 5; i++) {
+            vm.prank(alice);
+            vault.depositAtom{value: 0.1 ether}(alice, atomId);
+        }
+
+        // Get alice's shares balance in the atom vault
+        (uint256 shares,) = vault.getVaultStateForUser(atomId, alice);
+
+        // alice redeems her shares
+        vm.prank(alice);
+        vault.redeemAtom(shares, alice, atomId);
+
+        console.log(string(abi.encodePacked("Tested ", curveName, " curve successfully.")));
+    }
+
+    // Unit tests for each curve
+
+    function testCubicCurve() public {
+        performCurveTest(cubic, "Cubic");
+    }
+
+    function testExponentialCurve() public {
+        performCurveTest(exponential, "Exponential");
+    }
+
+    function testLogarithmicCurve() public {
+        performCurveTest(logarithmic, "Logarithmic");
+    }
+
+    function testLogarithmicStepCurve() public {
+        performCurveTest(logarithmicStepCurve, "LogarithmicStepCurve");
+    }
+
+    function testPolynomialCurve() public {
+        performCurveTest(polynomial, "Polynomial");
+    }
+
+    function testPowerFunctionCurve() public {
+        performCurveTest(powerFunction, "PowerFunction");
+    }
+
+    function testQuadraticCurve() public {
+        performCurveTest(quadratic, "Quadratic");
+    }
+
+    function testSkewedCurve() public {
+        performCurveTest(skewed, "Skewed");
+    }
+
+    function testSQRTCurve() public {
+        performCurveTest(sqrt, "SQRT");
+    }
+
+    function testSteppedCurve() public {
+        performCurveTest(steppedCurve, "SteppedCurve");
+    }
+
+    function testTwoStepLinearCurve() public {
+        performCurveTest(twoStepLinear, "TwoStepLinear");
     }
 }

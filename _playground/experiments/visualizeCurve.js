@@ -2,20 +2,32 @@ const { ethers } = require("ethers");
 const fs = require("fs");
 const path = require("path");
 const {
-  generateRandomNumbers,
+  allowedCurves,
+  generateSameValueArray,
   generateRandomBytes,
   curveContracts,
   wallet,
   generatePlot,
+  generateHTMLPlot,
 } = require("./utils.js");
 
-const main = async () => {
+const main = async (curveParam, numberOfDepositsParam) => {
   try {
-    const curve = process.argv[2] || "linear";
-    const numberOfDeposits = parseInt(process.argv[3]) || 10;
+    const curve = curveParam || process.argv[2] || "linear";
+    const numberOfDeposits =
+      parseInt(numberOfDepositsParam) || parseInt(process.argv[3]) || 10;
+
+    if (!allowedCurves.includes(curve)) {
+      throw new Error(
+        `Invalid curve parameter: ${curve}. Allowed curves: ${allowedCurves.join(
+          ", "
+        )}`
+      );
+    }
 
     const jsonPath = "_playground/experiments/json/";
     const imagePath = "_playground/experiments/images/";
+    const htmlPath = "_playground/experiments/html/";
 
     const shares = [];
     const assets = [];
@@ -35,9 +47,9 @@ const main = async () => {
     console.log("✅ Atom created successfully!");
 
     const atomId = await contract.count();
-    console.log(`Current atom ID: ${atomId}`);
+    console.log(`ℹ️  Current atom ID: ${atomId}`);
 
-    const depositValues = generateRandomNumbers(0.005, 0.1, numberOfDeposits);
+    const depositValues = generateSameValueArray(0.1, numberOfDeposits);
 
     const vaultStateBefore = await contract.vaults(atomId);
 
@@ -84,16 +96,26 @@ const main = async () => {
       JSON.stringify(data, null, 2)
     );
 
-    // Now generate the plot and save it as an image
+    // Generate the plot and save it as a PNG and HTML file
     await generatePlot(data, curve, timestamp, imagePath);
+    await generateHTMLPlot(data, curve, timestamp, htmlPath);
 
-    console.log("✅ Plot generated successfully!");
+    console.log("✅ HTML & PNG files generated successfully!");
 
-    process.exit(0);
+    return data;
   } catch (error) {
     console.error(error);
     process.exit(1);
   }
 };
 
-main();
+// Check if the script is being run directly or required as a module
+if (require.main === module) {
+  (async () => {
+    await main();
+    process.exit(0);
+  })();
+} else {
+  module.exports = main;
+}
+

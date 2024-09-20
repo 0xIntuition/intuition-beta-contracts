@@ -1,38 +1,41 @@
-const { exec } = require("child_process");
+const path = require("path");
+const { generateCombinedHTMLPlot, allowedCurves } = require("./utils.js");
 
-const curves = [
-  "linear",
-  "exponential",
-  "logarithmic",
-  "catmullRom",
-  "twoStepLinear",
-];
+const curves = allowedCurves;
 const numberOfDeposits = parseInt(process.argv[2]) || 10;
 
-const runVisualization = (curve) => {
-  return new Promise((resolve, reject) => {
-    exec(
-      `node _playground/experiments/visualizeCurve.js ${curve} ${numberOfDeposits}`,
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error running visualization for ${curve}:`, error);
-          reject(error);
-        } else {
-          console.log(`Visualization for ${curve} completed.`);
-          resolve();
-        }
-      }
-    );
-  });
-};
+const visualizeCurve = require("./visualizeCurve.js");
 
 const main = async () => {
-  for (const curve of curves) {
-    try {
-      await runVisualization(curve);
-    } catch (error) {
-      console.error(`Failed to visualize ${curve}:`, error);
+  try {
+    const allData = [];
+
+    for (const curve of curves) {
+      try {
+        const data = await visualizeCurve(curve, numberOfDeposits);
+        allData.push({ curve, data });
+        console.log(
+          `✅ Visualization for the ${curve} curve completed successfully!\n`
+        );
+      } catch (error) {
+        console.error(`❌ Failed to visualize the ${curve} curve: `, error);
+      }
     }
+
+    // Generate the combined HTML file
+    const combinedHtmlPath = "_playground/experiments/html/combined/";
+
+    const timestamp = Date.now();
+    const htmlFileName = `all-curves-${timestamp}.html`;
+
+    generateCombinedHTMLPlot(
+      allData,
+      path.join(combinedHtmlPath, htmlFileName)
+    );
+
+    console.log(`✅ Combined HTML file generated successfully!`);
+  } catch (error) {
+    console.error(`❌ Failed to generate the combined HTML file: `, error);
   }
 };
 
