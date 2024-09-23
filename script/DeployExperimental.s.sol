@@ -10,7 +10,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {Cubic} from "src/experiments/curves/Cubic.sol";
 import {Exponential} from "src/experiments/curves/Exponential.sol";
 import {Logarithmic} from "src/experiments/curves/Logarithmic.sol";
-import {LogarithmicStepCurve} from "src/experiments/curves/LogarithmicStepCurve.sol";
+// import {LogarithmicStepCurve} from "src/experiments/curves/LogarithmicStepCurve.sol";
 import {Polynomial} from "src/experiments/curves/Polynomial.sol";
 import {PowerFunction} from "src/experiments/curves/PowerFunction.sol";
 import {Quadratic} from "src/experiments/curves/Quadratic.sol";
@@ -35,7 +35,7 @@ contract DeployExperimental is Script {
     Cubic public cubic;
     Exponential public exponential;
     Logarithmic public logarithmic;
-    LogarithmicStepCurve public logarithmicStepCurve;
+    // LogarithmicStepCurve public logarithmicStepCurve;
     Polynomial public polynomial;
     PowerFunction public powerFunction;
     Quadratic public quadratic;
@@ -116,12 +116,12 @@ contract DeployExperimental is Script {
         console.logString("initialized Logarithmic curve.");
 
         // Deploy LogarithmicStepCurve curve
-        logarithmicStepCurve = new LogarithmicStepCurve();
-        console.logString("deployed LogarithmicStepCurve curve.");
+        // logarithmicStepCurve = new LogarithmicStepCurve();
+        // console.logString("deployed LogarithmicStepCurve curve.");
 
-        // Initialize LogarithmicStepCurve curve
-        logarithmicStepCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized LogarithmicStepCurve curve.");
+        // // Initialize LogarithmicStepCurve curve
+        // logarithmicStepCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized LogarithmicStepCurve curve.");
 
         // Deploy Polynomial curve
         polynomial = new Polynomial();
@@ -180,10 +180,11 @@ contract DeployExperimental is Script {
         console.logString("initialized TwoStepLinear curve.");
 
         console.logString("All curves deployed and initialized.");
+        // console.log("CatmullRom: ", address(catmullRom));
         console.log("Cubic: ", address(cubic));
         console.log("Exponential: ", address(exponential));
         console.log("Logarithmic: ", address(logarithmic));
-        console.log("LogarithmicStepCurve: ", address(logarithmicStepCurve));
+        // console.log("LogarithmicStepCurve: ", address(logarithmicStepCurve));
         console.log("Polynomial: ", address(polynomial));
         console.log("PowerFunction: ", address(powerFunction));
         console.log("Quadratic: ", address(quadratic));

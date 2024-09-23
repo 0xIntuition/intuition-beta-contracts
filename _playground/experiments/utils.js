@@ -8,11 +8,11 @@ dotenv.config();
 
 const allowedCurves = [
   "linear",
-  "catmullRom",
+  // "catmullRom",
   "cubic",
   "exponential",
   "logarithmic",
-  "logarithmicStepCurve",
+  // "logarithmicStepCurve",
   "polynomial",
   "powerFunction",
   "quadratic",
@@ -48,18 +48,18 @@ const normalizeCurveName = (curve) => {
 
 const curveContractAddresses = {
   linear: "0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665",
-  catmullRom: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  cubic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  exponential: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  logarithmic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  logarithmicStepCurve: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  polynomial: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  powerFunction: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  quadratic: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  skewed: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  sqrt: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  steppedCurve: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
-  twoStepLinear: "0xD8a8653ceD32364DeB582c900Cc3FcD16c34d6D5",
+  // catmullRom: "",
+  cubic: "0xcc17634445F2aB1Ba3533f93eb0B19C8C3b7f99d",
+  exponential: "0xBD635f0D71d1E9F581f78fcbB10c9ce11bf4c737",
+  logarithmic: "0x7B4a74fF52b51EbE798ee8DAbF6f41cd50841041",
+  // logarithmicStepCurve: "",
+  polynomial: "0x31fb33E92cAb0ECAc10625DcdFd1Da1aE3eDD92E",
+  powerFunction: "0x5613417B7EecE3e64edBBe8335Be781920bDA7E7",
+  quadratic: "0x9E81c3F775c3Cbe4E38B397Fe2747b6B98eA78B0",
+  skewed: "0xcA9a233baC48699335417F9593269e3465cE809f",
+  sqrt: "0xE63cE927c5C164DBa0954005f644dBD9137F858d",
+  steppedCurve: "0xB4b8E16F9c2D8F3f7dfBC594630dfdd64F38A15c",
+  twoStepLinear: "0x226e51476FEf4A13EcCafb7231353a1bDB673a7B",
 };
 
 const ethMultiVaultAbi = [
@@ -108,11 +108,11 @@ const linearCurveContract = new ethers.Contract(
   wallet
 );
 
-const catmullRomCurveContract = new ethers.Contract(
-  curveContractAddresses.catmullRom,
-  ethMultiVaultAbi,
-  wallet
-);
+// const catmullRomCurveContract = new ethers.Contract(
+//   curveContractAddresses.catmullRom,
+//   ethMultiVaultAbi,
+//   wallet
+// );
 
 const cubicCurveContract = new ethers.Contract(
   curveContractAddresses.cubic,
@@ -132,11 +132,11 @@ const logarithmicCurveContract = new ethers.Contract(
   wallet
 );
 
-const logarithmicStepCurveContract = new ethers.Contract(
-  curveContractAddresses.logarithmicStepCurve,
-  ethMultiVaultAbi,
-  wallet
-);
+// const logarithmicStepCurveContract = new ethers.Contract(
+//   curveContractAddresses.logarithmicStepCurve,
+//   ethMultiVaultAbi,
+//   wallet
+// );
 
 const polynomialCurveContract = new ethers.Contract(
   curveContractAddresses.polynomial,
@@ -182,11 +182,11 @@ const twoStepLinearCurveContract = new ethers.Contract(
 
 const curveContracts = {
   linear: linearCurveContract,
-  catmullRom: catmullRomCurveContract,
+  // catmullRom: catmullRomCurveContract,
   cubic: cubicCurveContract,
   exponential: exponentialCurveContract,
   logarithmic: logarithmicCurveContract,
-  logarithmicStepCurve: logarithmicStepCurveContract,
+  // logarithmicStepCurve: logarithmicStepCurveContract,
   polynomial: polynomialCurveContract,
   powerFunction: powerFunctionCurveContract,
   quadratic: quadraticCurveContract,

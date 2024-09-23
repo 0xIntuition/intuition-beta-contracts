@@ -10,7 +10,7 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 // Curve contracts
-// import {CatmullRomAssetShares} from "src/experiments/curves/CatmullRom.sol";
+// import {CatmullRom} from "src/experiments/curves/CatmullRom.sol";
 import {Cubic} from "src/experiments/curves/Cubic.sol";
 import {Exponential} from "src/experiments/curves/Exponential.sol";
 import {Logarithmic} from "src/experiments/curves/Logarithmic.sol";
@@ -182,6 +182,8 @@ contract TestCurves is Test {
 
     // Unit tests for each curve
 
+    // revisit the implementation of the CatmullRom 
+
     function testCubicCurve() public {
         performCurveTest(cubic, "Cubic");
     }
@@ -194,6 +196,7 @@ contract TestCurves is Test {
         performCurveTest(logarithmic, "Logarithmic");
     }
 
+    // revisit the implementation of the LogarithmicStepCurve
     function testLogarithmicStepCurve() public {
         performCurveTest(logarithmicStepCurve, "LogarithmicStepCurve");
     }
@@ -218,6 +221,7 @@ contract TestCurves is Test {
         performCurveTest(sqrt, "SQRT");
     }
 
+    // revisit the implementation of the SteppedCurve
     function testSteppedCurve() public {
         performCurveTest(steppedCurve, "SteppedCurve");
     }
