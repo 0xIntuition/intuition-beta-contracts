@@ -8,7 +8,8 @@
     "fmt:check": "forge fmt --check",
     "slither": "./test/tools/slither.sh",
     "visualizeCurve": "node _playground/experiments/visualizeCurve.js",
-    "visualizeAll": "node _playground/experiments/visualizeAll.js"
+    "visualizeAll": "node _playground/experiments/visualizeAll.js",
+    "cleanUp": "node _playground/experiments/cleanUp.js"
   },
   "keywords": [],
   "author": "0xIntuition",

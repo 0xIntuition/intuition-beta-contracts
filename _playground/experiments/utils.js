@@ -91,10 +91,9 @@ const generateRandomBytes = (length) => {
   return ethers.hexlify(ethers.randomBytes(length));
 };
 
-const rpcUrl =
-  "https://base-sepolia.g.alchemy.com/v2/M4nJgUt8qQiwH9FklBw3o5fAv80gdj1O";
+const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
 
-// Other options:
+// Public RPCs:
 // https://base-sepolia.blockpi.network/v1/rpc/public
 // "https://base-sepolia-rpc.publicnode.com";
 // https://sepolia.base.org

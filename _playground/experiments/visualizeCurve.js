@@ -11,6 +11,11 @@ const {
   generateHTMLPlot,
 } = require("./utils.js");
 
+// Define paths globally to make them accessible in both main and the conditional block
+const jsonPath = "_playground/experiments/json/";
+const imagePath = "_playground/experiments/images/";
+const htmlPath = "_playground/experiments/html/";
+
 const main = async (curveParam, numberOfDepositsParam) => {
   try {
     const curve = curveParam || process.argv[2] || "linear";
@@ -24,10 +29,6 @@ const main = async (curveParam, numberOfDepositsParam) => {
         )}`
       );
     }
-
-    const jsonPath = "_playground/experiments/json/";
-    const imagePath = "_playground/experiments/images/";
-    const htmlPath = "_playground/experiments/html/";
 
     const shares = [];
     const assets = [];
@@ -96,13 +97,10 @@ const main = async (curveParam, numberOfDepositsParam) => {
       JSON.stringify(data, null, 2)
     );
 
-    // Generate the plot and save it as a PNG and HTML file
-    await generatePlot(data, curve, timestamp, imagePath);
-    await generateHTMLPlot(data, curve, timestamp, htmlPath);
+    console.log("✅ JSON file generated successfully!");
 
-    console.log("✅ HTML & PNG files generated successfully!");
-
-    return data;
+    // Return necessary variables for plotting
+    return { data, curve, timestamp };
   } catch (error) {
     console.error(error);
     process.exit(1);
@@ -112,10 +110,15 @@ const main = async (curveParam, numberOfDepositsParam) => {
 // Check if the script is being run directly or required as a module
 if (require.main === module) {
   (async () => {
-    await main();
+    const { data, curve, timestamp } = await main();
+
+    // Generate plots only when run directly
+    await generatePlot(data, curve, timestamp, imagePath);
+    await generateHTMLPlot(data, curve, timestamp, htmlPath);
+
+    console.log("✅ HTML & PNG files generated successfully!");
     process.exit(0);
   })();
 } else {
   module.exports = main;
 }
-

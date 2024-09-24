@@ -12,7 +12,7 @@ const main = async () => {
 
     for (const curve of curves) {
       try {
-        const data = await visualizeCurve(curve, numberOfDeposits);
+        const { data } = await visualizeCurve(curve, numberOfDeposits);
         allData.push({ curve, data });
         console.log(
           `✅ Visualization for the ${curve} curve completed successfully!\n`
