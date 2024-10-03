@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Configurable Curve Visualization</title>
+  <!-- Include Plotly.js via CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<div id="plot" style="width:100%;max-width:700px;height:500px;"></div>
+
+<script>
+  // Data arrays
+  const assets = [0,0.000030000001,0.097530000001,0.195030000001,0.292530000001,0.390030000001,0.487530000001,0.585030000001,0.682530000001,0.780030000001,0.877530000001,0.975030000001,1.072530000001,1.170030000001,1.267530000001,1.365030000001,1.462530000001,1.560030000001,1.657530000001,1.755030000001,1.852530000001,1.950030000001,2.047530000001,2.145030000001,2.242530000001,2.340030000001,2.437530000001,2.535030000001,2.632530000001,2.730030000001,2.827530000001,2.925030000001];
+  const shares = [0,0.000030000001,0.092655000001,0.1806501745627208,0.2664458081513288,0.3508116611576272,0.4341230221161224,0.5166013207304095,0.5983923354349073,0.6795991542847412,0.7602984500368833,0.8405494316951584,0.9203991707910674,93.54539064559454,186.16952418951902,278.7927998264037,371.41521758008656,464.03677747440446,556.6574795331934,649.2773237802882,741.8963102395222,834.5144389347282,927.1317098897376,1019.7481231283807,1112.3636786744867,1204.9783765518837,1297.5922167843987,1390.2051993958578,1482.8173244100858,1575.428591850906,1668.0390017421414,1760.6485541076136];
+
+  // Define the trace
+  const trace = {
+    x: assets,
+    y: shares,
+    mode: 'lines+markers',
+    type: 'scatter',
+    name: 'Configurable Curve'
+  };
+
+  // Calculate max values for axis scaling
+  const maxAssets = Math.max.apply(null, assets) * 1.05; // 5% padding
+  const maxShares = Math.max.apply(null, shares) * 1.05; // 5% padding
+
+  // Define the layout with axis ranges
+  const layout = {
+    title: 'Configurable Curve Visualization',
+    xaxis: {
+      title: 'Assets',
+      range: [0, maxAssets]
+    },
+    yaxis: {
+      title: 'Shares',
+      range: [0, maxShares]
+    }
+  };
+
+  // Create the plot
+  Plotly.newPlot('plot', [trace], layout);
+</script>
+
+</body>
+</html>
+  

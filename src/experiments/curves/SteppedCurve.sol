@@ -15,7 +15,7 @@ contract SteppedCurve is EthMultiVaultExperimental {
     /// @notice Initializes the SteppedCurve with default stepWidth and stepHeight.
     constructor() {
         stepWidth = 3.3e14; // Set based on your test requirements
-        stepHeight = 1e6;    // Set based on your test requirements
+        stepHeight = 1e6; // Set based on your test requirements
     }
 
     /// @notice Sets the step width for the bonding curve.

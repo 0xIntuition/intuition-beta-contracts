@@ -7,6 +7,7 @@ const QuickChart = require("quickchart-js");
 dotenv.config();
 
 const allowedCurves = [
+  "configurable",
   "linear",
   // "catmullRom",
   "cubic",
@@ -47,6 +48,7 @@ const normalizeCurveName = (curve) => {
 };
 
 const curveContractAddresses = {
+  configurable: "0xab740Ab5f7890f918f99995030295F639198E619",
   linear: "0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665",
   // catmullRom: "",
   cubic: "0xcc17634445F2aB1Ba3533f93eb0B19C8C3b7f99d",
@@ -100,6 +102,12 @@ const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
 
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+const configurableCurveContract = new ethers.Contract(
+  curveContractAddresses.configurable,
+  ethMultiVaultAbi,
+  wallet
+);
 
 const linearCurveContract = new ethers.Contract(
   curveContractAddresses.linear,
@@ -180,6 +188,7 @@ const twoStepLinearCurveContract = new ethers.Contract(
 );
 
 const curveContracts = {
+  configurable: configurableCurveContract,
   linear: linearCurveContract,
   // catmullRom: catmullRomCurveContract,
   cubic: cubicCurveContract,

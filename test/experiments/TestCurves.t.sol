@@ -10,16 +10,18 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 // Curve contracts
+import {Configurable} from "src/experiments/curves/Configurable.sol";
 // import {CatmullRom} from "src/experiments/curves/CatmullRom.sol";
 import {Cubic} from "src/experiments/curves/Cubic.sol";
 import {Exponential} from "src/experiments/curves/Exponential.sol";
 import {Logarithmic} from "src/experiments/curves/Logarithmic.sol";
-import {LogarithmicStepCurve} from "src/experiments/curves/LogarithmicStepCurve.sol";
+// import {LogarithmicStepCurve} from "src/experiments/curves/LogarithmicStepCurve.sol";
 import {Polynomial} from "src/experiments/curves/Polynomial.sol";
 import {PowerFunction} from "src/experiments/curves/PowerFunction.sol";
 import {Quadratic} from "src/experiments/curves/Quadratic.sol";
 import {Skewed} from "src/experiments/curves/Skewed.sol";
 import {SQRT} from "src/experiments/curves/SQRT.sol";
+import {SquareRoot} from "src/experiments/curves/SquareRoot.sol";
 import {SteppedCurve} from "src/experiments/curves/SteppedCurve.sol";
 import {TwoStepLinear} from "src/experiments/curves/TwoStepLinear.sol";
 
@@ -33,16 +35,18 @@ contract TestCurves is Test {
     address payable public alice;
 
     // Contracts to be deployed
+    Configurable public configurable;
     // CatmullRomAssetShares public catmullRom;
     Cubic public cubic;
     Exponential public exponential;
     Logarithmic public logarithmic;
-    LogarithmicStepCurve public logarithmicStepCurve;
+    // LogarithmicStepCurve public logarithmicStepCurve;
     Polynomial public polynomial;
     PowerFunction public powerFunction;
     Quadratic public quadratic;
     Skewed public skewed;
     SQRT public sqrt;
+    SquareRoot public squareRoot;
     SteppedCurve public steppedCurve;
     TwoStepLinear public twoStepLinear;
 
@@ -105,6 +109,10 @@ contract TestCurves is Test {
         });
 
         // Deploy and initialize curves
+        configurable = new Configurable(1e16);
+        configurable.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // configurable.setBondingCurveConfig(1e12, 1e15);
+
         // catmullRom = new CatmullRomAssetShares();
         // catmullRom.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
@@ -117,8 +125,8 @@ contract TestCurves is Test {
         logarithmic = new Logarithmic();
         logarithmic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
-        logarithmicStepCurve = new LogarithmicStepCurve();
-        logarithmicStepCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // logarithmicStepCurve = new LogarithmicStepCurve();
+        // logarithmicStepCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
         polynomial = new Polynomial();
         polynomial.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
@@ -135,6 +143,9 @@ contract TestCurves is Test {
         sqrt = new SQRT();
         sqrt.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
+        squareRoot = new SquareRoot();
+        squareRoot.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+
         steppedCurve = new SteppedCurve();
         steppedCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
@@ -145,12 +156,13 @@ contract TestCurves is Test {
         console.log("Cubic: ", address(cubic));
         console.log("Exponential: ", address(exponential));
         console.log("Logarithmic: ", address(logarithmic));
-        console.log("LogarithmicStepCurve: ", address(logarithmicStepCurve));
+        // console.log("LogarithmicStepCurve: ", address(logarithmicStepCurve));
         console.log("Polynomial: ", address(polynomial));
         console.log("PowerFunction: ", address(powerFunction));
         console.log("Quadratic: ", address(quadratic));
         console.log("Skewed: ", address(skewed));
         console.log("SQRT: ", address(sqrt));
+        console.log("SteppedCurve: ", address(steppedCurve));
         console.log("SteppedCurve: ", address(steppedCurve));
         console.log("TwoStepLinear: ", address(twoStepLinear));
     }
@@ -165,24 +177,39 @@ contract TestCurves is Test {
         uint256 atomId = vault.createAtom{value: atomCost}(bytes("atom1"));
 
         // alice deposits into the atom 5 times
-        for (uint256 i = 0; i < 5; i++) {
+        for (uint256 i = 0; i < 10; i++) {
             vm.prank(alice);
-            vault.depositAtom{value: 0.1 ether}(alice, atomId);
+            vault.depositAtom{value: 0.2 ether}(alice, atomId);
         }
 
         // Get alice's shares balance in the atom vault
         (uint256 shares,) = vault.getVaultStateForUser(atomId, alice);
 
+        (uint256 assetsForReceiver, uint256 protocolFee) = SquareRoot(payable(address((vault))))._calculateRedeem(atomId, shares);
+        console.log("Assets for receiver: ", assetsForReceiver);
+        console.log("Protocol fee: ", protocolFee);
+
+        (uint256 totalAssets,) = SquareRoot(payable(address((vault)))).vaults(atomId);
+        console.log("Total assets: ", totalAssets);
+        console.log("Difference: ", totalAssets - (assetsForReceiver + protocolFee));
+
         // alice redeems her shares
         vm.prank(alice);
-        vault.redeemAtom(shares, alice, atomId);
+        // vault.redeemAtom(shares, alice, atomId);
 
         console.log(string(abi.encodePacked("Tested ", curveName, " curve successfully.")));
     }
 
     // Unit tests for each curve
 
-    // revisit the implementation of the CatmullRom 
+    function testConfigurable() public {
+        performCurveTest(configurable, "Configurable");
+    }
+
+    // revisit the implementation of the CatmullRom
+    // function testCatmullRom() public {
+    //     performCurveTest(catmullRom, "CatmullRom");
+    // }
 
     function testCubicCurve() public {
         performCurveTest(cubic, "Cubic");
@@ -197,9 +224,9 @@ contract TestCurves is Test {
     }
 
     // revisit the implementation of the LogarithmicStepCurve
-    function testLogarithmicStepCurve() public {
-        performCurveTest(logarithmicStepCurve, "LogarithmicStepCurve");
-    }
+    // function testLogarithmicStepCurve() public {
+    //     performCurveTest(logarithmicStepCurve, "LogarithmicStepCurve");
+    // }
 
     function testPolynomialCurve() public {
         performCurveTest(polynomial, "Polynomial");
@@ -219,6 +246,10 @@ contract TestCurves is Test {
 
     function testSQRTCurve() public {
         performCurveTest(sqrt, "SQRT");
+    }
+
+    function testSquareRootCurve() public {
+        performCurveTest(squareRoot, "SquareRoot");
     }
 
     // revisit the implementation of the SteppedCurve

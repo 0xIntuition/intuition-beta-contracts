@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Configurable Curve Visualization</title>
+  <!-- Include Plotly.js via CDN -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<div id="plot" style="width:100%;max-width:700px;height:500px;"></div>
+
+<script>
+  // Data arrays
+  const assets = [0,0.000030000001,0.097530000001,0.195030000001,0.292530000001,0.390030000001,0.487530000001,0.585030000001,0.682530000001,0.780030000001,0.877530000001,0.975030000001];
+  const shares = [0,0.000030000001,0.092655000001,0.1806501745627208,0.2664458081513288,0.3508116611576272,0.4341230221161224,0.5166013207304095,0.5983923354349073,0.6795991542847412,0.7602984500368833,0.8405494316951584];
+
+  // Define the trace
+  const trace = {
+    x: assets,
+    y: shares,
+    mode: 'lines+markers',
+    type: 'scatter',
+    name: 'Configurable Curve'
+  };
+
+  // Calculate max values for axis scaling
+  const maxAssets = Math.max.apply(null, assets) * 1.05; // 5% padding
+  const maxShares = Math.max.apply(null, shares) * 1.05; // 5% padding
+
+  // Define the layout with axis ranges
+  const layout = {
+    title: 'Configurable Curve Visualization',
+    xaxis: {
+      title: 'Assets',
+      range: [0, maxAssets]
+    },
+    yaxis: {
+      title: 'Shares',
+      range: [0, maxShares]
+    }
+  };
+
+  // Create the plot
+  Plotly.newPlot('plot', [trace], layout);
+</script>
+
+</body>
+</html>
+  

@@ -6,6 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
+import {Configurable} from "src/experiments/curves/Configurable.sol";
 // import {CatmullRom} from "src/experiments/curves/CatmullRom.sol";
 import {Cubic} from "src/experiments/curves/Cubic.sol";
 import {Exponential} from "src/experiments/curves/Exponential.sol";
@@ -16,6 +17,7 @@ import {PowerFunction} from "src/experiments/curves/PowerFunction.sol";
 import {Quadratic} from "src/experiments/curves/Quadratic.sol";
 import {Skewed} from "src/experiments/curves/Skewed.sol";
 import {SQRT} from "src/experiments/curves/SQRT.sol";
+import {SquareRoot} from "src/experiments/curves/SquareRoot.sol";
 import {SteppedCurve} from "src/experiments/curves/SteppedCurve.sol";
 import {TwoStepLinear} from "src/experiments/curves/TwoStepLinear.sol";
 
@@ -31,6 +33,7 @@ contract DeployExperimental is Script {
     address entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
 
     // Contracts to be deployed
+    Configurable public configurable;
     // CatmullRomAssetShares public catmullRom;
     Cubic public cubic;
     Exponential public exponential;
@@ -41,6 +44,7 @@ contract DeployExperimental is Script {
     Quadratic public quadratic;
     Skewed public skewed;
     SQRT public sqrt;
+    SquareRoot public squareRoot;
     SteppedCurve public steppedCurve;
     TwoStepLinear public twoStepLinear;
 
@@ -83,6 +87,14 @@ contract DeployExperimental is Script {
             protocolFee: 250 // Protocol fee for vault 0
         });
 
+        // Deploy Configurable curve
+        // configurable = new Configurable(1e18);
+        // console.logString("deployed Configurable curve.");
+
+        // // Initialize Configurable curve
+        // configurable.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Configurable curve.");
+
         // Deploy CatmullRom curve
         // catmullRom = new CatmullRom();
         // console.logString("deployed CatmullRom curve.");
@@ -92,28 +104,28 @@ contract DeployExperimental is Script {
         // console.logString("initialized CatmullRom curve.");
 
         // Deploy Cubic curve
-        cubic = new Cubic();
-        console.logString("deployed Cubic curve.");
+        // cubic = new Cubic();
+        // console.logString("deployed Cubic curve.");
 
-        // Initialize Cubic curve
-        cubic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Cubic curve.");
+        // // Initialize Cubic curve
+        // cubic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Cubic curve.");
 
-        // Deploy Exponential curve
-        exponential = new Exponential();
-        console.logString("deployed Exponential curve.");
+        // // Deploy Exponential curve
+        // exponential = new Exponential();
+        // console.logString("deployed Exponential curve.");
 
-        // Initialize Exponential curve
-        exponential.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Exponential curve.");
+        // // Initialize Exponential curve
+        // exponential.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Exponential curve.");
 
-        // Deploy Logarithmic curve
-        logarithmic = new Logarithmic();
-        console.logString("deployed Logarithmic curve.");
+        // // Deploy Logarithmic curve
+        // logarithmic = new Logarithmic();
+        // console.logString("deployed Logarithmic curve.");
 
-        // Initialize Logarithmic curve
-        logarithmic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Logarithmic curve.");
+        // // Initialize Logarithmic curve
+        // logarithmic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Logarithmic curve.");
 
         // Deploy LogarithmicStepCurve curve
         // logarithmicStepCurve = new LogarithmicStepCurve();
@@ -124,62 +136,71 @@ contract DeployExperimental is Script {
         // console.logString("initialized LogarithmicStepCurve curve.");
 
         // Deploy Polynomial curve
-        polynomial = new Polynomial();
-        console.logString("deployed Polynomial curve.");
+        // polynomial = new Polynomial();
+        // console.logString("deployed Polynomial curve.");
 
-        // Initialize Polynomial curve
-        polynomial.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Polynomial curve.");
+        // // Initialize Polynomial curve
+        // polynomial.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Polynomial curve.");
 
-        // Deploy PowerFunction curve
-        powerFunction = new PowerFunction();
-        console.logString("deployed PowerFunction curve.");
+        // // Deploy PowerFunction curve
+        // powerFunction = new PowerFunction();
+        // console.logString("deployed PowerFunction curve.");
 
-        // Initialize PowerFunction curve
-        powerFunction.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized PowerFunction curve.");
+        // // Initialize PowerFunction curve
+        // powerFunction.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized PowerFunction curve.");
 
-        // Deploy Quadratic curve
-        quadratic = new Quadratic();
-        console.logString("deployed Quadratic curve.");
+        // // Deploy Quadratic curve
+        // quadratic = new Quadratic();
+        // console.logString("deployed Quadratic curve.");
 
-        // Initialize Quadratic curve
-        quadratic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Quadratic curve.");
+        // // Initialize Quadratic curve
+        // quadratic.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Quadratic curve.");
 
-        // Deploy Skewed curve
-        skewed = new Skewed();
-        console.logString("deployed Skewed curve.");
+        // // Deploy Skewed curve
+        // skewed = new Skewed();
+        // console.logString("deployed Skewed curve.");
 
-        // Initialize Skewed curve
-        skewed.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized Skewed curve.");
+        // // Initialize Skewed curve
+        // skewed.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized Skewed curve.");
 
-        // Deploy SQRT curve
-        sqrt = new SQRT();
-        console.logString("deployed SQRT curve.");
+        // // Deploy SQRT curve
+        // sqrt = new SQRT();
+        // console.logString("deployed SQRT curve.");
 
-        // Initialize SQRT curve
-        sqrt.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized SQRT curve.");
+        // // Initialize SQRT curve
+        // sqrt.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized SQRT curve.");
 
-        // Deploy SteppedCurve curve
-        steppedCurve = new SteppedCurve();
-        console.logString("deployed SteppedCurve curve.");
+        // Deploy SquareRoot curve
+        squareRoot = new SquareRoot();
+        console.logString("deployed SquareRoot curve.");
 
-        // Initialize SteppedCurve curve
-        steppedCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized SteppedCurve curve.");
+        // Initialize SquareRoot curve
+        squareRoot.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        console.logString("initialized SquareRoot curve.");
 
-        // Deploy TwoStepLinear curve
-        twoStepLinear = new TwoStepLinear();
-        console.logString("deployed TwoStepLinear curve.");
+        // // Deploy SteppedCurve curve
+        // steppedCurve = new SteppedCurve();
+        // console.logString("deployed SteppedCurve curve.");
 
-        // Initialize TwoStepLinear curve
-        twoStepLinear.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
-        console.logString("initialized TwoStepLinear curve.");
+        // // Initialize SteppedCurve curve
+        // steppedCurve.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized SteppedCurve curve.");
+
+        // // Deploy TwoStepLinear curve
+        // twoStepLinear = new TwoStepLinear();
+        // console.logString("deployed TwoStepLinear curve.");
+
+        // // Initialize TwoStepLinear curve
+        // twoStepLinear.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        // console.logString("initialized TwoStepLinear curve.");
 
         console.logString("All curves deployed and initialized.");
+        console.log("Configurable: ", address(configurable));
         // console.log("CatmullRom: ", address(catmullRom));
         console.log("Cubic: ", address(cubic));
         console.log("Exponential: ", address(exponential));
@@ -190,6 +211,7 @@ contract DeployExperimental is Script {
         console.log("Quadratic: ", address(quadratic));
         console.log("Skewed: ", address(skewed));
         console.log("SQRT: ", address(sqrt));
+        console.log("SquareRoot: ", address(squareRoot));
         console.log("SteppedCurve: ", address(steppedCurve));
         console.log("TwoStepLinear: ", address(twoStepLinear));
 

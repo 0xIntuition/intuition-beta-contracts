@@ -1103,6 +1103,7 @@ contract EthMultiVaultExperimental is IEthMultiVault, Initializable, ReentrancyG
     /// @return protocolFee the amount of protocol fees deducted
     function _redeem(uint256 id, address sender, address receiver, uint256 shares)
         internal
+        virtual
         returns (uint256, uint256)
     {
         if (shares == 0) {
