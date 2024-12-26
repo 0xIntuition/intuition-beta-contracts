@@ -141,6 +141,18 @@ interface IEthMultiVault {
         bool isAtomWallet
     );
 
+    event DepositedCurve(
+        address indexed sender,
+        address indexed receiver,
+        uint256 receiverTotalSharesInVault,
+        uint256 senderAssetsAfterTotalFees,
+        uint256 sharesForReceiver,
+        uint256 entryFee,
+        uint256 vaultId,
+        bool isTriple,
+        bool isAtomWallet
+    );
+
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
     ///
     /// @param sender initializer of the withdrawal (owner of the shares)
@@ -151,6 +163,16 @@ interface IEthMultiVault {
     /// @param exitFee total fee amount collected for exiting the vault
     /// @param vaultId vault id of the vault being redeemed from
     event Redeemed(
+        address indexed sender,
+        address indexed receiver,
+        uint256 senderTotalSharesInVault,
+        uint256 assetsForReceiver,
+        uint256 sharesRedeemedBySender,
+        uint256 exitFee,
+        uint256 vaultId
+    );
+
+    event RedeemedCurve(
         address indexed sender,
         address indexed receiver,
         uint256 senderTotalSharesInVault,
