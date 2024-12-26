@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
 abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     using FixedPointMathLib for uint256;
@@ -254,5 +255,72 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 protocolMultisigBalanceDeltaGot = address(getProtocolMultisig()).balance - protocolMultisigBalanceBefore;
 
         assertEq(protocolMultisigBalanceDeltaExpected, protocolMultisigBalanceDeltaGot);
+    }
+
+    function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
+        return ethMultiVault.convertToSharesCurve(assets, id, curveId);
+    }
+
+    function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
+        return ethMultiVault.convertToAssetsCurve(shares, id, curveId);
+    }
+
+    function vaultTotalAssetsCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
+        (uint256 totalAssets, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        return totalAssets;
+    }
+
+    function vaultTotalSharesCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
+        (uint256 totalAssets, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        return totalShares;
+    }
+
+    function getSharesInVaultCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256) {
+        // Since we can't directly access the balanceOf mapping, we'll need to use the convertToShares function
+        // This is a workaround until we have a proper getter function
+        return convertToSharesCurve(convertToAssetsCurve(1 ether, vaultId, curveId), vaultId, curveId);
+    }
+
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256 shares, uint256 assets) {
+        shares = getSharesInVaultCurve(vaultId, curveId, user);
+        assets = convertToAssetsCurve(shares, vaultId, curveId);
+    }
+
+    function checkDepositIntoVaultCurve(
+        uint256 amount,
+        uint256 id,
+        uint256 curveId,
+        uint256 totalAssetsBefore,
+        uint256 totalSharesBefore
+    ) public payable {
+        uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
+        uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
+
+        uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
+
+        uint256 entryFee;
+
+        if (totalSharesBefore == getMinShare()) {
+            entryFee = 0;
+        } else {
+            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
+        }
+
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
+
+        uint256 totalAssetsDeltaGot = vaultTotalAssetsCurve(id, curveId) - totalAssetsBefore;
+        uint256 totalSharesDeltaGot = vaultTotalSharesCurve(id, curveId) - totalSharesBefore;
+
+        assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
+
+        uint256 totalSharesDeltaExpected;
+        if (totalSharesBefore == 0) {
+            totalSharesDeltaExpected = userAssetsAfterTotalFees;
+        } else {
+            totalSharesDeltaExpected = userAssetsAfterTotalFees.mulDiv(totalSharesBefore, totalAssetsBefore);
+        }
+
+        // Assert the calculated shares delta is as expected based on the backwards calculation from `convertToShares`
+        assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 }
