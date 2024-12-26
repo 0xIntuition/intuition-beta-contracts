@@ -18,7 +18,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
-
+import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
 /**
  * @title  EthMultiVault
  * @author 0xIntuition
@@ -82,14 +82,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice Timelock mapping (operation hash -> timelock struct)
     mapping(bytes32 operationHash => Timelock timelock) public timelocks;
 
-    /// @notice Bonding Curve Vaults
-    mapping(uint256 vaultId => VaultState vaultState) public bondingCurveVaults;
+    /// @notice Bonding Curve Vaults (termId -> curveId -> vaultState)
+    mapping(uint256 vaultId => mapping(uint256 curveId => VaultState vaultState)) public bondingCurveVaults;
 
-    /// @notice Bonding Curve Implementation
-    address public bondingCurve;
+    /// @notice Bonding Curve Configurations
+    BondingCurveConfig public bondingCurveConfig;
 
     /// @dev Gap for upgrade safety
-    uint256[49] private __gap;
+    uint256[48] private __gap;
 
     /* =================================================== */
     /*                    MODIFIERS                        */
@@ -121,7 +121,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         AtomConfig memory _atomConfig,
         TripleConfig memory _tripleConfig,
         WalletConfig memory _walletConfig,
-        VaultFees memory _defaultVaultFees
+        VaultFees memory _defaultVaultFees,
+        BondingCurveConfig memory _bondingCurveConfig
     ) external initializer {
         __ReentrancyGuard_init();
         __Pausable_init();
@@ -130,14 +131,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         atomConfig = _atomConfig;
         tripleConfig = _tripleConfig;
         walletConfig = _walletConfig;
-
+        bondingCurveConfig = _bondingCurveConfig;
         vaultFees[0] = VaultFees({
             entryFee: _defaultVaultFees.entryFee,
             exitFee: _defaultVaultFees.exitFee,
             protocolFee: _defaultVaultFees.protocolFee
         });
-
-        bondingCurve = address(new ProgressiveCurve("Progressive Curve", 0.0025e18));
     }
 
     /* =================================================== */
@@ -839,16 +838,16 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     // Entirely separate logic from the normal depositAtom function
-    function depositAtomCurve(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256) {
+    function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId) external payable nonReentrant whenNotPaused returns (uint256) {
         if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
-        if (id == 0 || id > count) {
+        if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
 
-        if (isTripleId(id)) {
+        if (isTripleId(atomId)) {
             revert Errors.EthMultiVault_VaultNotAtom();
         }
 
@@ -856,11 +855,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_MinimumDeposit();
         }
 
-        uint256 protocolFee = protocolFeeAmount(msg.value, id);
+        uint256 protocolFee = protocolFeeAmount(msg.value, atomId);
         uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _depositCurve(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _depositCurve(receiver, atomId, curveId, userDepositAfterprotocolFee);
 
         _transferFeesToProtocolMultisig(protocolFee);
 
@@ -902,12 +901,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
-    function redeemAtomCurve(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
-        if (id == 0 || id > count) {
+    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId) external nonReentrant returns (uint256) {
+        if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
 
-        if (isTripleId(id)) {
+        if (isTripleId(atomId)) {
             revert Errors.EthMultiVault_VaultNotAtom();
         }
 
@@ -915,7 +914,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        (uint256 assets, uint256 protocolFee) = _redeemCurve(id, msg.sender, receiver, shares);
+        (uint256 assets, uint256 protocolFee) = _redeemCurve(atomId, curveId, msg.sender, receiver, shares);
 
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
@@ -984,7 +983,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    function depositTripleCurve(address receiver, uint256 id)
+    function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
         external
         payable
         nonReentrant
@@ -995,11 +994,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
-        if (!isTripleId(id)) {
+        if (!isTripleId(tripleId)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        if (_hasCounterStakeCurve(id, receiver)) {
+        if (_hasCounterStakeCurve(tripleId, curveId,receiver)) {
             revert Errors.EthMultiVault_HasCounterStake();
         }
 
@@ -1007,18 +1006,18 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_MinimumDeposit();
         }
 
-        uint256 protocolFee = protocolFeeAmount(msg.value, id);
+        uint256 protocolFee = protocolFeeAmount(msg.value, tripleId);
         uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _depositCurve(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterprotocolFee);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, tripleId);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
         if (atomDepositFraction > 0) {
-            _depositAtomFractionCurve(id, receiver, atomDepositFraction);
+            _depositAtomFractionCurve(tripleId, curveId, receiver, atomDepositFraction);
         }
 
         _transferFeesToProtocolMultisig(protocolFee);
@@ -1058,8 +1057,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
-    function redeemTripleCurve(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
-        if (!isTripleId(id)) {
+    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId) external nonReentrant returns (uint256) {
+        if (!isTripleId(tripleId)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
@@ -1067,7 +1066,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             withdraw shares from vault, returning the amount of
             assets to be transferred to the receiver
         */
-        (uint256 assets, uint256 protocolFee) = _redeemCurve(id, msg.sender, receiver, shares);
+        (uint256 assets, uint256 protocolFee) = _redeemCurve(tripleId, curveId, msg.sender, receiver, shares);
 
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
@@ -1121,10 +1120,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
     }
 
-    function _depositAtomFractionCurve(uint256 id, address receiver, uint256 amount) internal {
+    function _depositAtomFractionCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal {
         // load atom IDs
         uint256[3] memory atomsIds;
-        (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(id);
+        (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(tripleId);
 
         // floor div, so perAtom is slightly less than 1/3 of total input amount
         uint256 perAtom = amount / 3;
@@ -1132,7 +1131,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // distribute proportional shares to each atom
         for (uint256 i = 0; i < 3; i++) {
             // deposit assets into each atom vault and mint shares for the receiver
-            _depositCurve(receiver, atomsIds[i], perAtom);
+            _depositCurve(receiver, atomsIds[i], curveId,perAtom);
         }
     }
 
@@ -1237,39 +1236,35 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return sharesForReceiver;
     }
 
-    function _depositCurve(address receiver, uint256 id, uint256 value) internal returns (uint256) {
-        if (previewDepositCurve(value, id) == 0) {
+    function _depositCurve(address receiver, uint256 id, uint256 curveId, uint256 value) internal returns (uint256) {
+        if (previewDepositCurve(value, id, curveId) == 0) {
             revert Errors.EthMultiVault_DepositOrWithdrawZeroShares();
         }
 
-        (uint256 totalAssetsDelta, uint256 sharesForReceiver, uint256 userAssetsAfterTotalFees, uint256 entryFee) =
-            getDepositSharesAndFees(value, id);
+        (uint256 totalAssetsDelta, uint256 sharesForReceiver, /*uint256 userAssetsAfterTotalFees*/, /*uint256 entryFee*/) =
+            getDepositSharesAndFeesCurve(value, id, curveId);
 
         if (totalAssetsDelta == 0) {
             revert Errors.EthMultiVault_InsufficientDepositAmountToCoverFees();
         }
 
-        // set vault totals (assets and shares)
-        _setCurveVaultTotals(
-            id,
-            bondingCurveVaults[id].totalAssets + totalAssetsDelta,
-            bondingCurveVaults[id].totalShares + sharesForReceiver // totalSharesDelta
-        );
+        _increaseCurveVaultTotals(id, curveId, totalAssetsDelta, sharesForReceiver);
 
         // mint `sharesOwed` shares to sender factoring in fees
-        _mintCurve(receiver, id, sharesForReceiver);
+        _mintCurve(receiver, id, curveId, sharesForReceiver);
 
-        emit DepositedCurve(
-            msg.sender,
-            receiver,
-            bondingCurveVaults[id].balanceOf[receiver],
-            userAssetsAfterTotalFees,
-            sharesForReceiver,
-            entryFee,
-            id,
-            isTripleId(id),
-            false
-        );
+        // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
+        // emit DepositedCurve(
+        //     msg.sender,
+        //     receiver,
+        //     bondingCurveVaults[id][curveId].balanceOf[receiver],
+        //     userAssetsAfterTotalFees,
+        //     sharesForReceiver,
+        //     entryFee,
+        //     id,
+        //     isTripleId(id),
+        //     false
+        // );
 
         return sharesForReceiver;
     }
@@ -1318,7 +1313,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (assetsForReceiver, protocolFee);
     }
 
-    function _redeemCurve(uint256 id, address sender, address receiver, uint256 shares)
+    function _redeemCurve(uint256 id, uint256 curveId, address sender, address /*receiver*/, uint256 shares)
         internal
         returns (uint256, uint256)
     {
@@ -1326,28 +1321,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (maxRedeemCurve(sender, id) < shares) {
+        if (maxRedeemCurve(sender, id, curveId) < shares) {
             revert Errors.EthMultiVault_InsufficientSharesInVault();
         }
 
         // uint256 remainingShares = vaults[id].totalShares - shares;
-        if (bondingCurveVaults[id].totalShares - shares < generalConfig.minShare) {
-            revert Errors.EthMultiVault_InsufficientRemainingSharesInVault(bondingCurveVaults[id].totalShares - shares);
+        if (bondingCurveVaults[id][curveId].totalShares - shares < generalConfig.minShare) {
+            revert Errors.EthMultiVault_InsufficientRemainingSharesInVault(bondingCurveVaults[id][curveId].totalShares - shares);
         }
 
-        (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) = getRedeemAssetsAndFeesCurve(shares, id);
+        (, uint256 assetsForReceiver, uint256 protocolFee, /*uint256 exitFee*/) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
-        // set vault totals (assets and shares)
-        _setCurveVaultTotals(
-            id,
-            bondingCurveVaults[id].totalAssets - (assetsForReceiver + protocolFee), // totalAssetsDelta
-            bondingCurveVaults[id].totalShares - shares // totalSharesDelta
-        );
+        _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee, shares);
 
         // burn shares, then transfer assets to receiver
-        _burnCurve(sender, id, shares);
+        _burnCurve(sender, id, curveId, shares);
 
-        emit RedeemedCurve(sender, receiver, bondingCurveVaults[id].balanceOf[sender], assetsForReceiver, shares, exitFee, id);
+        // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
+        // emit RedeemedCurve(sender, receiver, bondingCurveVaults[id][curveId].balanceOf[sender], assetsForReceiver, shares, exitFee, id, curveId);
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1361,8 +1352,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         vaults[id].balanceOf[to] += amount;
     }
 
-    function _mintCurve(address to, uint256 id, uint256 amount) internal {
-        bondingCurveVaults[id].balanceOf[to] += amount;
+    function _mintCurve(address to, uint256 id, uint256 curveId, uint256 amount) internal {
+        bondingCurveVaults[id][curveId].balanceOf[to] += amount;
     }
 
     /// @dev burn `amount` vault shares of vault ID `id` from address `from`
@@ -1383,16 +1374,16 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
     }
 
-    function _burnCurve(address from, uint256 id, uint256 amount) internal {
+    function _burnCurve(address from, uint256 id, uint256 curveId, uint256 amount) internal {
         if (from == address(0)) revert Errors.EthMultiVault_BurnFromZeroAddress();
 
-        uint256 fromBalance = bondingCurveVaults[id].balanceOf[from];
+        uint256 fromBalance = bondingCurveVaults[id][curveId].balanceOf[from];
         if (fromBalance < amount) {
             revert Errors.EthMultiVault_BurnInsufficientBalance();
         }
 
         unchecked {
-            bondingCurveVaults[id].balanceOf[from] = fromBalance - amount;
+            bondingCurveVaults[id][curveId].balanceOf[from] = fromBalance - amount;
         }
     }
 
@@ -1406,9 +1397,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         vaults[id].totalShares = totalShares;
     }
 
-    function _setCurveVaultTotals(uint256 id, uint256 totalAssets, uint256 totalShares) internal {
-        bondingCurveVaults[id].totalAssets = totalAssets;
-        bondingCurveVaults[id].totalShares = totalShares;
+    // function _setCurveVaultTotals(uint256 id, uint256 curveId, uint256 totalAssets, uint256 totalShares) internal {
+    //     bondingCurveVaults[id][curveId].totalAssets = totalAssets;
+    //     bondingCurveVaults[id][curveId].totalShares = totalShares;
+    // }
+
+    function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+        bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
+        bondingCurveVaults[id][curveId].totalShares += sharesDelta;
+    }
+
+    function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+        bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
+        bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
     }
 
     /// @dev internal method for vault creation
@@ -1500,7 +1501,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (totalAssetsDelta, sharesForReceiver, userAssetsAfterTotalFees, entryFee);
     }
 
-    function getDepositSharesAndFeesCurve(uint256 assets, uint256 id)
+    function getDepositSharesAndFeesCurve(uint256 assets, uint256 id, uint256 curveId)
         public
         view
         returns (uint256, uint256, uint256, uint256)
@@ -1514,7 +1515,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         uint256 entryFee;
 
-        if (bondingCurveVaults[id].totalShares == generalConfig.minShare) {
+        if (bondingCurveVaults[id][curveId].totalShares == generalConfig.minShare) {
             entryFee = 0;
         } else {
             entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
@@ -1524,7 +1525,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
 
         // user receives amount of shares as calculated by `convertToShares`
-        uint256 sharesForReceiver = convertToSharesCurve(userAssetsAfterTotalFees, id);
+        uint256 sharesForReceiver = convertToSharesCurve(userAssetsAfterTotalFees, id, curveId);
 
         return (totalAssetsDelta, sharesForReceiver, userAssetsAfterTotalFees, entryFee);
     }
@@ -1574,14 +1575,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (totalUserAssets, assetsForReceiver, protocolFee, exitFee);
     }
 
-    function getRedeemAssetsAndFeesCurve(uint256 shares, uint256 id)
+    function getRedeemAssetsAndFeesCurve(uint256 shares, uint256 id, uint256 curveId)
         public
         view
         returns (uint256, uint256, uint256, uint256)
     {
-        uint256 remainingShares = bondingCurveVaults[id].totalShares - shares;
+        uint256 remainingShares = bondingCurveVaults[id][curveId].totalShares - shares;
 
-        uint256 assetsForReceiverBeforeFees = convertToAssetsCurve(shares, id);
+        uint256 assetsForReceiverBeforeFees = convertToAssetsCurve(shares, id, curveId);
         uint256 protocolFee;
         uint256 exitFee;
 
@@ -1685,15 +1686,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return price;
     }
 
-    function currentSharePriceCurve(uint256 id) external view returns (uint256) {
-        uint256 supply = bondingCurveVaults[id].totalShares;
-        // uint256 price = supply == 0 ? 0 : (bondingCurveVaults[id].totalAssets * generalConfig.decimalPrecision) / supply;
-        uint256 basePrice = supply == 0 ? 0 : IBaseCurve(bondingCurve).currentPrice(supply);
-        uint256 totalAssets = bondingCurveVaults[id].totalAssets;
+    function currentSharePriceCurve(uint256 id, uint256 curveId) external view returns (uint256) {
+        uint256 supply = bondingCurveVaults[id][curveId].totalShares;
+        uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
+        uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
         uint256 price = basePrice;
+
         // Pool Ratio Adjustment
         if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = IBaseCurve(bondingCurve).convertToAssets(supply, supply, totalAssets);
+            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
                 price = price * totalAssets / totalSharesInAssetSpace;
             }
@@ -1707,8 +1708,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return type(uint256).max;
     }
 
-    function maxDepositCurve() public view returns (uint256) {
-        return IBaseCurve(bondingCurve).maxAssets();
+    function maxDepositCurve(uint256 curveId) public view returns (uint256) {
+        return _registry().getCurveMaxAssets(curveId);
     }
 
     /// @notice returns max amount of shares that can be redeemed from the 'sender' balance through a redeem call
@@ -1722,8 +1723,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    function maxRedeemCurve(address sender, uint256 id) public view returns (uint256) {
-        uint256 shares = bondingCurveVaults[id].balanceOf[sender];
+    function maxRedeemCurve(address sender, uint256 id, uint256 curveId) public view returns (uint256) {
+        uint256 shares = bondingCurveVaults[id][curveId].balanceOf[sender];
         return shares;
     }
 
@@ -1739,15 +1740,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    function convertToSharesCurve(uint256 assets, uint256 id) public view returns (uint256) {
-        uint256 supply = bondingCurveVaults[id].totalShares;
+    function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
+        uint256 supply = bondingCurveVaults[id][curveId].totalShares;
+        uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
 
-        uint256 shares = IBaseCurve(bondingCurve).convertToShares(assets, bondingCurveVaults[id].totalAssets, bondingCurveVaults[id].totalShares);
-        uint256 totalAssets = bondingCurveVaults[id].totalAssets;
+        uint256 shares = _registry().previewDeposit(assets, totalAssets, supply, curveId);
 
         // Pool Ratio Adjustment
         if (totalAssets != 0 && supply != 0) {
-            uint256 totalAssetsInShareSpace = IBaseCurve(bondingCurve).convertToShares(totalAssets, 0, supply);
+            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, supply, curveId);
             if (totalAssetsInShareSpace != 0) {
                 shares = shares * supply / totalAssetsInShareSpace;
             }
@@ -1767,15 +1768,14 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
-    function convertToAssetsCurve(uint256 shares, uint256 id) public view returns (uint256) {
-        uint256 supply = bondingCurveVaults[id].totalShares;
-        // uint256 assets = supply == 0 ? shares : shares.mulDiv(bondingCurveVaults[id].totalAssets, supply);
-        uint256 assets = IBaseCurve(bondingCurve).convertToAssets(shares, bondingCurveVaults[id].totalShares, bondingCurveVaults[id].totalAssets);
-        uint256 totalAssets = bondingCurveVaults[id].totalAssets;
+    function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
+        uint256 supply = bondingCurveVaults[id][curveId].totalShares;
+        uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
+        uint256 assets = _registry().previewRedeem(shares, supply, totalAssets, curveId);
 
         // Pool Ratio Adjustment
         if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = IBaseCurve(bondingCurve).convertToAssets(supply, supply, totalAssets);
+            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
                 assets = assets * totalAssets / totalSharesInAssetSpace;
             }
@@ -1803,9 +1803,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     function previewDepositCurve(
         uint256 assets, // should always be msg.value
-        uint256 id
+        uint256 id,
+        uint256 curveId
     ) public view returns (uint256) {
-        (, uint256 sharesForReceiver,,) = getDepositSharesAndFeesCurve(assets, id);
+        (, uint256 sharesForReceiver,,) = getDepositSharesAndFeesCurve(assets, id, curveId);
         return sharesForReceiver;
     }
 
@@ -1821,8 +1822,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assetsForReceiver;
     }
 
-    function previewRedeemCurve(uint256 shares, uint256 id) public view returns (uint256) {
-        (, uint256 assetsForReceiver,,) = getRedeemAssetsAndFeesCurve(shares, id);
+    function previewRedeemCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
+        (, uint256 assetsForReceiver,,) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
         return assetsForReceiver;
     }
 
@@ -1903,9 +1904,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (shares, totalUserAssets);
     }
 
-    function getVaultStateForUserCurve(uint256 vaultId, address receiver) external view returns (uint256, uint256) {
-        uint256 shares = bondingCurveVaults[vaultId].balanceOf[receiver];
-        (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId);
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId,address receiver) external view returns (uint256, uint256) {
+        uint256 shares = bondingCurveVaults[vaultId][curveId].balanceOf[receiver];
+        (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId, curveId);
         return (shares, totalUserAssets);
     }
 
@@ -1940,12 +1941,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return vaults[type(uint256).max - id].balanceOf[receiver] > 0;
     }
 
-    function _hasCounterStakeCurve(uint256 id, address receiver) internal view returns (bool) {
+    function _hasCounterStakeCurve(uint256 id, uint256 curveId, address receiver) internal view returns (bool) {
         if (!isTripleId(id)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        return bondingCurveVaults[type(uint256).max - id].balanceOf[receiver] > 0;
+        return bondingCurveVaults[type(uint256).max - id][curveId].balanceOf[receiver] > 0;
     }
 
     /// @dev returns the deployment data for the AtomWallet contract
@@ -1982,5 +1983,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (timelock.readyTime > block.timestamp) {
             revert Errors.EthMultiVault_TimelockNotExpired();
         }
+    }
+
+    function _registry() internal view returns (IBondingCurveRegistry) {
+        return IBondingCurveRegistry(bondingCurveConfig.registry);
     }
 }

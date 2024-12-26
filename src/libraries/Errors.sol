@@ -71,4 +71,9 @@ library Errors {
     error Attestoor_NotAWhitelistedAttestor();
     error Attestoor_SharesCannotBeRedeeemed();
     error Attestoor_WrongArrayLengths();
+
+    ///////// BONDING CURVE REGISTRY ERRORS /////////////////////////////////////////////////////////////
+
+    error BondingCurveRegistry_OnlyOwner();
+    error BondingCurveRegistry_CurveAlreadyExists();
 }
