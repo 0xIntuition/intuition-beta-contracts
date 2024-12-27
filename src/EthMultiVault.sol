@@ -1241,6 +1241,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_DepositOrWithdrawZeroShares();
         }
 
+        if (value + curveVaults[id][curveId].totalAssets > _registry().getCurveMaxAssets(curveId)) {
+            revert Errors.EthMultiVault_DepositExceedsMaxAssets();
+        }
+
         (uint256 totalAssetsDelta, uint256 sharesForReceiver, /*uint256 userAssetsAfterTotalFees*/, /*uint256 entryFee*/) =
             getDepositSharesAndFeesCurve(value, id, curveId);
 

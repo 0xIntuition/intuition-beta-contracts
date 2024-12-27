@@ -18,6 +18,7 @@ library Errors {
     error EthMultiVault_CannotRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
+    error EthMultiVault_DepositExceedsMaxAssets();
     error EthMultiVault_HasCounterStake();
     error EthMultiVault_InsufficientBalance();
     error EthMultiVault_InsufficientDepositAmountToCoverFees();
