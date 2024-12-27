@@ -82,7 +82,7 @@ contract EthMultiVaultBase is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.0025e18));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether 
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
