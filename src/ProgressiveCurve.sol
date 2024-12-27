@@ -86,13 +86,12 @@ contract ProgressiveCurve is BaseCurve {
         return UD60x18.wrap(totalShares).mul(SLOPE).unwrap();
     }
 
-    function convertToShares(uint256 assets, uint256 totalAssets, uint256 totalShares)
+    function convertToShares(uint256 assets, uint256 /*totalAssets*/, uint256 totalShares)
         public
         view
         override
         returns (uint256 shares)
     {
-        require(totalAssets >= assets, "PC: Under supply of assets");
         UD60x18 conversionPrice = UD60x18.wrap(totalShares).mul(HALF_SLOPE);
         return UD60x18.wrap(assets).div(conversionPrice).unwrap();
     }

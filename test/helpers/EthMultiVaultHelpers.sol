@@ -257,33 +257,31 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         assertEq(protocolMultisigBalanceDeltaExpected, protocolMultisigBalanceDeltaGot);
     }
 
+    function vaultTotalAssetsCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
+        (uint256 totalAssets,) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        return totalAssets;
+    }
+
+    function vaultTotalSharesCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
+        (, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        return totalShares;
+    }
+
+    function getSharesInVaultCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256) {
+        (uint256 shares,) = ethMultiVault.getVaultStateForUserCurve(vaultId, curveId, user);
+        return shares;
+    }
+
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256 shares, uint256 assets) {
+        (shares, assets) = ethMultiVault.getVaultStateForUserCurve(vaultId, curveId, user);
+    }
+
     function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
         return ethMultiVault.convertToSharesCurve(assets, id, curveId);
     }
 
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
         return ethMultiVault.convertToAssetsCurve(shares, id, curveId);
-    }
-
-    function vaultTotalAssetsCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
-        (uint256 totalAssets, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
-        return totalAssets;
-    }
-
-    function vaultTotalSharesCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
-        (uint256 totalAssets, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
-        return totalShares;
-    }
-
-    function getSharesInVaultCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256) {
-        // Since we can't directly access the balanceOf mapping, we'll need to use the convertToShares function
-        // This is a workaround until we have a proper getter function
-        return convertToSharesCurve(convertToAssetsCurve(1 ether, vaultId, curveId), vaultId, curveId);
-    }
-
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256 shares, uint256 assets) {
-        shares = getSharesInVaultCurve(vaultId, curveId, user);
-        assets = convertToAssetsCurve(shares, vaultId, curveId);
     }
 
     function checkDepositIntoVaultCurve(
@@ -313,14 +311,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
-        uint256 totalSharesDeltaExpected;
-        if (totalSharesBefore == 0) {
-            totalSharesDeltaExpected = userAssetsAfterTotalFees;
-        } else {
-            totalSharesDeltaExpected = userAssetsAfterTotalFees.mulDiv(totalSharesBefore, totalAssetsBefore);
-        }
+        uint256 totalSharesDeltaExpected = ethMultiVault.previewDepositCurve(userAssetsAfterTotalFees, id, curveId);
 
-        // Assert the calculated shares delta is as expected based on the backwards calculation from `convertToShares`
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }
 }

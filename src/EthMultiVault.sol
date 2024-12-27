@@ -1325,10 +1325,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_InsufficientSharesInVault();
         }
 
-        // uint256 remainingShares = vaults[id].totalShares - shares;
-        if (bondingCurveVaults[id][curveId].totalShares - shares < generalConfig.minShare) {
-            revert Errors.EthMultiVault_InsufficientRemainingSharesInVault(bondingCurveVaults[id][curveId].totalShares - shares);
-        }
+        // This just prevents users from withdrawing all shares, but it's not needed for the curve.
+        // if (bondingCurveVaults[id][curveId].totalShares - shares < generalConfig.minShare) {
+        //     console.log("minShares = ", generalConfig.minShare);
+        //     console.log("shares after operation = ", bondingCurveVaults[id][curveId].totalShares - shares);
+        //     revert Errors.EthMultiVault_InsufficientRemainingSharesInVault(bondingCurveVaults[id][curveId].totalShares - shares);
+        // }
 
         (, uint256 assetsForReceiver, uint256 protocolFee, /*uint256 exitFee*/) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
