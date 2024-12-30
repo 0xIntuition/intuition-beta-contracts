@@ -31,6 +31,11 @@ interface IEthMultiVault {
         uint256 minDelay;
     }
 
+    struct BondingCurveConfig {
+        address registry;
+        uint256 defaultCurveId;
+    }
+
     /// @dev Atom configuration struct
     struct AtomConfig {
         /// @dev fee charged for purchasing vault shares for the atom wallet
@@ -141,6 +146,18 @@ interface IEthMultiVault {
         bool isAtomWallet
     );
 
+    event DepositedCurve(
+        address indexed sender,
+        address indexed receiver,
+        uint256 receiverTotalSharesInVault,
+        uint256 senderAssetsAfterTotalFees,
+        uint256 sharesForReceiver,
+        uint256 entryFee,
+        uint256 vaultId,
+        // bool isTriple,
+        bool isAtomWallet
+    );
+
     /// @notice Emitted upon the withdrawal of assets from the vault by redeeming shares
     ///
     /// @param sender initializer of the withdrawal (owner of the shares)
@@ -158,6 +175,17 @@ interface IEthMultiVault {
         uint256 sharesRedeemedBySender,
         uint256 exitFee,
         uint256 vaultId
+    );
+
+    event RedeemedCurve(
+        address indexed sender,
+        address indexed receiver,
+        uint256 senderTotalSharesInVault,
+        uint256 assetsForReceiver,
+        uint256 sharesRedeemedBySender,
+        // uint256 exitFee, <-- Omitted because of stack too deep
+        uint256 vaultId,
+        uint256 curveId
     );
 
     /// @notice emitted upon creation of an atom
@@ -316,7 +344,8 @@ interface IEthMultiVault {
         AtomConfig memory _atomConfig,
         TripleConfig memory _tripleConfig,
         WalletConfig memory _walletConfig,
-        VaultFees memory _defaultVaultFees
+        VaultFees memory _defaultVaultFees,
+        BondingCurveConfig memory _bondingCurveConfig
     ) external;
 
     /* =================================================== */

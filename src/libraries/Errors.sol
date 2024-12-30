@@ -18,6 +18,7 @@ library Errors {
     error EthMultiVault_CannotRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
+    error EthMultiVault_DepositExceedsMaxAssets();
     error EthMultiVault_HasCounterStake();
     error EthMultiVault_InsufficientBalance();
     error EthMultiVault_InsufficientDepositAmountToCoverFees();
@@ -71,4 +72,9 @@ library Errors {
     error Attestoor_NotAWhitelistedAttestor();
     error Attestoor_SharesCannotBeRedeeemed();
     error Attestoor_WrongArrayLengths();
+
+    ///////// BONDING CURVE REGISTRY ERRORS /////////////////////////////////////////////////////////////
+
+    error BondingCurveRegistry_OnlyOwner();
+    error BondingCurveRegistry_CurveAlreadyExists();
 }

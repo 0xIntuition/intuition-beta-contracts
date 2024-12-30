@@ -10,3 +10,4 @@ account-abstraction/=node_modules/@account-abstraction/
 hardhat/=node_modules/hardhat/
 @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
 openzeppelin-foundry-upgrades=lib/openzeppelin-foundry-upgrades/src/
+@prb/math/=lib/prb-math/src/

@@ -9,6 +9,9 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
+import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
+import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {LinearCurve} from "src/LinearCurve.sol";
 contract EthMultiVaultBase is Test {
     // msg.value - atomCreationProtocolFee - protocolFee
 
@@ -73,8 +76,22 @@ contract EthMultiVaultBase is Test {
         IEthMultiVault.VaultFees memory vaultFees =
             IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
 
+
+        address bondingCurveRegistry = address(new BondingCurveRegistry());
+        BondingCurveRegistry(bondingCurveRegistry).initialize(address(this)); // this?
+
+        address linearCurve = address(new LinearCurve("Linear Curve"));
+        BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether 
+        BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
+
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
+            registry: bondingCurveRegistry,
+            defaultCurveId: 1
+        });
+
         ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees, bondingCurveConfig);
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);
