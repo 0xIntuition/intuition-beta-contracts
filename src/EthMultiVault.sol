@@ -1241,11 +1241,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_DepositOrWithdrawZeroShares();
         }
 
-        if (value + curveVaults[id][curveId].totalAssets > _registry().getCurveMaxAssets(curveId)) {
+        if (value + bondingCurveVaults[id][curveId].totalAssets > _registry().getCurveMaxAssets(curveId)) {
             revert Errors.EthMultiVault_DepositExceedsMaxAssets();
         }
 
-        (uint256 totalAssetsDelta, uint256 sharesForReceiver, /*uint256 userAssetsAfterTotalFees*/, /*uint256 entryFee*/) =
+        (uint256 totalAssetsDelta, uint256 sharesForReceiver, uint256 userAssetsAfterTotalFees, uint256 entryFee) =
             getDepositSharesAndFeesCurve(value, id, curveId);
 
         if (totalAssetsDelta == 0) {
@@ -1257,18 +1257,18 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // mint `sharesOwed` shares to sender factoring in fees
         _mintCurve(receiver, id, curveId, sharesForReceiver);
 
-        // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
-        // emit DepositedCurve(
-        //     msg.sender,
-        //     receiver,
-        //     bondingCurveVaults[id][curveId].balanceOf[receiver],
-        //     userAssetsAfterTotalFees,
-        //     sharesForReceiver,
-        //     entryFee,
-        //     id,
-        //     isTripleId(id),
-        //     false
-        // );
+        // This will be revised after syncing with BE
+        emit DepositedCurve(
+            msg.sender,
+            receiver,
+            bondingCurveVaults[id][curveId].balanceOf[receiver],
+            userAssetsAfterTotalFees,
+            sharesForReceiver,
+            entryFee,
+            id,
+            // isTripleId(id), // <-- Omitted because of stack too deep
+            false
+        );
 
         return sharesForReceiver;
     }
@@ -1317,7 +1317,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (assetsForReceiver, protocolFee);
     }
 
-    function _redeemCurve(uint256 id, uint256 curveId, address sender, address /*receiver*/, uint256 shares)
+    function _redeemCurve(uint256 id, uint256 curveId, address sender, address receiver, uint256 shares)
         internal
         returns (uint256, uint256)
     {
@@ -1329,14 +1329,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_InsufficientSharesInVault();
         }
 
-        // This just prevents users from withdrawing all shares, but it's not needed for the curve.
-        // if (bondingCurveVaults[id][curveId].totalShares - shares < generalConfig.minShare) {
-        //     console.log("minShares = ", generalConfig.minShare);
-        //     console.log("shares after operation = ", bondingCurveVaults[id][curveId].totalShares - shares);
-        //     revert Errors.EthMultiVault_InsufficientRemainingSharesInVault(bondingCurveVaults[id][curveId].totalShares - shares);
-        // }
-
-        (, uint256 assetsForReceiver, uint256 protocolFee, /*uint256 exitFee*/) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
+        (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
         _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee, shares);
 
@@ -1344,7 +1337,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         _burnCurve(sender, id, curveId, shares);
 
         // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
-        // emit RedeemedCurve(sender, receiver, bondingCurveVaults[id][curveId].balanceOf[sender], assetsForReceiver, shares, exitFee, id, curveId);
+        emit RedeemedCurve(sender, receiver, bondingCurveVaults[id][curveId].balanceOf[sender], assetsForReceiver, shares, /*exitFee,*/ id, curveId);
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1402,11 +1395,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         vaults[id].totalAssets = totalAssets;
         vaults[id].totalShares = totalShares;
     }
-
-    // function _setCurveVaultTotals(uint256 id, uint256 curveId, uint256 totalAssets, uint256 totalShares) internal {
-    //     bondingCurveVaults[id][curveId].totalAssets = totalAssets;
-    //     bondingCurveVaults[id][curveId].totalShares = totalShares;
-    // }
 
     function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
