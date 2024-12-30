@@ -48,6 +48,7 @@ contract BondingCurveRegistry is Initializable {
     /// @param _admin Address who may add curves to the registry
     /// NOTE: This function is called only once (during contract deployment)
     function initialize(address _admin) external initializer {
+        require(_admin != address(0), "BondingCurveRegistry: requires owner");
         admin = _admin;
     }
 
