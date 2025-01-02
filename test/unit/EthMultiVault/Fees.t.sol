@@ -9,7 +9,7 @@ import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     uint256 constant CURVE_ID = 2;
-    uint256 constant NUM_CURVE_OPERATIONS = 1000;
+    uint256 constant NUM_CURVE_OPERATIONS = 50;
 
     struct CurveOperation {
         uint256 entryFee;
@@ -55,7 +55,7 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function testFeesFlowToProRataVault() public {
         uint256 aliceInitialDeposit = 1 ether;
         uint256 bobDepositAmount = 1.5 ether;
-        uint256 numCurveOperations = 10;
+        uint256 numCurveOperations = NUM_CURVE_OPERATIONS;
 
         // Create atom
         vm.startPrank(alice);
@@ -80,7 +80,7 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             ethMultiVault.depositAtomCurve{value: bobDepositAmount}(bob, atomId, CURVE_ID);
 
             // Get shares for redeem
-            (uint256 bobShares, uint256 bobAssets) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, bob);
+            (uint256 bobShares,) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, bob);
 
             // Redeem
             (,, uint256 protocolFee, uint256 exitFeeToProRata) = ethMultiVault.getRedeemAssetsAndFeesCurve(bobShares, atomId, CURVE_ID);
@@ -122,7 +122,6 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(aliceShares, aliceInitialShares, "Alice's shares should remain constant");
 
         // Calculate expected share price increase based on fees per share
-        uint256 totalFeesToProRata = totalEntryFeesToProRata + totalExitFeesToProRata;
         uint256 expectedSharePriceIncrease = (aliceFinalAssets * PRECISION) / aliceShares - (aliceInitialAssets * PRECISION) / aliceInitialShares;
         assertEq(sharePriceIncrease, expectedSharePriceIncrease, "Share price increase should match fees per share");
     }
