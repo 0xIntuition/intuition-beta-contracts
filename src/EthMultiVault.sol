@@ -1252,7 +1252,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_InsufficientDepositAmountToCoverFees();
         }
 
-        _increaseCurveVaultTotals(id, curveId, totalAssetsDelta, sharesForReceiver);
+        // Increment pro rata vault ledger instead of curve vault ledger by fees
+        if (entryFee > 0) {
+            _setVaultTotals(id, vaults[id].totalAssets + entryFee, vaults[id].totalShares);
+        }
+
+        // Increment curve vault ledger by amount of assets left over after fees
+        _increaseCurveVaultTotals(id, curveId, userAssetsAfterTotalFees, sharesForReceiver);
 
         // mint `sharesOwed` shares to sender factoring in fees
         _mintCurve(receiver, id, curveId, sharesForReceiver);
@@ -1331,7 +1337,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
-        _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee, shares);
+        // Increment pro rata vault ledger instead of curve vault ledger by fees
+        if (exitFee > 0) {
+            _setVaultTotals(id, vaults[id].totalAssets + exitFee, vaults[id].totalShares);
+        }
+
+        // Decrement curve vault ledger by amount of assets left over after fees
+        _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee + exitFee, shares);
 
         // burn shares, then transfer assets to receiver
         _burnCurve(sender, id, curveId, shares);
