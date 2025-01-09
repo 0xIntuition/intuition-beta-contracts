@@ -354,11 +354,9 @@ jobs:
                               
                               # Extract stack trace for this test
                               awk -v test="$test_pattern" '
-                                  /test.*\(gas:/ { p = 0 }
-                                  $0 ~ test ".*\\(gas: " { p = 1; print; next }
-                                  /^Traces:/ { if (p) print }
-                                  /^[[:space:]]/ { if (p) print }
-                                  /^[^[:space:]]/ && !/^Traces:/ { if (p) exit }
+                                  /^Traces:/ { p = 1 }
+                                  p == 1 { print }
+                                  /^$/ { p = 0 }
                               ' "artifacts/test-results/forge-test-results.txt" >> test-summary.md
                               
                               echo -e "\n\`\`\`\n\n</details>\n\n" >> test-summary.md
