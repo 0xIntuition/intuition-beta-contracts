@@ -12,19 +12,19 @@ on:
       - labeled
 
 concurrency:
-  group: ci-${{ github.ref }}-tests
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  FOUNDRY_PROFILE: "ci"
+  FOUNDRY_PROFILE: 'ci'
+  SEPOLIA_RPC_URL: 'https://sepolia.base.org' # TODO: Throw this in repo env once permissioned to do so
+  BASE_RPC_URL: 'https://mainnet.base.org' # TODO: Throw this in repo env once permissioned to do so
 
 jobs:
-  check:
-    strategy:
-      fail-fast: true
-
-    name: Foundry project
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
         with:
@@ -32,28 +32,546 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
 
-      - name: Install deps
-        run: |
-          npm i
-          forge install
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
 
-      #- name: Run Forge build
-      #  run: |
-      #    forge build --sizes
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run fmt
+        run: npm run fmt
 
       - name: Run fmt check
+        run: npm run fmt:check
+
+  test:
+    name: Foundry Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Cache Foundry dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.foundry/cache
+            ~/.foundry/rpc-cache
+            cache/
+            out/
+          key: foundry-${{ runner.os }}-${{ hashFiles('foundry.toml') }}-${{ hashFiles('**/foundry.lock') }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
         run: |
-          npm run fmt:check
+          npm ci
+          forge install
 
       - name: Run Forge tests
+        id: forge-test
         run: |
-          forge test -vvv
+          mkdir -p artifacts/forge-test-results
+          forge test -vvv 2>&1 | tee artifacts/forge-test-results/forge-test-results.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/forge-test-results/forge-test-results.txt
+
+  security:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          cache: 'pip'
 
       - name: Install Slither
         run: |
-          pip3 install slither-analyzer
+          python -m pip install --upgrade pip
+          pip install slither-analyzer
 
-      - name: Run Slither
+      - name: Run Slither analysis
+        id: slither
+        continue-on-error: true
         run: |
-          npm run slither
+          # Create a slither.config.json file with correct format
+          echo '{
+            "filter_paths": "lib/,node_modules/",
+            "exclude_informational": true,
+            "exclude_low": true,
+            "exclude_optimization": true
+          }' > slither.config.json
+
+          slither . --json slither-output.json
+
+      - name: Process Slither results
+        if: always()
+        run: |
+          if [ -f slither-output.json ]; then
+            echo "Analyzing Slither results..."
+            
+            # Format and display high severity issues from src/ files
+            echo "=== HIGH SEVERITY ISSUES ===" > slither-report.txt
+            jq -r '.results.detectors[] | 
+              select(.impact == "High") | 
+              select(any(.elements[].source_mapping.filename_short; startswith("src/"))) |
+              "- [\(.check)]: \(.description | gsub("\n\t"; " ") | gsub("\n"; " "))"' slither-output.json | sort -u >> slither-report.txt
+            
+            # Format and display medium severity issues from src/ files
+            echo -e "\n=== MEDIUM SEVERITY ISSUES ===" >> slither-report.txt
+            jq -r '.results.detectors[] | 
+              select(.impact == "Medium") | 
+              select(any(.elements[].source_mapping.filename_short; startswith("src/"))) |
+              "- [\(.check)]: \(.description | gsub("\n\t"; " ") | gsub("\n"; " "))"' slither-output.json | sort -u >> slither-report.txt
+            
+            # Count issues (unique)
+            HIGH_SEVERITY=$(jq -r '[.results.detectors[] | 
+              select(.impact == "High") | 
+              select(any(.elements[].source_mapping.filename_short; startswith("src/")))] | length' slither-output.json)
+            
+            MEDIUM_SEVERITY=$(jq -r '[.results.detectors[] | 
+              select(.impact == "Medium") | 
+              select(any(.elements[].source_mapping.filename_short; startswith("src/")))] | length' slither-output.json)
+            
+            # Display summary
+            echo -e "\n=== SUMMARY ==="
+            echo "High Severity Issues: $HIGH_SEVERITY"
+            echo "Medium Severity Issues: $MEDIUM_SEVERITY"
+            
+            # Output the report
+            cat slither-report.txt
+            
+            # Fail on high severity issues
+            if [ "$HIGH_SEVERITY" -gt 0 ]; then
+              echo "❌ Found $HIGH_SEVERITY high severity issues"
+              echo "Review the detailed report above"
+              exit 1
+            else
+              echo "✅ No high severity issues found"
+              if [ "$MEDIUM_SEVERITY" -gt 0 ]; then
+                echo "⚠️ Found $MEDIUM_SEVERITY medium severity issues to review"
+              fi
+            fi
+          else
+            echo "❌ Slither analysis failed to produce output"
+            exit 1
+          fi
+
+      - name: Upload Slither results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-results
+          path: |
+            slither-output.json
+            slither-report.txt
+
+  gas:
+    name: Gas Analysis
+    runs-on: ubuntu-latest
+    needs: test
+    if: success() && needs.test.result == 'success'
+    timeout-minutes: 30
+    env:
+      FOUNDRY_FUZZ_RUNS: 256
+      FOUNDRY_FUZZ_MAX_TEST_REJECTS: 65536
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Cache Foundry dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.foundry/cache
+            ~/.foundry/rpc-cache
+            cache/
+            out/
+          key: foundry-${{ runner.os }}-${{ hashFiles('foundry.toml') }}-${{ hashFiles('**/foundry.lock') }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          forge install
+
+      - name: Generate gas report
+        id: gas-report
+        continue-on-error: true
+        run: |
+          mkdir -p snapshots
+          # Run tests and capture gas reports for successful tests
+          forge test --gas-report > snapshots/current-gas-report.txt
+          # Generate snapshot (Forge automatically includes only successful tests)
+          forge snapshot --snap snapshots/current-gas.snap
+
+      - name: Compare gas snapshots
+        if: always()
+        run: |
+          if [ ! -f "snapshots/current-gas.snap" ]; then
+            echo "⚠️ No gas snapshot generated - skipping comparison"
+            exit 0
+          fi
+
+          if [ -f ".gas-snapshot" ]; then
+            echo "📊 Gas Comparison:"
+            forge snapshot --diff .gas-snapshot snapshots/current-gas.snap || (
+              echo "🔍 Gas changes detected!"
+              exit 0
+            )
+          else
+            echo "Creating first snapshot for future comparisons"
+            cp snapshots/current-gas.snap .gas-snapshot
+          fi
+
+      - name: Upload gas reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gas-reports
+          path: snapshots/
+          if-no-files-found: warn
+
+  summary:
+    name: Create Summary
+    if: always()
+    needs: [test, security, gas]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Test Summary
+        if: always()
+        run: |
+          echo "=== Debug Information ==="
+          echo "Listing current directory:"
+          ls -la
+          echo
+          echo "Listing artifacts directory:"
+          ls -la artifacts || echo "artifacts directory does not exist"
+          echo
+          echo "Listing test-results directory (if it exists):"
+          ls -la artifacts/test-results || echo "test-results directory does not exist"
+          echo
+          echo "Checking for forge test results:"
+          ls -la artifacts/test-results/forge-test-results.txt || echo "forge-test-results.txt does not exist"
+          echo
+          if [ -f "artifacts/test-results/forge-test-results.txt" ]; then
+              # Get total test counts from the final summary line
+              TOTAL_LINE=$(grep "^Ran .* test suites" "artifacts/test-results/forge-test-results.txt" | tail -n 1)
+              if [[ $TOTAL_LINE =~ ([0-9]+)[[:space:]]tests[[:space:]]passed,[[:space:]]([0-9]+)[[:space:]]failed,[[:space:]]([0-9]+)[[:space:]]skipped[[:space:]]\(([0-9]+)[[:space:]]total[[:space:]]tests\) ]]; then
+                  PASSED_TESTS="${BASH_REMATCH[1]}"
+                  mapfile -t FAILING_TESTS < <(sed -n '/^Failing tests:/,/^Encountered a total of/p' "artifacts/test-results/forge-test-results.txt" | grep '^\[FAIL:')
+                  FAILED_TESTS=${#FAILING_TESTS[@]}
+                  SKIPPED_TESTS="${BASH_REMATCH[3]}"
+                  TOTAL_TESTS=$((PASSED_TESTS + FAILED_TESTS + SKIPPED_TESTS))
+
+                  # Write main status with emoji
+                  if [ "$FAILED_TESTS" -gt 0 ]; then
+                      echo "❌ $FAILED_TESTS tests failed, $PASSED_TESTS passed, $SKIPPED_TESTS skipped (Total: $TOTAL_TESTS)" >> test-summary.md
+                  else
+                      echo "✅ All $PASSED_TESTS tests passed! ($SKIPPED_TESTS skipped, Total: $TOTAL_TESTS)" >> test-summary.md
+                  fi
+
+                  # If there are failing tests, show them first
+                  if [ "$FAILED_TESTS" -gt 0 ]; then
+                      echo -e "\n### Failing Tests in this PR Branch\n" >> test-summary.md
+
+                      # Process each failing test
+                      while IFS= read -r line; do
+                          if [[ $line =~ ^\[FAIL:[[:space:]]([^;]+)\;.*\][[:space:]]([^[:space:]]+) ]]; then
+                              # Get the full test name including parameters
+                              full_test=$(echo "$line" | sed -E 's/.*\][[:space:]](.*) \(runs:.*/\1/')
+                              # Get the test name without parameters for the awk pattern
+                              test_pattern=$(echo "$full_test" | sed -E 's/\(.*\)//')
+                              
+                              # Write test name header
+                              echo -e "\`$full_test\`\n" >> test-summary.md
+                              echo -e "<details><summary>Stack Trace</summary>\n\n" >> test-summary.md
+                              echo -e "\`\`\`\n" >> test-summary.md
+                              
+                              # Extract stack trace for this test
+                              awk -v test="$test_pattern" '
+                                  /test.*\(runs:/ { p = 0 }
+                                  $0 ~ test ".*\\(runs: " { p = 1; print; next }
+                                  /^Traces:/ { if (p) print }
+                                  /^[[:space:]]/ { if (p) print }
+                                  /^[^[:space:]]/ && !/^Traces:/ { if (p) exit }
+                              ' "artifacts/test-results/forge-test-results.txt" >> test-summary.md
+                              
+                              echo -e "\n\`\`\`\n\n</details>\n\n" >> test-summary.md
+                          fi
+                      done < <(sed -n '/^Failing tests:/,/^Encountered a total of/p' "artifacts/test-results/forge-test-results.txt" | grep '^\[FAIL:')
+                  fi
+
+                  # Add test suite details section
+                  echo -e "\n### Test Results for Merge" >> test-summary.md
+                  echo -e "\n| Test Suite | Status | Coverage | Time |" >> test-summary.md
+                  echo "|------------|--------|----------|------|" >> test-summary.md
+
+                  # Process each test suite
+                  current_suite=""
+                  while IFS= read -r line; do
+                      if [[ $line =~ Ran[[:space:]][0-9]+[[:space:]]tests[[:space:]]for[[:space:]]([^:]+) ]]; then
+                          current_suite="${BASH_REMATCH[1]}"
+                      elif [[ $line =~ Suite[[:space:]]result:[[:space:]](ok|FAILED)\.[[:space:]]([0-9]+)[[:space:]]passed\;[[:space:]]([0-9]+)[[:space:]]failed\;[[:space:]]([0-9]+)[[:space:]]skipped\;[[:space:]]finished[[:space:]]in[[:space:]]([0-9.]+)(m?s) ]]; then
+                          status="${BASH_REMATCH[1]}"
+                          passed="${BASH_REMATCH[2]}"
+                          failed="${BASH_REMATCH[3]}"
+                          skipped="${BASH_REMATCH[4]}"
+                          time="${BASH_REMATCH[5]}"
+                          time_unit="${BASH_REMATCH[6]}"
+
+                          if [ ! -z "$current_suite" ]; then
+                              status_emoji="✅"
+                              [ "$status" = "FAILED" ] && status_emoji="❌"
+                              [ "$skipped" -gt 0 ] && [ "$failed" -eq 0 ] && status_emoji="⚠️"
+
+                              total=$((passed + failed + skipped))
+                              coverage=0
+                              [ "$total" -gt 0 ] && coverage=$((passed * 100 / total))
+
+                              # Convert time to seconds if in milliseconds
+                              if [ "$time_unit" = "ms" ]; then
+                                  time=$(echo "scale=3; $time/1000" | bc)
+                              fi
+
+                              printf "| \`%s\` | %s | %d%% (%d/%d) | %.3fs |\n" \
+                                  "$current_suite" "$status_emoji" "$coverage" "$passed" "$total" "$time" >> test-summary.md
+                              current_suite=""
+                          fi
+                      fi
+                  done < "artifacts/test-results/forge-test-results.txt"
+              else
+                  echo "⚠️ Could not parse test results" >> test-summary.md
+              fi
+          else
+              echo "⚠️ No test results found" >> test-summary.md
+          fi
+
+      - name: Create Slither Summary
+        id: slither-summary
+        run: |
+          echo "### 🔒 Security Analysis" > slither-summary.md
+
+          if [ -f "artifacts/slither-results/slither-output.json" ]; then
+            # Count vulnerabilities by severity
+            HIGH_COUNT=$(jq -r '[.results.detectors[] | select(.impact == "High")] | length' "artifacts/slither-results/slither-output.json")
+            MEDIUM_COUNT=$(jq -r '[.results.detectors[] | select(.impact == "Medium")] | length' "artifacts/slither-results/slither-output.json")
+            
+            if [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
+              echo "⚠️ Found **$HIGH_COUNT High** and **$MEDIUM_COUNT Medium** severity issues" >> slither-summary.md
+              
+              # Process high severity issues
+              if [ "$HIGH_COUNT" -gt 0 ]; then
+                echo -e "\n#### High Severity Issues" >> slither-summary.md
+                
+                # Group findings by check type
+                jq -r '
+                  def clean_description:
+                    gsub("\n\t"; " ") | gsub("\n"; " ");
+                  
+                  def format_location:
+                    . as $loc | 
+                    if contains("#") then split("#")[0] 
+                    else . end;
+                  
+                  .results.detectors
+                  | map(select(.impact == "High"))
+                  | group_by(.check)[]
+                  | {
+                      check: .[0].check,
+                      description: (.[0].description | clean_description),
+                      files: ([.[].elements[].source_mapping.filename_short] | unique | sort),
+                      findings: map({
+                        file: .elements[0].source_mapping.filename_short,
+                        function: (.elements[0].name | format_location),
+                        line: .elements[0].source_mapping.lines[0]
+                      })
+                    }
+                  | "##### \(.check)\n**Impact**: \(.description)\n\n**Affected Files**:\n\(.files | map("- `" + . + "`") | join("\n"))\n\n<details>\n<summary>View Detailed Findings</summary>\n\n\(.findings | map("- `" + .file + ":" + (.line|tostring) + "` in `" + .function + "`") | join("\n"))\n</details>\n"
+                ' "artifacts/slither-results/slither-output.json" >> slither-summary.md
+              fi
+              
+              # Process medium severity issues
+              if [ "$MEDIUM_COUNT" -gt 0 ]; then
+                echo -e "\n#### Medium Severity Issues" >> slither-summary.md
+                echo "<details><summary>View Medium Severity Issues</summary>" >> slither-summary.md
+                
+                jq -r '
+                  def clean_description:
+                    gsub("\n\t"; " ") | gsub("\n"; " ");
+                  
+                  def format_location:
+                    . as $loc | 
+                    if contains("#") then split("#")[0] 
+                    else . end;
+                  
+                  .results.detectors
+                  | map(select(.impact == "Medium"))
+                  | group_by(.check)[]
+                  | {
+                      check: .[0].check,
+                      description: (.[0].description | clean_description),
+                      files: ([.[].elements[].source_mapping.filename_short] | unique | sort),
+                      findings: map({
+                        file: .elements[0].source_mapping.filename_short,
+                        function: (.elements[0].name | format_location),
+                        line: .elements[0].source_mapping.lines[0]
+                      })
+                    }
+                  | "##### \(.check)\n**Impact**: \(.description)\n\n**Affected Files**:\n\(.files | map("- `" + . + "`") | join("\n"))\n\n\(.findings | map("- `" + .file + ":" + (.line|tostring) + "` in `" + .function + "`") | join("\n"))\n"
+                ' "artifacts/slither-results/slither-output.json" >> slither-summary.md
+                
+                echo "</details>" >> slither-summary.md
+              fi
+              
+              # Add recommendations section
+              echo -e "\n#### Recommended Actions" >> slither-summary.md
+              echo "1. Review and fix all high severity issues before deployment" >> slither-summary.md
+              echo "2. Implement thorough testing for affected components" >> slither-summary.md
+              echo "3. Consider additional security measures:" >> slither-summary.md
+              echo "   - Access controls" >> slither-summary.md
+              echo "   - Input validation" >> slither-summary.md
+              echo "   - Invariant checks" >> slither-summary.md
+              
+            else
+              echo "✅ No high or medium severity issues found!" >> slither-summary.md
+            fi
+          else
+            echo "⚠️ No security analysis results found" >> slither-summary.md
+          fi
+
+      - name: Create Gas Summary
+        id: gas-summary
+        run: |
+          echo "### ⛽ Gas Analysis" > gas-summary.md
+
+          if [ -f "artifacts/gas-reports/current-gas.snap" ] && [ -f ".gas-snapshot" ]; then
+            # Compare snapshots and capture the diff
+            DIFF_OUTPUT=$(forge snapshot --diff .gas-snapshot "artifacts/gas-reports/current-gas.snap" 2>&1 || true)
+            
+            if echo "$DIFF_OUTPUT" | grep -q "Different"; then
+              echo "🔄 Gas changes detected" >> gas-summary.md
+              
+              # Extract and format the changes
+              echo -e "\n**Changes:**" >> gas-summary.md
+              echo "\`\`\`" >> gas-summary.md
+              echo "$DIFF_OUTPUT" | grep -A 1 "Different" >> gas-summary.md || true
+              echo "\`\`\`" >> gas-summary.md
+              
+              # Add full diff in collapsible section
+              echo -e "\n<details>" >> gas-summary.md
+              echo "<summary>📋 Full Gas Comparison</summary>" >> gas-summary.md
+              echo -e "\n\`\`\`" >> gas-summary.md
+              echo "$DIFF_OUTPUT" >> gas-summary.md
+              echo "\`\`\`" >> gas-summary.md
+              echo "</details>" >> gas-summary.md
+            else
+              echo "✅ No gas changes detected" >> gas-summary.md
+            fi
+          elif [ -f "artifacts/gas-reports/current-gas.snap" ]; then
+            echo "📊 First gas snapshot created" >> gas-summary.md
+          else
+            echo "⚠️ No gas snapshot generated" >> gas-summary.md
+          fi
+
+      - name: Combine Summaries
+        id: combine-summaries
+        run: |
+          {
+            echo "## Summary of Test Results if Merged To Main:"
+            echo
+            echo "- Full logs & artifacts are available in the [Actions tab](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo "- This comment will update automatically with new CI runs"
+            echo
+            cat test-summary.md
+            echo
+            cat slither-summary.md
+            echo
+            cat gas-summary.md
+            echo
+          } > combined-summary.md
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: CI Results Summary
+
+      - name: Create or Update Comment
+        uses: peter-evans/create-or-update-comment@v3
+        if: github.event_name == 'pull_request'
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: combined-summary.md
+          edit-mode: replace
+
+permissions:
+  pull-requests: write
+  contents: read
