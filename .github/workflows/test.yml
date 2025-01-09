@@ -341,9 +341,9 @@ jobs:
 
                       # Process each failing test
                       while IFS= read -r line; do
-                          if [[ $line =~ ^\[FAIL:[[:space:]]([^;]+)\;.*\][[:space:]]([^[:space:]]+) ]]; then
+                          if [[ $line =~ ^\[FAIL:[[:space:]]([^]]+)\][[:space:]]([^[:space:]]+) ]]; then
                               # Get the full test name including parameters
-                              full_test=$(echo "$line" | sed -E 's/.*\][[:space:]](.*) \(runs:.*/\1/')
+                              full_test=$(echo "$line" | sed -E 's/.*\][[:space:]](.*) \(gas:.*/\1/')
                               # Get the test name without parameters for the awk pattern
                               test_pattern=$(echo "$full_test" | sed -E 's/\(.*\)//')
                               
@@ -354,8 +354,8 @@ jobs:
                               
                               # Extract stack trace for this test
                               awk -v test="$test_pattern" '
-                                  /test.*\(runs:/ { p = 0 }
-                                  $0 ~ test ".*\\(runs: " { p = 1; print; next }
+                                  /test.*\(gas:/ { p = 0 }
+                                  $0 ~ test ".*\\(gas: " { p = 1; print; next }
                                   /^Traces:/ { if (p) print }
                                   /^[[:space:]]/ { if (p) print }
                                   /^[^[:space:]]/ && !/^Traces:/ { if (p) exit }
