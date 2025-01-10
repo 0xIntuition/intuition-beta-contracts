@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "fmt:check": "forge fmt --check",
+    "fmt": "forge fmt",
     "slither": "./test/tools/slither.sh"
   },
   "keywords": [],
