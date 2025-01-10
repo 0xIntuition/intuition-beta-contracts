@@ -1404,18 +1404,30 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param totalAssets new total assets for the vault
     /// @param totalShares new total shares for the vault
     function _setVaultTotals(uint256 id, uint256 totalAssets, uint256 totalShares) internal {
+        // Share price can only change when vault totals change
+        uint256 oldSharePrice = currentSharePrice(id);
         vaults[id].totalAssets = totalAssets;
         vaults[id].totalShares = totalShares;
+        uint256 newSharePrice = currentSharePrice(id);
+        emit SharePriceChanged(id, newSharePrice, oldSharePrice);
     }
 
     function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+        // Share price can only change when vault totals change
+        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
         bondingCurveVaults[id][curveId].totalShares += sharesDelta;
+        uint256 newSharePrice = currentSharePriceCurve(id, curveId);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
     }
 
     function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+        // Share price can only change when vault totals change
+        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
         bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
+        uint256 newSharePrice = currentSharePriceCurve(id, curveId);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
     }
 
     /// @dev internal method for vault creation
@@ -1685,14 +1697,20 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @notice returns the current share price for the given vault id
     /// @param id vault id to get corresponding share price for
-    /// @return price current share price for the given vault id
-    function currentSharePrice(uint256 id) external view returns (uint256) {
+    /// @return price current share price for the given vault id, scaled by generalConfig.decimalPrecision
+    function currentSharePrice(uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 price = supply == 0 ? 0 : (vaults[id].totalAssets * generalConfig.decimalPrecision) / supply;
+        // Changing this to match exactly how convertToShares is calculated
+        // This was not previously used internally in production code
+        uint256 price = supply == 0 ? 0 : vaults[id].totalAssets.mulDiv(generalConfig.decimalPrecision, supply);
         return price;
     }
 
-    function currentSharePriceCurve(uint256 id, uint256 curveId) external view returns (uint256) {
+    /// @notice returns the current share price for the given vault id and curve id
+    /// @param id vault id to get corresponding share price for
+    /// @param curveId curve id to get corresponding share price for
+    /// @return price current share price for the given vault id and curve id, scaled by generalConfig.decimalPrecision
+    function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
@@ -1702,7 +1720,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (totalAssets != 0 && supply != 0) {
             uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
-                price = price * totalAssets / totalSharesInAssetSpace;
+                price = price.mulDiv(totalAssets * generalConfig.decimalPrecision, totalSharesInAssetSpace);
             }
         }
         return price;

@@ -326,6 +326,21 @@ interface IEthMultiVault {
     /// @param atomWallet address of the atom wallet
     event AtomWalletDeployed(uint256 indexed vaultId, address indexed atomWallet);
 
+    /// @notice emitted upon changing the share price of an atom
+    ///
+    /// @param vaultId vault id of the atom
+    /// @param newSharePrice new share price of the atom
+    /// @param oldSharePrice old share price of the atom (not needed but staying in parallel with production code)
+    event SharePriceChanged(uint256 indexed vaultId, uint256 newSharePrice, uint256 oldSharePrice);
+
+    /// @notice emitted upon changing the share price of a curve
+    ///
+    /// @param vaultId vault id of the atom
+    /// @param curveId curve id of the curve
+    /// @param newSharePrice new share price of the curve
+    /// @param oldSharePrice old share price of the curve (not needed but staying in parallel with production code)
+    event SharePriceChangedCurve(uint256 indexed vaultId, uint256 indexed curveId, uint256 newSharePrice, uint256 oldSharePrice);
+
     /* =================================================== */
     /*                    INITIALIZER                      */
     /* =================================================== */
