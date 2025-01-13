@@ -42,6 +42,11 @@ library Errors {
     error EthMultiVault_VaultIsTriple(uint256 vaultId);
     error EthMultiVault_VaultNotAtom();
     error EthMultiVault_VaultNotTriple();
+    error EthMultiVault_AdminControlNotSet();
+    error EthMultiVault_BondingCurveNotSet();
+    error EthMultiVault_BondingCurveOnly();
+    error EthMultiVault_EthMultiVaultNotSet();
+    error EthMultiVault_OnlyAdmin();
 
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 

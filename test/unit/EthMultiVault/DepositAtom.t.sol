@@ -49,7 +49,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 
@@ -88,7 +88,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 
@@ -117,7 +117,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 
@@ -153,7 +153,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 

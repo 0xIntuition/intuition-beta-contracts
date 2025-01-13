@@ -32,7 +32,7 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     // Total Assets is not used yet, but it will be for adjustment to resolve the domains as the numerator converted to share space
-    function previewDeposit(uint256 assets, uint256 /*totalAssets*/, uint256 totalShares)
+    function previewDeposit(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
         public
         view
         override
@@ -47,7 +47,7 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     // Total assets is not used yet, but it will be for adjustment to resolve the domains as the denominator
-    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/)
+    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
         public
         view
         override
@@ -61,7 +61,7 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     // Total assets is not used yet, but it will be for adjustment to resolve the domains as the denominator
-    function previewMint(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/)
+    function previewMint(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
         public
         view
         override
@@ -71,7 +71,7 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     // Total assets is not used yet, but it will be for adjustment to resolve the domains as the denominator
-    function previewWithdraw(uint256 assets, uint256 /*totalAssets*/, uint256 totalShares)
+    function previewWithdraw(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
         public
         view
         override
@@ -86,7 +86,7 @@ contract ProgressiveCurve is BaseCurve {
         return UD60x18.wrap(totalShares).mul(SLOPE).unwrap();
     }
 
-    function convertToShares(uint256 assets, uint256 /*totalAssets*/, uint256 totalShares)
+    function convertToShares(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
         public
         view
         override
@@ -97,7 +97,7 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     // Total assets is not used yet, but it will be for adjustment to resolve the domains as the denominator
-    function convertToAssets(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/)
+    function convertToAssets(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
         public
         view
         override

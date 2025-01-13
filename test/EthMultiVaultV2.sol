@@ -2,6 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {EthMultiVault} from "src/EthMultiVault.sol";
+import {AdminControl} from "src/utils/AdminControl.sol";
 
 /**
  * @title  EthMultiVaultV2
@@ -18,33 +19,13 @@ contract EthMultiVaultV2 is EthMultiVault {
     /* =================================================== */
 
     /// @notice Initializes the EthMultiVaultV2 contract
-    /// @param _generalConfig General configuration struct
-    /// @param _atomConfig Atom configuration struct
-    /// @param _tripleConfig Triple configuration struct
-    /// @param _walletConfig Wallet configuration struct
-    /// @param _defaultVaultFees Default vault fees struct
     /// @dev This function is called only once (during contract deployment)
-    function initV2(
-        GeneralConfig memory _generalConfig,
-        AtomConfig memory _atomConfig,
-        TripleConfig memory _tripleConfig,
-        WalletConfig memory _walletConfig,
-        VaultFees memory _defaultVaultFees
-    ) external reinitializer(2) {
+    function initV2(address _adminControl) external reinitializer(2) {
         __ReentrancyGuard_init();
         __Pausable_init();
 
         VERSION = "V2";
 
-        generalConfig = _generalConfig;
-        atomConfig = _atomConfig;
-        tripleConfig = _tripleConfig;
-        walletConfig = _walletConfig;
-
-        vaultFees[0] = VaultFees({
-            entryFee: _defaultVaultFees.entryFee,
-            exitFee: _defaultVaultFees.exitFee,
-            protocolFee: _defaultVaultFees.protocolFee
-        });
+        adminControl = AdminControl(_adminControl);
     }
 }

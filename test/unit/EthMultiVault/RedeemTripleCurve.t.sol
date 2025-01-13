@@ -29,20 +29,20 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(subjectId, predicateId, objectId);
 
         // Initial deposit
-        ethMultiVault.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
-        (uint256 aliceShares,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
-        
+        (uint256 aliceShares,) = bondingCurve.getVaultStateForUserCurve(id, CURVE_ID, alice);
+
         // Redeem all shares
-        uint256 assetsReceived = ethMultiVault.redeemTripleCurve(aliceShares, alice, id, CURVE_ID);
-        
+        uint256 assetsReceived = bondingCurve.redeemTripleCurve(aliceShares, alice, id, CURVE_ID);
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
-        (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
+        (uint256 sharesAfter,) = bondingCurve.getVaultStateForUserCurve(id, CURVE_ID, alice);
         assertEq(sharesAfter, 0);
 
         vm.stopPrank();
@@ -64,20 +64,20 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 counterId = ethMultiVault.getCounterIdFromTriple(id);
 
         // Initial deposit into counter vault
-        ethMultiVault.depositTripleCurve{value: testDepositAmount}(alice, counterId, CURVE_ID);
+        bondingCurve.depositTripleCurve{value: testDepositAmount}(alice, counterId, CURVE_ID);
 
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
-        (uint256 aliceShares,) = ethMultiVault.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
-        
+        (uint256 aliceShares,) = bondingCurve.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
+
         // Redeem all shares
-        uint256 assetsReceived = ethMultiVault.redeemTripleCurve(aliceShares, alice, counterId, CURVE_ID);
-        
+        uint256 assetsReceived = bondingCurve.redeemTripleCurve(aliceShares, alice, counterId, CURVE_ID);
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
-        (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
+        (uint256 sharesAfter,) = bondingCurve.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
         assertEq(sharesAfter, 0);
 
         vm.stopPrank();
@@ -100,7 +100,7 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit triple
-        ethMultiVault.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         vm.stopPrank();
 
@@ -111,7 +111,7 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InsufficientSharesInVault.selector));
         // execute interaction - redeem all triple shares
-        ethMultiVault.redeemTripleCurve(userSharesBeforeRedeem, bob, id, CURVE_ID);
+        bondingCurve.redeemTripleCurve(userSharesBeforeRedeem, bob, id, CURVE_ID);
 
         vm.stopPrank();
     }
@@ -121,16 +121,16 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Create an atom
         uint256 atomId = ethMultiVault.createAtom{value: getAtomCost()}("atom");
-        
+
         // Deposit into the atom vault
-        ethMultiVault.depositAtomCurve{value: getMinDeposit() * 100}(alice, atomId, CURVE_ID);
-        
+        bondingCurve.depositAtomCurve{value: getMinDeposit() * 100}(alice, atomId, CURVE_ID);
+
         // Get shares
-        (uint256 shares,) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, alice);
-        
+        (uint256 shares,) = bondingCurve.getVaultStateForUserCurve(atomId, CURVE_ID, alice);
+
         // Try to redeem from atom vault using redeemTripleCurve - should revert
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultNotTriple.selector));
-        ethMultiVault.redeemTripleCurve(shares, alice, atomId, CURVE_ID);
+        bondingCurve.redeemTripleCurve(shares, alice, atomId, CURVE_ID);
 
         vm.stopPrank();
     }
@@ -152,11 +152,11 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createTriple{value: getTripleCost()}(subjectId, predicateId, objectId);
 
         // execute interaction - deposit triple
-        ethMultiVault.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositTripleCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_DepositOrWithdrawZeroShares.selector));
         // execute interaction - redeem all triple shares
-        ethMultiVault.redeemTripleCurve(0, alice, id, CURVE_ID);
+        bondingCurve.redeemTripleCurve(0, alice, id, CURVE_ID);
 
         vm.stopPrank();
     }

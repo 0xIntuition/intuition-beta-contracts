@@ -133,7 +133,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // msg.sender = admin, can set a new atomWarden
         vm.startPrank(msg.sender, msg.sender);
 
-        ethMultiVault.setAtomWarden(address(0xdef));
+        adminControl.setAtomWarden(address(0xdef));
 
         (, bytes memory returnData3) = atomWallet.call(abi.encodeWithSelector(AtomWallet.owner.selector));
 

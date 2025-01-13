@@ -7,32 +7,33 @@ import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {AdminControl} from "src/utils/AdminControl.sol";
 
 abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     using FixedPointMathLib for uint256;
 
     function getAdmin() public view returns (address admin) {
-        (admin,,,,,,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().admin;
     }
 
     function getProtocolMultisig() public view returns (address protocolMultisig) {
-        (, protocolMultisig,,,,,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().protocolMultisig;
     }
 
     function getFeeDenominator() public view returns (uint256 feeDenominator) {
-        (,, feeDenominator,,,,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().feeDenominator;
     }
 
     function getEntryFee(uint256 _id) public view returns (uint256 entryFee) {
-        (entryFee,,) = ethMultiVault.vaultFees(_id);
+        return adminControl.getVaultFees(_id).entryFee;
     }
 
     function getExitFee(uint256 _id) public view returns (uint256 exitFee) {
-        (, exitFee,) = ethMultiVault.vaultFees(_id);
+        return adminControl.getVaultFees(_id).exitFee;
     }
 
     function getProtocolFee(uint256 _id) public view returns (uint256 protocolFee) {
-        (,, protocolFee) = ethMultiVault.vaultFees(_id);
+        return adminControl.getVaultFees(_id).protocolFee;
     }
 
     function getProtocolFeeAmount(uint256 _assets, uint256 _id) public view returns (uint256 protocolFee) {
@@ -40,31 +41,31 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function getAtomWalletInitialDepositAmount() public view virtual returns (uint256 atomWalletInitialDepositAmount) {
-        (atomWalletInitialDepositAmount,) = ethMultiVault.atomConfig();
+        return adminControl.getAtomConfig().atomWalletInitialDepositAmount;
     }
 
     function getAtomCreationProtocolFee() public view returns (uint256 atomCreationProtocolFee) {
-        (, atomCreationProtocolFee) = ethMultiVault.atomConfig();
+        return adminControl.getAtomConfig().atomCreationProtocolFee;
     }
 
     function getTripleCreationProtocolFee() public view returns (uint256 tripleCreationProtocolFee) {
-        (tripleCreationProtocolFee,,) = ethMultiVault.tripleConfig();
+        return adminControl.getTripleConfig().tripleCreationProtocolFee;
     }
 
     function getMinDeposit() public view returns (uint256 minDeposit) {
-        (,,, minDeposit,,,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().minDeposit;
     }
 
     function getMinShare() public view returns (uint256 minShare) {
-        (,,,, minShare,,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().minShare;
     }
 
     function getAtomUriMaxLength() public view returns (uint256 atomUriMaxLength) {
-        (,,,,, atomUriMaxLength,,) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().atomUriMaxLength;
     }
 
     function getMinDelay() public view returns (uint256 minDelay) {
-        (,,,,,,, minDelay) = ethMultiVault.generalConfig();
+        return adminControl.getGeneralConfig().minDelay;
     }
 
     function getAtomDepositFractionOnTripleCreation()
@@ -72,11 +73,11 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         view
         returns (uint256 atomDepositFractionOnTripleCreation)
     {
-        (, atomDepositFractionOnTripleCreation,) = ethMultiVault.tripleConfig();
+        return adminControl.getTripleConfig().atomDepositFractionOnTripleCreation;
     }
 
     function getAtomDepositFraction() public view returns (uint256 atomDepositFractionForTriple) {
-        (,, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
+        return adminControl.getTripleConfig().atomDepositFractionForTriple;
     }
 
     function getAtomWalletAddr(uint256 id) public view returns (address) {
@@ -258,30 +259,34 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
     }
 
     function vaultTotalAssetsCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
-        (uint256 totalAssets,) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        (uint256 totalAssets,) = bondingCurve.bondingCurveVaults(vaultId, curveId);
         return totalAssets;
     }
 
     function vaultTotalSharesCurve(uint256 vaultId, uint256 curveId) public view returns (uint256) {
-        (, uint256 totalShares) = ethMultiVault.bondingCurveVaults(vaultId, curveId);
+        (, uint256 totalShares) = bondingCurve.bondingCurveVaults(vaultId, curveId);
         return totalShares;
     }
 
     function getSharesInVaultCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256) {
-        (uint256 shares,) = ethMultiVault.getVaultStateForUserCurve(vaultId, curveId, user);
+        (uint256 shares,) = bondingCurve.getVaultStateForUserCurve(vaultId, curveId, user);
         return shares;
     }
 
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256 shares, uint256 assets) {
-        (shares, assets) = ethMultiVault.getVaultStateForUserCurve(vaultId, curveId, user);
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user)
+        public
+        view
+        returns (uint256 shares, uint256 assets)
+    {
+        (shares, assets) = bondingCurve.getVaultStateForUserCurve(vaultId, curveId, user);
     }
 
     function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
-        return ethMultiVault.convertToSharesCurve(assets, id, curveId);
+        return bondingCurve.convertToSharesCurve(assets, id, curveId);
     }
 
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
-        return ethMultiVault.convertToAssetsCurve(shares, id, curveId);
+        return bondingCurve.convertToAssetsCurve(shares, id, curveId);
     }
 
     function checkDepositIntoVaultCurve(
@@ -311,7 +316,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
 
         assertEq(totalAssetsDeltaExpected, totalAssetsDeltaGot);
 
-        uint256 totalSharesDeltaExpected = ethMultiVault.previewDepositCurve(userAssetsAfterTotalFees, id, curveId);
+        uint256 totalSharesDeltaExpected = bondingCurve.previewDepositCurve(userAssetsAfterTotalFees, id, curveId);
 
         assertEq(totalSharesDeltaExpected, totalSharesDeltaGot);
     }

@@ -19,13 +19,13 @@ contract ApprovalsTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(receiver, receiver);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_CannotApproveSelf.selector));
-        ethMultiVault.approveSender(receiver);
+        adminControl.approveSender(receiver);
 
-        ethMultiVault.approveSender(sender);
+        adminControl.approveSender(sender);
         assertTrue(getApproval(receiver, sender));
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_SenderAlreadyApproved.selector));
-        ethMultiVault.approveSender(sender);
+        adminControl.approveSender(sender);
 
         vm.stopPrank();
     }
@@ -37,16 +37,16 @@ contract ApprovalsTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(receiver, receiver);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_CannotRevokeSelf.selector));
-        ethMultiVault.revokeSender(receiver);
+        adminControl.revokeSender(receiver);
 
-        ethMultiVault.approveSender(sender);
+        adminControl.approveSender(sender);
         assertTrue(getApproval(receiver, sender));
 
-        ethMultiVault.revokeSender(sender);
+        adminControl.revokeSender(sender);
         assertFalse(getApproval(receiver, sender));
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_SenderNotApproved.selector));
-        ethMultiVault.revokeSender(sender);
+        adminControl.revokeSender(sender);
 
         vm.stopPrank();
     }

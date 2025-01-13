@@ -42,14 +42,14 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 
         vm.startPrank(address(2), address(2));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        adminControl.approveSender(bob);
 
         vm.stopPrank();
 
@@ -92,7 +92,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        adminControl.approveSender(alice);
 
         vm.stopPrank();
 
@@ -121,7 +121,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        adminControl.approveSender(alice);
 
         vm.stopPrank();
 
@@ -152,7 +152,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        adminControl.approveSender(alice);
 
         vm.stopPrank();
 

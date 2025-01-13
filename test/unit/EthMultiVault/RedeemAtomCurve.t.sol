@@ -24,27 +24,27 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // create atom and deposit
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
-        ethMultiVault.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
-        (uint256 aliceShares,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
+        (uint256 aliceShares,) = bondingCurve.getVaultStateForUserCurve(id, CURVE_ID, alice);
 
         console.log("aliceShares", aliceShares);
         console.log("Attempting to redeem them.");
-        uint256 test = ethMultiVault.convertToAssetsCurve(aliceShares, id, CURVE_ID);
+        uint256 test = bondingCurve.convertToAssetsCurve(aliceShares, id, CURVE_ID);
         console.log("In assets that's ", test);
         uint256 assetsInVault = vaultTotalAssetsCurve(id, CURVE_ID);
         console.log("In vault assets ", assetsInVault);
-        
+
         // Redeem all shares
-        uint256 assetsReceived = ethMultiVault.redeemAtomCurve(aliceShares, alice, id, CURVE_ID);
-        
+        uint256 assetsReceived = bondingCurve.redeemAtomCurve(aliceShares, alice, id, CURVE_ID);
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
-        (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
+        (uint256 sharesAfter,) = bondingCurve.getVaultStateForUserCurve(id, CURVE_ID, alice);
         assertEq(sharesAfter, 0);
 
         vm.stopPrank();
@@ -62,14 +62,14 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         // snapshots before redeem
         uint256 userSharesBeforeRedeem = getSharesInVaultCurve(id, CURVE_ID, alice);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultDoesNotExist.selector));
         // execute interaction - redeem all atom shares
-        ethMultiVault.redeemAtomCurve(userSharesBeforeRedeem, alice, id + 1, CURVE_ID);
+        bondingCurve.redeemAtomCurve(userSharesBeforeRedeem, alice, id + 1, CURVE_ID);
 
         vm.stopPrank();
     }
@@ -86,11 +86,11 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_DepositOrWithdrawZeroShares.selector));
         // execute interaction - redeem all atom shares
-        ethMultiVault.redeemAtomCurve(0, alice, id, CURVE_ID);
+        bondingCurve.redeemAtomCurve(0, alice, id, CURVE_ID);
 
         vm.stopPrank();
     }
@@ -107,7 +107,7 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id = ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         // execute interaction - deposit atoms
-        ethMultiVault.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
+        bondingCurve.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
 
         vm.stopPrank();
 
@@ -118,7 +118,7 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InsufficientSharesInVault.selector));
         // execute interaction - redeem all atom shares
-        ethMultiVault.redeemAtomCurve(userSharesBeforeRedeem, bob, id, CURVE_ID);
+        bondingCurve.redeemAtomCurve(userSharesBeforeRedeem, bob, id, CURVE_ID);
 
         vm.stopPrank();
     }

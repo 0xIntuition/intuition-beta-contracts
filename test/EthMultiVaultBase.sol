@@ -6,12 +6,17 @@ import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/Upgradeabl
 
 import {AtomWallet} from "src/AtomWallet.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
+import {AdminControl} from "src/utils/AdminControl.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {IAdminControl} from "src/interfaces/IAdminControl.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
+import {IModel} from "src/interfaces/IModel.sol";
+import {BondingCurve} from "src/BondingCurve.sol";
+
 contract EthMultiVaultBase is Test {
     // msg.value - atomCreationProtocolFee - protocolFee
 
@@ -28,6 +33,8 @@ contract EthMultiVaultBase is Test {
     address immutable rich = vm.addr(PK_RICH);
 
     /// @notice core contracts
+    AdminControl adminControl;
+    BondingCurve bondingCurve;
     EthMultiVault ethMultiVault;
     AtomWallet atomWallet;
     UpgradeableBeacon atomWalletBeacon;
@@ -44,7 +51,7 @@ contract EthMultiVaultBase is Test {
         atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), msg.sender);
 
         // Define the configuration objects
-        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+        IModel.GeneralConfig memory generalConfig = IModel.GeneralConfig({
             admin: msg.sender,
             protocolMultisig: address(0xbeef),
             feeDenominator: 10000,
@@ -55,48 +62,53 @@ contract EthMultiVaultBase is Test {
             minDelay: 1 days
         });
 
-        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
-            atomWalletInitialDepositAmount: 0.0001 ether,
-            atomCreationProtocolFee: 0.0002 ether
-        });
+        IModel.AtomConfig memory atomConfig =
+            IModel.AtomConfig({atomWalletInitialDepositAmount: 0.0001 ether, atomCreationProtocolFee: 0.0002 ether});
 
-        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+        IModel.TripleConfig memory tripleConfig = IModel.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether,
             atomDepositFractionOnTripleCreation: 0.0003 ether,
             atomDepositFractionForTriple: 1500
         });
 
-        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+        IModel.WalletConfig memory walletConfig = IModel.WalletConfig({
             permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
             entryPoint: address(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789),
             atomWarden: address(0xbeef),
             atomWalletBeacon: address(atomWalletBeacon)
         });
 
-        IEthMultiVault.VaultFees memory vaultFees =
-            IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
-
+        IModel.VaultFees memory vaultFees = IModel.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
 
         address bondingCurveRegistry = address(new BondingCurveRegistry());
         BondingCurveRegistry(bondingCurveRegistry).initialize(address(this)); // this?
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether 
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
 
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
-            registry: bondingCurveRegistry,
-            defaultCurveId: 1
-        });
+        IModel.BondingCurveConfig memory bondingCurveConfig =
+            IModel.BondingCurveConfig({registry: bondingCurveRegistry, defaultCurveId: 1});
+
+        adminControl = new AdminControl();
+        adminControl.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
 
         ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees, bondingCurveConfig);
+        ethMultiVault.init(address(adminControl));
+
+        bondingCurve = new BondingCurve();
+        bondingCurve.init(bondingCurveConfig, address(adminControl), address(ethMultiVault));
+
+        vm.startPrank(msg.sender);
+        bondingCurve.setEthMultiVault(address(ethMultiVault));
+        ethMultiVault.setBondingCurve(address(bondingCurve));
+        vm.stopPrank();
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);
-        vm.deal(bob, 100 ether);
-        vm.deal(alice, 100 ether);
+        vm.deal(bob, 1000 ether);
+        vm.deal(alice, 1000 ether);
         vm.deal(rich, 20000 ether);
     }
 
@@ -167,7 +179,7 @@ contract EthMultiVaultBase is Test {
     }
 
     function getApproval(address receiver, address sender) public view returns (bool) {
-        return ethMultiVault.approvals(receiver, sender);
+        return adminControl.isApproved(receiver, sender);
     }
 
     //////// Generate Memes ////////

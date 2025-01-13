@@ -18,6 +18,9 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
+import {IModel} from "src/interfaces/IModel.sol";
+import {BondingCurve} from "src/BondingCurve.sol";
+import {AdminControl} from "src/utils/AdminControl.sol";
 
 contract DeployEthMultiVault is Script {
     address deployer;
@@ -35,6 +38,8 @@ contract DeployEthMultiVault is Script {
     AtomWallet atomWallet;
     UpgradeableBeacon atomWalletBeacon;
     EthMultiVault ethMultiVault;
+    BondingCurve bondingCurve;
+    AdminControl adminControl;
     TransparentUpgradeableProxy ethMultiVaultProxy;
     TimelockController timelock;
 
@@ -72,7 +77,7 @@ contract DeployEthMultiVault is Script {
         atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), address(timelock));
         console.logString("deployed UpgradeableBeacon.");
 
-        IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
+        IModel.GeneralConfig memory generalConfig = IModel.GeneralConfig({
             admin: admin, // Admin address for the EthMultiVault contract
             protocolMultisig: protocolMultisig, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
@@ -83,25 +88,25 @@ contract DeployEthMultiVault is Script {
             minDelay: 1 days // minimum delay for timelocked transactions
         });
 
-        IEthMultiVault.AtomConfig memory atomConfig = IEthMultiVault.AtomConfig({
+        IModel.AtomConfig memory atomConfig = IModel.AtomConfig({
             atomWalletInitialDepositAmount: 0.00003 ether, // Fee charged for purchasing vault shares for the atom wallet upon creation
             atomCreationProtocolFee: 0.0003 ether // Fee charged for creating an atom
         });
 
-        IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
+        IModel.TripleConfig memory tripleConfig = IModel.TripleConfig({
             tripleCreationProtocolFee: 0.0003 ether, // Fee for creating a triple
             atomDepositFractionOnTripleCreation: 0.00003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 900 // Fee for equity in atoms when creating a triple
         });
 
-        IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
+        IModel.WalletConfig memory walletConfig = IModel.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
             atomWarden: atomWarden, // atomWarden address
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
-        IEthMultiVault.VaultFees memory vaultFees = IEthMultiVault.VaultFees({
+        IModel.VaultFees memory vaultFees = IModel.VaultFees({
             entryFee: 500, // Entry fee for vault 0
             exitFee: 500, // Exit fee for vault 0
             protocolFee: 250 // Protocol fee for vault 0
@@ -129,21 +134,33 @@ contract DeployEthMultiVault is Script {
         // Transfer ownership of BondingCurveRegistry to admin
         bondingCurveRegistry.setAdmin(admin);
 
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
+        IModel.BondingCurveConfig memory bondingCurveConfig = IModel.BondingCurveConfig({
             registry: address(bondingCurveRegistry),
             defaultCurveId: 1 // Unused in this edition of EthMultiVault
         });
 
         // -------------------------------------------------------------------------------------
 
-        // Prepare data for initializer function
-        bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees, bondingCurveConfig
-        );
+        // Deploy AdminControl
+        adminControl = new AdminControl();
+        adminControl.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees);
+        console.logString("deployed AdminControl.");
 
         // Deploy EthMultiVault implementation contract
         ethMultiVault = new EthMultiVault();
         console.logString("deployed EthMultiVault.");
+
+        // Deploy BondingCurve
+        bondingCurve = new BondingCurve();
+        bondingCurve.init(bondingCurveConfig, address(adminControl), address(ethMultiVault));
+        bondingCurve.setEthMultiVault(address(ethMultiVault));
+        console.logString("deployed BondingCurve.");
+
+        // Set BondingCurve address in EthMultiVault
+        ethMultiVault.setBondingCurve(address(bondingCurve));
+
+        // Prepare data for initializer function
+        bytes memory initData = abi.encodeWithSelector(EthMultiVault.init.selector, address(adminControl));
 
         // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         ethMultiVaultProxy = new TransparentUpgradeableProxy(
@@ -163,6 +180,8 @@ contract DeployEthMultiVault is Script {
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
         console.log("BondingCurveRegistry address:", address(bondingCurveRegistry));
+        console.log("BondingCurve address:", address(bondingCurve));
+        console.log("AdminControl address:", address(adminControl));
         console.log(
             "To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event. Same applies to the CustomMulticall3 proxy contract."
         );
