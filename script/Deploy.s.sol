@@ -112,7 +112,7 @@ contract DeployEthMultiVault is Script {
         // Deploy BondingCurveRegistry and take temporary ownership to add the curves
         bondingCurveRegistry = new BondingCurveRegistry();
         console.logString("deployed BondingCurveRegistry.");
-        bondingCurveRegistry.initialize(address(this));
+        bondingCurveRegistry.initialize(msg.sender);
 
         // Deploy LinearCurve
         linearCurve = new LinearCurve("Linear Curve");
