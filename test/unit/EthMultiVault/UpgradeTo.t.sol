@@ -15,6 +15,9 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
 import {EthMultiVaultV2} from "test/EthMultiVaultV2.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
+import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
+import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {LinearCurve} from "src/LinearCurve.sol";
 
 contract UpgradeTo is Test {
     address user1 = address(1);
@@ -111,12 +114,32 @@ contract UpgradeTo is Test {
             protocolFee: 100 // Protocol fee for vault 0
         });
 
+        // Deploy and configure bonding curve registry
+        BondingCurveRegistry bondingCurveRegistry = new BondingCurveRegistry();
+        bondingCurveRegistry.initialize(address(this));
+
+        address linearCurve = address(new LinearCurve("Linear Curve"));
+        bondingCurveRegistry.addBondingCurve(linearCurve);
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18));
+        bondingCurveRegistry.addBondingCurve(progressiveCurve);
+
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
+            registry: address(bondingCurveRegistry),
+            defaultCurveId: 1
+        });
+
         ethMultiVault = new EthMultiVault();
         console.log("deployed EthMultiVault", address(ethMultiVault));
 
-        // // Prepare data for initializer function
+        // Prepare data for initializer function
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees
+            EthMultiVault.init.selector, 
+            generalConfig, 
+            atomConfig, 
+            tripleConfig, 
+            walletConfig, 
+            vaultFees,
+            bondingCurveConfig
         );
 
         // // Deploy EthMultiVaultProxy
