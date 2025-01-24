@@ -19,6 +19,25 @@
     "@account-abstraction/contracts": "^0.6.0",
     "@opengsn/contracts": "^3.0.0-beta.10",
     "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2"
+    "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "prettier": "^3.4.2",
+    "prettier-plugin-solidity": "^1.4.2"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-solidity"
+    ],
+    "overrides": [
+      {
+        "files": "*.sol",
+        "options": {
+          "printWidth": 100,
+          "tabWidth": 4,
+          "useTabs": false,
+          "singleQuote": false,
+          "bracketSpacing": true
+        }
+      }
+    ]
   }
 }
