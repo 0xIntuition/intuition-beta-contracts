@@ -1,0 +1,107 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Dependencies
+        run: forge install
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Generate Documentation
+        run: forge doc
+
+      - name: Create Architecture Documentation
+        run: mkdir -p docs/src/architecture
+
+      - name: Generate Contract Diagrams
+        run: python3 scripts/generate_diagrams.py
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Configure mdbook
+        run: |
+          cat > docs/book.toml << EOF
+          [book]
+          title = "Intuition Beta Contracts Documentation"
+          authors = ["Intuition Labs"]
+          language = "en"
+          multilingual = false
+          src = "src"
+
+          [output.html]
+          default-theme = "dark"
+          preferred-dark-theme = "ayu"
+          git-repository-url = "https://github.com/0xIntuition/intuition-beta-contracts"
+          additional-js = ["mermaid.min.js"]
+          additional-css = ["book.css"]
+
+          [preprocessor.mermaid]
+          command = "mdbook-mermaid"
+          EOF
+
+      - name: Setup Mermaid
+        run: |
+          mkdir -p docs/theme
+          curl -o docs/mermaid.min.js https://unpkg.com/mermaid@8.13.3/dist/mermaid.min.js
+          cat > docs/theme/head.hbs << EOF
+          <script>
+              window.addEventListener('load', (event) => {
+                  mermaid.initialize({
+                      startOnLoad: true,
+                      theme: 'dark',
+                      securityLevel: 'loose',
+                      themeVariables: {
+                          darkMode: true
+                      }
+                  });
+              });
+          </script>
+          EOF
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install mdbook and plugins
+        run: |
+          cargo install mdbook
+          cargo install mdbook-mermaid
+
+      - name: Build Documentation
+        run: |
+          cd docs
+          mdbook build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/book
