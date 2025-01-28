@@ -64,17 +64,52 @@ jobs:
             base=$(basename "$contract" .sol)
             echo "Processing $base..."
             
-            abi=$(forge inspect "$contract:$base" abi)
-            devdoc=$(forge inspect "$contract:$base" devdoc)
-            userdoc=$(forge inspect "$contract:$base" userdoc)
-            storage=$(forge inspect "$contract:$base" storageLayout)
+            # Create a temporary directory for each contract's components
+            mkdir -p "docs/contracts/$base"
             
-            echo "{
-                \"abi\": $abi,
-                \"devdoc\": $devdoc,
-                \"userdoc\": $userdoc,
-                \"storageLayout\": $storage
-            }" | jq '.' > "docs/contracts/$base.json"
+            # Process each component separately with error handling
+            if abi=$(forge inspect "$contract:$base" abi 2>/dev/null) && echo "$abi" | jq . >/dev/null 2>&1; then
+              echo "$abi" > "docs/contracts/$base/abi.json"
+            else
+              echo "[]" > "docs/contracts/$base/abi.json"
+              echo "Warning: Could not get ABI for $base"
+            fi
+            
+            if devdoc=$(forge inspect "$contract:$base" devdoc 2>/dev/null) && echo "$devdoc" | jq . >/dev/null 2>&1; then
+              echo "$devdoc" > "docs/contracts/$base/devdoc.json"
+            else
+              echo "{}" > "docs/contracts/$base/devdoc.json"
+              echo "Warning: Could not get devdoc for $base"
+            fi
+            
+            if userdoc=$(forge inspect "$contract:$base" userdoc 2>/dev/null) && echo "$userdoc" | jq . >/dev/null 2>&1; then
+              echo "$userdoc" > "docs/contracts/$base/userdoc.json"
+            else
+              echo "{}" > "docs/contracts/$base/userdoc.json"
+              echo "Warning: Could not get userdoc for $base"
+            fi
+            
+            if storage=$(forge inspect "$contract:$base" storageLayout 2>/dev/null) && echo "$storage" | jq . >/dev/null 2>&1; then
+              echo "$storage" > "docs/contracts/$base/storage.json"
+            else
+              echo "{}" > "docs/contracts/$base/storage.json"
+              echo "Warning: Could not get storage layout for $base"
+            fi
+            
+            # Combine all valid JSON files
+            jq -s '{ 
+              "abi": .[0], 
+              "devdoc": .[1], 
+              "userdoc": .[2], 
+              "storageLayout": .[3] 
+            }' \
+              "docs/contracts/$base/abi.json" \
+              "docs/contracts/$base/devdoc.json" \
+              "docs/contracts/$base/userdoc.json" \
+              "docs/contracts/$base/storage.json" > "docs/contracts/$base.json"
+            
+            # Clean up temporary files
+            rm -rf "docs/contracts/$base"
           done
 
       - name: Generate Contract Diagrams
