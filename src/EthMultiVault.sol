@@ -28,40 +28,41 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  *         semantic data structure through "atoms" and "triples", reminiscent of
  *         RDF (Resource Description Framework) concepts.
  *
- * @dev    Core protocol component managing the relationship between semantic data
+ * @notice Core protocol component managing the relationship between semantic data
  *         structures and their economic representations through vault mechanics.
  *         Implements ERC4626-style accounting with progressive bonding curves.
  *
- * @notice    Key Components:
- * @notice    1. Vault Management
- * @dev       - ETH deposits/withdrawals through ERC4626-style vault accounting
- * @dev       - Progressive bonding curves for price discovery
- * @dev       - Supports both standard pro-rata vaults and curve-specific vaults, for backwards compatibility.
+ * @notice    ## Key Components:
+ *     1. Vault Management
+ *        - ETH deposits/withdrawals through ERC4626-style vault accounting
+ *        - Progressive bonding curves for price discovery
+ *        - Supports both standard pro-rata vaults and curve-specific vaults, for backwards compatibility.
  *
- * @notice    2. Semantic Structure
- * @dev       - Atoms: Base-level vaults representing individual semantic units
- * @dev       - Triples: Composite vaults linking three atoms in subject-predicate-object relationships
- * @dev       - Each vault type maintains independent state and fee structures
+ *     2. Semantic Structure
+ *        - Atoms: Base-level vaults representing individual semantic units
+ *        - Triples: Composite vaults linking three atoms in subject-predicate-object relationships
+ *        - Each vault type maintains independent state and fee structures
  *
- * @notice    3. Security Features
- * @dev       - Timelocked admin operations
- * @dev       - Reentrancy protection
- * @dev       - Pausable functionality
- * @dev       - Granular fee controls with maximum caps
- * @dev       - Approval system for delegated deposits
+ *     3. Security Features
+ *        - Timelocked admin operations
+ *        - Reentrancy protection
+ *        - Pausable functionality
+ *        - Granular fee controls with maximum caps
+ *        - Approval system for delegated deposits
  *
- * @notice    4. Smart Account Integration
- * @dev       - Deploys ERC4337-compatible atom wallets
- * @dev       - BeaconProxy pattern for upgradeable wallet implementations
- * @dev       - Maintains initialization deposits for wallet operations
+ *     4. Smart Account Integration
+ *        - Deploys ERC4337-compatible atom wallets
+ *        - BeaconProxy pattern for upgradeable wallet implementations
+ *        - Maintains initialization deposits for wallet operations
  *
- * @notice    5. Fee Structure
- * @dev       - Entry, exit, and protocol fees
- * @dev       - Configurable per vault
- * @dev       - Separate fee structures for atom/triple creation
- * @dev       - Proportional deposit distribution for triple-related operations
+ *     5. Fee Structure
+ *        - Entry, exit, and protocol fees
+ *        - Configurable per vault
+ *        - Separate fee structures for atom/triple creation
+ *        - Proportional deposit distribution for triple-related operations
  *
- * @dev Please note: This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
+ * @dev ## Please note: 
+ *      This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
  *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
  *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
  *      code size, it ensures that users can still use the audited pathways in the code if they wish, while also
@@ -1909,13 +1910,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param assets amount of assets to calculate shares on
     /// @param id vault id to get corresponding shares for
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
-    /// @dev For regular vaults, shares maintain a linear relationship with assets:
-    /// @dev $shares = assets \cdot \frac{S_{total}}{A_{total}}$
-    /// @dev Where:
-    /// @dev - $S_{total}$ is the total supply of shares
-    /// @dev - $A_{total}$ is the total assets in the vault
+    /// @notice For regular vaults, shares maintain a linear relationship with assets:
+    ///  $shares = assets \cdot \frac{S_{total}}{A_{total}}$
+    /// ### Where:
+    ///  $S_{total}$ = the total supply of shares
+    ///  $A_{total}$ = the total assets in the vault
     /// @dev TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
-    /// @dev No domain conversion needed because $1 worth of assets always equals $1 worth of shares.
+    ///  No domain conversion needed because 1 dollar worth of assets always equals 1 dollar worth of shares.
     function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
         return assets.mulDiv(supply, vaults[id].totalAssets);
@@ -1926,22 +1927,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding shares for
     /// @param curveId vault id of the curve
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
-    /// @dev The conversion happens in two steps:
-    /// @dev 1. First, we get the base shares from the bonding curve: $s_{base} = f_{curve}(assets)$
-    /// @dev 2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    /// @dev $s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total\_in\_shares}}$
-    /// @dev Where:
-    /// @dev - $S_{total}$ is the total supply of shares
-    /// @dev - $A_{total\_in\_shares} = f_{curve}^{-1}(A_{total})$ - total assets converted to share domain
+    /// @notice The conversion happens in two steps:
+    ///  1. First, we get the base shares from the bonding curve: 
+    ///  $$s_{base} = f_{curve}(assets)$$
+    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+    ///  $$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$
+    ///  ### Where:
+    ///  1. $S_{total}$ is the total supply of shares
+    ///  2. $A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
     ///        using the inverse of the bonding curve function
-    /// @dev This adjustment is necessary because the actual ratio of assets:shares may drift from
-    ///      the bonding curve's ideal ratio due to:
-    /// @dev - Protocol fees being taken in assets
-    /// @dev - Share burns
-    /// @dev - Direct asset transfers/airdrops
-    /// @dev For example, if the pool has fewer assets than the curve expects for its share supply
+    /// @notice This adjustment is necessary because the actual ratio of assets:shares may drift from
+    ///      the bonding curve's 'pure' conversion ratio due to:
+    ///  - Protocol fees being taken in assets
+    ///  - Share burns
+    ///  - Direct asset transfers/airdrops
+    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
     ///     (due to fees), new depositors will receive proportionally more shares to maintain fairness.
-    /// @dev The crucial conversion of assets to share domain ($A_{total\_in\_shares}$) ensures we're comparing
+    /// @notice The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
     ///      quantities in the same space, as the bonding curve defines a non-linear relationship
     ///      between assets and shares.
     /// @dev TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
@@ -1966,13 +1968,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param shares amount of shares to calculate assets on
     /// @param id vault id to get corresponding assets for
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
-    /// @dev For regular vaults, assets maintain a linear relationship with shares:
-    /// @dev $assets = shares \cdot \frac{A_{total}}{S_{total}}$
-    /// @dev Where:
-    /// @dev - $S_{total}$ is the total supply of shares
-    /// @dev - $A_{total}$ is the total assets in the vault
+    /// @notice For regular vaults, assets maintain a linear relationship with shares:
+    ///  $assets = shares \cdot \frac{A_{total}}{S_{total}}$
+    /// ### Where:
+    ///  - $S_{total}$ is the total supply of shares
+    ///  - $A_{total}$ is the total assets in the vault
     /// @dev TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
-    /// @dev No domain conversion needed because $1 worth of shares always equals $1 worth of assets.
+    ///  No domain conversion needed because 1 dollar worth of shares always equals 1 dollar worth of assets.
     function convertToAssets(uint256 shares, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
         uint256 assets = supply == 0 ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
@@ -1984,22 +1986,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding assets for
     /// @param curveId vault id of the curve
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
-    /// @dev The conversion happens in two steps:
-    /// @dev 1. First, we get the base assets from the bonding curve: $a_{base} = f_{curve}^{-1}(shares)$
-    /// @dev 2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    /// @dev $a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total\_in\_assets}}$
-    /// @dev Where:
-    /// @dev - $A_{total}$ is the total assets in the vault
-    /// @dev - $S_{total\_in\_assets} = f_{curve}(S_{total})$ - total shares converted to asset domain
-    /// @dev   using the bonding curve function
-    /// @dev This adjustment is necessary because the actual ratio of shares:assets may drift from
-    /// the bonding curve's ideal ratio due to:
-    /// @dev - Protocol fees being taken in assets
-    /// @dev - Share burns
-    /// @dev - Direct asset transfers/airdrops
-    /// @dev For example, if the pool has fewer assets than the curve expects for its share supply
+    /// @notice The conversion happens in two steps:
+    ///  1. First, we get the base assets from the bonding curve: 
+    ///  $$a_{base} = f_{curve}^{-1}(shares)$$
+    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+    ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
+    /// ### Where:
+    ///  1. $A_{total}$ is the total assets in the vault
+    ///  2. $S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
+    ///    using the bonding curve function
+    /// @notice This adjustment is necessary because the actual ratio of shares:assets may drift from
+    /// the bonding curve's 'pure' conversion ratio due to:
+    ///  - Protocol fees being taken in assets
+    ///  - Share burns
+    ///  - Direct asset transfers/airdrops
+    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
     /// (due to fees), redeemers will receive proportionally fewer assets to maintain fairness.
-    /// @dev The crucial conversion of shares to asset domain ($S_{total\_in\_assets}$) ensures we're comparing
+    /// @notice The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
     ///  quantities in the same space, as the bonding curve defines a non-linear relationship
     ///  between shares and assets.
     /// @dev TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.

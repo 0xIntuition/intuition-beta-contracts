@@ -26,7 +26,7 @@ fi
 
 # Step 1: Generate Forge documentation
 echo "Generating Forge documentation..."
-forge doc --build --markdown
+forge doc
 
 # Step 2: Create architecture documentation directory
 echo "Setting up architecture documentation..."
