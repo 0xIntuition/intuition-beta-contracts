@@ -160,7 +160,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param _walletConfig Wallet configuration struct
     /// @param _defaultVaultFees Default vault fees struct
     ///
-    /// NOTE: This function is called only once (during contract deployment)
+    /// @dev This function is called only once (during contract deployment)
     function init(
         GeneralConfig memory _generalConfig,
         AtomConfig memory _atomConfig,
@@ -477,7 +477,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice deploy a given atom wallet
     /// @param atomId vault id of atom
     /// @return atomWallet the address of the atom wallet
-    /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
+    /// @dev deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external whenNotPaused returns (address) {
         if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
@@ -568,7 +568,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with
     /// @return id vault id of the atom
-    /// NOTE: This function will revert if called with less than `getAtomCost()` in `msg.value`
+    /// @dev This function will revert if called with less than `getAtomCost()` in `msg.value`
     function createAtom(bytes calldata atomUri) external payable nonReentrant whenNotPaused returns (uint256) {
         if (msg.value < getAtomCost()) {
             revert Errors.EthMultiVault_InsufficientBalance();
@@ -586,7 +586,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice Batch create atoms and return their vault ids
     /// @param atomUris atom data array to create atoms with
     /// @return ids vault ids array of the atoms
-    /// NOTE: This function will revert if called with less than `getAtomCost()` * `atomUris.length` in `msg.value`
+    /// @dev This function will revert if called with less than `getAtomCost()` * `atomUris.length` in `msg.value`
     function batchCreateAtom(bytes[] calldata atomUris)
         external
         payable
@@ -687,7 +687,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param objectId vault id of the object atom
     ///
     /// @return id vault id of the triple
-    /// NOTE: This function will revert if called with less than `getTripleCost()` in `msg.value`.
+    /// @dev This function will revert if called with less than `getTripleCost()` in `msg.value`.
     ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
     function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
         external
@@ -715,7 +715,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param predicateIds vault ids array of predicate atoms
     /// @param objectIds vault ids array of object atoms
     ///
-    /// NOTE: This function will revert if called with less than `getTripleCost()` * `array.length` in `msg.value`.
+    /// @dev This function will revert if called with less than `getTripleCost()` * `array.length` in `msg.value`.
     ///       This function will revert if any of the atoms do not exist or if any ids are triple vaults.
     function batchCreateTriple(
         uint256[] calldata subjectIds,
@@ -852,7 +852,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id the vault ID of the atom
     ///
     /// @return shares the amount of shares minted
-    /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
+    /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
     function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256) {
         if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
@@ -882,7 +882,20 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
-    // Entirely separate logic from the normal depositAtom function
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param atomId the vault ID of the atom
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return shares the amount of shares minted
+    /// @dev this function will revert if the minimum deposit amount of eth is not met and
+    ///       if the vault ID does not exist/is not an atom.
+    /// @dev This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
+    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+    ///      performing an audit of the full refactor (V2).
     function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId)
         external
         payable
@@ -924,7 +937,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id the vault ID of the atom
     ///
     /// @return assets the amount of assets/eth withdrawn
-    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (id == 0 || id > count) {
@@ -952,6 +965,17 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
+    /// @notice redeem shares from a bonding curve atom vault for assets
+    ///
+    /// @param shares the amount of shares to redeem
+    /// @param receiver the address to receiver the assets
+    /// @param atomId the vault ID of the atom
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    /// @dev This method is entirely separate from redeemAtom, because we wanted to leave the audited pathways intact.
+    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+    ///      performing an audit of the full refactor (V2).
     function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
         external
         nonReentrant
@@ -994,7 +1018,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id the vault ID of the triple
     ///
     /// @return shares the amount of shares minted
-    /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
+    /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not a triple.
     function depositTriple(address receiver, uint256 id)
         external
@@ -1038,6 +1062,18 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
+    /// @notice deposit eth into a bonding curve triple vault and grant ownership of 'shares' to 'receiver'
+    ///         *payable msg.value amount of eth to deposit
+    /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param tripleId the vault ID of the triple
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return shares the amount of shares minted
+    /// @dev This method is entirely separate from depositTriple, because we wanted to leave the audited pathways intact.
+    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+    ///      performing an audit of the full refactor (V2).
     function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
         external
         payable
@@ -1088,7 +1124,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id the vault ID of the triple
     ///
     /// @return assets the amount of assets/eth withdrawn
-    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (!isTripleId(id)) {
@@ -1112,6 +1148,17 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
+    /// @notice redeem shares from a bonding curve triple vault for assets
+    ///
+    /// @param shares the amount of shares to redeem
+    /// @param receiver the address to receiver the assets
+    /// @param tripleId the vault ID of the triple
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    /// @dev This method is entirely separate from redeemTriple, because we wanted to leave the audited pathways intact.
+    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+    ///      performing an audit of the full refactor (V2).
     function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         nonReentrant
@@ -1163,7 +1210,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param receiver the address to receive the shares
     /// @param amount the amount of eth to deposit
     ///
-    /// NOTE: assumes funds have already been transferred to this contract
+    /// @dev assumes funds have already been transferred to this contract
     function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal {
         // load atom IDs
         uint256[3] memory atomsIds;
@@ -1382,6 +1429,17 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (assetsForReceiver, protocolFee);
     }
 
+    /// @dev redeem shares out of a given bonding curve vault.
+    ///      Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal
+    ///
+    /// @param id the vault ID of the atom or triple
+    /// @param curveId the vault ID of the curve
+    /// @param sender the address to redeem the shares from
+    /// @param receiver the address to receive the assets
+    /// @param shares the amount of shares to redeem
+    ///
+    /// @return assetsForReceiver the amount of assets/eth to be transferred to the receiver
+    /// @return protocolFee the amount of protocol fees deducted
     function _redeemCurve(uint256 id, uint256 curveId, address sender, address receiver, uint256 shares)
         internal
         returns (uint256, uint256)
@@ -1480,6 +1538,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         emit SharePriceChanged(id, newSharePrice, oldSharePrice);
     }
 
+    /// @dev increase the total assets and shares for a given bonding curve vault
+    ///
+    /// @param id the vault ID of the atom or triple
+    /// @param curveId the vault ID of the curve
+    /// @param assetsDelta the amount of assets to increase the total assets by
+    /// @param sharesDelta the amount of shares to increase the total shares by
+    /// @dev emits an event, as this affects the share price of the specified bonding curve vault
     function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
         internal
     {
@@ -1491,6 +1556,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
     }
 
+    /// @dev decrease the total assets and shares for a given bonding curve vault
+    ///
+    /// @param id the vault ID of the atom or triple
+    /// @param curveId the vault ID of the curve
+    /// @param assetsDelta the amount of assets to decrease the total assets by
+    /// @param sharesDelta the amount of shares to decrease the total shares by
+    /// @dev emits an event, as this affects the share price of the specified bonding curve vault
     function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
         internal
     {
@@ -1707,7 +1779,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding fees for
     ///
     /// @return feeAmount amount of assets that would be charged for the entry fee
-    /// NOTE: if the vault being deposited on has a vault total shares of 0, the entry fee is not applied
+    /// @dev if the vault being deposited on has a vault total shares of 0, the entry fee is not applied
     function entryFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 entryFee = vaultFees[id].entryFee;
         uint256 feeAmount = _feeOnRaw(assets, entryFee == 0 ? vaultFees[0].entryFee : entryFee);
@@ -1720,7 +1792,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding fees for
     ///
     /// @return feeAmount amount of assets that would be charged for the exit fee
-    /// NOTE: if the vault  being redeemed from given the shares to redeem results in a total shares after of 0,
+    /// @dev if the vault  being redeemed from given the shares to redeem results in a total shares after of 0,
     ///       the exit fee is not applied
     function exitFeeAmount(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 exitFee = vaultFees[id].exitFee;
@@ -1747,7 +1819,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id
     ///
     /// @return feeAmount amount of assets that would be used as atom deposit fraction
-    /// NOTE: only applies to triple vaults
+    /// @dev only applies to triple vaults
     function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
         return feeAmount;
@@ -1804,6 +1876,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return type(uint256).max;
     }
 
+    /// @notice returns max amount of assets that can be deposited into a bonding curve vault
+    /// @param curveId the vault ID of the curve
+    /// @return maxDepositCurve max amount of assets that can be deposited into the bonding curve vault
+    /// @dev Tells the registry to ask the specified curve what its asset limits are.
     function maxDepositCurve(uint256 curveId) public view returns (uint256) {
         return _registry().getCurveMaxAssets(curveId);
     }
@@ -1819,23 +1895,57 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return shares;
     }
 
+    /// @notice returns max amount of shares that can be redeemed from a bonding curve vault
+    /// @param sender the address to redeem the shares from
+    /// @param id the vault ID of the atom or triple
+    /// @param curveId the vault ID of the curve
+    /// @return shares the amount of shares that can be redeemed from the 'sender' balance through a redeem call
     function maxRedeemCurve(address sender, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 shares = bondingCurveVaults[id][curveId].balanceOf[sender];
         return shares;
     }
 
     /// @notice returns amount of shares that would be exchanged by vault given amount of 'assets' provided
-    ///
     /// @param assets amount of assets to calculate shares on
     /// @param id vault id to get corresponding shares for
-    ///
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
+    /// @dev For regular vaults, shares maintain a linear relationship with assets:
+    /// @dev $shares = assets \cdot \frac{S_{total}}{A_{total}}$
+    /// @dev Where:
+    /// @dev - $S_{total}$ is the total supply of shares
+    /// @dev - $A_{total}$ is the total assets in the vault
+    /// @dev TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
+    /// @dev No domain conversion needed because $1 worth of assets always equals $1 worth of shares.
     function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        uint256 shares = supply == 0 ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
-        return shares;
+        return assets.mulDiv(supply, vaults[id].totalAssets);
     }
 
+    /// @notice returns amount of shares that would be exchanged by vault given amount of 'assets' provided
+    /// @param assets amount of assets to calculate shares on
+    /// @param id vault id to get corresponding shares for
+    /// @param curveId vault id of the curve
+    /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
+    /// @dev The conversion happens in two steps:
+    /// @dev 1. First, we get the base shares from the bonding curve: $s_{base} = f_{curve}(assets)$
+    /// @dev 2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+    /// @dev $s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total\_in\_shares}}$
+    /// @dev Where:
+    /// @dev - $S_{total}$ is the total supply of shares
+    /// @dev - $A_{total\_in\_shares} = f_{curve}^{-1}(A_{total})$ - total assets converted to share domain
+    ///        using the inverse of the bonding curve function
+    /// @dev This adjustment is necessary because the actual ratio of assets:shares may drift from
+    ///      the bonding curve's ideal ratio due to:
+    /// @dev - Protocol fees being taken in assets
+    /// @dev - Share burns
+    /// @dev - Direct asset transfers/airdrops
+    /// @dev For example, if the pool has fewer assets than the curve expects for its share supply
+    ///     (due to fees), new depositors will receive proportionally more shares to maintain fairness.
+    /// @dev The crucial conversion of assets to share domain ($A_{total\_in\_shares}$) ensures we're comparing
+    ///      quantities in the same space, as the bonding curve defines a non-linear relationship
+    ///      between assets and shares.
+    /// @dev TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
+    ///     So you need to compute their value using a common denominator like dollars.
     function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
@@ -1853,17 +1963,47 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     /// @notice returns amount of assets that would be exchanged by vault given amount of 'shares' provided
-    ///
     /// @param shares amount of shares to calculate assets on
     /// @param id vault id to get corresponding assets for
-    ///
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
+    /// @dev For regular vaults, assets maintain a linear relationship with shares:
+    /// @dev $assets = shares \cdot \frac{A_{total}}{S_{total}}$
+    /// @dev Where:
+    /// @dev - $S_{total}$ is the total supply of shares
+    /// @dev - $A_{total}$ is the total assets in the vault
+    /// @dev TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
+    /// @dev No domain conversion needed because $1 worth of shares always equals $1 worth of assets.
     function convertToAssets(uint256 shares, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
         uint256 assets = supply == 0 ? shares : shares.mulDiv(vaults[id].totalAssets, supply);
         return assets;
     }
 
+    /// @notice returns amount of assets that would be exchanged by vault given amount of 'shares' provided
+    /// @param shares amount of shares to calculate assets on
+    /// @param id vault id to get corresponding assets for
+    /// @param curveId vault id of the curve
+    /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
+    /// @dev The conversion happens in two steps:
+    /// @dev 1. First, we get the base assets from the bonding curve: $a_{base} = f_{curve}^{-1}(shares)$
+    /// @dev 2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+    /// @dev $a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total\_in\_assets}}$
+    /// @dev Where:
+    /// @dev - $A_{total}$ is the total assets in the vault
+    /// @dev - $S_{total\_in\_assets} = f_{curve}(S_{total})$ - total shares converted to asset domain
+    /// @dev   using the bonding curve function
+    /// @dev This adjustment is necessary because the actual ratio of shares:assets may drift from
+    /// the bonding curve's ideal ratio due to:
+    /// @dev - Protocol fees being taken in assets
+    /// @dev - Share burns
+    /// @dev - Direct asset transfers/airdrops
+    /// @dev For example, if the pool has fewer assets than the curve expects for its share supply
+    /// (due to fees), redeemers will receive proportionally fewer assets to maintain fairness.
+    /// @dev The crucial conversion of shares to asset domain ($S_{total\_in\_assets}$) ensures we're comparing
+    ///  quantities in the same space, as the bonding curve defines a non-linear relationship
+    ///  between shares and assets.
+    /// @dev TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.
+    ///  So you need to compute their value using a common denominator like dollars.
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
@@ -1886,7 +2026,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param id vault id to get corresponding shares for
     ///
     /// @return shares amount of shares that would be minted from the deposit of `assets`
-    /// NOTE: this function pessimistically estimates the amount of shares that would be minted from the
+    /// @dev this function pessimistically estimates the amount of shares that would be minted from the
     ///       input amount of assets so if the vault is empty before the deposit the caller receives more
     ///       shares than returned by this function, reference internal _depositIntoVault logic for details
     function previewDeposit(
@@ -1930,7 +2070,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice returns the corresponding hash for the given RDF triple, given the triple vault id
     /// @param id vault id of the triple
     /// @return hash the corresponding hash for the given RDF triple
-    /// NOTE: only applies to triple vault IDs as input
+    /// @dev only applies to triple vault IDs as input
     function tripleHash(uint256 id) public view returns (bytes32) {
         uint256[3] memory atomIds;
         (atomIds[0], atomIds[1], atomIds[2]) = getTripleAtoms(id);
@@ -1948,7 +2088,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice returns the atoms that make up a triple/counter-triple
     /// @param id vault id of the triple/counter-triple
     /// @return tuple(atomIds) the atoms that make up the triple/counter-triple
-    /// NOTE: only applies to triple vault IDs as input
+    /// @dev only applies to triple vault IDs as input
     function getTripleAtoms(uint256 id) public view returns (uint256, uint256, uint256) {
         bool isCounterTriple = id > type(uint256).max / 2;
         uint256[3] memory atomIds = isCounterTriple ? triples[type(uint256).max - id] : triples[id];
@@ -1973,7 +2113,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice returns the counter id from the given triple id
     /// @param id vault id of the triple
     /// @return counterId the counter vault id from the given triple id
-    /// NOTE: only applies to triple vault IDs as input
+    /// @dev only applies to triple vault IDs as input
     function getCounterIdFromTriple(uint256 id) public pure returns (uint256) {
         return type(uint256).max - id;
     }
@@ -2013,7 +2153,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice returns the Atom Wallet address for the given atom data
     /// @param id vault id of the atom associated to the atom wallet
     /// @return atomWallet the address of the atom wallet
-    /// NOTE: the create2 salt is based off of the vault ID
+    /// @dev the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) public view returns (address) {
         // compute salt for create2
         bytes32 salt = bytes32(id);
