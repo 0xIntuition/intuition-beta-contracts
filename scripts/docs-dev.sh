@@ -60,15 +60,23 @@ python3 scripts/generate_diagrams.py
 
 # Step 5: Update SUMMARY.md to include architecture
 echo "Updating SUMMARY.md..."
-# First, check if architecture section already exists
-if ! grep -q "architecture/overview.md" docs/src/SUMMARY.md; then
-    # Add architecture section after Home but before src
-    awk '
-    /# Home/ { print; print "- [Architecture](architecture/overview.md)"; next }
-    { print }
-    ' docs/src/SUMMARY.md > docs/src/SUMMARY.md.tmp
-    mv docs/src/SUMMARY.md.tmp docs/src/SUMMARY.md
-fi
+{
+    echo "# Summary"
+    echo "- [Home](README.md)"
+    echo "- [Architecture](architecture/overview.md)"
+    echo "  - [EthMultiVault](architecture/EthMultiVault.md)"
+    echo "  - [BondingCurveRegistry](architecture/BondingCurveRegistry.md)"
+    echo "  - [BaseCurve](architecture/BaseCurve.md)"
+    echo "  - [LinearCurve](architecture/LinearCurve.md)"
+    echo "  - [ProgressiveCurve](architecture/ProgressiveCurve.md)"
+    echo "  - [AtomWallet](architecture/AtomWallet.md)"
+    echo "  - [Attestoor](architecture/Attestoor.md)"
+    echo "  - [AttestoorFactory](architecture/AttestoorFactory.md)"
+    echo "  - [CustomMulticall3](architecture/CustomMulticall3.md)"
+    echo "# src"
+    tail -n +3 docs/src/SUMMARY.md | grep -v "architecture/overview.md"
+} > docs/src/SUMMARY.md.tmp
+mv docs/src/SUMMARY.md.tmp docs/src/SUMMARY.md
 
 # Step 6: Configure mdbook
 echo "Configuring mdbook..."
@@ -94,20 +102,22 @@ EOF
 # Step 7: Copy Mermaid files
 echo "Setting up Mermaid..."
 mkdir -p docs/theme
-curl -o docs/mermaid.min.js https://unpkg.com/mermaid@8.13.3/dist/mermaid.min.js
-cat > docs/theme/head.hbs << EOF
-<script>
-    window.addEventListener('load', (event) => {
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'dark',
-            securityLevel: 'loose',
-            themeVariables: {
-                darkMode: true
-            }
-        });
-    });
-</script>
+curl -o docs/mermaid.min.js https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
+cat > docs/mermaid-init.js << EOF
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  securityLevel: 'loose',
+  themeVariables: {
+    darkMode: true
+  },
+  mindmap: {
+    padding: 10,
+    useMaxWidth: true
+  }
+});
 EOF
 
 # Step 8: Start development server

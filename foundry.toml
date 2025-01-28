@@ -8,9 +8,9 @@ build_info = true
 extra_output = ["storageLayout"]
 evm_version = "Cancun"
 auto_detect_remappings = false
-optimizer = true
-optimizer_runs = 200
-via_ir = true
-optimizer_details = { constantOptimizer = true, yul = true, deduplicate = true }
+# optimizer = true
+# optimizer_runs = 200
+# via_ir = true
+# optimizer_details = { constantOptimizer = true, yul = true, deduplicate = true }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
