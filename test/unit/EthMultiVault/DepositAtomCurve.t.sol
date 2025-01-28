@@ -28,10 +28,10 @@ contract DepositAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // Initial deposit by alice
         uint256 aliceInitialBalance = address(alice).balance;
         ethMultiVault.depositAtomCurve{value: testDepositAmount}(alice, id, CURVE_ID);
-        
+
         // Check alice's balance change
         assertEq(aliceInitialBalance - address(alice).balance, testDepositAmount);
-        
+
         // Check alice's shares and assets
         (uint256 aliceShares, uint256 aliceAssets) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
         assertTrue(aliceShares > 0);
@@ -43,10 +43,10 @@ contract DepositAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
         uint256 bobInitialBalance = address(bob).balance;
         ethMultiVault.depositAtomCurve{value: testDepositAmount}(bob, id, CURVE_ID);
-        
+
         // Check bob's balance change
         assertEq(bobInitialBalance - address(bob).balance, testDepositAmount);
-        
+
         // Check bob's shares and assets
         (uint256 bobShares, uint256 bobAssets) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, bob);
         assertTrue(bobShares > 0);

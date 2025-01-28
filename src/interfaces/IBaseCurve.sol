@@ -25,7 +25,6 @@ interface IBaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would be minted
-    /// @dev The implementation of this function must call _adjust()
     function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
         external
         view
@@ -36,7 +35,6 @@ interface IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be returned
-    /// @dev The implementation of this function must call _adjust()
     function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
         external
         view
@@ -47,7 +45,6 @@ interface IBaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would need to be redeemed
-    /// @dev The implementation of this function must call _adjust()
     function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
         external
         view
@@ -58,7 +55,6 @@ interface IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be required to mint the shares
-    /// @dev The implementation of this function must call _adjust()
     function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
         external
         view

@@ -272,7 +272,11 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         return shares;
     }
 
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user) public view returns (uint256 shares, uint256 assets) {
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address user)
+        public
+        view
+        returns (uint256 shares, uint256 assets)
+    {
         (shares, assets) = ethMultiVault.getVaultStateForUserCurve(vaultId, curveId, user);
     }
 

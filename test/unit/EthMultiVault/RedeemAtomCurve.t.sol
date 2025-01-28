@@ -36,13 +36,13 @@ contract RedeemAtomCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         console.log("In assets that's ", test);
         uint256 assetsInVault = vaultTotalAssetsCurve(id, CURVE_ID);
         console.log("In vault assets ", assetsInVault);
-        
+
         // Redeem all shares
         uint256 assetsReceived = ethMultiVault.redeemAtomCurve(aliceShares, alice, id, CURVE_ID);
-        
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
         (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
         assertEq(sharesAfter, 0);

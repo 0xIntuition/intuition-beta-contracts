@@ -31,6 +31,7 @@ To get a basic understanding of the Intuition protocol, please check out the fol
 - [Official Website](https://intuition.systems)
 - [Official Documentation](https://docs.intuition.systems)
 - [Deep Dive into Our Smart Contracts](https://intuition.gitbook.io/intuition-or-beta-contracts)
+- [Full Contracts Documentation](https://0xintuition.github.io/intuition-beta-contracts)
 
 ### Known Nuances
 
