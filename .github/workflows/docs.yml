@@ -1,0 +1,221 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Forge Dependencies
+        run: |
+          forge install
+          forge build
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install matplotlib numpy
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Generate Forge Documentation
+        run: forge doc
+
+      - name: Create Architecture Documentation
+        run: mkdir -p docs/src/architecture
+
+      - name: Generate Contract Information
+        run: |
+          mkdir -p docs/contracts
+          for contract in $(find src -name "*.sol"); do
+            base=$(basename "$contract" .sol)
+            echo "Processing $base..."
+            
+            # Create a temporary directory for each contract's components
+            mkdir -p "docs/contracts/$base"
+            
+            # Process each component separately with error handling
+            if abi=$(forge inspect "$contract:$base" abi 2>/dev/null) && echo "$abi" | jq . >/dev/null 2>&1; then
+              echo "$abi" > "docs/contracts/$base/abi.json"
+            else
+              echo "[]" > "docs/contracts/$base/abi.json"
+              echo "Warning: Could not get ABI for $base"
+            fi
+            
+            if devdoc=$(forge inspect "$contract:$base" devdoc 2>/dev/null) && echo "$devdoc" | jq . >/dev/null 2>&1; then
+              echo "$devdoc" > "docs/contracts/$base/devdoc.json"
+            else
+              echo "{}" > "docs/contracts/$base/devdoc.json"
+              echo "Warning: Could not get devdoc for $base"
+            fi
+            
+            if userdoc=$(forge inspect "$contract:$base" userdoc 2>/dev/null) && echo "$userdoc" | jq . >/dev/null 2>&1; then
+              echo "$userdoc" > "docs/contracts/$base/userdoc.json"
+            else
+              echo "{}" > "docs/contracts/$base/userdoc.json"
+              echo "Warning: Could not get userdoc for $base"
+            fi
+            
+            if storage=$(forge inspect "$contract:$base" storageLayout 2>/dev/null) && echo "$storage" | jq . >/dev/null 2>&1; then
+              echo "$storage" > "docs/contracts/$base/storage.json"
+            else
+              echo "{}" > "docs/contracts/$base/storage.json"
+              echo "Warning: Could not get storage layout for $base"
+            fi
+            
+            # Combine all valid JSON files
+            jq -s '{ 
+              "abi": .[0], 
+              "devdoc": .[1], 
+              "userdoc": .[2], 
+              "storageLayout": .[3] 
+            }' \
+              "docs/contracts/$base/abi.json" \
+              "docs/contracts/$base/devdoc.json" \
+              "docs/contracts/$base/userdoc.json" \
+              "docs/contracts/$base/storage.json" > "docs/contracts/$base.json"
+            
+            # Clean up temporary files
+            rm -rf "docs/contracts/$base"
+          done
+
+      - name: Generate Contract Diagrams
+        run: python3 scripts/generate_diagrams.py
+
+      - name: Update SUMMARY.md
+        run: |
+          {
+              echo "# Summary"
+              echo "- [Home](README.md)"
+              echo "- [Architecture](architecture/overview.md)"
+              echo "  - [EthMultiVault](architecture/EthMultiVault.md)"
+              echo "  - [BondingCurveRegistry](architecture/BondingCurveRegistry.md)"
+              echo "  - [BaseCurve](architecture/BaseCurve.md)"
+              echo "  - [LinearCurve](architecture/LinearCurve.md)"
+              echo "  - [ProgressiveCurve](architecture/ProgressiveCurve.md)"
+              echo "  - [AtomWallet](architecture/AtomWallet.md)"
+              echo "  - [Attestoor](architecture/Attestoor.md)"
+              echo "  - [AttestoorFactory](architecture/AttestoorFactory.md)"
+              echo "  - [CustomMulticall3](architecture/CustomMulticall3.md)"
+              echo "# src"
+              tail -n +3 docs/src/SUMMARY.md | grep -v "architecture/overview.md"
+          } > docs/src/SUMMARY.md.tmp
+          mv docs/src/SUMMARY.md.tmp docs/src/SUMMARY.md
+
+      - name: Install mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Configure mdbook
+        run: |
+          cat > docs/book.toml << EOF
+          [book]
+          title = "Intuition Beta Contracts Documentation"
+          authors = ["Intuition Labs"]
+          language = "en"
+          multilingual = false
+          src = "src"
+
+          [output.html]
+          default-theme = "dark"
+          preferred-dark-theme = "ayu"
+          git-repository-url = "https://github.com/0xIntuition/intuition-beta-contracts"
+          additional-js = ["mermaid.min.js", "mermaid-init.js"]
+          additional-css = ["book.css"]
+
+          [preprocessor.mermaid]
+          command = "mdbook-mermaid"
+          EOF
+
+      - name: Setup Theme and Templates
+        run: |
+          mkdir -p docs/theme
+          # Copy template from templates directory
+          cp templates/head.hbs docs/theme/head.hbs
+          # Setup mermaid
+          curl -o docs/mermaid.min.js https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js
+          cat > docs/mermaid-init.js << EOF
+          window.addEventListener('load', (event) => {
+              mermaid.initialize({
+                  startOnLoad: true,
+                  theme: 'dark',
+                  securityLevel: 'loose',
+                  themeVariables: {
+                      darkMode: true,
+                      xyChart: {
+                          backgroundColor: '#1f2937',
+                          titleColor: '#ffffff',
+                          gridColor: '#374151',
+                          xAxisLabelColor: '#9ca3af',
+                          yAxisLabelColor: '#9ca3af',
+                          plotColorPalette: '#6366f1'
+                      }
+                  },
+                  mindmap: {
+                      padding: 10,
+                      useMaxWidth: true
+                  }
+              });
+          });
+          EOF
+
+      - name: Generate Curve Data and Graphs
+        run: python3 scripts/generate_curve_graphs.py
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install mdbook and plugins
+        run: |
+          cargo install mdbook
+          cargo install mdbook-mermaid
+
+      - name: Build Documentation
+        run: |
+          cd docs
+          mdbook build
+
+      - name: Copy Documentation to README
+        run: |
+          cp docs/book/architecture/overview.html README.md
+          sed -i 's/<[^>]*>//g' README.md
+          echo "For full documentation, visit [our documentation site](https://0xintuition.github.io/intuition-beta-contracts/)" >> README.md
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/book

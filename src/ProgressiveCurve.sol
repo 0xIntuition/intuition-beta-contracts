@@ -7,7 +7,28 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 /**
  * @title  ProgressiveCurve
  * @author 0xIntuition
- * @notice Implementation of a progressive bonding curve where price increases linearly with each share
+ * @notice 🚀 Welcome to the SPICIEST bonding curve in the Intuition galaxy! While our LinearCurve 
+ *         is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on 
+ *         early staker rewards! 🌶️
+ *
+ *         This mathematical masterpiece uses a progressive pricing model where each new share 
+ *         costs more than the last. The price follows the formula P(s) = m * s, where 'm' is 
+ *         our slope (measured in basis points) and 's' is the total supply of shares. But wait, 
+ *         there's more! The actual cost to mint shares is calculated as the area under this 
+ *         curve, giving us: Cost = (s₂² - s₁²) * (m/2), where s₁ is the starting share supply 
+ *         and s₂ is the final share supply. 📐
+ *
+ *         Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors 
+ *         early stakers. The earlier you get in, the more your shares are worth compared to 
+ *         later participants. It's like the LinearCurve's fee-based appreciation got injected 
+ *         with pure rocket fuel! While fees still provide that sweet, sweet baseline appreciation, 
+ *         the progressive curve adds an aggressive incentivization mechanism that makes early 
+ *         staking absolutely JUICY. 💎
+ *
+ *         Think of it as DeFi's answer to the early bird special - except instead of getting 
+ *         the worm, you're getting exponentially more valuable shares! The perfect complement 
+ *         to our low-risk fee model, creating a two-pronged approach to value accrual that's 
+ *         simply *chef's kiss* 👨‍🍳
  */
 contract ProgressiveCurve is BaseCurve {
     UD60x18 public immutable SLOPE; // 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc

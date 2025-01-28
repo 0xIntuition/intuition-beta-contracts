@@ -27,3 +27,4 @@ _playground/*.json
 .env_testnet
 venv
 test/tools/__pycache__/
+docs/
