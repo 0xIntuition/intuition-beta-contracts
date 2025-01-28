@@ -36,23 +36,29 @@ def get_doc_link(contract_name: str, source_path: str, member_name: str = "") ->
     """Generate documentation link for a contract or member."""
     base_url = "http://localhost:3000/src/"
     
-    # Determine the correct path and type prefix based on the source path
-    if contract_name.startswith('I') and not contract_name == 'Intuition':
-        path = f"interfaces/{contract_name}.sol"
-        type_prefix = "interface"
-    elif source_path.endswith('Library.sol'):
-        path = f"libraries/{contract_name}.sol"
+    # Get the full path and type from the source path
+    if source_path.startswith('libraries/'):
         type_prefix = "library"
-    elif source_path.startswith('utils/'):
-        path = f"utils/{contract_name}.sol"
-        type_prefix = "contract"
+    elif source_path.startswith('interfaces/'):
+        type_prefix = "interface"
     else:
-        path = f"{contract_name}.sol"
         type_prefix = "contract"
     
+    # Use the full source path for the link
     if member_name:
-        return f"{base_url}{path}/{type_prefix}.{contract_name}.html#{member_name.lower()}"
-    return f"{base_url}{path}/{type_prefix}.{contract_name}.html"
+        return f"{base_url}{source_path}/{type_prefix}.{contract_name}.html#{member_name.lower()}"
+    return f"{base_url}{source_path}/{type_prefix}.{contract_name}.html"
+
+def get_category_from_path(path: str) -> str:
+    """Get the category for a contract based on its path."""
+    parts = path.split('/')
+    
+    # Default to Core for files directly in src
+    if len(parts) == 1:
+        return "Core"
+        
+    # Use the first subdirectory as the category
+    return parts[0].title()
 
 def parse_contract_doc(contract_path: str) -> ContractInfo:
     base = os.path.basename(contract_path).replace(".json", "")
@@ -92,14 +98,19 @@ def parse_contract_doc(contract_path: str) -> ContractInfo:
                 inherits = details.split("Inherits:")[1].strip()
                 info.inherits_from.update(re.findall(r'\b([A-Z]\w+)\b', inherits))
 
-        # Determine source path
-        if info.is_interface:
-            info.source_path = f"interfaces/{base}.sol"
-        elif base.endswith("Library"):
-            info.source_path = f"libraries/{base}.sol"
-        elif "utils" in contract_path:
-            info.source_path = f"utils/{base}.sol"
-        else:
+        # Look for the contract in src directory to determine its path
+        for root, _, files in os.walk("src"):
+            for file in files:
+                if file == f"{base}.sol":
+                    # Get the relative path from src
+                    rel_path = os.path.relpath(os.path.join(root, file), "src")
+                    info.source_path = rel_path
+                    break
+            if info.source_path:
+                break
+                
+        # If not found, default to root
+        if not info.source_path:
             info.source_path = f"{base}.sol"
 
     return info
@@ -266,59 +277,37 @@ graph TB
     return mermaid
 
 def generate_overview_diagram(contracts: Dict[str, ContractInfo]) -> str:
-    mermaid = """```mermaid
-graph TB
-    root(("🔗 Smart Contracts"))
-"""
-    
-    # Group contracts by type
-    interfaces = []
-    core_contracts = []
-    utils = []
-    libraries = []
+    # Group contracts by their categories
+    categorized_contracts: Dict[str, List[Tuple[str, ContractInfo]]] = defaultdict(list)
     
     for name, info in contracts.items():
-        if info.is_interface:
-            interfaces.append((name, info))
-        elif info.source_path.startswith("utils/"):
-            utils.append((name, info))
-        elif info.source_path.startswith("libraries/"):
-            libraries.append((name, info))
-        else:
-            core_contracts.append((name, info))
+        category = get_category_from_path(info.source_path)
+        categorized_contracts[category].append((name, info))
     
-    # Add core contracts subgraph
-    if core_contracts:
-        mermaid += """
-    subgraph Core ["🛠️ Core Contracts"]
+    # Start the diagram
+    mermaid = """```mermaid
+graph TB
+"""
+    
+    # Add root nodes for each category that has contracts
+    for category in categorized_contracts.keys():
+        safe_category = category.replace(" ", "")
+        mermaid += f'    {safe_category}(("{category}"))\n'
+    
+    # Add subgraphs for each category
+    for category, contract_list in categorized_contracts.items():
+        if not contract_list:
+            continue
+            
+        safe_category = category.replace(" ", "")
+        mermaid += f"""
+    subgraph {safe_category}List ["{category}"]
         direction LR
 """
         # Group contracts in pairs for better layout
         pairs = []
         current_pair = []
-        for name, _ in sorted(core_contracts):
-            current_pair.append(name)
-            if len(current_pair) == 2:
-                pairs.append(current_pair)
-                current_pair = []
-        if current_pair:  # Add any remaining contract
-            pairs.append(current_pair)
-            
-        # Add the pairs to the diagram
-        for pair in pairs:
-            mermaid += f"        {' & '.join(pair)}\n"
-        mermaid += "    end\n"
-    
-    # Add interfaces subgraph
-    if interfaces:
-        mermaid += """
-    subgraph Interfaces ["📋 Interfaces"]
-        direction LR
-"""
-        # Group interfaces in pairs
-        pairs = []
-        current_pair = []
-        for name, _ in sorted(interfaces):
+        for name, _ in sorted(contract_list):
             current_pair.append(name)
             if len(current_pair) == 2:
                 pairs.append(current_pair)
@@ -329,42 +318,38 @@ graph TB
         for pair in pairs:
             mermaid += f"        {' & '.join(pair)}\n"
         mermaid += "    end\n"
+        mermaid += f"    {safe_category} --> {safe_category}List\n"
     
-    # Add root connections
+    # Add styles
     mermaid += """
-    root --> Core
-    root --> Interfaces
-    
     %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:14px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:18px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef contract fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:14px,font-family:Arial,rounded:true;
-    classDef interface fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:14px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:16px,font-weight:bold,font-family:Arial;
+    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:16px,font-family:Arial,rounded:true,color:#000;
+    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:20px,font-weight:bold,font-family:Arial,rx:40px;
+    classDef category fill:none,stroke:none,color:#000,font-size:18px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
-    class root root;
-    class Core,Interfaces category;
 """
+    # Add root styles
+    root_nodes = [cat.replace(" ", "") for cat in categorized_contracts.keys()]
+    if root_nodes:
+        mermaid += f"    class {','.join(root_nodes)} root;\n"
     
-    # Apply contract styles
-    contract_styles = []
-    for name, _ in core_contracts:
-        contract_styles.append(name)
-    if contract_styles:
-        mermaid += f"    class {','.join(contract_styles)} contract;\n"
-    
-    # Apply interface styles
-    interface_styles = []
-    for name, _ in interfaces:
-        interface_styles.append(name)
-    if interface_styles:
-        mermaid += f"    class {','.join(interface_styles)} interface;\n"
+    # Add category styles
+    category_nodes = [f"{cat.replace(' ', '')}List" for cat in categorized_contracts.keys()]
+    if category_nodes:
+        mermaid += f"    class {','.join(category_nodes)} category;\n"
     
     # Add click actions
     mermaid += "\n    %% Click actions\n"
-    for name, _ in core_contracts + interfaces:
-        mermaid += f'    click {name} "{name}.html" "{name} documentation"\n'
+    
+    # Add clicks for all contracts
+    for category, contract_list in categorized_contracts.items():
+        for name, info in contract_list:
+            # Core contracts link to architecture diagrams, others link to their documentation
+            if category == "Core":
+                mermaid += f'    click {name} "{name}.html" "{name} documentation"\n'
+            else:
+                mermaid += f'    click {name} "{get_doc_link(name, info.source_path)}" "{name} documentation"\n'
     
     mermaid += "```"
     return mermaid
