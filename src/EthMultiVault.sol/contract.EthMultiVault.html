@@ -1,0 +1,1317 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>EthMultiVault - Intuition Beta Contracts Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        <!-- Include Mermaid -->
+        <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
+        
+        <script>
+          window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
+          'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
+          { enabled: true, maxZoom: 10, minZoom: 0.1 }, menu: { enabled: true, showMenu: true, menuItems: [ { name: 'Zoom In',
+          action: function() { mermaid.mermaidAPI.zoomIn(); } }, { name: 'Zoom Out', action: function() {
+          mermaid.mermaidAPI.zoomOut(); } }, { name: 'Reset Zoom', action: function() { mermaid.mermaidAPI.reset(); } } ] } });
+          });
+        </script>
+        
+        <style>
+          .mermaid { width: 100% !important; } /* Style the menu */ .mermaid-menu { background-color: #2d2d2d !important;
+          border: 1px solid #444 !important; padding: 5px !important; border-radius: 4px !important; } .mermaid-menu-item {
+          color: #fff !important; padding: 5px 10px !important; cursor: pointer !important; } .mermaid-menu-item:hover {
+          background-color: #444 !important; }
+        </style>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../book.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('dark')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Intuition Beta Contracts Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/0xIntuition/intuition-beta-contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ethmultivault"><a class="header" href="#ethmultivault">EthMultiVault</a></h1>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/EthMultiVault.sol">Git Source</a></p>
+<p><strong>Inherits:</strong>
+<a href="/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
+<p><strong>Author:</strong>
+0xIntuition</p>
+<p>Core contract of the Intuition protocol. Manages the creation and management of vaults
+associated with atoms &amp; triples.</p>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="set_admin"><a class="header" href="#set_admin">SET_ADMIN</a></h3>
+<pre><code class="language-solidity">bytes32 public constant SET_ADMIN = keccak256("setAdmin");
+</code></pre>
+<h3 id="set_exit_fee"><a class="header" href="#set_exit_fee">SET_EXIT_FEE</a></h3>
+<pre><code class="language-solidity">bytes32 public constant SET_EXIT_FEE = keccak256("setExitFee");
+</code></pre>
+<h3 id="generalconfig"><a class="header" href="#generalconfig">generalConfig</a></h3>
+<p>Configuration structs</p>
+<pre><code class="language-solidity">GeneralConfig public generalConfig;
+</code></pre>
+<h3 id="atomconfig"><a class="header" href="#atomconfig">atomConfig</a></h3>
+<pre><code class="language-solidity">AtomConfig public atomConfig;
+</code></pre>
+<h3 id="tripleconfig"><a class="header" href="#tripleconfig">tripleConfig</a></h3>
+<pre><code class="language-solidity">TripleConfig public tripleConfig;
+</code></pre>
+<h3 id="walletconfig"><a class="header" href="#walletconfig">walletConfig</a></h3>
+<pre><code class="language-solidity">WalletConfig public walletConfig;
+</code></pre>
+<h3 id="count"><a class="header" href="#count">count</a></h3>
+<p>ID of the last vault to be created</p>
+<pre><code class="language-solidity">uint256 public count;
+</code></pre>
+<h3 id="vaults"><a class="header" href="#vaults">vaults</a></h3>
+<p>Mapping of vault ID to vault state</p>
+<pre><code class="language-solidity">mapping(uint256 vaultId =&gt; VaultState vaultState) public vaults;
+</code></pre>
+<h3 id="vaultfees"><a class="header" href="#vaultfees">vaultFees</a></h3>
+<p>Mapping of vault ID to vault fees</p>
+<pre><code class="language-solidity">mapping(uint256 vaultId =&gt; VaultFees vaultFees) public vaultFees;
+</code></pre>
+<h3 id="approvals"><a class="header" href="#approvals">approvals</a></h3>
+<p>Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver</p>
+<pre><code class="language-solidity">mapping(address receiver =&gt; mapping(address sender =&gt; bool isApproved)) public approvals;
+</code></pre>
+<h3 id="atoms"><a class="header" href="#atoms">atoms</a></h3>
+<p>RDF (Resource Description Framework)</p>
+<pre><code class="language-solidity">mapping(uint256 atomId =&gt; bytes atomData) public atoms;
+</code></pre>
+<h3 id="atomsbyhash"><a class="header" href="#atomsbyhash">atomsByHash</a></h3>
+<pre><code class="language-solidity">mapping(bytes32 atomHash =&gt; uint256 atomId) public atomsByHash;
+</code></pre>
+<h3 id="triples"><a class="header" href="#triples">triples</a></h3>
+<pre><code class="language-solidity">mapping(uint256 tripleId =&gt; uint256[3] tripleAtomIds) public triples;
+</code></pre>
+<h3 id="triplesbyhash"><a class="header" href="#triplesbyhash">triplesByHash</a></h3>
+<pre><code class="language-solidity">mapping(bytes32 tripleHash =&gt; uint256 tripleId) public triplesByHash;
+</code></pre>
+<h3 id="istriple"><a class="header" href="#istriple">isTriple</a></h3>
+<pre><code class="language-solidity">mapping(uint256 vaultId =&gt; bool isTriple) public isTriple;
+</code></pre>
+<h3 id="timelocks"><a class="header" href="#timelocks">timelocks</a></h3>
+<p>Timelock mapping (operation hash -&gt; timelock struct)</p>
+<pre><code class="language-solidity">mapping(bytes32 operationHash =&gt; Timelock timelock) public timelocks;
+</code></pre>
+<h3 id="bondingcurvevaults"><a class="header" href="#bondingcurvevaults">bondingCurveVaults</a></h3>
+<p>Bonding Curve Vaults (termId -&gt; curveId -&gt; vaultState)</p>
+<pre><code class="language-solidity">mapping(uint256 vaultId =&gt; mapping(uint256 curveId =&gt; VaultState vaultState)) public bondingCurveVaults;
+</code></pre>
+<h3 id="bondingcurveconfig"><a class="header" href="#bondingcurveconfig">bondingCurveConfig</a></h3>
+<p>Bonding Curve Configurations</p>
+<pre><code class="language-solidity">BondingCurveConfig public bondingCurveConfig;
+</code></pre>
+<h3 id="__gap"><a class="header" href="#__gap">__gap</a></h3>
+<p><em>Gap for upgrade safety</em></p>
+<pre><code class="language-solidity">uint256[48] private __gap;
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<h3 id="onlyadmin"><a class="header" href="#onlyadmin">onlyAdmin</a></h3>
+<p>Modifier to restrict a function to the admin</p>
+<pre><code class="language-solidity">modifier onlyAdmin();
+</code></pre>
+<h3 id="init"><a class="header" href="#init">init</a></h3>
+<p>Initializes the EthMultiVault contract</p>
+<pre><code class="language-solidity">function init(
+    GeneralConfig memory _generalConfig,
+    AtomConfig memory _atomConfig,
+    TripleConfig memory _tripleConfig,
+    WalletConfig memory _walletConfig,
+    VaultFees memory _defaultVaultFees,
+    BondingCurveConfig memory _bondingCurveConfig
+) external initializer;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_generalConfig</code></td><td><code>GeneralConfig</code></td><td>General configuration struct</td></tr>
+<tr><td><code>_atomConfig</code></td><td><code>AtomConfig</code></td><td>Atom configuration struct</td></tr>
+<tr><td><code>_tripleConfig</code></td><td><code>TripleConfig</code></td><td>Triple configuration struct</td></tr>
+<tr><td><code>_walletConfig</code></td><td><code>WalletConfig</code></td><td>Wallet configuration struct</td></tr>
+<tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct NOTE: This function is called only once (during contract deployment)</td></tr>
+<tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="receive"><a class="header" href="#receive">receive</a></h3>
+<p>contract does not accept ETH donations</p>
+<pre><code class="language-solidity">receive() external payable;
+</code></pre>
+<h3 id="fallback"><a class="header" href="#fallback">fallback</a></h3>
+<p>fallback function to decompress the calldata and call the appropriate function</p>
+<pre><code class="language-solidity">fallback() external payable;
+</code></pre>
+<h3 id="pause"><a class="header" href="#pause">pause</a></h3>
+<p><em>pauses the pausable contract methods</em></p>
+<pre><code class="language-solidity">function pause() external onlyAdmin;
+</code></pre>
+<h3 id="unpause"><a class="header" href="#unpause">unpause</a></h3>
+<p><em>unpauses the pausable contract methods</em></p>
+<pre><code class="language-solidity">function unpause() external onlyAdmin;
+</code></pre>
+<h3 id="scheduleoperation"><a class="header" href="#scheduleoperation">scheduleOperation</a></h3>
+<p><em>schedule an operation to be executed after a delay</em></p>
+<pre><code class="language-solidity">function scheduleOperation(bytes32 operationId, bytes calldata data) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>operationId</code></td><td><code>bytes32</code></td><td>unique identifier for the operation</td></tr>
+<tr><td><code>data</code></td><td><code>bytes</code></td><td>data to be executed</td></tr>
+</tbody></table>
+</div>
+<h3 id="canceloperation"><a class="header" href="#canceloperation">cancelOperation</a></h3>
+<p><em>cancel a scheduled operation</em></p>
+<pre><code class="language-solidity">function cancelOperation(bytes32 operationId, bytes calldata data) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>operationId</code></td><td><code>bytes32</code></td><td>unique identifier for the operation</td></tr>
+<tr><td><code>data</code></td><td><code>bytes</code></td><td>data of the operation to be cancelled</td></tr>
+</tbody></table>
+</div>
+<h3 id="setadmin"><a class="header" href="#setadmin">setAdmin</a></h3>
+<p><em>set admin</em></p>
+<pre><code class="language-solidity">function setAdmin(address admin) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>admin</code></td><td><code>address</code></td><td>address of the new admin</td></tr>
+</tbody></table>
+</div>
+<h3 id="setprotocolmultisig"><a class="header" href="#setprotocolmultisig">setProtocolMultisig</a></h3>
+<p><em>set protocol multisig</em></p>
+<pre><code class="language-solidity">function setProtocolMultisig(address protocolMultisig) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>protocolMultisig</code></td><td><code>address</code></td><td>address of the new protocol multisig</td></tr>
+</tbody></table>
+</div>
+<h3 id="setmindeposit"><a class="header" href="#setmindeposit">setMinDeposit</a></h3>
+<p><em>sets the minimum deposit amount for atoms and triples</em></p>
+<pre><code class="language-solidity">function setMinDeposit(uint256 minDeposit) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>new minimum deposit amount</td></tr>
+</tbody></table>
+</div>
+<h3 id="setminshare"><a class="header" href="#setminshare">setMinShare</a></h3>
+<p><em>sets the minimum share amount for atoms and triples</em></p>
+<pre><code class="language-solidity">function setMinShare(uint256 minShare) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>minShare</code></td><td><code>uint256</code></td><td>new minimum share amount</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomurimaxlength"><a class="header" href="#setatomurimaxlength">setAtomUriMaxLength</a></h3>
+<p><em>sets the atom URI max length</em></p>
+<pre><code class="language-solidity">function setAtomUriMaxLength(uint256 atomUriMaxLength) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomUriMaxLength</code></td><td><code>uint256</code></td><td>new atom URI max length</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomwalletinitialdepositamount"><a class="header" href="#setatomwalletinitialdepositamount">setAtomWalletInitialDepositAmount</a></h3>
+<p><em>sets the atom share lock fee</em></p>
+<pre><code class="language-solidity">function setAtomWalletInitialDepositAmount(uint256 atomWalletInitialDepositAmount) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomWalletInitialDepositAmount</code></td><td><code>uint256</code></td><td>new atom share lock fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomcreationprotocolfee"><a class="header" href="#setatomcreationprotocolfee">setAtomCreationProtocolFee</a></h3>
+<p><em>sets the atom creation fee</em></p>
+<pre><code class="language-solidity">function setAtomCreationProtocolFee(uint256 atomCreationProtocolFee) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomCreationProtocolFee</code></td><td><code>uint256</code></td><td>new atom creation fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="settriplecreationprotocolfee"><a class="header" href="#settriplecreationprotocolfee">setTripleCreationProtocolFee</a></h3>
+<p><em>sets fee charged in wei when creating a triple to protocol multisig</em></p>
+<pre><code class="language-solidity">function setTripleCreationProtocolFee(uint256 tripleCreationProtocolFee) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>tripleCreationProtocolFee</code></td><td><code>uint256</code></td><td>new fee in wei</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomdepositfractionontriplecreation"><a class="header" href="#setatomdepositfractionontriplecreation">setAtomDepositFractionOnTripleCreation</a></h3>
+<p><em>sets the atom deposit fraction on triple creation used to increase the amount of assets
+in the underlying atom vaults on triple creation</em></p>
+<pre><code class="language-solidity">function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomDepositFractionOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomdepositfractionfortriple"><a class="header" href="#setatomdepositfractionfortriple">setAtomDepositFractionForTriple</a></h3>
+<p><em>sets the atom deposit fraction percentage for atoms used in triples
+(number to be divided by <code>generalConfig.feeDenominator</code>)</em></p>
+<pre><code class="language-solidity">function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+</tbody></table>
+</div>
+<h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
+<p><em>sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
+id = 0 changes the default entry fee, id = n changes fees for vault n specifically</em></p>
+<p><em>admin cannot set the entry fee to be greater than <code>maxEntryFeePercentage</code>, which is
+set to be the 10% of <code>generalConfig.feeDenominator</code> (which represents 100%), to avoid
+being able to prevent users from depositing assets with unreasonable fees</em></p>
+<pre><code class="language-solidity">function setEntryFee(uint256 id, uint256 entryFee) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to set entry fee for</td></tr>
+<tr><td><code>entryFee</code></td><td><code>uint256</code></td><td>entry fee to set</td></tr>
+</tbody></table>
+</div>
+<h3 id="setexitfee"><a class="header" href="#setexitfee">setExitFee</a></h3>
+<p><em>sets exit fees for the specified vault (id=0 sets the default fees for all vaults)
+id = 0 changes the default exit fee, id = n changes fees for vault n specifically</em></p>
+<p><em>admin cannot set the exit fee to be greater than <code>maxExitFeePercentage</code>, which is
+set to be the 10% of <code>generalConfig.feeDenominator</code> (which represents 100%), to avoid
+being able to prevent users from withdrawing their assets</em></p>
+<pre><code class="language-solidity">function setExitFee(uint256 id, uint256 exitFee) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to set exit fee for</td></tr>
+<tr><td><code>exitFee</code></td><td><code>uint256</code></td><td>exit fee to set</td></tr>
+</tbody></table>
+</div>
+<h3 id="setprotocolfee"><a class="header" href="#setprotocolfee">setProtocolFee</a></h3>
+<p><em>sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
+id = 0 changes the default protocol fee, id = n changes fees for vault n specifically</em></p>
+<p><em>admin cannot set the protocol fee to be greater than <code>maxProtocolFeePercentage</code>, which is
+set to be the 10% of <code>generalConfig.feeDenominator</code> (which represents 100%), to avoid
+being able to prevent users from depositing or withdrawing their assets with unreasonable fees</em></p>
+<pre><code class="language-solidity">function setProtocolFee(uint256 id, uint256 protocolFee) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to set protocol fee for</td></tr>
+<tr><td><code>protocolFee</code></td><td><code>uint256</code></td><td>protocol fee to set</td></tr>
+</tbody></table>
+</div>
+<h3 id="setatomwarden"><a class="header" href="#setatomwarden">setAtomWarden</a></h3>
+<p><em>sets the atomWarden address</em></p>
+<pre><code class="language-solidity">function setAtomWarden(address atomWarden) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomWarden</code></td><td><code>address</code></td><td>address of the new atomWarden</td></tr>
+</tbody></table>
+</div>
+<h3 id="deployatomwallet"><a class="header" href="#deployatomwallet">deployAtomWallet</a></h3>
+<p>deploy a given atom wallet</p>
+<pre><code class="language-solidity">function deployAtomWallet(uint256 atomId) external whenNotPaused returns (address);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomId</code></td><td><code>uint256</code></td><td>vault id of atom</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist</td></tr>
+</tbody></table>
+</div>
+<h3 id="approvesender"><a class="header" href="#approvesender">approveSender</a></h3>
+<p>approve a sender to deposit assets on behalf of the receiver</p>
+<pre><code class="language-solidity">function approveSender(address sender) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address to approve</td></tr>
+</tbody></table>
+</div>
+<h3 id="revokesender"><a class="header" href="#revokesender">revokeSender</a></h3>
+<p>revoke a sender's approval to deposit assets on behalf of the receiver</p>
+<pre><code class="language-solidity">function revokeSender(address sender) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address to revoke</td></tr>
+</tbody></table>
+</div>
+<h3 id="createatom"><a class="header" href="#createatom">createAtom</a></h3>
+<p>Create an atom and return its vault id</p>
+<pre><code class="language-solidity">function createAtom(bytes calldata atomUri) external payable nonReentrant whenNotPaused returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomUri</code></td><td><code>bytes</code></td><td>atom data to create atom with</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the atom NOTE: This function will revert if called with less than <code>getAtomCost()</code> in <code>msg.value</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="batchcreateatom"><a class="header" href="#batchcreateatom">batchCreateAtom</a></h3>
+<p>Batch create atoms and return their vault ids</p>
+<pre><code class="language-solidity">function batchCreateAtom(bytes[] calldata atomUris)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomUris</code></td><td><code>bytes[]</code></td><td>atom data array to create atoms with</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>ids vault ids array of the atoms NOTE: This function will revert if called with less than <code>getAtomCost()</code> * <code>atomUris.length</code> in <code>msg.value</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="_createatom"><a class="header" href="#_createatom">_createAtom</a></h3>
+<p>Internal utility function to create an atom and handle vault creation</p>
+<pre><code class="language-solidity">function _createAtom(bytes calldata atomUri, uint256 value) internal returns (uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>atomUri</code></td><td><code>bytes</code></td><td>The atom data to create an atom with</td></tr>
+<tr><td><code>value</code></td><td><code>uint256</code></td><td>The value sent with the transaction</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id The new vault ID created for the atom</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="createtriple"><a class="header" href="#createtriple">createTriple</a></h3>
+<p>create a triple and return its vault id</p>
+<pre><code class="language-solidity">function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subjectId</code></td><td><code>uint256</code></td><td>vault id of the subject atom</td></tr>
+<tr><td><code>predicateId</code></td><td><code>uint256</code></td><td>vault id of the predicate atom</td></tr>
+<tr><td><code>objectId</code></td><td><code>uint256</code></td><td>vault id of the object atom</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the triple NOTE: This function will revert if called with less than <code>getTripleCost()</code> in <code>msg.value</code>. This function will revert if any of the atoms do not exist or if any ids are triple vaults.</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchcreatetriple"><a class="header" href="#batchcreatetriple">batchCreateTriple</a></h3>
+<p>batch create triples and return their vault ids</p>
+<pre><code class="language-solidity">function batchCreateTriple(uint256[] calldata subjectIds, uint256[] calldata predicateIds, uint256[] calldata objectIds)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subjectIds</code></td><td><code>uint256[]</code></td><td>vault ids array of subject atoms</td></tr>
+<tr><td><code>predicateIds</code></td><td><code>uint256[]</code></td><td>vault ids array of predicate atoms</td></tr>
+<tr><td><code>objectIds</code></td><td><code>uint256[]</code></td><td>vault ids array of object atoms NOTE: This function will revert if called with less than <code>getTripleCost()</code> * <code>array.length</code> in <code>msg.value</code>. This function will revert if any of the atoms do not exist or if any ids are triple vaults.</td></tr>
+</tbody></table>
+</div>
+<h3 id="_createtriple"><a class="header" href="#_createtriple">_createTriple</a></h3>
+<p>Internal utility function to create a triple</p>
+<pre><code class="language-solidity">function _createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 value)
+    internal
+    returns (uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subjectId</code></td><td><code>uint256</code></td><td>vault id of the subject atom</td></tr>
+<tr><td><code>predicateId</code></td><td><code>uint256</code></td><td>vault id of the predicate atom</td></tr>
+<tr><td><code>objectId</code></td><td><code>uint256</code></td><td>vault id of the object atom</td></tr>
+<tr><td><code>value</code></td><td><code>uint256</code></td><td>The amount of ETH the user has sent minus the base triple cost</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id The new vault ID of the created triple</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolDepositFee The calculated protocol fee for the deposit</td></tr>
+</tbody></table>
+</div>
+<h3 id="depositatom"><a class="header" href="#depositatom">depositAtom</a></h3>
+<p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<pre><code class="language-solidity">function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not an atom.</td></tr>
+</tbody></table>
+</div>
+<h3 id="depositatomcurve"><a class="header" href="#depositatomcurve">depositAtomCurve</a></h3>
+<pre><code class="language-solidity">function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256);
+</code></pre>
+<h3 id="redeematom"><a class="header" href="#redeematom">redeemAtom</a></h3>
+<p>redeem shares from an atom vault for assets</p>
+<pre><code class="language-solidity">function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+</tbody></table>
+</div>
+<h3 id="redeematomcurve"><a class="header" href="#redeematomcurve">redeemAtomCurve</a></h3>
+<pre><code class="language-solidity">function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+    external
+    nonReentrant
+    returns (uint256);
+</code></pre>
+<h3 id="deposittriple"><a class="header" href="#deposittriple">depositTriple</a></h3>
+<p>deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'receiver'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<pre><code class="language-solidity">function depositTriple(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not a triple.</td></tr>
+</tbody></table>
+</div>
+<h3 id="deposittriplecurve"><a class="header" href="#deposittriplecurve">depositTripleCurve</a></h3>
+<pre><code class="language-solidity">function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256);
+</code></pre>
+<h3 id="redeemtriple"><a class="header" href="#redeemtriple">redeemTriple</a></h3>
+<p>redeems 'shares' number of shares from the triple vault and send 'assets' eth
+from the contract to 'reciever' factoring in exit fees</p>
+<pre><code class="language-solidity">function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+</tbody></table>
+</div>
+<h3 id="redeemtriplecurve"><a class="header" href="#redeemtriplecurve">redeemTripleCurve</a></h3>
+<pre><code class="language-solidity">function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+    external
+    nonReentrant
+    returns (uint256);
+</code></pre>
+<h3 id="_transferfeestoprotocolmultisig"><a class="header" href="#_transferfeestoprotocolmultisig">_transferFeesToProtocolMultisig</a></h3>
+<p><em>transfer fees to the protocol multisig</em></p>
+<pre><code class="language-solidity">function _transferFeesToProtocolMultisig(uint256 value) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>uint256</code></td><td>the amount of eth to transfer</td></tr>
+</tbody></table>
+</div>
+<h3 id="_depositatomfraction"><a class="header" href="#_depositatomfraction">_depositAtomFraction</a></h3>
+<p><em>divides amount across the three atoms composing the triple and issues shares to
+the receiver. Doesn't charge additional protocol fees, but it does charge entry fees on each deposit
+into an atom vault.</em></p>
+<pre><code class="language-solidity">function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>the amount of eth to deposit NOTE: assumes funds have already been transferred to this contract</td></tr>
+</tbody></table>
+</div>
+<h3 id="_depositatomfractioncurve"><a class="header" href="#_depositatomfractioncurve">_depositAtomFractionCurve</a></h3>
+<pre><code class="language-solidity">function _depositAtomFractionCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal;
+</code></pre>
+<h3 id="_depositonvaultcreation"><a class="header" href="#_depositonvaultcreation">_depositOnVaultCreation</a></h3>
+<p><em>deposit assets into a vault upon creation.
+Changes the vault's total assets, total shares and balanceOf mappings to reflect the deposit.
+Additionally, initializes a counter vault with ghost shares.</em></p>
+<pre><code class="language-solidity">function _depositOnVaultCreation(uint256 id, address receiver, uint256 assets) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>the amount of eth to deposit</td></tr>
+</tbody></table>
+</div>
+<h3 id="_deposit"><a class="header" href="#_deposit">_deposit</a></h3>
+<p>Initialize the counter triple vault with ghost shares if it is a triple creation flow</p>
+<p>Internal function to encapsulate the common deposit logic for both atoms and triples</p>
+<pre><code class="language-solidity">function _deposit(address receiver, uint256 id, uint256 value) internal returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>value</code></td><td><code>uint256</code></td><td>the amount of eth to deposit</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>sharesForReceiver the amount of shares minted</td></tr>
+</tbody></table>
+</div>
+<h3 id="_depositcurve"><a class="header" href="#_depositcurve">_depositCurve</a></h3>
+<pre><code class="language-solidity">function _depositCurve(address receiver, uint256 id, uint256 curveId, uint256 value) internal returns (uint256);
+</code></pre>
+<h3 id="_redeem"><a class="header" href="#_redeem">_redeem</a></h3>
+<p><em>redeem shares out of a given vault.
+Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal</em></p>
+<pre><code class="language-solidity">function _redeem(uint256 id, address sender, address receiver, uint256 shares) internal returns (uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>the address to redeem the shares from</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the assets</td></tr>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assetsForReceiver the amount of assets/eth to be transferred to the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolFee the amount of protocol fees deducted</td></tr>
+</tbody></table>
+</div>
+<h3 id="_redeemcurve"><a class="header" href="#_redeemcurve">_redeemCurve</a></h3>
+<pre><code class="language-solidity">function _redeemCurve(uint256 id, uint256 curveId, address sender, address receiver, uint256 shares)
+    internal
+    returns (uint256, uint256);
+</code></pre>
+<h3 id="_mint"><a class="header" href="#_mint">_mint</a></h3>
+<p><em>mint vault shares of vault ID <code>id</code> to address <code>to</code></em></p>
+<pre><code class="language-solidity">function _mint(address to, uint256 id, uint256 amount) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>to</code></td><td><code>address</code></td><td>address to mint shares to</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault ID to mint shares for</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>amount of shares to mint</td></tr>
+</tbody></table>
+</div>
+<h3 id="_mintcurve"><a class="header" href="#_mintcurve">_mintCurve</a></h3>
+<pre><code class="language-solidity">function _mintCurve(address to, uint256 id, uint256 curveId, uint256 amount) internal;
+</code></pre>
+<h3 id="_burn"><a class="header" href="#_burn">_burn</a></h3>
+<p><em>burn <code>amount</code> vault shares of vault ID <code>id</code> from address <code>from</code></em></p>
+<pre><code class="language-solidity">function _burn(address from, uint256 id, uint256 amount) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>from</code></td><td><code>address</code></td><td>address to burn shares from</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault ID to burn shares from</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>amount of shares to burn</td></tr>
+</tbody></table>
+</div>
+<h3 id="_burncurve"><a class="header" href="#_burncurve">_burnCurve</a></h3>
+<pre><code class="language-solidity">function _burnCurve(address from, uint256 id, uint256 curveId, uint256 amount) internal;
+</code></pre>
+<h3 id="_setvaulttotals"><a class="header" href="#_setvaulttotals">_setVaultTotals</a></h3>
+<p><em>set total assets and shares for a vault</em></p>
+<pre><code class="language-solidity">function _setVaultTotals(uint256 id, uint256 totalAssets, uint256 totalShares) internal;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault ID to set totals for</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>new total assets for the vault</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>new total shares for the vault</td></tr>
+</tbody></table>
+</div>
+<h3 id="_increasecurvevaulttotals"><a class="header" href="#_increasecurvevaulttotals">_increaseCurveVaultTotals</a></h3>
+<pre><code class="language-solidity">function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal;
+</code></pre>
+<h3 id="_decreasecurvevaulttotals"><a class="header" href="#_decreasecurvevaulttotals">_decreaseCurveVaultTotals</a></h3>
+<pre><code class="language-solidity">function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal;
+</code></pre>
+<h3 id="_createvault"><a class="header" href="#_createvault">_createVault</a></h3>
+<p><em>internal method for vault creation</em></p>
+<pre><code class="language-solidity">function _createVault() internal returns (uint256);
+</code></pre>
+<h3 id="getatomcost"><a class="header" href="#getatomcost">getAtomCost</a></h3>
+<p>returns the cost of creating an atom</p>
+<pre><code class="language-solidity">function getAtomCost() public view returns (uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>atomCost the cost of creating an atom</td></tr>
+</tbody></table>
+</div>
+<h3 id="gettriplecost"><a class="header" href="#gettriplecost">getTripleCost</a></h3>
+<p>returns the cost of creating a triple</p>
+<pre><code class="language-solidity">function getTripleCost() public view returns (uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tripleCost the cost of creating a triple</td></tr>
+</tbody></table>
+</div>
+<h3 id="getdepositfees"><a class="header" href="#getdepositfees">getDepositFees</a></h3>
+<p>returns the total fees that would be charged for depositing 'assets' into a vault</p>
+<pre><code class="language-solidity">function getDepositFees(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of <code>assets</code> to calculate fees on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>totalFees total fees that would be charged for depositing 'assets' into a vault</td></tr>
+</tbody></table>
+</div>
+<h3 id="getdepositsharesandfees"><a class="header" href="#getdepositsharesandfees">getDepositSharesAndFees</a></h3>
+<p>returns the shares for recipient and other important values when depositing 'assets' into a vault</p>
+<pre><code class="language-solidity">function getDepositSharesAndFees(uint256 assets, uint256 id) public view returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of <code>assets</code> to calculate fees on (should always be msg.value - protocolFee)</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>totalAssetsDelta changes in vault's total assets</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>sharesForReceiver changes in vault's total shares (shares owed to receiver)</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>entryFee amount of assets that would be charged for the entry fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="getdepositsharesandfeescurve"><a class="header" href="#getdepositsharesandfeescurve">getDepositSharesAndFeesCurve</a></h3>
+<pre><code class="language-solidity">function getDepositSharesAndFeesCurve(uint256 assets, uint256 id, uint256 curveId)
+    public
+    view
+    returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<h3 id="getredeemassetsandfees"><a class="header" href="#getredeemassetsandfees">getRedeemAssetsAndFees</a></h3>
+<p>returns the assets for receiver and other important values when redeeming 'shares' from a vault</p>
+<pre><code class="language-solidity">function getRedeemAssetsAndFees(uint256 shares, uint256 id) public view returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of <code>shares</code> to calculate fees on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assetsForReceiver amount of assets that is redeemable by the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolFee amount of assets that would be sent to the protocol multisig</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>exitFee amount of assets that would be charged for the exit fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="getredeemassetsandfeescurve"><a class="header" href="#getredeemassetsandfeescurve">getRedeemAssetsAndFeesCurve</a></h3>
+<pre><code class="language-solidity">function getRedeemAssetsAndFeesCurve(uint256 shares, uint256 id, uint256 curveId)
+    public
+    view
+    returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<h3 id="entryfeeamount"><a class="header" href="#entryfeeamount">entryFeeAmount</a></h3>
+<p>returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided</p>
+<pre><code class="language-solidity">function entryFeeAmount(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate fee on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the entry fee NOTE: if the vault being deposited on has a vault total shares of 0, the entry fee is not applied</td></tr>
+</tbody></table>
+</div>
+<h3 id="exitfeeamount"><a class="header" href="#exitfeeamount">exitFeeAmount</a></h3>
+<p>returns amount of assets that would be charged for the exit fee given an amount of 'assets' provided</p>
+<pre><code class="language-solidity">function exitFeeAmount(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate fee on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the exit fee NOTE: if the vault  being redeemed from given the shares to redeem results in a total shares after of 0, the exit fee is not applied</td></tr>
+</tbody></table>
+</div>
+<h3 id="protocolfeeamount"><a class="header" href="#protocolfeeamount">protocolFeeAmount</a></h3>
+<p>returns amount of assets that would be charged by a vault on protocol fee given amount of 'assets'
+provided</p>
+<pre><code class="language-solidity">function protocolFeeAmount(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate fee on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged by vault on protocol fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="atomdepositfractionamount"><a class="header" href="#atomdepositfractionamount">atomDepositFractionAmount</a></h3>
+<p>returns atom deposit fraction given amount of 'assets' provided</p>
+<pre><code class="language-solidity">function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate fee on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be used as atom deposit fraction NOTE: only applies to triple vaults</td></tr>
+</tbody></table>
+</div>
+<h3 id="_feeonraw"><a class="header" href="#_feeonraw">_feeOnRaw</a></h3>
+<p>calculates fee on raw amount</p>
+<pre><code class="language-solidity">function _feeOnRaw(uint256 amount, uint256 fee) internal view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>amount of assets to calculate fee on</td></tr>
+<tr><td><code>fee</code></td><td><code>uint256</code></td><td>fee in %</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>amount of assets that would be charged as fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentshareprice"><a class="header" href="#currentshareprice">currentSharePrice</a></h3>
+<p>returns the current share price for the given vault id</p>
+<pre><code class="language-solidity">function currentSharePrice(uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding share price for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id, scaled by generalConfig.decimalPrecision</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentsharepricecurve"><a class="header" href="#currentsharepricecurve">currentSharePriceCurve</a></h3>
+<p>returns the current share price for the given vault id and curve id</p>
+<pre><code class="language-solidity">function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding share price for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding share price for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id and curve id, scaled by generalConfig.decimalPrecision</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxdeposit"><a class="header" href="#maxdeposit">maxDeposit</a></h3>
+<p>returns max amount of eth that can be deposited into the vault</p>
+<pre><code class="language-solidity">function maxDeposit() public pure returns (uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>maxDeposit max amount of eth that can be deposited into the vault</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxdepositcurve"><a class="header" href="#maxdepositcurve">maxDepositCurve</a></h3>
+<pre><code class="language-solidity">function maxDepositCurve(uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="maxredeem"><a class="header" href="#maxredeem">maxRedeem</a></h3>
+<p>returns max amount of shares that can be redeemed from the 'sender' balance through a redeem call</p>
+<pre><code class="language-solidity">function maxRedeem(address sender, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the account to get max redeemable shares for</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that can be redeemed from the 'sender' balance through a redeem call</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxredeemcurve"><a class="header" href="#maxredeemcurve">maxRedeemCurve</a></h3>
+<pre><code class="language-solidity">function maxRedeemCurve(address sender, uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
+<p>returns amount of shares that would be exchanged by vault given amount of 'assets' provided</p>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate shares on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be exchanged by vault given amount of 'assets' provided</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttosharescurve"><a class="header" href="#converttosharescurve">convertToSharesCurve</a></h3>
+<pre><code class="language-solidity">function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
+<p>returns amount of assets that would be exchanged by vault given amount of 'shares' provided</p>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of shares to calculate assets on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding assets for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets amount of assets that would be exchanged by vault given amount of 'shares' provided</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttoassetscurve"><a class="header" href="#converttoassetscurve">convertToAssetsCurve</a></h3>
+<pre><code class="language-solidity">function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
+<p>simulates the effects of the deposited amount of 'assets' and returns the estimated
+amount of shares that would be minted from the deposit of <code>assets</code></p>
+<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate shares on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be minted from the deposit of <code>assets</code> NOTE: this function pessimistically estimates the amount of shares that would be minted from the input amount of assets so if the vault is empty before the deposit the caller receives more shares than returned by this function, reference internal _depositIntoVault logic for details</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewdepositcurve"><a class="header" href="#previewdepositcurve">previewDepositCurve</a></h3>
+<pre><code class="language-solidity">function previewDepositCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
+<p>simulates the effects of the redemption of <code>shares</code> and returns the estimated
+amount of assets estimated to be returned to the receiver of the redeem</p>
+<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 id) public view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of shares to calculate assets on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding assets for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets amount of assets estimated to be returned to the receiver</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewredeemcurve"><a class="header" href="#previewredeemcurve">previewRedeemCurve</a></h3>
+<pre><code class="language-solidity">function previewRedeemCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256);
+</code></pre>
+<h3 id="triplehash"><a class="header" href="#triplehash">tripleHash</a></h3>
+<p>returns the corresponding hash for the given RDF triple, given the triple vault id</p>
+<pre><code class="language-solidity">function tripleHash(uint256 id) public view returns (bytes32);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id of the triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bytes32</code></td><td>hash the corresponding hash for the given RDF triple NOTE: only applies to triple vault IDs as input</td></tr>
+</tbody></table>
+</div>
+<h3 id="istripleid"><a class="header" href="#istripleid">isTripleId</a></h3>
+<p>returns whether the supplied vault id is a triple</p>
+<pre><code class="language-solidity">function isTripleId(uint256 id) public view returns (bool);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to check</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool whether the supplied vault id is a triple</td></tr>
+</tbody></table>
+</div>
+<h3 id="gettripleatoms"><a class="header" href="#gettripleatoms">getTripleAtoms</a></h3>
+<p>returns the atoms that make up a triple/counter-triple</p>
+<pre><code class="language-solidity">function getTripleAtoms(uint256 id) public view returns (uint256, uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id of the triple/counter-triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tuple(atomIds) the atoms that make up the triple/counter-triple NOTE: only applies to triple vault IDs as input</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="triplehashfromatoms"><a class="header" href="#triplehashfromatoms">tripleHashFromAtoms</a></h3>
+<p>returns the corresponding hash for the given RDF triple, given the atoms that make up the triple</p>
+<pre><code class="language-solidity">function tripleHashFromAtoms(uint256 subjectId, uint256 predicateId, uint256 objectId) public pure returns (bytes32);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subjectId</code></td><td><code>uint256</code></td><td>the subject atom's vault id</td></tr>
+<tr><td><code>predicateId</code></td><td><code>uint256</code></td><td>the predicate atom's vault id</td></tr>
+<tr><td><code>objectId</code></td><td><code>uint256</code></td><td>the object atom's vault id</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bytes32</code></td><td>hash the corresponding hash for the given RDF triple based on the atom vault ids</td></tr>
+</tbody></table>
+</div>
+<h3 id="getcounteridfromtriple"><a class="header" href="#getcounteridfromtriple">getCounterIdFromTriple</a></h3>
+<p>returns the counter id from the given triple id</p>
+<pre><code class="language-solidity">function getCounterIdFromTriple(uint256 id) public pure returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id of the triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>counterId the counter vault id from the given triple id NOTE: only applies to triple vault IDs as input</td></tr>
+</tbody></table>
+</div>
+<h3 id="getatomwarden"><a class="header" href="#getatomwarden">getAtomWarden</a></h3>
+<p>returns the address of the atom warden</p>
+<pre><code class="language-solidity">function getAtomWarden() external view returns (address);
+</code></pre>
+<h3 id="getvaultstateforuser"><a class="header" href="#getvaultstateforuser">getVaultStateForUser</a></h3>
+<p>returns the number of shares and assets (less fees) user has in the vault</p>
+<pre><code class="language-solidity">function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id of the vault</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>address of the receiver</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares number of shares user has in the vault</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets number of assets user has in the vault</td></tr>
+</tbody></table>
+</div>
+<h3 id="getvaultstateforusercurve"><a class="header" href="#getvaultstateforusercurve">getVaultStateForUserCurve</a></h3>
+<pre><code class="language-solidity">function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+    external
+    view
+    returns (uint256, uint256);
+</code></pre>
+<h3 id="computeatomwalletaddr"><a class="header" href="#computeatomwalletaddr">computeAtomWalletAddr</a></h3>
+<p>returns the Atom Wallet address for the given atom data</p>
+<pre><code class="language-solidity">function computeAtomWalletAddr(uint256 id) public view returns (address);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id of the atom associated to the atom wallet</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: the create2 salt is based off of the vault ID</td></tr>
+</tbody></table>
+</div>
+<h3 id="_hascounterstake"><a class="header" href="#_hascounterstake">_hasCounterStake</a></h3>
+<p><em>checks if an account holds shares in the vault counter to the id provided</em></p>
+<pre><code class="language-solidity">function _hasCounterStake(uint256 id, address receiver) internal view returns (bool);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the id of the vault to check</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the account to check</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool whether the account holds shares in the counter vault to the id provided or not</td></tr>
+</tbody></table>
+</div>
+<h3 id="_hascounterstakecurve"><a class="header" href="#_hascounterstakecurve">_hasCounterStakeCurve</a></h3>
+<pre><code class="language-solidity">function _hasCounterStakeCurve(uint256 id, uint256 curveId, address receiver) internal view returns (bool);
+</code></pre>
+<h3 id="_getdeploymentdata"><a class="header" href="#_getdeploymentdata">_getDeploymentData</a></h3>
+<p><em>returns the deployment data for the AtomWallet contract</em></p>
+<pre><code class="language-solidity">function _getDeploymentData() internal view returns (bytes memory);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bytes</code></td><td>bytes memory the deployment data for the AtomWallet contract (using BeaconProxy pattern)</td></tr>
+</tbody></table>
+</div>
+<h3 id="_validatetimelock"><a class="header" href="#_validatetimelock">_validateTimelock</a></h3>
+<p><em>internal method to validate the timelock constraints</em></p>
+<pre><code class="language-solidity">function _validateTimelock(bytes32 operationHash) internal view;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>operationHash</code></td><td><code>bytes32</code></td><td>hash of the operation</td></tr>
+</tbody></table>
+</div>
+<h3 id="_registry"><a class="header" href="#_registry">_registry</a></h3>
+<pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../mermaid.min.js"></script>
+        <script src="../../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>

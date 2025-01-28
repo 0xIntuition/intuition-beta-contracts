@@ -1,0 +1,350 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Home - Intuition Beta Contracts Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        <!-- Include Mermaid -->
+        <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
+        
+        <script>
+          window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
+          'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
+          { enabled: true, maxZoom: 10, minZoom: 0.1 }, menu: { enabled: true, showMenu: true, menuItems: [ { name: 'Zoom In',
+          action: function() { mermaid.mermaidAPI.zoomIn(); } }, { name: 'Zoom Out', action: function() {
+          mermaid.mermaidAPI.zoomOut(); } }, { name: 'Reset Zoom', action: function() { mermaid.mermaidAPI.reset(); } } ] } });
+          });
+        </script>
+        
+        <style>
+          .mermaid { width: 100% !important; } /* Style the menu */ .mermaid-menu { background-color: #2d2d2d !important;
+          border: 1px solid #444 !important; padding: 5px !important; border-radius: 4px !important; } .mermaid-menu-item {
+          color: #fff !important; padding: 5px 10px !important; cursor: pointer !important; } .mermaid-menu-item:hover {
+          background-color: #444 !important; }
+        </style>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="book.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('dark')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Intuition Beta Contracts Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/0xIntuition/intuition-beta-contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="intuition-protocol"><a class="header" href="#intuition-protocol">Intuition Protocol</a></h1>
+<p>Intuition is an Ethereum-based attestation protocol harnessing the wisdom of the crowds to create an open knowledge and reputation graph. Our infrastructure makes it easy for applications and their users to capture, explore, and curate verifiable data. We’ve prioritized making developer integrations easy and have implemented incentive structures that prioritize ‘useful’ data and discourage spam.</p>
+<p>In bringing this new data layer to the decentralized web, we’re opening the flood gates to countless new use cases that we believe will kick off a consumer application boom.</p>
+<p>The Intuition Knowledge Graph will be recognized as an organic flywheel, where the more developers that implement it, the more valuable the data it houses becomes.</p>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<ul>
+<li><a href="#intuition-protocol">Intuition Protocol</a>
+<ul>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#documentation">Documentation</a>
+<ul>
+<li><a href="#known-nuances">Known Nuances</a></li>
+</ul>
+</li>
+<li><a href="#building-and-running-tests">Building and Running Tests</a>
+<ul>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#step-by-step-guide">Step by Step Guide</a>
+<ul>
+<li><a href="#install-dependencies">Install Dependencies</a></li>
+<li><a href="#build">Build</a></li>
+<li><a href="#run-tests">Run Tests</a></li>
+<li><a href="#run-fuzz-tests">Run Fuzz Tests</a></li>
+<li><a href="#run-slither-static-analysis">Run Slither (Static Analysis)</a></li>
+<li><a href="#run-manticore-symbolic-execution">Run Manticore (Symbolic Execution)</a></li>
+</ul>
+</li>
+<li><a href="#deployment-process">Deployment Process</a></li>
+<li><a href="#deployment-verification">Deployment Verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="documentation"><a class="header" href="#documentation">Documentation</a></h2>
+<p>To get a basic understanding of the Intuition protocol, please check out the following:</p>
+<ul>
+<li><a href="https://intuition.systems">Official Website</a></li>
+<li><a href="https://docs.intuition.systems">Official Documentation</a></li>
+<li><a href="https://intuition.gitbook.io/intuition-or-beta-contracts">Deep Dive into Our Smart Contracts</a></li>
+</ul>
+<h3 id="known-nuances"><a class="header" href="#known-nuances">Known Nuances</a></h3>
+<ul>
+<li>Share prices may get arbitrarily large as deposits/withdraws occur after Vault asset and share amounts approach 0 (i.e. if all users have withdrawn from the Vault), but this still elegantly achieves our desired functionality - which is, Users earn fee revenue when they are shareholders of a vault and deposit/redeem activities occur while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.</li>
+<li>The Admin can pause the contracts, though there is an emergency withdraw that allows users to withdraw from the contract even while paused. This emergency withdraw bypasses all fees, to reduce the surface area of attack.</li>
+<li>Exit fees are configurable, but have a maximum limit which they can be set to, preventing loss of user funds. Users also have the timelock window to withdraw from the contracts if they do not agree with a parameter change.</li>
+</ul>
+<h2 id="building-and-running-tests"><a class="header" href="#building-and-running-tests">Building and Running Tests</a></h2>
+<p>To build the project and run tests, follow these steps:</p>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li><a href="https://nodejs.org/en/download/">Node.js</a></li>
+<li><a href="https://getfoundry.sh">Foundry</a></li>
+</ul>
+<h3 id="step-by-step-guide"><a class="header" href="#step-by-step-guide">Step by Step Guide</a></h3>
+<h4 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h4>
+<pre><code class="language-shell">$ npm i
+$ forge install
+</code></pre>
+<h4 id="build"><a class="header" href="#build">Build</a></h4>
+<pre><code class="language-shell">$ forge build
+</code></pre>
+<h4 id="run-tests"><a class="header" href="#run-tests">Run Tests</a></h4>
+<pre><code class="language-shell">$ forge test -vvv
+</code></pre>
+<h4 id="run-fuzz-tests"><a class="header" href="#run-fuzz-tests">Run Fuzz Tests</a></h4>
+<ul>
+<li>Make sure you have at least node 16 and python 3.6 installed on your local machine</li>
+<li>Add your FUZZ_AP_KEY to the .env file locally</li>
+<li>Run the following command to install the <code>diligence-fuzzing</code> package:</li>
+</ul>
+<pre><code class="language-shell">$ pip3 install diligence-fuzzing
+</code></pre>
+<ul>
+<li>After the installation is completed, run the fuzzing CLI:</li>
+</ul>
+<pre><code class="language-shell">$ fuzz forge test
+</code></pre>
+<ul>
+<li>Finally, check your Diligence Fuzzing dashboard to see the results of the fuzzing tests</li>
+</ul>
+<h4 id="run-slither-static-analysis"><a class="header" href="#run-slither-static-analysis">Run Slither (Static Analysis)</a></h4>
+<ul>
+<li>Install the <code>slither-analyzer</code> package:</li>
+</ul>
+<pre><code class="language-shell">  $ pip3 install slither-analyzer
+</code></pre>
+<ul>
+<li>After the installation is completed, run the slither analysis bash script:</li>
+</ul>
+<pre><code class="language-shell">  $ npm run slither
+</code></pre>
+<h4 id="run-manticore-symbolic-execution"><a class="header" href="#run-manticore-symbolic-execution">Run Manticore (Symbolic Execution)</a></h4>
+<ul>
+<li>
+<p>Make sure you have <a href="https://docker.com/products/docker-desktop">Docker</a> installed on your local machine</p>
+</li>
+<li>
+<p>Build the Docker image:</p>
+</li>
+</ul>
+<pre><code class="language-shell">  $ docker build -t manticore-analysis .
+</code></pre>
+<ul>
+<li>Run the Docker container:</li>
+</ul>
+<pre><code class="language-shell">  $ docker run --rm -v "$(pwd)":/app manticore-analysis
+</code></pre>
+<h3 id="deployment-process"><a class="header" href="#deployment-process">Deployment Process</a></h3>
+<p>To deploy the Beta smart contract system on to a public testnet or mainnet, you’ll need the following:</p>
+<ul>
+<li>RPC URL of the network that you’re trying to deploy to (as for us, we’re targeting Base Sepolia testnet as our target chain for the testnet deployments)</li>
+<li>Export <code>PRIVATE_KEY</code> of a deployer account in the terminal, and fund it with some test ETH to be able to cover the gas fees for the smart contract deployments</li>
+<li>For Base Sepolia, there is a reliable <a href="https://alchemy.com/faucets/base-sepolia">testnet faucet</a> deployed by Alchemy</li>
+<li>Deploy smart contracts using the following command:</li>
+</ul>
+<pre><code class="language-shell">$ forge script script/Deploy.s.sol --broadcast --rpc-url &lt;your_rpc_url&gt; --private-key $PRIVATE_KEY
+</code></pre>
+<h3 id="deployment-verification"><a class="header" href="#deployment-verification">Deployment Verification</a></h3>
+<p>To verify the deployed smart contracts on Etherscan, you’ll need to export your Etherscan API key as <code>ETHERSCAN_API_KEY</code> in the terminal, and then run the following command:</p>
+<pre><code class="language-shell">$ forge verify-contract &lt;0x_contract_address&gt; ContractName --watch --chain-id &lt;chain_id&gt;
+</code></pre>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>When verifying your smart contracts, you can use an optional parameter <code>--constructor-args</code> to pass the constructor arguments of the smart contract in the ABI-encoded format</li>
+<li>The chain ID for Base Sepolia is <code>84532</code>, whereas the chain ID for Base Mainnet is <code>8453</code></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="architecture/overview.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="architecture/overview.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>

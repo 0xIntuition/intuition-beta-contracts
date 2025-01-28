@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark" dir="ltr">
+    <head>
+        <!-- sidebar iframe generated using mdBook
+
+        This is a frame, and not included directly in the page, to control the total size of the
+        book. The TOC contains an entry for each page, so if each page includes a copy of the TOC,
+        the total size of the page becomes O(n**2).
+
+        The frame is only used as a fallback when JS is turned off. When it's on, the sidebar is
+        instead added to the main page by `toc.js` instead. The JavaScript mode is better
+        because, when running in a `file:///` URL, the iframed page would not be Same-Origin as
+        the rest of the page, so the sidebar and the main page theme would fall out of sync.
+        -->
+        <meta charset="UTF-8">
+        <meta name="robots" content="noindex">
+        <!-- Custom HTML head -->
+        <!-- Include Mermaid -->
+        <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
+        
+        <script>
+          window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
+          'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
+          { enabled: true, maxZoom: 10, minZoom: 0.1 }, menu: { enabled: true, showMenu: true, menuItems: [ { name: 'Zoom In',
+          action: function() { mermaid.mermaidAPI.zoomIn(); } }, { name: 'Zoom Out', action: function() {
+          mermaid.mermaidAPI.zoomOut(); } }, { name: 'Reset Zoom', action: function() { mermaid.mermaidAPI.reset(); } } ] } });
+          });
+        </script>
+        
+        <style>
+          .mermaid { width: 100% !important; } /* Style the menu */ .mermaid-menu { background-color: #2d2d2d !important;
+          border: 1px solid #444 !important; padding: 5px !important; border-radius: 4px !important; } .mermaid-menu-item {
+          color: #fff !important; padding: 5px 10px !important; cursor: pointer !important; } .mermaid-menu-item:hover {
+          background-color: #444 !important; }
+        </style>        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="book.css">
+    </head>
+    <body class="sidebar-iframe-inner">
+        <ol class="chapter"><li class="chapter-item expanded "><a href="index.html" target="_parent"><strong aria-hidden="true">1.</strong> Home</a></li><li class="chapter-item expanded "><a href="architecture/overview.html" target="_parent"><strong aria-hidden="true">2.</strong> Architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="architecture/EthMultiVault.html" target="_parent"><strong aria-hidden="true">2.1.</strong> EthMultiVault</a></li><li class="chapter-item expanded "><a href="architecture/BondingCurveRegistry.html" target="_parent"><strong aria-hidden="true">2.2.</strong> BondingCurveRegistry</a></li><li class="chapter-item expanded "><a href="architecture/BaseCurve.html" target="_parent"><strong aria-hidden="true">2.3.</strong> BaseCurve</a></li><li class="chapter-item expanded "><a href="architecture/LinearCurve.html" target="_parent"><strong aria-hidden="true">2.4.</strong> LinearCurve</a></li><li class="chapter-item expanded "><a href="architecture/ProgressiveCurve.html" target="_parent"><strong aria-hidden="true">2.5.</strong> ProgressiveCurve</a></li><li class="chapter-item expanded "><a href="architecture/AtomWallet.html" target="_parent"><strong aria-hidden="true">2.6.</strong> AtomWallet</a></li><li class="chapter-item expanded "><a href="architecture/Attestoor.html" target="_parent"><strong aria-hidden="true">2.7.</strong> Attestoor</a></li><li class="chapter-item expanded "><a href="architecture/AttestoorFactory.html" target="_parent"><strong aria-hidden="true">2.8.</strong> AttestoorFactory</a></li><li class="chapter-item expanded "><a href="architecture/CustomMulticall3.html" target="_parent"><strong aria-hidden="true">2.9.</strong> CustomMulticall3</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">src</li><li class="chapter-item expanded affix "><li class="part-title">src</li><li class="chapter-item expanded "><a href="src/interfaces/index.html" target="_parent"><strong aria-hidden="true">3.</strong> ❱ interfaces</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html" target="_parent"><strong aria-hidden="true">3.1.</strong> IBaseCurve</a></li><li class="chapter-item expanded "><a href="src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html" target="_parent"><strong aria-hidden="true">3.2.</strong> IBondingCurveRegistry</a></li><li class="chapter-item expanded "><a href="src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html" target="_parent"><strong aria-hidden="true">3.3.</strong> IEthMultiVault</a></li><li class="chapter-item expanded "><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html" target="_parent"><strong aria-hidden="true">3.4.</strong> IPermit2</a></li></ol></li><li class="chapter-item expanded "><a href="src/libraries/index.html" target="_parent"><strong aria-hidden="true">4.</strong> ❱ libraries</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="src/libraries/Errors.sol/library.Errors.html" target="_parent"><strong aria-hidden="true">4.1.</strong> Errors</a></li></ol></li><li class="chapter-item expanded "><a href="src/utils/index.html" target="_parent"><strong aria-hidden="true">5.</strong> ❱ utils</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="src/utils/Attestoor.sol/contract.Attestoor.html" target="_parent"><strong aria-hidden="true">5.1.</strong> Attestoor</a></li><li class="chapter-item expanded "><a href="src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html" target="_parent"><strong aria-hidden="true">5.2.</strong> AttestoorFactory</a></li><li class="chapter-item expanded "><a href="src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html" target="_parent"><strong aria-hidden="true">5.3.</strong> CustomMulticall3</a></li><li class="chapter-item expanded "><a href="src/utils/Multicall3.sol/contract.Multicall3.html" target="_parent"><strong aria-hidden="true">5.4.</strong> Multicall3</a></li></ol></li><li class="chapter-item expanded "><a href="src/AtomWallet.sol/contract.AtomWallet.html" target="_parent"><strong aria-hidden="true">6.</strong> AtomWallet</a></li><li class="chapter-item expanded "><a href="src/BaseCurve.sol/abstract.BaseCurve.html" target="_parent"><strong aria-hidden="true">7.</strong> BaseCurve</a></li><li class="chapter-item expanded "><a href="src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html" target="_parent"><strong aria-hidden="true">8.</strong> BondingCurveRegistry</a></li><li class="chapter-item expanded "><a href="src/EthMultiVault.sol/contract.EthMultiVault.html" target="_parent"><strong aria-hidden="true">9.</strong> EthMultiVault</a></li><li class="chapter-item expanded "><a href="src/LinearCurve.sol/contract.LinearCurve.html" target="_parent"><strong aria-hidden="true">10.</strong> LinearCurve</a></li><li class="chapter-item expanded "><a href="src/ProgressiveCurve.sol/contract.ProgressiveCurve.html" target="_parent"><strong aria-hidden="true">11.</strong> ProgressiveCurve</a></li></ol>
+    </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>EthMultiVault - Intuition Beta Contracts Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        <!-- Include Mermaid -->
+        <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
+        
+        <script>
+          window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
+          'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
+          { enabled: true, maxZoom: 10, minZoom: 0.1 }, menu: { enabled: true, showMenu: true, menuItems: [ { name: 'Zoom In',
+          action: function() { mermaid.mermaidAPI.zoomIn(); } }, { name: 'Zoom Out', action: function() {
+          mermaid.mermaidAPI.zoomOut(); } }, { name: 'Reset Zoom', action: function() { mermaid.mermaidAPI.reset(); } } ] } });
+          });
+        </script>
+        
+        <style>
+          .mermaid { width: 100% !important; } /* Style the menu */ .mermaid-menu { background-color: #2d2d2d !important;
+          border: 1px solid #444 !important; padding: 5px !important; border-radius: 4px !important; } .mermaid-menu-item {
+          color: #fff !important; padding: 5px 10px !important; cursor: pointer !important; } .mermaid-menu-item:hover {
+          background-color: #444 !important; }
+        </style>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../book.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('dark')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Intuition Beta Contracts Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/0xIntuition/intuition-beta-contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ethmultivault"><a class="header" href="#ethmultivault">EthMultiVault</a></h1>
+<p>Detailed view of the EthMultiVault contract and its members. Click on any member to view its documentation.</p>
+<pre class="mermaid">graph TB
+    root((&quot;EthMultiVault&quot;))
+
+    subgraph ConversionFunctions [&quot;Conversion Functions&quot;]
+        direction LR
+        func_convertToAssets[convertToAssets] &amp; func_convertToAssetsCurve[convertToAssetsCurve]
+        func_convertToShares[convertToShares] &amp; func_convertToSharesCurve[convertToSharesCurve]
+    end
+    root --&gt; ConversionFunctions
+
+    subgraph CoreFunctions [&quot;Core Functions&quot;]
+        direction LR
+        func_SET_ADMIN[SET_ADMIN] &amp; func_SET_EXIT_FEE[SET_EXIT_FEE]
+        func_approvals[approvals] &amp; func_approveSender[approveSender]
+        func_atomConfig[atomConfig] &amp; func_atomDepositFractionAmount[atomDepositFractionAmount]
+        func_atoms[atoms] &amp; func_atomsByHash[atomsByHash]
+        func_batchCreateAtom[batchCreateAtom] &amp; func_batchCreateTriple[batchCreateTriple]
+        func_bondingCurveConfig[bondingCurveConfig] &amp; func_bondingCurveVaults[bondingCurveVaults]
+        func_cancelOperation[cancelOperation] &amp; func_computeAtomWalletAddr[computeAtomWalletAddr]
+        func_count[count] &amp; func_createAtom[createAtom]
+        func_createTriple[createTriple] &amp; func_currentSharePrice[currentSharePrice]
+        func_currentSharePriceCurve[currentSharePriceCurve] &amp; func_deployAtomWallet[deployAtomWallet]
+        func_depositAtom[depositAtom] &amp; func_depositAtomCurve[depositAtomCurve]
+        func_depositTriple[depositTriple] &amp; func_depositTripleCurve[depositTripleCurve]
+        func_entryFeeAmount[entryFeeAmount] &amp; func_exitFeeAmount[exitFeeAmount]
+        func_generalConfig[generalConfig] &amp; func_isTriple[isTriple]
+        func_isTripleId[isTripleId] &amp; func_maxDeposit[maxDeposit]
+        func_maxDepositCurve[maxDepositCurve] &amp; func_maxRedeem[maxRedeem]
+        func_maxRedeemCurve[maxRedeemCurve] &amp; func_pause[pause]
+        func_paused[paused] &amp; func_protocolFeeAmount[protocolFeeAmount]
+        func_redeemAtom[redeemAtom] &amp; func_redeemAtomCurve[redeemAtomCurve]
+        func_redeemTriple[redeemTriple] &amp; func_redeemTripleCurve[redeemTripleCurve]
+        func_revokeSender[revokeSender] &amp; func_scheduleOperation[scheduleOperation]
+        func_timelocks[timelocks] &amp; func_tripleConfig[tripleConfig]
+        func_tripleHash[tripleHash] &amp; func_tripleHashFromAtoms[tripleHashFromAtoms]
+        func_triples[triples] &amp; func_triplesByHash[triplesByHash]
+        func_unpause[unpause] &amp; func_vaultFees[vaultFees]
+        func_vaults[vaults] &amp; func_walletConfig[walletConfig]
+    end
+    root --&gt; CoreFunctions
+
+    subgraph Getters [&quot;Getters&quot;]
+        direction LR
+        func_getAtomCost[getAtomCost] &amp; func_getAtomWarden[getAtomWarden]
+        func_getCounterIdFromTriple[getCounterIdFromTriple] &amp; func_getDepositFees[getDepositFees]
+        func_getDepositSharesAndFees[getDepositSharesAndFees] &amp; func_getDepositSharesAndFeesCurve[getDepositSharesAndFeesCurve]
+        func_getRedeemAssetsAndFees[getRedeemAssetsAndFees] &amp; func_getRedeemAssetsAndFeesCurve[getRedeemAssetsAndFeesCurve]
+        func_getTripleAtoms[getTripleAtoms] &amp; func_getTripleCost[getTripleCost]
+        func_getVaultStateForUser[getVaultStateForUser] &amp; func_getVaultStateForUserCurve[getVaultStateForUserCurve]
+    end
+    root --&gt; Getters
+
+    subgraph Initialization [&quot;Initialization&quot;]
+        direction LR
+        func_init[init]
+    end
+    root --&gt; Initialization
+
+    subgraph PreviewFunctions [&quot;Preview Functions&quot;]
+        direction LR
+        func_previewDeposit[previewDeposit] &amp; func_previewDepositCurve[previewDepositCurve]
+        func_previewRedeem[previewRedeem] &amp; func_previewRedeemCurve[previewRedeemCurve]
+    end
+    root --&gt; PreviewFunctions
+
+    subgraph Setters [&quot;Setters&quot;]
+        direction LR
+        func_setAdmin[setAdmin] &amp; func_setAtomCreationProtocolFee[setAtomCreationProtocolFee]
+        func_setAtomDepositFractionForTriple[setAtomDepositFractionForTriple] &amp; func_setAtomDepositFractionOnTripleCreation[setAtomDepositFractionOnTripleCreation]
+        func_setAtomUriMaxLength[setAtomUriMaxLength] &amp; func_setAtomWalletInitialDepositAmount[setAtomWalletInitialDepositAmount]
+        func_setAtomWarden[setAtomWarden] &amp; func_setEntryFee[setEntryFee]
+        func_setExitFee[setExitFee] &amp; func_setMinDeposit[setMinDeposit]
+        func_setMinShare[setMinShare] &amp; func_setProtocolFee[setProtocolFee]
+        func_setProtocolMultisig[setProtocolMultisig] &amp; func_setTripleCreationProtocolFee[setTripleCreationProtocolFee]
+    end
+    root --&gt; Setters
+
+    %% Style definitions
+    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
+    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
+    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
+    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
+    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
+    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
+    
+    %% Apply styles
+    class root root;
+    class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
+    class func_convertToAssets,func_convertToAssetsCurve,func_convertToShares,func_convertToSharesCurve,func_SET_ADMIN,func_SET_EXIT_FEE,func_approvals,func_approveSender,func_atomConfig,func_atomDepositFractionAmount,func_atoms,func_atomsByHash,func_batchCreateAtom,func_batchCreateTriple,func_bondingCurveConfig,func_bondingCurveVaults,func_cancelOperation,func_computeAtomWalletAddr,func_count,func_createAtom,func_createTriple,func_currentSharePrice,func_currentSharePriceCurve,func_deployAtomWallet,func_depositAtom,func_depositAtomCurve,func_depositTriple,func_depositTripleCurve,func_entryFeeAmount,func_exitFeeAmount,func_generalConfig,func_isTriple,func_isTripleId,func_maxDeposit,func_maxDepositCurve,func_maxRedeem,func_maxRedeemCurve,func_pause,func_paused,func_protocolFeeAmount,func_redeemAtom,func_redeemAtomCurve,func_redeemTriple,func_redeemTripleCurve,func_revokeSender,func_scheduleOperation,func_timelocks,func_tripleConfig,func_tripleHash,func_tripleHashFromAtoms,func_triples,func_triplesByHash,func_unpause,func_vaultFees,func_vaults,func_walletConfig,func_getAtomCost,func_getAtomWarden,func_getCounterIdFromTriple,func_getDepositFees,func_getDepositSharesAndFees,func_getDepositSharesAndFeesCurve,func_getRedeemAssetsAndFees,func_getRedeemAssetsAndFeesCurve,func_getTripleAtoms,func_getTripleCost,func_getVaultStateForUser,func_getVaultStateForUserCurve,func_init,func_previewDeposit,func_previewDepositCurve,func_previewRedeem,func_previewRedeemCurve,func_setAdmin,func_setAtomCreationProtocolFee,func_setAtomDepositFractionForTriple,func_setAtomDepositFractionOnTripleCreation,func_setAtomUriMaxLength,func_setAtomWalletInitialDepositAmount,func_setAtomWarden,func_setEntryFee,func_setExitFee,func_setMinDeposit,func_setMinShare,func_setProtocolFee,func_setProtocolMultisig,func_setTripleCreationProtocolFee function;
+
+    %% Click actions
+    click root &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html&quot; &quot;EthMultiVault documentation&quot;
+    click func_SET_ADMIN &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#set_admin&quot; &quot;SET_ADMIN documentation&quot;
+    click func_SET_EXIT_FEE &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#set_exit_fee&quot; &quot;SET_EXIT_FEE documentation&quot;
+    click func_approvals &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#approvals&quot; &quot;approvals documentation&quot;
+    click func_approveSender &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#approvesender&quot; &quot;approveSender documentation&quot;
+    click func_atomConfig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#atomconfig&quot; &quot;atomConfig documentation&quot;
+    click func_atomDepositFractionAmount &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#atomdepositfractionamount&quot; &quot;atomDepositFractionAmount documentation&quot;
+    click func_atoms &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#atoms&quot; &quot;atoms documentation&quot;
+    click func_atomsByHash &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#atomsbyhash&quot; &quot;atomsByHash documentation&quot;
+    click func_batchCreateAtom &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#batchcreateatom&quot; &quot;batchCreateAtom documentation&quot;
+    click func_batchCreateTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#batchcreatetriple&quot; &quot;batchCreateTriple documentation&quot;
+    click func_bondingCurveConfig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#bondingcurveconfig&quot; &quot;bondingCurveConfig documentation&quot;
+    click func_bondingCurveVaults &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#bondingcurvevaults&quot; &quot;bondingCurveVaults documentation&quot;
+    click func_cancelOperation &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#canceloperation&quot; &quot;cancelOperation documentation&quot;
+    click func_computeAtomWalletAddr &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#computeatomwalletaddr&quot; &quot;computeAtomWalletAddr documentation&quot;
+    click func_count &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#count&quot; &quot;count documentation&quot;
+    click func_createAtom &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#createatom&quot; &quot;createAtom documentation&quot;
+    click func_createTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#createtriple&quot; &quot;createTriple documentation&quot;
+    click func_currentSharePrice &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#currentshareprice&quot; &quot;currentSharePrice documentation&quot;
+    click func_currentSharePriceCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#currentsharepricecurve&quot; &quot;currentSharePriceCurve documentation&quot;
+    click func_deployAtomWallet &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#deployatomwallet&quot; &quot;deployAtomWallet documentation&quot;
+    click func_depositAtom &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#depositatom&quot; &quot;depositAtom documentation&quot;
+    click func_depositAtomCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#depositatomcurve&quot; &quot;depositAtomCurve documentation&quot;
+    click func_depositTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#deposittriple&quot; &quot;depositTriple documentation&quot;
+    click func_depositTripleCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#deposittriplecurve&quot; &quot;depositTripleCurve documentation&quot;
+    click func_entryFeeAmount &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#entryfeeamount&quot; &quot;entryFeeAmount documentation&quot;
+    click func_exitFeeAmount &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#exitfeeamount&quot; &quot;exitFeeAmount documentation&quot;
+    click func_generalConfig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#generalconfig&quot; &quot;generalConfig documentation&quot;
+    click func_isTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#istriple&quot; &quot;isTriple documentation&quot;
+    click func_isTripleId &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#istripleid&quot; &quot;isTripleId documentation&quot;
+    click func_maxDeposit &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#maxdeposit&quot; &quot;maxDeposit documentation&quot;
+    click func_maxDepositCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#maxdepositcurve&quot; &quot;maxDepositCurve documentation&quot;
+    click func_maxRedeem &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#maxredeem&quot; &quot;maxRedeem documentation&quot;
+    click func_maxRedeemCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#maxredeemcurve&quot; &quot;maxRedeemCurve documentation&quot;
+    click func_pause &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#pause&quot; &quot;pause documentation&quot;
+    click func_paused &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#paused&quot; &quot;paused documentation&quot;
+    click func_protocolFeeAmount &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#protocolfeeamount&quot; &quot;protocolFeeAmount documentation&quot;
+    click func_redeemAtom &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#redeematom&quot; &quot;redeemAtom documentation&quot;
+    click func_redeemAtomCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#redeematomcurve&quot; &quot;redeemAtomCurve documentation&quot;
+    click func_redeemTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#redeemtriple&quot; &quot;redeemTriple documentation&quot;
+    click func_redeemTripleCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#redeemtriplecurve&quot; &quot;redeemTripleCurve documentation&quot;
+    click func_revokeSender &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#revokesender&quot; &quot;revokeSender documentation&quot;
+    click func_scheduleOperation &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#scheduleoperation&quot; &quot;scheduleOperation documentation&quot;
+    click func_timelocks &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#timelocks&quot; &quot;timelocks documentation&quot;
+    click func_tripleConfig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#tripleconfig&quot; &quot;tripleConfig documentation&quot;
+    click func_tripleHash &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#triplehash&quot; &quot;tripleHash documentation&quot;
+    click func_tripleHashFromAtoms &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#triplehashfromatoms&quot; &quot;tripleHashFromAtoms documentation&quot;
+    click func_triples &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#triples&quot; &quot;triples documentation&quot;
+    click func_triplesByHash &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#triplesbyhash&quot; &quot;triplesByHash documentation&quot;
+    click func_unpause &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#unpause&quot; &quot;unpause documentation&quot;
+    click func_vaultFees &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#vaultfees&quot; &quot;vaultFees documentation&quot;
+    click func_vaults &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#vaults&quot; &quot;vaults documentation&quot;
+    click func_walletConfig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#walletconfig&quot; &quot;walletConfig documentation&quot;
+    click func_convertToAssets &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#converttoassets&quot; &quot;convertToAssets documentation&quot;
+    click func_convertToAssetsCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#converttoassetscurve&quot; &quot;convertToAssetsCurve documentation&quot;
+    click func_convertToShares &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#converttoshares&quot; &quot;convertToShares documentation&quot;
+    click func_convertToSharesCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#converttosharescurve&quot; &quot;convertToSharesCurve documentation&quot;
+    click func_getAtomCost &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getatomcost&quot; &quot;getAtomCost documentation&quot;
+    click func_getAtomWarden &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getatomwarden&quot; &quot;getAtomWarden documentation&quot;
+    click func_getCounterIdFromTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getcounteridfromtriple&quot; &quot;getCounterIdFromTriple documentation&quot;
+    click func_getDepositFees &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getdepositfees&quot; &quot;getDepositFees documentation&quot;
+    click func_getDepositSharesAndFees &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getdepositsharesandfees&quot; &quot;getDepositSharesAndFees documentation&quot;
+    click func_getDepositSharesAndFeesCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getdepositsharesandfeescurve&quot; &quot;getDepositSharesAndFeesCurve documentation&quot;
+    click func_getRedeemAssetsAndFees &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getredeemassetsandfees&quot; &quot;getRedeemAssetsAndFees documentation&quot;
+    click func_getRedeemAssetsAndFeesCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getredeemassetsandfeescurve&quot; &quot;getRedeemAssetsAndFeesCurve documentation&quot;
+    click func_getTripleAtoms &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#gettripleatoms&quot; &quot;getTripleAtoms documentation&quot;
+    click func_getTripleCost &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#gettriplecost&quot; &quot;getTripleCost documentation&quot;
+    click func_getVaultStateForUser &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getvaultstateforuser&quot; &quot;getVaultStateForUser documentation&quot;
+    click func_getVaultStateForUserCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#getvaultstateforusercurve&quot; &quot;getVaultStateForUserCurve documentation&quot;
+    click func_init &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#init&quot; &quot;init documentation&quot;
+    click func_previewDeposit &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#previewdeposit&quot; &quot;previewDeposit documentation&quot;
+    click func_previewDepositCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#previewdepositcurve&quot; &quot;previewDepositCurve documentation&quot;
+    click func_previewRedeem &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#previewredeem&quot; &quot;previewRedeem documentation&quot;
+    click func_previewRedeemCurve &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#previewredeemcurve&quot; &quot;previewRedeemCurve documentation&quot;
+    click func_setAdmin &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setadmin&quot; &quot;setAdmin documentation&quot;
+    click func_setAtomCreationProtocolFee &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomcreationprotocolfee&quot; &quot;setAtomCreationProtocolFee documentation&quot;
+    click func_setAtomDepositFractionForTriple &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomdepositfractionfortriple&quot; &quot;setAtomDepositFractionForTriple documentation&quot;
+    click func_setAtomDepositFractionOnTripleCreation &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomdepositfractionontriplecreation&quot; &quot;setAtomDepositFractionOnTripleCreation documentation&quot;
+    click func_setAtomUriMaxLength &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomurimaxlength&quot; &quot;setAtomUriMaxLength documentation&quot;
+    click func_setAtomWalletInitialDepositAmount &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomwalletinitialdepositamount&quot; &quot;setAtomWalletInitialDepositAmount documentation&quot;
+    click func_setAtomWarden &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setatomwarden&quot; &quot;setAtomWarden documentation&quot;
+    click func_setEntryFee &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setentryfee&quot; &quot;setEntryFee documentation&quot;
+    click func_setExitFee &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setexitfee&quot; &quot;setExitFee documentation&quot;
+    click func_setMinDeposit &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setmindeposit&quot; &quot;setMinDeposit documentation&quot;
+    click func_setMinShare &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setminshare&quot; &quot;setMinShare documentation&quot;
+    click func_setProtocolFee &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setprotocolfee&quot; &quot;setProtocolFee documentation&quot;
+    click func_setProtocolMultisig &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#setprotocolmultisig&quot; &quot;setProtocolMultisig documentation&quot;
+    click func_setTripleCreationProtocolFee &quot;http://localhost:3000/src/EthMultiVault.sol/contract.EthMultiVault.html#settriplecreationprotocolfee&quot; &quot;setTripleCreationProtocolFee documentation&quot;
+</pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../architecture/overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../architecture/BondingCurveRegistry.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../architecture/overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../architecture/BondingCurveRegistry.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>

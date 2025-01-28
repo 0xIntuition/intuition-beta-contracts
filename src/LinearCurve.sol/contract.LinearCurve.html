@@ -1,0 +1,368 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>LinearCurve - Intuition Beta Contracts Documentation</title>
+
+
+        <!-- Custom HTML head -->
+        <!-- Include Mermaid -->
+        <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
+        
+        <script>
+          window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
+          'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
+          { enabled: true, maxZoom: 10, minZoom: 0.1 }, menu: { enabled: true, showMenu: true, menuItems: [ { name: 'Zoom In',
+          action: function() { mermaid.mermaidAPI.zoomIn(); } }, { name: 'Zoom Out', action: function() {
+          mermaid.mermaidAPI.zoomOut(); } }, { name: 'Reset Zoom', action: function() { mermaid.mermaidAPI.reset(); } } ] } });
+          });
+        </script>
+        
+        <style>
+          .mermaid { width: 100% !important; } /* Style the menu */ .mermaid-menu { background-color: #2d2d2d !important;
+          border: 1px solid #444 !important; padding: 5px !important; border-radius: 4px !important; } .mermaid-menu-item {
+          color: #fff !important; padding: 5px 10px !important; cursor: pointer !important; } .mermaid-menu-item:hover {
+          background-color: #444 !important; }
+        </style>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../book.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('dark')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Intuition Beta Contracts Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/0xIntuition/intuition-beta-contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="linearcurve"><a class="header" href="#linearcurve">LinearCurve</a></h1>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/LinearCurve.sol">Git Source</a></p>
+<h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
+<pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
+</pre>
+<pre class="mermaid">xychart-beta
+    title &quot;Linear Curve&quot;
+    x-axis &quot;Assets (ETH)&quot; [0.000000000000000000, 1.000000000000000000, 2.000000000000000000, 3.000000000000000000, 4.000000000000000000, 5.000000000000000000, 6.000000000000000000, 7.000000000000000000, 8.000000000000000000, 9.000000000000000000, 10.000000000000000000, 11.000000000000000000, 12.000000000000000000, 13.000000000000000000, 14.000000000000000000, 15.000000000000000000, 16.000000000000000000, 17.000000000000000000, 18.000000000000000000, 19.000000000000000000, 20.000000000000000000, 21.000000000000000000, 22.000000000000000000, 23.000000000000000000, 24.000000000000000000, 25.000000000000000000, 26.000000000000000000, 27.000000000000000000, 28.000000000000000000, 29.000000000000000000, 30.000000000000000000, 31.000000000000000000, 32.000000000000000000, 33.000000000000000000, 34.000000000000000000, 35.000000000000000000, 36.000000000000000000, 37.000000000000000000, 38.000000000000000000, 39.000000000000000000, 40.000000000000000000, 41.000000000000000000, 42.000000000000000000, 43.000000000000000000, 44.000000000000000000, 45.000000000000000000, 46.000000000000000000, 47.000000000000000000, 48.000000000000000000, 49.000000000000000000, 50.000000000000000000, 51.000000000000000000, 52.000000000000000000, 53.000000000000000000, 54.000000000000000000, 55.000000000000000000, 56.000000000000000000, 57.000000000000000000, 58.000000000000000000, 59.000000000000000000, 60.000000000000000000, 61.000000000000000000, 62.000000000000000000, 63.000000000000000000, 64.000000000000000000, 65.000000000000000000, 66.000000000000000000, 67.000000000000000000, 68.000000000000000000, 69.000000000000000000, 70.000000000000000000, 71.000000000000000000, 72.000000000000000000, 73.000000000000000000, 74.000000000000000000, 75.000000000000000000, 76.000000000000000000, 77.000000000000000000, 78.000000000000000000, 79.000000000000000000, 80.000000000000000000, 81.000000000000000000, 82.000000000000000000, 83.000000000000000000, 84.000000000000000000, 85.000000000000000000, 86.000000000000000000, 87.000000000000000000, 88.000000000000000000, 89.000000000000000000, 90.000000000000000000, 91.000000000000000000, 92.000000000000000000, 93.000000000000000000, 94.000000000000000000, 95.000000000000000000, 96.000000000000000000, 97.000000000000000000, 98.000000000000000000, 99.000000000000000000]
+    y-axis &quot;Shares&quot;
+    line [0.000000000000000000, 1.000000000000000000, 2.000000000000000000, 3.000000000000000000, 4.000000000000000000, 5.000000000000000000, 6.000000000000000000, 7.000000000000000000, 8.000000000000000000, 9.000000000000000000, 10.000000000000000000, 11.000000000000000000, 12.000000000000000000, 13.000000000000000000, 14.000000000000000000, 15.000000000000000000, 16.000000000000000000, 17.000000000000000000, 18.000000000000000000, 19.000000000000000000, 20.000000000000000000, 21.000000000000000000, 22.000000000000000000, 23.000000000000000000, 24.000000000000000000, 25.000000000000000000, 26.000000000000000000, 27.000000000000000000, 28.000000000000000000, 29.000000000000000000, 30.000000000000000000, 31.000000000000000000, 32.000000000000000000, 33.000000000000000000, 34.000000000000000000, 35.000000000000000000, 36.000000000000000000, 37.000000000000000000, 38.000000000000000000, 39.000000000000000000, 40.000000000000000000, 41.000000000000000000, 42.000000000000000000, 43.000000000000000000, 44.000000000000000000, 45.000000000000000000, 46.000000000000000000, 47.000000000000000000, 48.000000000000000000, 49.000000000000000000, 50.000000000000000000, 51.000000000000000000, 52.000000000000000000, 53.000000000000000000, 54.000000000000000000, 55.000000000000000000, 56.000000000000000000, 57.000000000000000000, 58.000000000000000000, 59.000000000000000000, 60.000000000000000000, 61.000000000000000000, 62.000000000000000000, 63.000000000000000000, 64.000000000000000000, 65.000000000000000000, 66.000000000000000000, 67.000000000000000000, 68.000000000000000000, 69.000000000000000000, 70.000000000000000000, 71.000000000000000000, 72.000000000000000000, 73.000000000000000000, 74.000000000000000000, 75.000000000000000000, 76.000000000000000000, 77.000000000000000000, 78.000000000000000000, 79.000000000000000000, 80.000000000000000000, 81.000000000000000000, 82.000000000000000000, 83.000000000000000000, 84.000000000000000000, 85.000000000000000000, 86.000000000000000000, 87.000000000000000000, 88.000000000000000000, 89.000000000000000000, 90.000000000000000000, 91.000000000000000000, 92.000000000000000000, 93.000000000000000000, 94.000000000000000000, 95.000000000000000000, 96.000000000000000000, 97.000000000000000000, 98.000000000000000000, 99.000000000000000000]
+</pre>
+<p><strong>Inherits:</strong>
+<a href="/src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
+<p><strong>Author:</strong>
+0xIntuition</p>
+<p>🎯 The OG, battle-tested share price model, now reborn as a bonding curve!
+This magnificent specimen takes the legacy share price logic - a time-honored 1:1
+relationship between assets and shares - and wraps it in our shiny new bonding curve
+architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
+implementation (we see you, future integrations 👀), this curve is the unsung hero
+of low-risk incentivization.
+Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
+on the pure, unadulterated power of fees to affect share price. When fees roll in,
+they're distributed proportionally across all shareholders, creating a gentle upward
+pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰
+This creates an incredibly based, low-risk incentivization model where early stakers
+benefit from the natural accumulation of fees over time. No wild price swings, no
+complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
+bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
+<pre><code class="language-solidity">uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
+</code></pre>
+<h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
+<pre><code class="language-solidity">uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
+<pre><code class="language-solidity">constructor(string memory _name) BaseCurve(_name);
+</code></pre>
+<h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
+<p>Preview how many shares would be minted for a deposit of assets</p>
+<p><em>The implementation of this function must call _adjust()</em></p>
+<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
+    public
+    view
+    override
+    returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
+<p>Preview how many assets would be returned for burning a specific amount of shares</p>
+<p><em>The implementation of this function must call _adjust()</em></p>
+<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    public
+    view
+    override
+    returns (uint256 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
+<p>Preview how many assets would be required to mint a specific amount of shares</p>
+<p><em>The implementation of this function must call _adjust()</em></p>
+<pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    public
+    view
+    override
+    returns (uint256 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
+<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
+<p><em>The implementation of this function must call _adjust()</em></p>
+<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
+    public
+    view
+    override
+    returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 totalAssets, uint256) public pure override returns (uint256 shares);
+</code></pre>
+<h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public pure override returns (uint256 assets);
+</code></pre>
+<h3 id="currentprice"><a class="header" href="#currentprice">currentPrice</a></h3>
+<pre><code class="language-solidity">function currentPrice(uint256) public pure override returns (uint256 sharePrice);
+</code></pre>
+<h3 id="maxshares"><a class="header" href="#maxshares">maxShares</a></h3>
+<pre><code class="language-solidity">function maxShares() public view override returns (uint256);
+</code></pre>
+<h3 id="maxassets"><a class="header" href="#maxassets">maxAssets</a></h3>
+<pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../src/EthMultiVault.sol/contract.EthMultiVault.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../src/ProgressiveCurve.sol/contract.ProgressiveCurve.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../src/EthMultiVault.sol/contract.EthMultiVault.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../src/ProgressiveCurve.sol/contract.ProgressiveCurve.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../mermaid.min.js"></script>
+        <script src="../../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>
