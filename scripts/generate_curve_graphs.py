@@ -18,7 +18,6 @@ def generate_mermaid_graph(data, title):
     # Start the mermaid graph
     mermaid = [
         '```mermaid',
-        '%%{init: {"xychart": {"showTitle": true}} }%%',
         'xychart-beta',
         f'    title "{title}"',
         f'    x-axis "Assets (ETH)" [{", ".join(x_values)}]',
@@ -41,7 +40,9 @@ def insert_graph_into_doc(doc_path, data_path):
     data = load_curve_data(data_path)
     
     # Generate graph with initialization
-    init_directive = '```mermaid\n%%{init: {"xychart": {"showTitle": true}} }%%\n```\n'
+    # We don't know why, but the graph doesn't style correctly without rendering this text directly
+    # Wrapping it in HTML to change the color or hide it makes it stop applying the styles
+    init_directive = '\n```mermaid\n%%{init: {"xychart": {"showTitle": true}} }%%\n```\n\n'
     graph = generate_mermaid_graph(data, f'{data["name"].title()} Curve')
     
     # Find the end of the contract description (first empty line after the description)
