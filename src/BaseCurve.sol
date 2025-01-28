@@ -7,34 +7,22 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
  * @title  BaseCurve
  * @author 0xIntuition
  * @notice Abstract contract for a bonding curve. Defines the interface for converting assets to shares and vice versa.
+ * @dev This contract is designed to be inherited by other bonding curve contracts, providing a common interface for
+ *      converting between assets and shares.
+ * @dev These curves handle the pure mathematical relationship for share price.  Pool ratio adjustments (such as
+ *      accomodating for the effect of fees, supply burn, airdrops, etc) are handled by the EthMultiVault instead
+ *      of the curves themselves.
  */
 abstract contract BaseCurve {
     string public name;
 
+    /// @notice The maximum number of shares that this curve can handle without overflowing.
+    /// @dev Checked by the EthMultiVault before transacting
     function maxShares() public view virtual returns (uint256);
+
+    /// @notice The maximum number of assets that this curve can handle without overflowing.
+    /// @dev Checked by the EthMultiVault before transacting
     function maxAssets() public view virtual returns (uint256);
-
-    /// @notice Internal function to adjust integrated values based on total ratios
-    /// @param value The value to adjust - shares or assets being computed - i.e. shares or assets
-    /// @param numerator The numerator for ratio adjustment - total in domain of value - i.e. totalShares or totalAssets
-    /// @param denominator The denominator for ratio adjustment - total in *other domain* converted to value domain - i.e. totalAssetsInShareSpace or totalSharesInAssetSpace
-    /// @return result The adjusted value accounting for pool ratios
-    ///
-    function _adjust(uint256 value, uint256 numerator, uint256 denominator) internal pure returns (uint256) {
-        if (numerator == denominator) {
-            return value;
-        }
-        if (numerator == 0 || denominator == 0) {
-            return 0;
-        }
-
-        /// @dev: The numerator will the the total of the value domain
-        /// @dev: (i.e. shares -> totalShares, assets -> totalAssets)
-        /// @dev: And the denominator should be the total of the return domain converted to it's corresponding domain
-        /// @dev: (i.e. shares -> totalAssetsInShareSpace, assets -> totalSharesInAssetSpace)
-        // Utilize the same precision that the curves have with fixed point arithmetic
-        return UD60x18.wrap(value).mul(UD60x18.wrap(numerator)).div(UD60x18.wrap(denominator)).unwrap();
-    }
 
     /// @notice Preview how many shares would be minted for a deposit of assets
     ///
@@ -42,7 +30,6 @@ abstract contract BaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would be minted
-    /// @dev The implementation of this function must call _adjust()
     function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
         public
         view
@@ -55,7 +42,6 @@ abstract contract BaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be returned
-    /// @dev The implementation of this function must call _adjust()
     function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
         public
         view
@@ -68,7 +54,6 @@ abstract contract BaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would need to be redeemed
-    /// @dev The implementation of this function must call _adjust()
     function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
         public
         view
@@ -81,7 +66,6 @@ abstract contract BaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be required to mint the shares
-    /// @dev The implementation of this function must call _adjust()
     function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
         public
         view

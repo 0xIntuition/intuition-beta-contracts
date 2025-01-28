@@ -138,7 +138,13 @@ contract DeployEthMultiVault is Script {
 
         // Prepare data for initializer function
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector, generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees, bondingCurveConfig
+            EthMultiVault.init.selector,
+            generalConfig,
+            atomConfig,
+            tripleConfig,
+            walletConfig,
+            vaultFees,
+            bondingCurveConfig
         );
 
         // Deploy EthMultiVault implementation contract

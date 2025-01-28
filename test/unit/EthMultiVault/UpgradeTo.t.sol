@@ -123,21 +123,19 @@ contract UpgradeTo is Test {
         address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18));
         bondingCurveRegistry.addBondingCurve(progressiveCurve);
 
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
-            registry: address(bondingCurveRegistry),
-            defaultCurveId: 1
-        });
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
+            IEthMultiVault.BondingCurveConfig({registry: address(bondingCurveRegistry), defaultCurveId: 1});
 
         ethMultiVault = new EthMultiVault();
         console.log("deployed EthMultiVault", address(ethMultiVault));
 
         // Prepare data for initializer function
         bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.init.selector, 
-            generalConfig, 
-            atomConfig, 
-            tripleConfig, 
-            walletConfig, 
+            EthMultiVault.init.selector,
+            generalConfig,
+            atomConfig,
+            tripleConfig,
+            walletConfig,
             vaultFees,
             bondingCurveConfig
         );

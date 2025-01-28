@@ -339,7 +339,9 @@ interface IEthMultiVault {
     /// @param curveId curve id of the curve
     /// @param newSharePrice new share price of the curve
     /// @param oldSharePrice old share price of the curve (not needed but staying in parallel with production code)
-    event SharePriceChangedCurve(uint256 indexed vaultId, uint256 indexed curveId, uint256 newSharePrice, uint256 oldSharePrice);
+    event SharePriceChangedCurve(
+        uint256 indexed vaultId, uint256 indexed curveId, uint256 newSharePrice, uint256 oldSharePrice
+    );
 
     /* =================================================== */
     /*                    INITIALIZER                      */

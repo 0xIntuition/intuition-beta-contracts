@@ -10,7 +10,16 @@ import {Errors} from "src/libraries/Errors.sol";
  * @title  BondingCurveRegistry
  * @author 0xIntuition
  * @notice Registry contract for the Intuition protocol Bonding Curves. Routes access to the curves
- *         associated with atoms & triples.
+ *         associated with atoms & triples.  Does not maintain any economic state -- this merely
+ *         performs computations based on the provided economic state.
+ * @notice An administrator may add new bonding curves to this registry, including those submitted
+ *         by community members, once they are verified to be safe, and conform to the BaseCurve
+ *         interface.  The EthMultiVault supports a growing registry of curves, with each curve
+ *         supplying a new "vault" for each term (atom or triple).
+ * @dev    The registry is responsible for interacting with the curves, to fetch the mathematical
+ *         computations given the provided economic state and the desired curve implementation.
+ *         You can think of the registry as a concierge the EthMultiVault uses to access various
+ *         economic incentive patterns.
  */
 contract BondingCurveRegistry is Initializable {
     /* =================================================== */
@@ -180,14 +189,14 @@ contract BondingCurveRegistry is Initializable {
         return IBaseCurve(curveAddresses[id]).name();
     }
 
-    /// @notice Get the maximum number of shares a curve can handle
+    /// @notice Get the maximum number of shares a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.
     /// @param id Curve ID to query
     /// @return maxShares The maximum number of shares
     function getCurveMaxShares(uint256 id) external view returns (uint256 maxShares) {
         return IBaseCurve(curveAddresses[id]).maxShares();
     }
 
-    /// @notice Get the maximum number of assets a curve can handle
+    /// @notice Get the maximum number of assets a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.
     /// @param id Curve ID to query
     /// @return maxAssets The maximum number of assets
     function getCurveMaxAssets(uint256 id) external view returns (uint256 maxAssets) {

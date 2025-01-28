@@ -9,7 +9,7 @@ import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 contract GenerateCurveData is Script {
     // Number of data points to generate
     uint256 constant POINTS = 100;
-    
+
     // For storing results
     struct DataPoint {
         uint256 assets;
@@ -26,35 +26,39 @@ contract GenerateCurveData is Script {
 
         // Create a metadata file to store file locations
         string memory metadata = '{"files":[';
-        
+
         // Generate and save data for each curve
         for (uint256 i = 0; i < curves.length; i++) {
             BaseCurve curve = curves[i];
             string memory curveName = toLowerCase(curve.name());
             DataPoint[] memory points = generatePoints(curve);
             string memory json = formatJson(curveName, points);
-            
+
             // Convert curve name to lowercase for filename
-            string memory filename = string.concat(
-                "out/",
-                curveName,
-                "_curve.json"
-            );
-            
+            string memory filename = string.concat("out/", curveName, "_curve.json");
+
             vm.writeFile(filename, json);
-            
+
             // Add file info to metadata
-            if (i > 0) metadata = string.concat(metadata, ',');
+            if (i > 0) metadata = string.concat(metadata, ",");
             metadata = string.concat(
                 metadata,
-                '{"name":"', curveName, '",',
-                '"data":"', filename, '",',
-                '"doc":"docs/book/src/', curve.name(), 'Curve.sol/contract.', curve.name(), 'Curve.html"}'
+                '{"name":"',
+                curveName,
+                '",',
+                '"data":"',
+                filename,
+                '",',
+                '"doc":"docs/book/src/',
+                curve.name(),
+                "Curve.sol/contract.",
+                curve.name(),
+                'Curve.html"}'
             );
         }
-        
+
         // Close the metadata JSON and write it
-        metadata = string.concat(metadata, ']}');
+        metadata = string.concat(metadata, "]}");
         vm.writeFile("out/curve_metadata.json", metadata);
     }
 
@@ -76,22 +80,21 @@ contract GenerateCurveData is Script {
 
     function formatJson(string memory name, DataPoint[] memory points) internal pure returns (string memory) {
         string memory json = string.concat('{"name":"', name, '","points":[');
-        
+
         for (uint256 i = 0; i < points.length; i++) {
             // Convert to ETH units for readability
             string memory point = string.concat(
-                '{"assets":', vm.toString(points[i].assets), 
-                ',"shares":', vm.toString(points[i].shares), '}'
+                '{"assets":', vm.toString(points[i].assets), ',"shares":', vm.toString(points[i].shares), "}"
             );
-            
+
             if (i < points.length - 1) {
-                point = string.concat(point, ',');
+                point = string.concat(point, ",");
             }
-            
+
             json = string.concat(json, point);
         }
-        
-        return string.concat(json, ']}');
+
+        return string.concat(json, "]}");
     }
 
     function toLowerCase(string memory str) internal pure returns (string memory) {
@@ -107,4 +110,4 @@ contract GenerateCurveData is Script {
         }
         return string(bLower);
     }
-} 
+}

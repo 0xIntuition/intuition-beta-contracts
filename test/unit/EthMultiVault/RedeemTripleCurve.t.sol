@@ -34,13 +34,13 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
         (uint256 aliceShares,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
-        
+
         // Redeem all shares
         uint256 assetsReceived = ethMultiVault.redeemTripleCurve(aliceShares, alice, id, CURVE_ID);
-        
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
         (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(id, CURVE_ID, alice);
         assertEq(sharesAfter, 0);
@@ -69,13 +69,13 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
         (uint256 aliceShares,) = ethMultiVault.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
-        
+
         // Redeem all shares
         uint256 assetsReceived = ethMultiVault.redeemTripleCurve(aliceShares, alice, counterId, CURVE_ID);
-        
+
         // Verify balance change
         assertEq(address(alice).balance - aliceInitialBalance, assetsReceived);
-        
+
         // Verify shares are gone
         (uint256 sharesAfter,) = ethMultiVault.getVaultStateForUserCurve(counterId, CURVE_ID, alice);
         assertEq(sharesAfter, 0);
@@ -121,13 +121,13 @@ contract RedeemTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // Create an atom
         uint256 atomId = ethMultiVault.createAtom{value: getAtomCost()}("atom");
-        
+
         // Deposit into the atom vault
         ethMultiVault.depositAtomCurve{value: getMinDeposit() * 100}(alice, atomId, CURVE_ID);
-        
+
         // Get shares
         (uint256 shares,) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, alice);
-        
+
         // Try to redeem from atom vault using redeemTripleCurve - should revert
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_VaultNotTriple.selector));
         ethMultiVault.redeemTripleCurve(shares, alice, atomId, CURVE_ID);

@@ -21,24 +21,25 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         _setUp();
     }
 
-    function performCurveOperation(
-        address user,
-        uint256 atomId,
-        uint256 depositAmount
-    ) internal returns (CurveOperation memory op) {
+    function performCurveOperation(address user, uint256 atomId, uint256 depositAmount)
+        internal
+        returns (CurveOperation memory op)
+    {
         // Get deposit details
-        (,, uint256 protocolFee, uint256 entryFee) = ethMultiVault.getDepositSharesAndFeesCurve(depositAmount, atomId, CURVE_ID);
+        (,, uint256 protocolFee, uint256 entryFee) =
+            ethMultiVault.getDepositSharesAndFeesCurve(depositAmount, atomId, CURVE_ID);
         op.entryFee = entryFee;
         op.protocolFee = protocolFee;
 
         // Deposit into curve
         ethMultiVault.depositAtomCurve{value: depositAmount}(user, atomId, CURVE_ID);
-        
+
         // Get user's shares in curve vault
         (uint256 shares,) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, user);
-        
+
         // Get exit fee that will flow to pro rata vault
-        (, , uint256 redeemProtocolFee, uint256 exitFee) = ethMultiVault.getRedeemAssetsAndFeesCurve(shares, atomId, CURVE_ID);
+        (,, uint256 redeemProtocolFee, uint256 exitFee) =
+            ethMultiVault.getRedeemAssetsAndFeesCurve(shares, atomId, CURVE_ID);
         op.exitFee = exitFee;
         op.protocolFee += redeemProtocolFee;
 
@@ -75,7 +76,8 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         for (uint256 i = 0; i < numCurveOperations; i++) {
             // Deposit
-            (,, uint256 entryFeeToProRata,) = ethMultiVault.getDepositSharesAndFeesCurve(bobDepositAmount, atomId, CURVE_ID);
+            (,, uint256 entryFeeToProRata,) =
+                ethMultiVault.getDepositSharesAndFeesCurve(bobDepositAmount, atomId, CURVE_ID);
             totalEntryFeesToProRata += entryFeeToProRata;
             ethMultiVault.depositAtomCurve{value: bobDepositAmount}(bob, atomId, CURVE_ID);
 
@@ -83,7 +85,8 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             (uint256 bobShares,) = ethMultiVault.getVaultStateForUserCurve(atomId, CURVE_ID, bob);
 
             // Redeem
-            (,, uint256 protocolFee, uint256 exitFeeToProRata) = ethMultiVault.getRedeemAssetsAndFeesCurve(bobShares, atomId, CURVE_ID);
+            (,, uint256 protocolFee, uint256 exitFeeToProRata) =
+                ethMultiVault.getRedeemAssetsAndFeesCurve(bobShares, atomId, CURVE_ID);
             totalExitFeesToProRata += exitFeeToProRata;
             totalProtocolFees += protocolFee;
             ethMultiVault.redeemAtomCurve(bobShares, bob, atomId, CURVE_ID);
@@ -122,7 +125,8 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(aliceShares, aliceInitialShares, "Alice's shares should remain constant");
 
         // Calculate expected share price increase based on fees per share
-        uint256 expectedSharePriceIncrease = (aliceFinalAssets * PRECISION) / aliceShares - (aliceInitialAssets * PRECISION) / aliceInitialShares;
+        uint256 expectedSharePriceIncrease =
+            (aliceFinalAssets * PRECISION) / aliceShares - (aliceInitialAssets * PRECISION) / aliceInitialShares;
         assertEq(sharePriceIncrease, expectedSharePriceIncrease, "Share price increase should match fees per share");
     }
-} 
+}

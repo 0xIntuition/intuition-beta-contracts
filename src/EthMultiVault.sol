@@ -24,7 +24,52 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  * @author 0xIntuition
  * @notice Core contract of the Intuition protocol. Manages the creation and management of vaults
  *         associated with atoms & triples.
+ * @notice A sophisticated vault management system that implements a dual-layer
+ *         semantic data structure through "atoms" and "triples", reminiscent of
+ *         RDF (Resource Description Framework) concepts.
+ *
+ * @dev    Core protocol component managing the relationship between semantic data
+ *         structures and their economic representations through vault mechanics.
+ *         Implements ERC4626-style accounting with progressive bonding curves.
+ *
+ * @notice    Key Components:
+ * @notice    1. Vault Management
+ * @dev       - ETH deposits/withdrawals through ERC4626-style vault accounting
+ * @dev       - Progressive bonding curves for price discovery
+ * @dev       - Supports both standard pro-rata vaults and curve-specific vaults, for backwards compatibility.
+ *
+ * @notice    2. Semantic Structure
+ * @dev       - Atoms: Base-level vaults representing individual semantic units
+ * @dev       - Triples: Composite vaults linking three atoms in subject-predicate-object relationships
+ * @dev       - Each vault type maintains independent state and fee structures
+ *
+ * @notice    3. Security Features
+ * @dev       - Timelocked admin operations
+ * @dev       - Reentrancy protection
+ * @dev       - Pausable functionality
+ * @dev       - Granular fee controls with maximum caps
+ * @dev       - Approval system for delegated deposits
+ *
+ * @notice    4. Smart Account Integration
+ * @dev       - Deploys ERC4337-compatible atom wallets
+ * @dev       - BeaconProxy pattern for upgradeable wallet implementations
+ * @dev       - Maintains initialization deposits for wallet operations
+ *
+ * @notice    5. Fee Structure
+ * @dev       - Entry, exit, and protocol fees
+ * @dev       - Configurable per vault
+ * @dev       - Separate fee structures for atom/triple creation
+ * @dev       - Proportional deposit distribution for triple-related operations
+ *
+ * @dev Please note: This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
+ *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
+ *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
+ *      code size, it ensures that users can still use the audited pathways in the code if they wish, while also
+ *      enabling them to engage in more economically exciting activities like the Progressive Curve.
+ * @dev The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
+ *      interface for depositing and redeeming.
  */
+
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
@@ -838,7 +883,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     // Entirely separate logic from the normal depositAtom function
-    function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId) external payable nonReentrant whenNotPaused returns (uint256) {
+    function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId)
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256)
+    {
         if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
@@ -901,7 +952,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
-    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId) external nonReentrant returns (uint256) {
+    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+        external
+        nonReentrant
+        returns (uint256)
+    {
         if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
@@ -998,7 +1053,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        if (_hasCounterStakeCurve(tripleId, curveId,receiver)) {
+        if (_hasCounterStakeCurve(tripleId, curveId, receiver)) {
             revert Errors.EthMultiVault_HasCounterStake();
         }
 
@@ -1057,7 +1112,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return assets;
     }
 
-    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId) external nonReentrant returns (uint256) {
+    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+        external
+        nonReentrant
+        returns (uint256)
+    {
         if (!isTripleId(tripleId)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
@@ -1131,7 +1190,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // distribute proportional shares to each atom
         for (uint256 i = 0; i < 3; i++) {
             // deposit assets into each atom vault and mint shares for the receiver
-            _depositCurve(receiver, atomsIds[i], curveId,perAtom);
+            _depositCurve(receiver, atomsIds[i], curveId, perAtom);
         }
     }
 
@@ -1335,7 +1394,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_InsufficientSharesInVault();
         }
 
-        (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) = getRedeemAssetsAndFeesCurve(shares, id, curveId);
+        (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) =
+            getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
         // Increment pro rata vault ledger instead of curve vault ledger by fees
         if (exitFee > 0) {
@@ -1349,7 +1409,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         _burnCurve(sender, id, curveId, shares);
 
         // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
-        emit RedeemedCurve(sender, receiver, bondingCurveVaults[id][curveId].balanceOf[sender], assetsForReceiver, shares, /*exitFee,*/ id, curveId);
+        emit RedeemedCurve(
+            sender,
+            receiver,
+            bondingCurveVaults[id][curveId].balanceOf[sender],
+            assetsForReceiver,
+            shares, /*exitFee,*/
+            id,
+            curveId
+        );
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1412,7 +1480,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         emit SharePriceChanged(id, newSharePrice, oldSharePrice);
     }
 
-    function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+    function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
+        internal
+    {
         // Share price can only change when vault totals change
         uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
@@ -1421,7 +1491,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
     }
 
-    function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal {
+    function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
+        internal
+    {
         // Share price can only change when vault totals change
         uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
@@ -1928,7 +2000,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (shares, totalUserAssets);
     }
 
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId,address receiver) external view returns (uint256, uint256) {
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+        external
+        view
+        returns (uint256, uint256)
+    {
         uint256 shares = bondingCurveVaults[vaultId][curveId].balanceOf[receiver];
         (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId, curveId);
         return (shares, totalUserAssets);
