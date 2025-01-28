@@ -11,6 +11,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -214,6 +228,7 @@
 <li><a href="https://intuition.systems">Official Website</a></li>
 <li><a href="https://docs.intuition.systems">Official Documentation</a></li>
 <li><a href="https://intuition.gitbook.io/intuition-or-beta-contracts">Deep Dive into Our Smart Contracts</a></li>
+<li><a href="https://0xintuition.github.io/intuition-beta-contracts">Full Contracts Documentation</a></li>
 </ul>
 <h3 id="known-nuances"><a class="header" href="#known-nuances">Known Nuances</a></h3>
 <ul>
@@ -1068,7 +1083,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -1103,7 +1118,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
 <p>Preview how many shares would be minted for a deposit of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
     external
     view
@@ -1123,7 +1137,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
 <p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
     external
     view
@@ -1143,7 +1156,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
 <p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
     external
     view
@@ -1163,7 +1175,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
 <p>Preview how many assets would be required to mint a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets) external view returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -1230,7 +1241,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -1458,7 +1469,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -2554,7 +2565,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2601,7 +2612,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2788,7 +2799,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <li><a href="src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attestoor-1"><a class="header" href="#attestoor-1">Attestoor</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/utils/Attestoor.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/Attestoor.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3063,7 +3074,7 @@ on behalf of the Intuiton itself, effectively acting as an official attestoor ac
 <tr><td><code>whitelisted</code></td><td><code>bool</code></td><td>Whether the attestor is whitelisted or not</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="attestoorfactory-1"><a class="header" href="#attestoorfactory-1">AttestoorFactory</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/utils/AttestoorFactory.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/AttestoorFactory.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3167,7 +3178,7 @@ with the given admin address and the <code>count</code> value</p>
 <tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="custommulticall3-1"><a class="header" href="#custommulticall3-1">CustomMulticall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/utils/CustomMulticall3.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/CustomMulticall3.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable, <a href="src/utils/CustomMulticall3.sol//src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></p>
 <p><strong>Author:</strong>
@@ -3281,7 +3292,7 @@ Example use case: First two atoms are known, e.g. "I" and "follow", and the thir
 <tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="multicall3"><a class="header" href="#multicall3">Multicall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/utils/Multicall3.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/Multicall3.sol">Git Source</a></p>
 <p><strong>Authors:</strong>
 Michael Elliot <a href="mailto:src/utils/Multicall3.sol/mike@makerdao.com">mike@makerdao.com</a>, Joshua Levine <a href="mailto:src/utils/Multicall3.sol/joshua@makerdao.com">joshua@makerdao.com</a>, Nick Johnson <a href="mailto:src/utils/Multicall3.sol/arachnid@notdot.net">arachnid@notdot.net</a>, Andreas Bigger <a href="mailto:src/utils/Multicall3.sol/andreas@nascent.xyz">andreas@nascent.xyz</a>, Matt Solomon <a href="mailto:src/utils/Multicall3.sol/matt@mattsolomon.dev">matt@mattsolomon.dev</a></p>
 <p>Aggregate results from multiple function calls</p>
@@ -3465,7 +3476,7 @@ which now returns a random number based on the beacon chain</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3666,40 +3677,32 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Abstract contract for a bonding curve. Defines the interface for converting assets to shares and vice versa.</p>
+<p><em>This contract is designed to be inherited by other bonding curve contracts, providing a common interface for
+converting between assets and shares.</em></p>
+<p><em>These curves handle the pure mathematical relationship for share price.  Pool ratio adjustments (such as
+accomodating for the effect of fees, supply burn, airdrops, etc) are handled by the EthMultiVault instead
+of the curves themselves.</em></p>
 <h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
 <h3 id="name-1"><a class="header" href="#name-1">name</a></h3>
 <pre><code class="language-solidity">string public name;
 </code></pre>
 <h2 id="functions-9"><a class="header" href="#functions-9">Functions</a></h2>
 <h3 id="maxshares-1"><a class="header" href="#maxshares-1">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view virtual returns (uint256);
 </code></pre>
 <h3 id="maxassets-1"><a class="header" href="#maxassets-1">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view virtual returns (uint256);
 </code></pre>
-<h3 id="_adjust"><a class="header" href="#_adjust">_adjust</a></h3>
-<p>Internal function to adjust integrated values based on total ratios</p>
-<pre><code class="language-solidity">function _adjust(uint256 value, uint256 numerator, uint256 denominator) internal pure returns (uint256);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>value</code></td><td><code>uint256</code></td><td>The value to adjust - shares or assets being computed - i.e. shares or assets</td></tr>
-<tr><td><code>numerator</code></td><td><code>uint256</code></td><td>The numerator for ratio adjustment - total in domain of value - i.e. totalShares or totalAssets</td></tr>
-<tr><td><code>denominator</code></td><td><code>uint256</code></td><td>The denominator for ratio adjustment - total in <em>other domain</em> converted to value domain - i.e. totalAssetsInShareSpace or totalSharesInAssetSpace</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>result The adjusted value accounting for pool ratios</td></tr>
-</tbody></table>
-</div>
 <h3 id="previewdeposit-3"><a class="header" href="#previewdeposit-3">previewDeposit</a></h3>
 <p>Preview how many shares would be minted for a deposit of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -3720,7 +3723,6 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 </div>
 <h3 id="previewredeem-3"><a class="header" href="#previewredeem-3">previewRedeem</a></h3>
 <p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -3741,7 +3743,6 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 </div>
 <h3 id="previewwithdraw-2"><a class="header" href="#previewwithdraw-2">previewWithdraw</a></h3>
 <p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -3762,7 +3763,6 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 </div>
 <h3 id="previewmint-2"><a class="header" href="#previewmint-2">previewMint</a></h3>
 <p>Preview how many assets would be required to mint a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -3844,13 +3844,22 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>_name</code></td><td><code>string</code></td><td>Unique name for the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable</p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Registry contract for the Intuition protocol Bonding Curves. Routes access to the curves
-associated with atoms &amp; triples.</p>
+associated with atoms &amp; triples.  Does not maintain any economic state -- this merely
+performs computations based on the provided economic state.</p>
+<p>An administrator may add new bonding curves to this registry, including those submitted
+by community members, once they are verified to be safe, and conform to the BaseCurve
+interface.  The EthMultiVault supports a growing registry of curves, with each curve
+supplying a new "vault" for each term (atom or triple).</p>
+<p><em>The registry is responsible for interacting with the curves, to fetch the mathematical
+computations given the provided economic state and the desired curve implementation.
+You can think of the registry as a concierge the EthMultiVault uses to access various
+economic incentive patterns.</em></p>
 <h2 id="state-variables-5"><a class="header" href="#state-variables-5">State Variables</a></h2>
 <h3 id="admin-1"><a class="header" href="#admin-1">admin</a></h3>
 <pre><code class="language-solidity">address public admin;
@@ -4045,7 +4054,7 @@ associated with atoms &amp; triples.</p>
 </tbody></table>
 </div>
 <h3 id="getcurvemaxshares-1"><a class="header" href="#getcurvemaxshares-1">getCurveMaxShares</a></h3>
-<p>Get the maximum number of shares a curve can handle</p>
+<p>Get the maximum number of shares a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.</p>
 <pre><code class="language-solidity">function getCurveMaxShares(uint256 id) external view returns (uint256 maxShares);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4059,7 +4068,7 @@ associated with atoms &amp; triples.</p>
 </tbody></table>
 </div>
 <h3 id="getcurvemaxassets-1"><a class="header" href="#getcurvemaxassets-1">getCurveMaxAssets</a></h3>
-<p>Get the maximum number of assets a curve can handle</p>
+<p>Get the maximum number of assets a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.</p>
 <pre><code class="language-solidity">function getCurveMaxAssets(uint256 id) external view returns (uint256 maxAssets);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4072,13 +4081,71 @@ associated with atoms &amp; triples.</p>
 <tr><td><code>maxAssets</code></td><td><code>uint256</code></td><td>The maximum number of assets</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-5"><a class="header" href="#ethmultivault-5">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Core contract of the Intuition protocol. Manages the creation and management of vaults
 associated with atoms &amp; triples.</p>
+<p>A sophisticated vault management system that implements a dual-layer
+semantic data structure through "atoms" and "triples", reminiscent of
+RDF (Resource Description Framework) concepts.</p>
+<p>Core protocol component managing the relationship between semantic data
+structures and their economic representations through vault mechanics.
+Implements ERC4626-style accounting with progressive bonding curves.</p>
+<h2 id="key-components"><a class="header" href="#key-components">Key Components:</a></h2>
+<ol>
+<li>Vault Management</li>
+</ol>
+<ul>
+<li>ETH deposits/withdrawals through ERC4626-style vault accounting</li>
+<li>Progressive bonding curves for price discovery</li>
+<li>Supports both standard pro-rata vaults and curve-specific vaults, for backwards compatibility.</li>
+</ul>
+<ol start="2">
+<li>Semantic Structure</li>
+</ol>
+<ul>
+<li>Atoms: Base-level vaults representing individual semantic units</li>
+<li>Triples: Composite vaults linking three atoms in subject-predicate-object relationships</li>
+<li>Each vault type maintains independent state and fee structures</li>
+</ul>
+<ol start="3">
+<li>Security Features</li>
+</ol>
+<ul>
+<li>Timelocked admin operations</li>
+<li>Reentrancy protection</li>
+<li>Pausable functionality</li>
+<li>Granular fee controls with maximum caps</li>
+<li>Approval system for delegated deposits</li>
+</ul>
+<ol start="4">
+<li>Smart Account Integration</li>
+</ol>
+<ul>
+<li>Deploys ERC4337-compatible atom wallets</li>
+<li>BeaconProxy pattern for upgradeable wallet implementations</li>
+<li>Maintains initialization deposits for wallet operations</li>
+</ul>
+<ol start="5">
+<li>Fee Structure</li>
+</ol>
+<ul>
+<li>Entry, exit, and protocol fees</li>
+<li>Configurable per vault</li>
+<li>Separate fee structures for atom/triple creation</li>
+<li>Proportional deposit distribution for triple-related operations</li>
+</ul>
+<p><em>## Please note:
+This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
+the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
+reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
+code size, it ensures that users can still use the audited pathways in the code if they wish, while also
+enabling them to engage in more economically exciting activities like the Progressive Curve.</em></p>
+<p><em>The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
+interface for depositing and redeeming.</em></p>
 <h2 id="state-variables-6"><a class="header" href="#state-variables-6">State Variables</a></h2>
 <h3 id="set_admin"><a class="header" href="#set_admin">SET_ADMIN</a></h3>
 <pre><code class="language-solidity">bytes32 public constant SET_ADMIN = keccak256("setAdmin");
@@ -4154,6 +4221,7 @@ associated with atoms &amp; triples.</p>
 </code></pre>
 <h3 id="init-5"><a class="header" href="#init-5">init</a></h3>
 <p>Initializes the EthMultiVault contract</p>
+<p><em>This function is called only once (during contract deployment)</em></p>
 <pre><code class="language-solidity">function init(
     GeneralConfig memory _generalConfig,
     AtomConfig memory _atomConfig,
@@ -4169,7 +4237,7 @@ associated with atoms &amp; triples.</p>
 <tr><td><code>_atomConfig</code></td><td><code>AtomConfig</code></td><td>Atom configuration struct</td></tr>
 <tr><td><code>_tripleConfig</code></td><td><code>TripleConfig</code></td><td>Triple configuration struct</td></tr>
 <tr><td><code>_walletConfig</code></td><td><code>WalletConfig</code></td><td>Wallet configuration struct</td></tr>
-<tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct NOTE: This function is called only once (during contract deployment)</td></tr>
+<tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct</td></tr>
 <tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
 </tbody></table>
 </div>
@@ -4354,6 +4422,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <h3 id="deployatomwallet-1"><a class="header" href="#deployatomwallet-1">deployAtomWallet</a></h3>
 <p>deploy a given atom wallet</p>
+<p><em>deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist</em></p>
 <pre><code class="language-solidity">function deployAtomWallet(uint256 atomId) external whenNotPaused returns (address);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4363,7 +4432,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet</td></tr>
 </tbody></table>
 </div>
 <h3 id="approvesender-1"><a class="header" href="#approvesender-1">approveSender</a></h3>
@@ -4386,6 +4455,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <h3 id="createatom-2"><a class="header" href="#createatom-2">createAtom</a></h3>
 <p>Create an atom and return its vault id</p>
+<p><em>This function will revert if called with less than <code>getAtomCost()</code> in <code>msg.value</code></em></p>
 <pre><code class="language-solidity">function createAtom(bytes calldata atomUri) external payable nonReentrant whenNotPaused returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4395,11 +4465,12 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the atom NOTE: This function will revert if called with less than <code>getAtomCost()</code> in <code>msg.value</code></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the atom</td></tr>
 </tbody></table>
 </div>
 <h3 id="batchcreateatom-2"><a class="header" href="#batchcreateatom-2">batchCreateAtom</a></h3>
 <p>Batch create atoms and return their vault ids</p>
+<p><em>This function will revert if called with less than <code>getAtomCost()</code> * <code>atomUris.length</code> in <code>msg.value</code></em></p>
 <pre><code class="language-solidity">function batchCreateAtom(bytes[] calldata atomUris)
     external
     payable
@@ -4414,7 +4485,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>ids vault ids array of the atoms NOTE: This function will revert if called with less than <code>getAtomCost()</code> * <code>atomUris.length</code> in <code>msg.value</code></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>ids vault ids array of the atoms</td></tr>
 </tbody></table>
 </div>
 <h3 id="_createatom"><a class="header" href="#_createatom">_createAtom</a></h3>
@@ -4435,6 +4506,8 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <h3 id="createtriple-2"><a class="header" href="#createtriple-2">createTriple</a></h3>
 <p>create a triple and return its vault id</p>
+<p><em>This function will revert if called with less than <code>getTripleCost()</code> in <code>msg.value</code>.
+This function will revert if any of the atoms do not exist or if any ids are triple vaults.</em></p>
 <pre><code class="language-solidity">function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
     external
     payable
@@ -4451,11 +4524,13 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the triple NOTE: This function will revert if called with less than <code>getTripleCost()</code> in <code>msg.value</code>. This function will revert if any of the atoms do not exist or if any ids are triple vaults.</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the triple</td></tr>
 </tbody></table>
 </div>
 <h3 id="batchcreatetriple-2"><a class="header" href="#batchcreatetriple-2">batchCreateTriple</a></h3>
 <p>batch create triples and return their vault ids</p>
+<p><em>This function will revert if called with less than <code>getTripleCost()</code> * <code>array.length</code> in <code>msg.value</code>.
+This function will revert if any of the atoms do not exist or if any ids are triple vaults.</em></p>
 <pre><code class="language-solidity">function batchCreateTriple(uint256[] calldata subjectIds, uint256[] calldata predicateIds, uint256[] calldata objectIds)
     external
     payable
@@ -4467,7 +4542,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>subjectIds</code></td><td><code>uint256[]</code></td><td>vault ids array of subject atoms</td></tr>
 <tr><td><code>predicateIds</code></td><td><code>uint256[]</code></td><td>vault ids array of predicate atoms</td></tr>
-<tr><td><code>objectIds</code></td><td><code>uint256[]</code></td><td>vault ids array of object atoms NOTE: This function will revert if called with less than <code>getTripleCost()</code> * <code>array.length</code> in <code>msg.value</code>. This function will revert if any of the atoms do not exist or if any ids are triple vaults.</td></tr>
+<tr><td><code>objectIds</code></td><td><code>uint256[]</code></td><td>vault ids array of object atoms</td></tr>
 </tbody></table>
 </div>
 <h3 id="_createtriple"><a class="header" href="#_createtriple">_createTriple</a></h3>
@@ -4494,6 +4569,8 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
 *payable msg.value amount of eth to deposit</p>
 <p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<p><em>this function will revert if the minimum deposit amount of eth is not met and
+if the vault ID does not exist/is not an atom.</em></p>
 <pre><code class="language-solidity">function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4504,10 +4581,18 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not an atom.</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
 </tbody></table>
 </div>
 <h3 id="depositatomcurve"><a class="header" href="#depositatomcurve">depositAtomCurve</a></h3>
+<p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<p><em>this function will revert if the minimum deposit amount of eth is not met and
+if the vault ID does not exist/is not an atom.</em></p>
+<p><em>This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
+This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+performing an audit of the full refactor (V2).</em></p>
 <pre><code class="language-solidity">function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId)
     external
     payable
@@ -4515,8 +4600,22 @@ being able to prevent users from depositing or withdrawing their assets with unr
     whenNotPaused
     returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>atomId</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
+</tbody></table>
+</div>
 <h3 id="redeematom-2"><a class="header" href="#redeematom-2">redeemAtom</a></h3>
 <p>redeem shares from an atom vault for assets</p>
+<p><em>Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</em></p>
 <pre><code class="language-solidity">function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4528,19 +4627,38 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
 </tbody></table>
 </div>
 <h3 id="redeematomcurve"><a class="header" href="#redeematomcurve">redeemAtomCurve</a></h3>
+<p>redeem shares from a bonding curve atom vault for assets</p>
+<p><em>This method is entirely separate from redeemAtom, because we wanted to leave the audited pathways intact.
+This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+performing an audit of the full refactor (V2).</em></p>
 <pre><code class="language-solidity">function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
     external
     nonReentrant
     returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>atomId</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
+</tbody></table>
+</div>
 <h3 id="deposittriple-2"><a class="header" href="#deposittriple-2">depositTriple</a></h3>
 <p>deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'receiver'
 *payable msg.value amount of eth to deposit</p>
 <p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<p><em>this function will revert if the minimum deposit amount of eth is not met and
+if the vault ID does not exist/is not a triple.</em></p>
 <pre><code class="language-solidity">function depositTriple(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4551,10 +4669,16 @@ being able to prevent users from depositing or withdrawing their assets with unr
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not a triple.</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
 </tbody></table>
 </div>
 <h3 id="deposittriplecurve"><a class="header" href="#deposittriplecurve">depositTripleCurve</a></h3>
+<p>deposit eth into a bonding curve triple vault and grant ownership of 'shares' to 'receiver'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<p><em>This method is entirely separate from depositTriple, because we wanted to leave the audited pathways intact.
+This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+performing an audit of the full refactor (V2).</em></p>
 <pre><code class="language-solidity">function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
     external
     payable
@@ -4562,9 +4686,23 @@ being able to prevent users from depositing or withdrawing their assets with unr
     whenNotPaused
     returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>tripleId</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
+</tbody></table>
+</div>
 <h3 id="redeemtriple-2"><a class="header" href="#redeemtriple-2">redeemTriple</a></h3>
 <p>redeems 'shares' number of shares from the triple vault and send 'assets' eth
 from the contract to 'reciever' factoring in exit fees</p>
+<p><em>Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</em></p>
 <pre><code class="language-solidity">function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4576,15 +4714,32 @@ from the contract to 'reciever' factoring in exit fees</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
 </tbody></table>
 </div>
 <h3 id="redeemtriplecurve"><a class="header" href="#redeemtriplecurve">redeemTripleCurve</a></h3>
+<p>redeem shares from a bonding curve triple vault for assets</p>
+<p><em>This method is entirely separate from redeemTriple, because we wanted to leave the audited pathways intact.
+This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+performing an audit of the full refactor (V2).</em></p>
 <pre><code class="language-solidity">function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
     external
     nonReentrant
     returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>tripleId</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
+</tbody></table>
+</div>
 <h3 id="_transferfeestoprotocolmultisig"><a class="header" href="#_transferfeestoprotocolmultisig">_transferFeesToProtocolMultisig</a></h3>
 <p><em>transfer fees to the protocol multisig</em></p>
 <pre><code class="language-solidity">function _transferFeesToProtocolMultisig(uint256 value) internal;
@@ -4598,13 +4753,14 @@ from the contract to 'reciever' factoring in exit fees</p>
 <p><em>divides amount across the three atoms composing the triple and issues shares to
 the receiver. Doesn't charge additional protocol fees, but it does charge entry fees on each deposit
 into an atom vault.</em></p>
+<p><em>assumes funds have already been transferred to this contract</em></p>
 <pre><code class="language-solidity">function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
 <tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
-<tr><td><code>amount</code></td><td><code>uint256</code></td><td>the amount of eth to deposit NOTE: assumes funds have already been transferred to this contract</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>the amount of eth to deposit</td></tr>
 </tbody></table>
 </div>
 <h3 id="_depositatomfractioncurve"><a class="header" href="#_depositatomfractioncurve">_depositAtomFractionCurve</a></h3>
@@ -4663,10 +4819,27 @@ Changes the vault's total assets, total shares and balanceOf mappings to reflect
 </tbody></table>
 </div>
 <h3 id="_redeemcurve"><a class="header" href="#_redeemcurve">_redeemCurve</a></h3>
+<p><em>redeem shares out of a given bonding curve vault.
+Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal</em></p>
 <pre><code class="language-solidity">function _redeemCurve(uint256 id, uint256 curveId, address sender, address receiver, uint256 shares)
     internal
     returns (uint256, uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>the address to redeem the shares from</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the assets</td></tr>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assetsForReceiver the amount of assets/eth to be transferred to the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolFee the amount of protocol fees deducted</td></tr>
+</tbody></table>
+</div>
 <h3 id="_mint"><a class="header" href="#_mint">_mint</a></h3>
 <p><em>mint vault shares of vault ID <code>id</code> to address <code>to</code></em></p>
 <pre><code class="language-solidity">function _mint(address to, uint256 id, uint256 amount) internal;
@@ -4707,11 +4880,31 @@ Changes the vault's total assets, total shares and balanceOf mappings to reflect
 </tbody></table>
 </div>
 <h3 id="_increasecurvevaulttotals"><a class="header" href="#_increasecurvevaulttotals">_increaseCurveVaultTotals</a></h3>
+<p><em>increase the total assets and shares for a given bonding curve vault</em></p>
+<p><em>emits an event, as this affects the share price of the specified bonding curve vault</em></p>
 <pre><code class="language-solidity">function _increaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal;
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+<tr><td><code>assetsDelta</code></td><td><code>uint256</code></td><td>the amount of assets to increase the total assets by</td></tr>
+<tr><td><code>sharesDelta</code></td><td><code>uint256</code></td><td>the amount of shares to increase the total shares by</td></tr>
+</tbody></table>
+</div>
 <h3 id="_decreasecurvevaulttotals"><a class="header" href="#_decreasecurvevaulttotals">_decreaseCurveVaultTotals</a></h3>
+<p><em>decrease the total assets and shares for a given bonding curve vault</em></p>
+<p><em>emits an event, as this affects the share price of the specified bonding curve vault</em></p>
 <pre><code class="language-solidity">function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta) internal;
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+<tr><td><code>assetsDelta</code></td><td><code>uint256</code></td><td>the amount of assets to decrease the total assets by</td></tr>
+<tr><td><code>sharesDelta</code></td><td><code>uint256</code></td><td>the amount of shares to decrease the total shares by</td></tr>
+</tbody></table>
+</div>
 <h3 id="_createvault"><a class="header" href="#_createvault">_createVault</a></h3>
 <p><em>internal method for vault creation</em></p>
 <pre><code class="language-solidity">function _createVault() internal returns (uint256);
@@ -4799,6 +4992,7 @@ Changes the vault's total assets, total shares and balanceOf mappings to reflect
 </code></pre>
 <h3 id="entryfeeamount-1"><a class="header" href="#entryfeeamount-1">entryFeeAmount</a></h3>
 <p>returns amount of assets that would be charged for the entry fee given an amount of 'assets' provided</p>
+<p><em>if the vault being deposited on has a vault total shares of 0, the entry fee is not applied</em></p>
 <pre><code class="language-solidity">function entryFeeAmount(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4809,11 +5003,13 @@ Changes the vault's total assets, total shares and balanceOf mappings to reflect
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the entry fee NOTE: if the vault being deposited on has a vault total shares of 0, the entry fee is not applied</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the entry fee</td></tr>
 </tbody></table>
 </div>
 <h3 id="exitfeeamount-1"><a class="header" href="#exitfeeamount-1">exitFeeAmount</a></h3>
 <p>returns amount of assets that would be charged for the exit fee given an amount of 'assets' provided</p>
+<p><em>if the vault  being redeemed from given the shares to redeem results in a total shares after of 0,
+the exit fee is not applied</em></p>
 <pre><code class="language-solidity">function exitFeeAmount(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4824,7 +5020,7 @@ Changes the vault's total assets, total shares and balanceOf mappings to reflect
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the exit fee NOTE: if the vault  being redeemed from given the shares to redeem results in a total shares after of 0, the exit fee is not applied</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged for the exit fee</td></tr>
 </tbody></table>
 </div>
 <h3 id="protocolfeeamount-1"><a class="header" href="#protocolfeeamount-1">protocolFeeAmount</a></h3>
@@ -4845,6 +5041,7 @@ provided</p>
 </div>
 <h3 id="atomdepositfractionamount-1"><a class="header" href="#atomdepositfractionamount-1">atomDepositFractionAmount</a></h3>
 <p>returns atom deposit fraction given amount of 'assets' provided</p>
+<p><em>only applies to triple vaults</em></p>
 <pre><code class="language-solidity">function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4855,7 +5052,7 @@ provided</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be used as atom deposit fraction NOTE: only applies to triple vaults</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be used as atom deposit fraction</td></tr>
 </tbody></table>
 </div>
 <h3 id="_feeonraw"><a class="header" href="#_feeonraw">_feeOnRaw</a></h3>
@@ -4912,8 +5109,20 @@ provided</p>
 </tbody></table>
 </div>
 <h3 id="maxdepositcurve"><a class="header" href="#maxdepositcurve">maxDepositCurve</a></h3>
+<p>returns max amount of assets that can be deposited into a bonding curve vault</p>
+<p><em>Tells the registry to ask the specified curve what its asset limits are.</em></p>
 <pre><code class="language-solidity">function maxDepositCurve(uint256 curveId) public view returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>maxDepositCurve max amount of assets that can be deposited into the bonding curve vault</td></tr>
+</tbody></table>
+</div>
 <h3 id="maxredeem-1"><a class="header" href="#maxredeem-1">maxRedeem</a></h3>
 <p>returns max amount of shares that can be redeemed from the 'sender' balance through a redeem call</p>
 <pre><code class="language-solidity">function maxRedeem(address sender, uint256 id) public view returns (uint256);
@@ -4930,10 +5139,30 @@ provided</p>
 </tbody></table>
 </div>
 <h3 id="maxredeemcurve"><a class="header" href="#maxredeemcurve">maxRedeemCurve</a></h3>
+<p>returns max amount of shares that can be redeemed from a bonding curve vault</p>
 <pre><code class="language-solidity">function maxRedeemCurve(address sender, uint256 id, uint256 curveId) public view returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>the address to redeem the shares from</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom or triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares that can be redeemed from the 'sender' balance through a redeem call</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoshares-5"><a class="header" href="#converttoshares-5">convertToShares</a></h3>
 <p>returns amount of shares that would be exchanged by vault given amount of 'assets' provided</p>
+<p>For regular vaults, shares maintain a linear relationship with assets:
+$shares = assets \cdot \frac{S_{total}}{A_{total}}$</p>
+<h3 id="where"><a class="header" href="#where">Where:</a></h3>
+<p>$S_{total}$ = the total supply of shares
+$A_{total}$ = the total assets in the vault</p>
+<p><em>TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
+No domain conversion needed because 1 dollar worth of assets always equals 1 dollar worth of shares.</em></p>
 <pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4948,10 +5177,59 @@ provided</p>
 </tbody></table>
 </div>
 <h3 id="converttosharescurve"><a class="header" href="#converttosharescurve">convertToSharesCurve</a></h3>
+<p>returns amount of shares that would be exchanged by vault given amount of 'assets' provided</p>
+<p>The conversion happens in two steps:</p>
+<ol>
+<li>First, we get the base shares from the bonding curve:
+$$s_{base} = f_{curve}(assets)$$</li>
+<li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+$$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$</li>
+</ol>
+<h3 id="where-1"><a class="header" href="#where-1">Where:</a></h3>
+<ol>
+<li>$S_{total}$ is the total supply of shares</li>
+<li>$A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
+using the inverse of the bonding curve function</li>
+</ol>
+<p>This adjustment is necessary because the actual ratio of assets:shares may drift from
+the bonding curve's 'pure' conversion ratio due to:</p>
+<ul>
+<li>Protocol fees being taken in assets</li>
+<li>Share burns</li>
+<li>Direct asset transfers/airdrops</li>
+</ul>
+<p>For example, if the pool has fewer assets than the curve expects for its share supply
+(due to fees), new depositors will receive proportionally more shares to maintain fairness.</p>
+<p>The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
+quantities in the same space, as the bonding curve defines a non-linear relationship
+between assets and shares.</p>
+<p><em>TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
+So you need to compute their value using a common denominator like dollars.</em></p>
 <pre><code class="language-solidity">function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate shares on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>vault id of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be exchanged by vault given amount of 'assets' provided</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoassets-5"><a class="header" href="#converttoassets-5">convertToAssets</a></h3>
 <p>returns amount of assets that would be exchanged by vault given amount of 'shares' provided</p>
+<p>For regular vaults, assets maintain a linear relationship with shares:
+$assets = shares \cdot \frac{A_{total}}{S_{total}}$</p>
+<h3 id="where-2"><a class="header" href="#where-2">Where:</a></h3>
+<ul>
+<li>$S_{total}$ is the total supply of shares</li>
+<li>$A_{total}$ is the total assets in the vault</li>
+</ul>
+<p><em>TLDR: Since assets and shares maintain a 1:1 relationship, we only need simple proportion math.
+No domain conversion needed because 1 dollar worth of shares always equals 1 dollar worth of assets.</em></p>
 <pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4966,11 +5244,54 @@ provided</p>
 </tbody></table>
 </div>
 <h3 id="converttoassetscurve"><a class="header" href="#converttoassetscurve">convertToAssetsCurve</a></h3>
+<p>returns amount of assets that would be exchanged by vault given amount of 'shares' provided</p>
+<p>The conversion happens in two steps:</p>
+<ol>
+<li>First, we get the base assets from the bonding curve:
+$$a_{base} = f_{curve}^{-1}(shares)$$</li>
+<li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
+$$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$</li>
+</ol>
+<h3 id="where-3"><a class="header" href="#where-3">Where:</a></h3>
+<ol>
+<li>$A_{total}$ is the total assets in the vault</li>
+<li>$S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
+using the bonding curve function</li>
+</ol>
+<p>This adjustment is necessary because the actual ratio of shares:assets may drift from
+the bonding curve's 'pure' conversion ratio due to:</p>
+<ul>
+<li>Protocol fees being taken in assets</li>
+<li>Share burns</li>
+<li>Direct asset transfers/airdrops</li>
+</ul>
+<p>For example, if the pool has fewer assets than the curve expects for its share supply
+(due to fees), redeemers will receive proportionally fewer assets to maintain fairness.</p>
+<p>The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
+quantities in the same space, as the bonding curve defines a non-linear relationship
+between shares and assets.</p>
+<p><em>TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.
+So you need to compute their value using a common denominator like dollars.</em></p>
 <pre><code class="language-solidity">function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of shares to calculate assets on</td></tr>
+<tr><td><code>id</code></td><td><code>uint256</code></td><td>vault id to get corresponding assets for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>vault id of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets amount of assets that would be exchanged by vault given amount of 'shares' provided</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewdeposit-5"><a class="header" href="#previewdeposit-5">previewDeposit</a></h3>
 <p>simulates the effects of the deposited amount of 'assets' and returns the estimated
 amount of shares that would be minted from the deposit of <code>assets</code></p>
+<p><em>this function pessimistically estimates the amount of shares that would be minted from the
+input amount of assets so if the vault is empty before the deposit the caller receives more
+shares than returned by this function, reference internal _depositIntoVault logic for details</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -4981,7 +5302,7 @@ amount of shares that would be minted from the deposit of <code>assets</code></p
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be minted from the deposit of <code>assets</code> NOTE: this function pessimistically estimates the amount of shares that would be minted from the input amount of assets so if the vault is empty before the deposit the caller receives more shares than returned by this function, reference internal _depositIntoVault logic for details</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be minted from the deposit of <code>assets</code></td></tr>
 </tbody></table>
 </div>
 <h3 id="previewdepositcurve"><a class="header" href="#previewdepositcurve">previewDepositCurve</a></h3>
@@ -5008,6 +5329,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </code></pre>
 <h3 id="triplehash-1"><a class="header" href="#triplehash-1">tripleHash</a></h3>
 <p>returns the corresponding hash for the given RDF triple, given the triple vault id</p>
+<p><em>only applies to triple vault IDs as input</em></p>
 <pre><code class="language-solidity">function tripleHash(uint256 id) public view returns (bytes32);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -5017,7 +5339,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>bytes32</code></td><td>hash the corresponding hash for the given RDF triple NOTE: only applies to triple vault IDs as input</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bytes32</code></td><td>hash the corresponding hash for the given RDF triple</td></tr>
 </tbody></table>
 </div>
 <h3 id="istripleid-1"><a class="header" href="#istripleid-1">isTripleId</a></h3>
@@ -5036,6 +5358,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <h3 id="gettripleatoms-1"><a class="header" href="#gettripleatoms-1">getTripleAtoms</a></h3>
 <p>returns the atoms that make up a triple/counter-triple</p>
+<p><em>only applies to triple vault IDs as input</em></p>
 <pre><code class="language-solidity">function getTripleAtoms(uint256 id) public view returns (uint256, uint256, uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -5045,7 +5368,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tuple(atomIds) the atoms that make up the triple/counter-triple NOTE: only applies to triple vault IDs as input</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tuple(atomIds) the atoms that make up the triple/counter-triple</td></tr>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
@@ -5068,6 +5391,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <h3 id="getcounteridfromtriple-1"><a class="header" href="#getcounteridfromtriple-1">getCounterIdFromTriple</a></h3>
 <p>returns the counter id from the given triple id</p>
+<p><em>only applies to triple vault IDs as input</em></p>
 <pre><code class="language-solidity">function getCounterIdFromTriple(uint256 id) public pure returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -5077,7 +5401,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>counterId the counter vault id from the given triple id NOTE: only applies to triple vault IDs as input</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>counterId the counter vault id from the given triple id</td></tr>
 </tbody></table>
 </div>
 <h3 id="getatomwarden-1"><a class="header" href="#getatomwarden-1">getAtomWarden</a></h3>
@@ -5108,6 +5432,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </code></pre>
 <h3 id="computeatomwalletaddr-1"><a class="header" href="#computeatomwalletaddr-1">computeAtomWalletAddr</a></h3>
 <p>returns the Atom Wallet address for the given atom data</p>
+<p><em>the create2 salt is based off of the vault ID</em></p>
 <pre><code class="language-solidity">function computeAtomWalletAddr(uint256 id) public view returns (address);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -5117,7 +5442,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: the create2 salt is based off of the vault ID</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet</td></tr>
 </tbody></table>
 </div>
 <h3 id="_hascounterstake"><a class="header" href="#_hascounterstake">_hasCounterStake</a></h3>
@@ -5160,7 +5485,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5179,29 +5504,39 @@ This magnificent specimen takes the legacy share price logic - a time-honored 1:
 relationship between assets and shares - and wraps it in our shiny new bonding curve
 architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
 implementation (we see you, future integrations 👀), this curve is the unsung hero
-of low-risk incentivization.
-Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
+of low-risk incentivization.</p>
+<p>Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
 on the pure, unadulterated power of fees to affect share price. When fees roll in,
 they're distributed proportionally across all shareholders, creating a gentle upward
-pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰
-This creates an incredibly based, low-risk incentivization model where early stakers
+pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰</p>
+<p>This creates an incredibly based, low-risk incentivization model where early stakers
 benefit from the natural accumulation of fees over time. No wild price swings, no
 complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
 bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
+<p><em>This curve is not actually used in this version of the EthMultiVault, so as to avoid changing
+audited code.  It is left here to demonstrate the design pattern of curves for V2.  This curve
+replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve architecture.</em></p>
 <h2 id="state-variables-7"><a class="header" href="#state-variables-7">State Variables</a></h2>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
+<p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
 </code></pre>
 <h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
+<p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
 </code></pre>
 <h2 id="functions-12"><a class="header" href="#functions-12">Functions</a></h2>
 <h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
+<p>Constructor for the Linear Curve.</p>
 <pre><code class="language-solidity">constructor(string memory _name) BaseCurve(_name);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve.</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewdeposit-6"><a class="header" href="#previewdeposit-6">previewDeposit</a></h3>
-<p>Preview how many shares would be minted for a deposit of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -5221,8 +5556,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewredeem-6"><a class="header" href="#previewredeem-6">previewRedeem</a></h3>
-<p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -5242,8 +5576,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewmint-4"><a class="header" href="#previewmint-4">previewMint</a></h3>
-<p>Preview how many assets would be required to mint a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -5263,8 +5596,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewwithdraw-4"><a class="header" href="#previewwithdraw-4">previewWithdraw</a></h3>
-<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -5284,22 +5616,63 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="converttoshares-6"><a class="header" href="#converttoshares-6">convertToShares</a></h3>
-<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 totalAssets, uint256) public pure override returns (uint256 shares);
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256) public pure override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoassets-6"><a class="header" href="#converttoassets-6">convertToAssets</a></h3>
-<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public pure override returns (uint256 assets);
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256, uint256) public pure override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="currentprice-4"><a class="header" href="#currentprice-4">currentPrice</a></h3>
+<p>In a linear curve, the base price will always be 1.  Pool ratio adjustments are dealt with in the EthMultiVault itself.</p>
 <pre><code class="language-solidity">function currentPrice(uint256) public pure override returns (uint256 sharePrice);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
 <h3 id="maxshares-2"><a class="header" href="#maxshares-2">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
 <h3 id="maxassets-2"><a class="header" href="#maxassets-2">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5317,11 +5690,13 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
 early staker rewards! 🌶️
 This mathematical masterpiece uses a progressive pricing model where each new share
-costs more than the last. The price follows the formula P(s) = m * s, where 'm' is
-our slope (measured in basis points) and 's' is the total supply of shares. But wait,
-there's more! The actual cost to mint shares is calculated as the area under this
-curve, giving us: Cost = (s₂² - s₁²) * (m/2), where s₁ is the starting share supply
-and s₂ is the final share supply. 📐
+costs more than the last. The price follows the formula:
+$$P(s) = m \cdot s$$
+where $m$ is our slope (measured in basis points) and $s$ is the total supply of shares.
+But wait, there's more! The actual cost to mint shares is calculated as the area under this
+curve, giving us:
+$$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
+where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
 Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors
 early stakers. The earlier you get in, the more your shares are worth compared to
 later participants. It's like the LinearCurve's fee-based appreciation got injected
@@ -5332,49 +5707,226 @@ Think of it as DeFi's answer to the early bird special - except instead of getti
 the worm, you're getting exponentially more valuable shares! The perfect complement
 to our low-risk fee model, creating a two-pronged approach to value accrual that's
 simply <em>chef's kiss</em> 👨‍🍳</p>
+<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+<p><em>Fixed point precision used for all internal calculations, while return values are all
+represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
+and return 123.</em></p>
+<p><em>The core equation:
+$$P(s) = m \cdot s$$
+and the cost equation:
+$$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
+comes from calculus - it's the integral of a linear price function. The area under a
+linear curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
+shares.</em></p>
+<p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution</em></p>
 <h2 id="state-variables-8"><a class="header" href="#state-variables-8">State Variables</a></h2>
 <h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
+<p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
+<p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
+<p><em>If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets</em></p>
 <pre><code class="language-solidity">UD60x18 public immutable SLOPE;
 </code></pre>
 <h3 id="half_slope"><a class="header" href="#half_slope">HALF_SLOPE</a></h3>
+<p>The half of the slope, used for calculations.</p>
 <pre><code class="language-solidity">UD60x18 public immutable HALF_SLOPE;
 </code></pre>
 <h3 id="max_shares-1"><a class="header" href="#max_shares-1">MAX_SHARES</a></h3>
+<p><em>Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES;
 </code></pre>
 <h3 id="max_assets-1"><a class="header" href="#max_assets-1">MAX_ASSETS</a></h3>
+<p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
 <h2 id="functions-13"><a class="header" href="#functions-13">Functions</a></h2>
 <h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
+<p>Constructs a new ProgressiveCurve with the given name and slope</p>
+<p><em>Computes maximum values given constructor arguments</em></p>
+<p><em>Computes Slope / 2 as commonly used constant</em></p>
 <pre><code class="language-solidity">constructor(string memory _name, uint256 slope18) BaseCurve(_name);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve (i.e. "Progressive Curve #465")</td></tr>
+<tr><td><code>slope18</code></td><td><code>uint256</code></td><td>The slope of the curve, in basis points (i.e. 0.0025e18)</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewdeposit-7"><a class="header" href="#previewdeposit-7">previewDeposit</a></h3>
+<p>Preview how many shares would be minted for a deposit of assets</p>
+<p><em>Let $s$ = current total supply</em></p>
+<p><em>Let $a$ = amount of assets to deposit</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>shares:
+$$\text{shares} = \sqrt{s^2 + \frac{a}{m/2}} - s$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = \sqrt{s^2 + \frac{2a}{m}} - s$$</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewredeem-7"><a class="header" href="#previewredeem-7">previewRedeem</a></h3>
+<p>Preview how many assets would be returned for burning a specific amount of shares</p>
+<p><em>Let $s$ = initial total supply of shares</em></p>
+<p><em>Let $r$ = shares to redeem</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>assets:
+$$\text{assets} = (s^2 - (s-r)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>this can be expanded to:
+$$\text{assets} = (s^2 - (s^2 - 2sr + r^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewmint-5"><a class="header" href="#previewmint-5">previewMint</a></h3>
+<p>Preview how many assets would be required to mint a specific amount of shares</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $n$ = new shares to mint</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + n)^2 - s^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which can be expanded to:
+$$\text{assets} = (s^2 + 2sn + n^2 - s^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2sn + n^2) \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewwithdraw-5"><a class="header" href="#previewwithdraw-5">previewWithdraw</a></h3>
+<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to withdraw</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>shares:
+$$\text{shares} = s - \sqrt{s^2 - \frac{a}{m/2}}$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = s - \sqrt{s^2 - \frac{2a}{m}}$$</em></p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
 <h3 id="currentprice-5"><a class="header" href="#currentprice-5">currentPrice</a></h3>
+<p>Get the current price of a share</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $m$ = the slope of the curve</em></p>
+<p><em>sharePrice:
+$$\text{sharePrice} = s \cdot m$$</em></p>
+<p><em>This is the basic linear price function where the price increases linearly with the total supply</em></p>
+<p><em>And the slope ($m$) determines how quickly the price increases</em></p>
+<p><em>TLDR: Each new share costs more than the last</em></p>
 <pre><code class="language-solidity">function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoshares-7"><a class="header" href="#converttoshares-7">convertToShares</a></h3>
+<p>Convert assets to shares at a specific point on the curve</p>
+<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
+<p><em>shares:
+$$\text{shares} = \frac{a}{s \cdot m/2}$$</em></p>
+<p><em>Or to say that another way:
+$$\text{shares} = \frac{2a}{s \cdot m}$$</em></p>
 <pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoassets-7"><a class="header" href="#converttoassets-7">convertToAssets</a></h3>
+<p>Convert shares to assets at a specific point on the curve</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $n$ = quantity of shares to convert to assets</em></p>
+<p><em>conversion price:
+$$\text{price} = s \cdot \frac{m}{2}$$</em></p>
+<p><em>where $\frac{m}{2}$ is average price per share</em></p>
+<p><em>assets:
+$$\text{assets} = n \cdot (s \cdot \frac{m}{2})$$</em></p>
+<p><em>Or to say that another way:
+$$\text{assets} = n \cdot s \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="_converttoassets"><a class="header" href="#_converttoassets">_convertToAssets</a></h3>
-<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium,
-f(x) = mx + c, and Area = 1/2 * (a + b) * h
-where <code>a</code> and <code>b</code> can be both f(juniorSupply) or f(seniorSupply) depending if used in minting or redeeming.
-Calculates area as (seniorSupply^2 - juniorSupply^2) * halfSlope, where halfSlope = (slope / 2)</p>
+<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium:
+$$f(x) = mx + c$$
+$$\text{Area} = \frac{1}{2} \cdot (a + b) \cdot h$$
+where $a$ and $b$ can be both $f(\text{juniorSupply})$ or $f(\text{seniorSupply})$ depending if used in minting or redeeming.
+Calculates area as:
+$$(\text{seniorSupply}^2 - \text{juniorSupply}^2) \cdot \text{halfSlope}$$
+where:
+$$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
 <pre><code class="language-solidity">function _convertToAssets(UD60x18 juniorSupply, UD60x18 seniorSupply) internal view returns (UD60x18 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -5389,9 +5941,13 @@ Calculates area as (seniorSupply^2 - juniorSupply^2) * halfSlope, where halfSlop
 </tbody></table>
 </div>
 <h3 id="maxshares-3"><a class="header" href="#maxshares-3">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
 <h3 id="maxassets-3"><a class="header" href="#maxassets-3">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 

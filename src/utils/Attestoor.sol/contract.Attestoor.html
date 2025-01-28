@@ -10,6 +10,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -174,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="attestoor"><a class="header" href="#attestoor">Attestoor</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/utils/Attestoor.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/Attestoor.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable</p>
 <p><strong>Author:</strong>

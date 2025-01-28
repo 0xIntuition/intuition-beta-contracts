@@ -10,6 +10,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -174,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="linearcurve"><a class="header" href="#linearcurve">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -193,29 +207,39 @@ This magnificent specimen takes the legacy share price logic - a time-honored 1:
 relationship between assets and shares - and wraps it in our shiny new bonding curve
 architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
 implementation (we see you, future integrations 👀), this curve is the unsung hero
-of low-risk incentivization.
-Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
+of low-risk incentivization.</p>
+<p>Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
 on the pure, unadulterated power of fees to affect share price. When fees roll in,
 they're distributed proportionally across all shareholders, creating a gentle upward
-pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰
-This creates an incredibly based, low-risk incentivization model where early stakers
+pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰</p>
+<p>This creates an incredibly based, low-risk incentivization model where early stakers
 benefit from the natural accumulation of fees over time. No wild price swings, no
 complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
 bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
+<p><em>This curve is not actually used in this version of the EthMultiVault, so as to avoid changing
+audited code.  It is left here to demonstrate the design pattern of curves for V2.  This curve
+replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve architecture.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
+<p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
 </code></pre>
 <h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
+<p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
+<p>Constructor for the Linear Curve.</p>
 <pre><code class="language-solidity">constructor(string memory _name) BaseCurve(_name);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve.</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
-<p>Preview how many shares would be minted for a deposit of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -235,8 +259,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
-<p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -256,8 +279,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
-<p>Preview how many assets would be required to mint a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
     public
     view
@@ -277,8 +299,7 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
-<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
     public
     view
@@ -298,18 +319,59 @@ bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
 </tbody></table>
 </div>
 <h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
-<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 totalAssets, uint256) public pure override returns (uint256 shares);
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256) public pure override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
-<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public pure override returns (uint256 assets);
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256, uint256) public pure override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="currentprice"><a class="header" href="#currentprice">currentPrice</a></h3>
+<p>In a linear curve, the base price will always be 1.  Pool ratio adjustments are dealt with in the EthMultiVault itself.</p>
 <pre><code class="language-solidity">function currentPrice(uint256) public pure override returns (uint256 sharePrice);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
 <h3 id="maxshares"><a class="header" href="#maxshares">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
 <h3 id="maxassets"><a class="header" href="#maxassets">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 

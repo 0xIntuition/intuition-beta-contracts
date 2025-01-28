@@ -10,6 +10,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -213,6 +227,7 @@
 <li><a href="https://intuition.systems">Official Website</a></li>
 <li><a href="https://docs.intuition.systems">Official Documentation</a></li>
 <li><a href="https://intuition.gitbook.io/intuition-or-beta-contracts">Deep Dive into Our Smart Contracts</a></li>
+<li><a href="https://0xintuition.github.io/intuition-beta-contracts">Full Contracts Documentation</a></li>
 </ul>
 <h3 id="known-nuances"><a class="header" href="#known-nuances">Known Nuances</a></h3>
 <ul>

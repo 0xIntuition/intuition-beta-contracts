@@ -10,6 +10,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -174,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="progressivecurve"><a class="header" href="#progressivecurve">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -192,11 +206,13 @@
 is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
 early staker rewards! 🌶️
 This mathematical masterpiece uses a progressive pricing model where each new share
-costs more than the last. The price follows the formula P(s) = m * s, where 'm' is
-our slope (measured in basis points) and 's' is the total supply of shares. But wait,
-there's more! The actual cost to mint shares is calculated as the area under this
-curve, giving us: Cost = (s₂² - s₁²) * (m/2), where s₁ is the starting share supply
-and s₂ is the final share supply. 📐
+costs more than the last. The price follows the formula:
+$$P(s) = m \cdot s$$
+where $m$ is our slope (measured in basis points) and $s$ is the total supply of shares.
+But wait, there's more! The actual cost to mint shares is calculated as the area under this
+curve, giving us:
+$$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
+where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
 Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors
 early stakers. The earlier you get in, the more your shares are worth compared to
 later participants. It's like the LinearCurve's fee-based appreciation got injected
@@ -207,49 +223,226 @@ Think of it as DeFi's answer to the early bird special - except instead of getti
 the worm, you're getting exponentially more valuable shares! The perfect complement
 to our low-risk fee model, creating a two-pronged approach to value accrual that's
 simply <em>chef's kiss</em> 👨‍🍳</p>
+<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+<p><em>Fixed point precision used for all internal calculations, while return values are all
+represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
+and return 123.</em></p>
+<p><em>The core equation:
+$$P(s) = m \cdot s$$
+and the cost equation:
+$$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
+comes from calculus - it's the integral of a linear price function. The area under a
+linear curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
+shares.</em></p>
+<p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
+<p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
+<p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
+<p><em>If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets</em></p>
 <pre><code class="language-solidity">UD60x18 public immutable SLOPE;
 </code></pre>
 <h3 id="half_slope"><a class="header" href="#half_slope">HALF_SLOPE</a></h3>
+<p>The half of the slope, used for calculations.</p>
 <pre><code class="language-solidity">UD60x18 public immutable HALF_SLOPE;
 </code></pre>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
+<p><em>Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES;
 </code></pre>
 <h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
+<p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
+<p>Constructs a new ProgressiveCurve with the given name and slope</p>
+<p><em>Computes maximum values given constructor arguments</em></p>
+<p><em>Computes Slope / 2 as commonly used constant</em></p>
 <pre><code class="language-solidity">constructor(string memory _name, uint256 slope18) BaseCurve(_name);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve (i.e. "Progressive Curve #465")</td></tr>
+<tr><td><code>slope18</code></td><td><code>uint256</code></td><td>The slope of the curve, in basis points (i.e. 0.0025e18)</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
+<p>Preview how many shares would be minted for a deposit of assets</p>
+<p><em>Let $s$ = current total supply</em></p>
+<p><em>Let $a$ = amount of assets to deposit</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>shares:
+$$\text{shares} = \sqrt{s^2 + \frac{a}{m/2}} - s$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = \sqrt{s^2 + \frac{2a}{m}} - s$$</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
+<p>Preview how many assets would be returned for burning a specific amount of shares</p>
+<p><em>Let $s$ = initial total supply of shares</em></p>
+<p><em>Let $r$ = shares to redeem</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>assets:
+$$\text{assets} = (s^2 - (s-r)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>this can be expanded to:
+$$\text{assets} = (s^2 - (s^2 - 2sr + r^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
+<p>Preview how many assets would be required to mint a specific amount of shares</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $n$ = new shares to mint</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + n)^2 - s^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which can be expanded to:
+$$\text{assets} = (s^2 + 2sn + n^2 - s^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2sn + n^2) \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
+<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to withdraw</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>shares:
+$$\text{shares} = s - \sqrt{s^2 - \frac{a}{m/2}}$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = s - \sqrt{s^2 - \frac{2a}{m}}$$</em></p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
 <h3 id="currentprice"><a class="header" href="#currentprice">currentPrice</a></h3>
+<p>Get the current price of a share</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $m$ = the slope of the curve</em></p>
+<p><em>sharePrice:
+$$\text{sharePrice} = s \cdot m$$</em></p>
+<p><em>This is the basic linear price function where the price increases linearly with the total supply</em></p>
+<p><em>And the slope ($m$) determines how quickly the price increases</em></p>
+<p><em>TLDR: Each new share costs more than the last</em></p>
 <pre><code class="language-solidity">function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
+<p>Convert assets to shares at a specific point on the curve</p>
+<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
+<p><em>shares:
+$$\text{shares} = \frac{a}{s \cdot m/2}$$</em></p>
+<p><em>Or to say that another way:
+$$\text{shares} = \frac{2a}{s \cdot m}$$</em></p>
 <pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
+<p>Convert shares to assets at a specific point on the curve</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $n$ = quantity of shares to convert to assets</em></p>
+<p><em>conversion price:
+$$\text{price} = s \cdot \frac{m}{2}$$</em></p>
+<p><em>where $\frac{m}{2}$ is average price per share</em></p>
+<p><em>assets:
+$$\text{assets} = n \cdot (s \cdot \frac{m}{2})$$</em></p>
+<p><em>Or to say that another way:
+$$\text{assets} = n \cdot s \cdot \frac{m}{2}$$</em></p>
 <pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
+</tbody></table>
+</div>
 <h3 id="_converttoassets"><a class="header" href="#_converttoassets">_convertToAssets</a></h3>
-<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium,
-f(x) = mx + c, and Area = 1/2 * (a + b) * h
-where <code>a</code> and <code>b</code> can be both f(juniorSupply) or f(seniorSupply) depending if used in minting or redeeming.
-Calculates area as (seniorSupply^2 - juniorSupply^2) * halfSlope, where halfSlope = (slope / 2)</p>
+<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium:
+$$f(x) = mx + c$$
+$$\text{Area} = \frac{1}{2} \cdot (a + b) \cdot h$$
+where $a$ and $b$ can be both $f(\text{juniorSupply})$ or $f(\text{seniorSupply})$ depending if used in minting or redeeming.
+Calculates area as:
+$$(\text{seniorSupply}^2 - \text{juniorSupply}^2) \cdot \text{halfSlope}$$
+where:
+$$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
 <pre><code class="language-solidity">function _convertToAssets(UD60x18 juniorSupply, UD60x18 seniorSupply) internal view returns (UD60x18 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -264,9 +457,13 @@ Calculates area as (seniorSupply^2 - juniorSupply^2) * halfSlope, where halfSlop
 </tbody></table>
 </div>
 <h3 id="maxshares"><a class="header" href="#maxshares">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
 <h3 id="maxassets"><a class="header" href="#maxassets">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 

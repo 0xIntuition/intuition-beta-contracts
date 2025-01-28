@@ -10,6 +10,20 @@
         <!-- Include Mermaid -->
         <script src='https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js'></script>
         
+        <!-- Include MathJax -->
+        <script>
+          window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true, processEnvironments: true }, options: { skipHtmlTags: ['script', 'noscript', 'style',
+          'textarea', 'pre'] } };
+        </script>
+        <script
+          type='text/javascript'
+          id='MathJax-script'
+          async
+          src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+        >
+        </script>
+        
         <script>
           window.addEventListener('load', function() { mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel:
           'loose', themeVariables: { darkMode: true }, flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }, zoom:
@@ -174,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ffc9eae9262f0b3ca46a69f80448e982f5796dc8/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -209,7 +223,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
 <p>Preview how many shares would be minted for a deposit of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
     external
     view
@@ -229,7 +242,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
 <p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
     external
     view
@@ -249,7 +261,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
 <p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
     external
     view
@@ -269,7 +280,6 @@ All curves must implement these functions to be compatible with the protocol.</p
 </div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
 <p>Preview how many assets would be required to mint a specific amount of shares</p>
-<p><em>The implementation of this function must call _adjust()</em></p>
 <pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets) external view returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
