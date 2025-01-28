@@ -25,7 +25,6 @@ contract LinearCurve is BaseCurve {
         returns (uint256 shares)
     {
         if (assets == 0) return 0;
-        require(assets + totalAssets < MAX_ASSETS, "LC: Exceeds max assets");
 
         shares = assets; // 1:1 relationship
 
@@ -45,7 +44,6 @@ contract LinearCurve is BaseCurve {
         returns (uint256 assets)
     {
         if (shares == 0) return 0;
-        require(totalShares < MAX_SHARES, "LC: Exceeds max shares");
 
         assets = shares; // 1:1 relationship
 
@@ -65,7 +63,6 @@ contract LinearCurve is BaseCurve {
         returns (uint256 assets)
     {
         if (shares == 0) return 0;
-        require(shares + totalShares < MAX_SHARES, "LC: Exceeds max shares");
 
         assets = shares; // 1:1 relationship
 
@@ -85,7 +82,6 @@ contract LinearCurve is BaseCurve {
         returns (uint256 shares)
     {
         if (assets == 0) return 0;
-        require(totalAssets < MAX_ASSETS, "LC: Exceeds max assets");
 
         shares = assets; // 1:1 relationship
 
@@ -102,7 +98,6 @@ contract LinearCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        require(totalAssets >= assets, "LC: Under supply of assets");
         return assets;
     }
 
@@ -112,7 +107,6 @@ contract LinearCurve is BaseCurve {
         override
         returns (uint256 assets)
     {
-        require(totalShares >= shares, "LC: Under supply of shares");
         return shares;
     }
 

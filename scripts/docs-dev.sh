@@ -92,7 +92,7 @@ src = "src"
 default-theme = "dark"
 preferred-dark-theme = "ayu"
 git-repository-url = "https://github.com/0xIntuition/intuition-beta-contracts"
-additional-js = ["mermaid.min.js"]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
 additional-css = ["book.css"]
 
 [preprocessor.mermaid]
@@ -102,24 +102,36 @@ EOF
 # Step 7: Copy Mermaid files
 echo "Setting up Mermaid..."
 mkdir -p docs/theme
-curl -o docs/mermaid.min.js https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
+curl -o docs/mermaid.min.js https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js
 cat > docs/mermaid-init.js << EOF
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-mermaid.initialize({
-  startOnLoad: true,
-  theme: 'dark',
-  securityLevel: 'loose',
-  themeVariables: {
-    darkMode: true
-  },
-  mindmap: {
-    padding: 10,
-    useMaxWidth: true
-  }
+window.addEventListener('load', (event) => {
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        securityLevel: 'loose',
+        themeVariables: {
+            darkMode: true,
+            xyChart: {
+                backgroundColor: '#1f2937',
+                titleColor: '#ffffff',
+                gridColor: '#374151',
+                xAxisLabelColor: '#9ca3af',
+                yAxisLabelColor: '#9ca3af',
+                plotColorPalette: '#6366f1'
+            }
+        },
+        mindmap: {
+            padding: 10,
+            useMaxWidth: true
+        }
+    });
 });
 EOF
 
-# Step 8: Start development server
+# Step 8: Generate curve data and graphs
+echo "Generating curve data and graphs..."
+python3 scripts/generate_curve_graphs.py
+
+# Step 9: Start development server
 echo "Starting mdbook server..."
 cd docs && mdbook serve --open 

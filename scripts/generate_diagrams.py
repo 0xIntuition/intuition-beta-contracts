@@ -227,12 +227,12 @@ graph TB
     # Add styles
     mermaid += """
     %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:14px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:18px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:14px,font-family:Arial,rounded:true;
-    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:14px,font-family:Arial,rounded:true;
-    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:14px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:16px,font-weight:bold,font-family:Arial;
+    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
+    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
+    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
+    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
+    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
+    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
     class root root;
@@ -323,9 +323,9 @@ graph TB
     # Add styles
     mermaid += """
     %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:16px,font-family:Arial,rounded:true,color:#000;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:20px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef category fill:none,stroke:none,color:#000,font-size:18px,font-weight:bold,font-family:Arial;
+    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:24px,font-family:Arial,rounded:true,color:#000;
+    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
+    classDef category fill:none,stroke:none,color:#000,font-size:24px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
 """

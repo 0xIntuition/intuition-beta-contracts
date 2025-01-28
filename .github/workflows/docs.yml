@@ -41,6 +41,9 @@ jobs:
       - name: Generate Contract Diagrams
         run: python3 scripts/generate_diagrams.py
 
+      - name: Generate Curve Graphs
+        run: python3 scripts/generate_curve_graphs.py
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
