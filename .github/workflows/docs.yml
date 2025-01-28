@@ -21,11 +21,22 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm install
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Install Dependencies
-        run: forge install
+      - name: Install Forge Dependencies
+        run: |
+          forge install
+          forge build
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -88,11 +99,6 @@ jobs:
               tail -n +3 docs/src/SUMMARY.md | grep -v "architecture/overview.md"
           } > docs/src/SUMMARY.md.tmp
           mv docs/src/SUMMARY.md.tmp docs/src/SUMMARY.md
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
 
       - name: Install mermaid-cli
         run: npm install -g @mermaid-js/mermaid-cli
