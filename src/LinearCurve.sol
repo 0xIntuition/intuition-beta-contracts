@@ -6,8 +6,22 @@ import {BaseCurve} from "./BaseCurve.sol";
 /**
  * @title  LinearCurve
  * @author 0xIntuition
- * @notice Models a linear curve where shares and assets maintain a 1:1 relationship.
- *         This is the simplest curve possible, used as a baseline implementation.
+ * @notice 🎯 The OG, battle-tested share price model, now reborn as a bonding curve! 
+ *         This magnificent specimen takes the legacy share price logic - a time-honored 1:1 
+ *         relationship between assets and shares - and wraps it in our shiny new bonding curve 
+ *         architecture. While it's currently chillin' on the sidelines of our ETHMultiVault 
+ *         implementation (we see you, future integrations 👀), this curve is the unsung hero 
+ *         of low-risk incentivization.
+ *
+ *         Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies 
+ *         on the pure, unadulterated power of fees to affect share price. When fees roll in, 
+ *         they're distributed proportionally across all shareholders, creating a gentle upward 
+ *         pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰
+ *
+ *         This creates an incredibly based, low-risk incentivization model where early stakers 
+ *         benefit from the natural accumulation of fees over time. No wild price swings, no 
+ *         complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of 
+ *         bonding curves: not flashy, but it'll get you there every single time! 🚗
  */
 contract LinearCurve is BaseCurve {
     // For linear curve, max values are the same since it's 1:1
@@ -28,10 +42,6 @@ contract LinearCurve is BaseCurve {
 
         shares = assets; // 1:1 relationship
 
-        // Deposit Adjustment:
-        uint256 totalAssetsInShareSpace = totalAssets; // 1 : 1 relationship
-        shares = super._adjust(shares, totalShares, totalAssetsInShareSpace);
-
         return shares;
     }
 
@@ -46,10 +56,6 @@ contract LinearCurve is BaseCurve {
         if (shares == 0) return 0;
 
         assets = shares; // 1:1 relationship
-
-        // Redeem Adjustment:
-        uint256 totalSharesInAssetsSpace = totalShares; // 1 : 1 relationship
-        assets = super._adjust(assets, totalAssets, totalSharesInAssetsSpace);
 
         return assets;
     }
@@ -66,10 +72,6 @@ contract LinearCurve is BaseCurve {
 
         assets = shares; // 1:1 relationship
 
-        // Mint Adjustment:
-        uint256 totalSharesInAssetSpace = totalShares; // 1 : 1 relationship
-        assets = super._adjust(assets, totalAssets, totalSharesInAssetSpace);
-
         return assets;
     }
 
@@ -84,10 +86,6 @@ contract LinearCurve is BaseCurve {
         if (assets == 0) return 0;
 
         shares = assets; // 1:1 relationship
-
-        // Withdraw Adjustment:
-        uint256 totalAssetsInShareSpace = totalAssets; // 1 : 1 relationship
-        shares = super._adjust(shares, totalShares, totalAssetsInShareSpace);
 
         return shares;
     }
