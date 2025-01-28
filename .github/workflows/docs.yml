@@ -159,9 +159,12 @@ jobs:
           command = "mdbook-mermaid"
           EOF
 
-      - name: Setup Mermaid
+      - name: Setup Theme and Templates
         run: |
           mkdir -p docs/theme
+          # Copy template from templates directory
+          cp templates/head.hbs docs/theme/head.hbs
+          # Setup mermaid
           curl -o docs/mermaid.min.js https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js
           cat > docs/mermaid-init.js << EOF
           window.addEventListener('load', (event) => {
