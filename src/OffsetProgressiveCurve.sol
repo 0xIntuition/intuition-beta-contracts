@@ -5,7 +5,7 @@ import {BaseCurve} from "./BaseCurve.sol";
 import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 
 /**
- * @title  ProgressiveCurve
+ * @title  OffsetProgressiveCurve
  * @author 0xIntuition
  * @notice 🚀 Welcome to the SPICIEST bonding curve in the Intuition galaxy! While our LinearCurve
  *         is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
@@ -46,14 +46,19 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
  * @dev     Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
  *          and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  * The key difference
  *          between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
- *          instead of directly in the curve implementation. *  Otherwise the math is identical.
+ *          instead of directly in the curve implementation. *  Otherwise the only difference in the math is the
+ *          inclusion of the OFFSET value, which we use to make the curve more gentle.
  */
 
-contract ProgressiveCurve is BaseCurve {
+contract OffsetProgressiveCurve is BaseCurve {
     /// @notice The slope of the curve, in basis points.  This is the rate at which the price of shares increases.
     /// @dev 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc
     /// @dev If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets
     UD60x18 public immutable SLOPE;
+
+    /// @notice The offset of the curve.  This value is used to snip off a portion of the beginning of the curve, realigning it to the
+    /// origin.  For more details, see the preview functions.
+    UD60x18 public immutable OFFSET;
 
     /// @notice The half of the slope, used for calculations.
     UD60x18 public immutable HALF_SLOPE;
@@ -69,12 +74,12 @@ contract ProgressiveCurve is BaseCurve {
     /// @param slope18 The slope of the curve, in basis points (i.e. 0.0025e18)
     /// @dev Computes maximum values given constructor arguments
     /// @dev Computes Slope / 2 as commonly used constant
-    constructor(string memory _name, uint256 slope18) BaseCurve(_name) {
+    constructor(string memory _name, uint256 slope18, uint256 offset18) BaseCurve(_name) {
         require(slope18 > 0, "PC: Slope must be > 0");
 
         SLOPE = UD60x18.wrap(slope18);
         HALF_SLOPE = SLOPE.div(UD60x18.wrap(2));
-
+        OFFSET = UD60x18.wrap(offset18);
         // Find max values
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
         // Then the maximum assets is the total shares * slope / 2, because multiplication will overflow at this point
@@ -99,7 +104,7 @@ contract ProgressiveCurve is BaseCurve {
     {
         require(assets > 0, "Asset amount must be greater than zero");
 
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
 
         return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
             .unwrap();
@@ -121,7 +126,7 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 assets)
     {
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
 
         UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
 
@@ -144,7 +149,7 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 assets)
     {
-        return _convertToAssets(UD60x18.wrap(totalShares), UD60x18.wrap(totalShares + shares)).unwrap();
+        return _convertToAssets(UD60x18.wrap(totalShares), UD60x18.wrap(totalShares + shares).add(OFFSET)).unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -161,7 +166,7 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
         return currentSupplyOfShares.sub(currentSupplyOfShares.powu(2).sub(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt())
             .unwrap();
     }
@@ -175,7 +180,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
-        return UD60x18.wrap(totalShares).mul(SLOPE).unwrap();
+        return UD60x18.wrap(totalShares).add(OFFSET).mul(SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -192,7 +197,7 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).mul(HALF_SLOPE);
+        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
         return UD60x18.wrap(assets).div(conversionPrice).unwrap();
     }
 
@@ -214,7 +219,7 @@ contract ProgressiveCurve is BaseCurve {
         returns (uint256 assets)
     {
         require(totalShares >= shares, "PC: Under supply of shares");
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).mul(HALF_SLOPE);
+        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
         return UD60x18.wrap(shares).mul(conversionPrice).unwrap();
     }
 
@@ -227,6 +232,8 @@ contract ProgressiveCurve is BaseCurve {
      * $$(\text{seniorSupply}^2 - \text{juniorSupply}^2) \cdot \text{halfSlope}$$
      * where:
      * $$\text{halfSlope} = \frac{\text{slope}}{2}$$
+     * @dev This method is identical to the ProgressiveCurve because it works entirely with relative values, which are already
+     * offset by the invoking methods.
      *
      * @param juniorSupply The smaller supply in the operation (the initial supply during mint,
      * or the final supply during a redeem operation).
