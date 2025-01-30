@@ -3,6 +3,7 @@ pragma solidity ^0.8.21;
 import { console2 as console } from "forge-std/console2.sol";
 import { Test, Vm } from "forge-std/Test.sol";
 import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { IEthMultiVault } from "src/interfaces/IEthMultiVault.sol";
 import { IPermit2 } from "src/interfaces/IPermit2.sol";
@@ -37,13 +38,15 @@ struct BaseTestState {
 }
 
 contract BaseTest is Test {
+    using FixedPointMathLib for uint256;
+
     BaseTestActors internal actors;
 
     BaseTestConfig internal config;
 
     BaseTestState internal state;
 
-    function _setUp() public {
+    function setUp() public {
         actors = _actors();
         config = _config();
         state.vault = new EthMultiVault();
@@ -115,11 +118,34 @@ contract BaseTest is Test {
 
         BondingCurveRegistry(c.bondingCurve.registry).initialize(actors.deployer);
         address linearCurve = address(new LinearCurve("Linear Curve"));
-        console.log("Admin: %s", BondingCurveRegistry(c.bondingCurve.registry).admin());
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(
-            new ProgressiveCurve("Progressive Curve", 0.00007054e18)
-        ); // Because minDeposit is 0.0003 ether
+        // address progressiveCurve = address(
+        //     new ProgressiveCurve("Progressive Curve", 0.00007054e18);
+        // - default
+        //   Slope: 0.00007054e18
+        //   Alice Shares: 2.645751311e9
+        //   Bob Shares: 3.17043765565655076e17
+        //   Charlie Shares: 2.82335376863657827e17
+        //
+        // - 1/10
+        //   Slope: 0.000007054e18
+        //   Alice Shares: 8.888194417e9
+        //   Bob Shares: 4.04623800546193655e17
+        //   Charlie Shares: 3.08261900500235198e17
+        //
+        // - 1/100
+        //   Slope: 0.0000007054e18
+        //   Alice Shares: 2.826658805e10
+        //   Bob Shares: 4.13268430959427379e17
+        //   Charlie Shares: 3.16888290166311742e17
+        //
+        // - 1/10000
+        //   Slope: 0.000000007054e18
+        //   Alice Shares: 8.9437128755e10
+        //   Bob Shares: 4.14132267880182129e17
+        //   Charlie Shares: 3.17781355457602312e17
+
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.0001e18)); // Because minDeposit is 0.0003 ether
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(progressiveCurve);
         vm.stopPrank();
 
@@ -132,5 +158,157 @@ contract BaseTest is Test {
 
     function _config() internal virtual returns (BaseTestConfig memory) {
         return defaultConfig();
+    }
+
+    // ╭───────────────────────────────────────────────────────────────────────╮
+    // │                            Atoms & Triples                            │
+    // ╰───────────────────────────────────────────────────────────────────────╯
+
+    // ────────────────────────────── Creation ───────────────────────────
+
+    function createTriple(
+        address _who,
+        uint256 _subjectId,
+        uint256 _predicateId,
+        uint256 _objectId
+    ) internal returns (uint256 tripleId) {
+        require(state.vault.currentSharePrice(_subjectId) != 0, "subject already exists");
+        require(state.vault.currentSharePrice(_predicateId) != 0, "prediacte already exists");
+        require(state.vault.currentSharePrice(_objectId) != 0, "object already exists");
+
+        vm.startPrank(_who);
+        tripleId = state.vault.createTriple{ value: state.vault.getTripleCost() }(
+            _subjectId,
+            _predicateId,
+            _objectId
+        );
+        vm.stopPrank();
+    }
+
+    function createAtom(address _who, string memory _label) internal returns (uint256 atomId) {
+        uint256 atomCost = state.vault.getAtomCost();
+
+        vm.startPrank(_who);
+        atomId = state.vault.createAtom{ value: atomCost }(bytes(_label));
+        vm.stopPrank();
+    }
+
+    // ────────────────────────────── Deposits ───────────────────────────
+
+    function depositAtom(
+        address _who,
+        uint256 _atomId,
+        uint256 _curveId,
+        uint256 _amount
+    ) internal returns (uint256 shares) {
+        vm.startPrank(_who);
+        shares = state.vault.depositAtomCurve{ value: _amount }(_who, _atomId, _curveId);
+        vm.stopPrank();
+    }
+
+    function depositAtom(address _who, uint256 _atomId) internal returns (uint256 shares) {
+        uint256 atomCost = state.vault.getAtomCost();
+        uint256 curveId = 2;
+        shares = depositAtom(_who, _atomId, curveId, atomCost);
+    }
+
+    // ───────────────────────────── Redemptions ─────────────────────────────
+
+    function redeemAtom(
+        address _who,
+        uint256 _atomId,
+        uint256 _curveId,
+        uint256 _amount
+    ) internal returns (uint256 assets) {
+        vm.startPrank(_who);
+        assets = state.vault.redeemAtomCurve(_amount, _who, _atomId, _curveId);
+        vm.stopPrank();
+    }
+
+    function redeemAtom(address _who, uint256 _atomId) internal returns (uint256 assets) {
+        vm.startPrank(_who);
+        uint256 curveId = 2;
+        (uint256 shareBalance, ) = state.vault.getVaultStateForUserCurve(_atomId, curveId, _who);
+        assets = state.vault.redeemAtomCurve(shareBalance, _who, _atomId, curveId);
+        vm.stopPrank();
+    }
+
+    // ────────────────────────────── Balances ───────────────────────────
+
+    function vaultBalance(
+        address _who,
+        uint256 _vaultId,
+        uint256 _curveId
+    ) internal view returns (uint256 shares, uint256 assets) {
+        (shares, assets) = state.vault.getVaultStateForUserCurve(_vaultId, _curveId, _who);
+    }
+
+    function vaultBalance(
+        address _who,
+        uint256 _vaultId
+    ) internal returns (uint256 shares, uint256 assets) {
+        uint256 curveId = 2;
+        (shares, assets) = vaultBalance(_who, _vaultId, curveId);
+    }
+
+    // ─────────────────────────────── Testing ───────────────────────────────
+
+    function test_deposit_redeem_curve_single_actor() external {
+        string memory atomString = "atom1";
+        uint256 atomId = createAtom(actors.alice, atomString);
+
+        uint256 aliceShares = depositAtom(actors.alice, atomId);
+
+        assertGt(aliceShares, 0);
+
+        uint256 aliceReturns = redeemAtom(actors.alice, atomId);
+
+        assertGt(aliceReturns, 0);
+    }
+
+    function test_deposit_redeem_multiple_actors() external {
+        // Have alice create the atom.
+        string memory atomString = "atom1";
+        uint256 atomId = createAtom(actors.deployer, atomString);
+
+        uint256 aliceShares = depositAtom(actors.alice, atomId);
+        uint256 aliceBalance = actors.alice.balance;
+        uint256 bobShares = depositAtom(actors.bob, atomId);
+        uint256 bobBalance = actors.bob.balance;
+        uint256 charlieShares = depositAtom(actors.charlie, atomId);
+        uint256 charlieBalance = actors.charlie.balance;
+
+        // NOTE: Bob is getting ~31.7% of Alice's shares
+        //       Charlie is getting ~25% of Alice's shares
+        //       It seems odd to me that the bulk of the drop would happen
+        //       between the initial and second depositor.... should this
+        //       be smoothed?
+        //
+        console.log("Alice Shares: %e", aliceShares);
+        console.log("Bob Shares: %e", bobShares.divWad(aliceShares));
+        console.log("Charlie Shares: %e", charlieShares.divWad(aliceShares));
+
+        if (aliceBalance > actors.alice.balance) {
+            console.log("Alice Balance: %e", aliceBalance - actors.alice.balance);
+        }
+        if (bobBalance > actors.bob.balance) {
+            console.log("Bob Balance Diff: %e", bobBalance - actors.bob.balance);
+        }
+        if (charlieBalance > actors.alice.balance) {
+            console.log("Charlie Balance Diff: %e", actors.charlie.balance);
+        }
+
+        // Redeem all shares
+        vm.prank(actors.alice);
+        uint256 aliceReceived = state.vault.redeemAtomCurve(aliceShares, actors.alice, atomId, 2);
+        vm.prank(actors.bob);
+        uint256 bobReceived = state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2);
+        vm.prank(actors.charlie);
+        uint256 charlieReceived = state.vault.redeemAtomCurve(
+            charlieShares,
+            actors.charlie,
+            atomId,
+            2
+        );
     }
 }
