@@ -12,6 +12,7 @@ import { BondingCurveRegistry } from "src/BondingCurveRegistry.sol";
 import { EthMultiVault } from "src/EthMultiVault.sol";
 import { LinearCurve } from "src/LinearCurve.sol";
 import { ProgressiveCurve } from "src/ProgressiveCurve.sol";
+import { OffsetProgressiveCurve } from "src/OffsetProgressiveCurve.sol";
 
 struct BaseTestActors {
     address deployer;
@@ -119,6 +120,15 @@ contract BaseTest is Test {
         BondingCurveRegistry(c.bondingCurve.registry).initialize(actors.deployer);
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(linearCurve);
+
+        // Testing for offset curve:
+        // - 7e13 - 0 - 36%
+        // - 7e13 - 10 - 36% initial dropoff
+        address offsetCurve = address(
+            new OffsetProgressiveCurve("Offset Curve", 0.0000705e18, 10e18)
+        );
+        BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
+
         // address progressiveCurve = address(
         //     new ProgressiveCurve("Progressive Curve", 0.00007054e18);
         // - default
