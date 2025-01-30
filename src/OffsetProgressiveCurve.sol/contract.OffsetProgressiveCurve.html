@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>BondingCurveRegistry - Intuition Beta Contracts Documentation</title>
+        <title>OffsetProgressiveCurve - Intuition Beta Contracts Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -187,80 +187,104 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="bondingcurveregistry"><a class="header" href="#bondingcurveregistry">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/BondingCurveRegistry.sol">Git Source</a></p>
+                        <h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
-Initializable</p>
+<a href="/src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>Registry contract for the Intuition protocol Bonding Curves. Routes access to the curves
-associated with atoms &amp; triples.  Does not maintain any economic state -- this merely
-performs computations based on the provided economic state.</p>
-<p>An administrator may add new bonding curves to this registry, including those submitted
-by community members, once they are verified to be safe, and conform to the BaseCurve
-interface.  The EthMultiVault supports a growing registry of curves, with each curve
-supplying a new "vault" for each term (atom or triple).</p>
-<p><em>The registry is responsible for interacting with the curves, to fetch the mathematical
-computations given the provided economic state and the desired curve implementation.
-You can think of the registry as a concierge the EthMultiVault uses to access various
-economic incentive patterns.</em></p>
+<p>🚀 Welcome to the GENTLER version of our Progressive bonding curve! While the ProgressiveCurve
+brings the HEAT, the OffsetProgressiveCurve offers a more controlled ascent that's still
+rewarding for early stakers. 🎯
+This mathematical innovation modifies our progressive pricing model by introducing an offset
+that shifts the starting point of our curve. The price follows the formula:
+$$P(s) = m \cdot (s + \text{offset})$$
+where $m$ is our slope (measured in basis points), $s$ is the total supply of shares, and
+$\text{offset}$ is our curve-shifting parameter. The actual cost to mint shares is calculated
+as the area under this curve, giving us:
+$$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
+where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
+Why is this so clever? 🧠 By introducing an offset, we can create a more gentle price curve
+that still maintains the core benefits of progressive pricing. It's like starting partway up
+the curve, which means the initial price increase is less aggressive while still providing
+meaningful incentives for early stakers. Think of it as the "smooth operator" version of
+our ProgressiveCurve - all the benefits of progressive pricing, but with more control over
+the initial trajectory! 🎭
+This makes the OffsetProgressiveCurve perfect for scenarios where you want to maintain
+the incentive structure of progressive pricing but need more control over the initial
+price dynamics. It's the sophisticated sibling to our ProgressiveCurve, offering a more
+nuanced approach to value accrual. 🎨</p>
+<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+<p><em>Fixed point precision used for all internal calculations, while return values are all
+represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
+and return 123.</em></p>
+<p><em>The core equation:
+$$P(s) = m \cdot (s + \text{offset})$$
+and the cost equation:
+$$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
+comes from calculus - it's the integral of our modified linear price function. The area under
+the curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
+shares, but now shifted by our offset parameter.</em></p>
+<p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  The key difference
+between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
+instead of directly in the curve implementation. The other significant difference is the inclusion
+of the OFFSET value, which we use to make the curve more gentle.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
-<h3 id="admin"><a class="header" href="#admin">admin</a></h3>
-<pre><code class="language-solidity">address public admin;
+<h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
+<p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
+<p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
+<p><em>If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets</em></p>
+<pre><code class="language-solidity">UD60x18 public immutable SLOPE;
 </code></pre>
-<h3 id="count"><a class="header" href="#count">count</a></h3>
-<pre><code class="language-solidity">uint256 public count;
+<h3 id="offset"><a class="header" href="#offset">OFFSET</a></h3>
+<p>The offset of the curve.  This value is used to snip off a portion of the beginning of the curve, realigning it to the
+origin.  For more details, see the preview functions.</p>
+<pre><code class="language-solidity">UD60x18 public immutable OFFSET;
 </code></pre>
-<h3 id="curveaddresses"><a class="header" href="#curveaddresses">curveAddresses</a></h3>
-<pre><code class="language-solidity">mapping(uint256 =&gt; address) public curveAddresses;
+<h3 id="half_slope"><a class="header" href="#half_slope">HALF_SLOPE</a></h3>
+<p>The half of the slope, used for calculations.</p>
+<pre><code class="language-solidity">UD60x18 public immutable HALF_SLOPE;
 </code></pre>
-<h3 id="curveids"><a class="header" href="#curveids">curveIds</a></h3>
-<pre><code class="language-solidity">mapping(address =&gt; uint256) public curveIds;
+<h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
+<p><em>Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)</em></p>
+<pre><code class="language-solidity">uint256 public immutable MAX_SHARES;
+</code></pre>
+<h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
+<p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
+<pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
-<h3 id="onlyadmin"><a class="header" href="#onlyadmin">onlyAdmin</a></h3>
-<pre><code class="language-solidity">modifier onlyAdmin();
-</code></pre>
-<h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
-<p>Initializes the BondingCurveRegistry contract</p>
-<pre><code class="language-solidity">function initialize(address _admin) external initializer;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_admin</code></td><td><code>address</code></td><td>Address who may add curves to the registry NOTE: This function is called only once (during contract deployment)</td></tr>
-</tbody></table>
-</div>
-<h3 id="setadmin"><a class="header" href="#setadmin">setAdmin</a></h3>
-<p>Set the admin address</p>
-<pre><code class="language-solidity">function setAdmin(address _admin) external onlyAdmin;
+<h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
+<p>Constructs a new ProgressiveCurve with the given name and slope</p>
+<p><em>Computes maximum values given constructor arguments</em></p>
+<p><em>Computes Slope / 2 as commonly used constant</em></p>
+<pre><code class="language-solidity">constructor(string memory _name, uint256 slope18, uint256 offset18) BaseCurve(_name);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_admin</code></td><td><code>address</code></td><td>Address of the new admin</td></tr>
-</tbody></table>
-</div>
-<h3 id="addbondingcurve"><a class="header" href="#addbondingcurve">addBondingCurve</a></h3>
-<p>Add a new bonding curve to the registry</p>
-<pre><code class="language-solidity">function addBondingCurve(address bondingCurve) external onlyAdmin;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>bondingCurve</code></td><td><code>address</code></td><td>Address of the new bonding curve</td></tr>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve (i.e. "Progressive Curve #465")</td></tr>
+<tr><td><code>slope18</code></td><td><code>uint256</code></td><td>The slope of the curve, in basis points (i.e. 0.0025e18)</td></tr>
+<tr><td><code>offset18</code></td><td><code>uint256</code></td><td>The offset of the curve, in basis points (i.e. 0.0001e18)</td></tr>
 </tbody></table>
 </div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
 <p>Preview how many shares would be minted for a deposit of assets</p>
-<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares, uint256 id)
-    external
-    view
-    returns (uint256 shares);
+<p><em>Let $s$ = current total supply</em></p>
+<p><em>Let $a$ = amount of assets to deposit</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = \sqrt{(s + o)^2 + \frac{a}{m/2}} - (s + o)$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = \sqrt{(s + o)^2 + \frac{2a}{m}} - (s + o)$$</em></p>
+<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 <tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -270,17 +294,25 @@ economic incentive patterns.</em></p>
 </div>
 <h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
 <p>Preview how many assets would be returned for burning a specific amount of shares</p>
-<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets, uint256 id)
-    external
-    view
-    returns (uint256 assets);
+<p><em>Let $s$ = initial total supply of shares</em></p>
+<p><em>Let $r$ = shares to redeem</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + o)^2 - ((s - r + o)^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>this can be expanded to:
+$$\text{assets} = ((s + o)^2 - ((s + o)^2 - 2(s + o)r + r^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2(s + o)r - r^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>Implementation note: This formula is computed via the _convertToAssets helper,</em></p>
+<p><em>where juniorSupply = (s - r + o) and seniorSupply = (s + o)</em></p>
+<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
 <tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -288,39 +320,27 @@ economic incentive patterns.</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
 </tbody></table>
 </div>
-<h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
-<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
-<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares, uint256 id)
-    external
-    view
-    returns (uint256 shares);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
-</tbody></table>
-</div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
 <p>Preview how many assets would be required to mint a specific amount of shares</p>
-<pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets, uint256 id)
-    external
-    view
-    returns (uint256 assets);
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $n$ = new shares to mint</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + n + o)^2 - (s + o)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which can be expanded to:
+$$\text{assets} = ((s + o)^2 + 2(s + o)n + n^2 - (s + o)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2(s + o)n + n^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>Implementation note: This formula is computed via the _convertToAssets helper,</em></p>
+<p><em>where juniorSupply = (s + o) and seniorSupply = (s + n + o)</em></p>
+<pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
 <tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -328,19 +348,69 @@ economic incentive patterns.</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
 </tbody></table>
 </div>
+<h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
+<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to withdraw</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = (s + o) - \sqrt{(s + o)^2 - \frac{a}{m/2}}$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = (s + o) - \sqrt{(s + o)^2 - \frac{2a}{m}}$$</em></p>
+<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentprice"><a class="header" href="#currentprice">currentPrice</a></h3>
+<p>Get the current price of a share</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $m$ = the slope of the curve</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>sharePrice:
+$$\text{sharePrice} = (s + o) \cdot m$$</em></p>
+<p><em>This is the modified linear price function where the price increases linearly with the total supply plus offset</em></p>
+<p><em>And the slope ($m$) determines how quickly the price increases</em></p>
+<p><em>TLDR: Each new share costs more than the last, but starting from an offset point on the curve</em></p>
+<pre><code class="language-solidity">function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
 <h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
 <p>Convert assets to shares at a specific point on the curve</p>
-<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256 totalAssets, uint256 totalShares, uint256 id)
-    external
-    view
-    returns (uint256 shares);
+<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = \frac{a}{(s + o) \cdot m/2}$$</em></p>
+<p><em>Or to say that another way:
+$$\text{shares} = \frac{2a}{(s + o) \cdot m}$$</em></p>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 <tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -350,17 +420,24 @@ economic incentive patterns.</em></p>
 </div>
 <h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
 <p>Convert shares to assets at a specific point on the curve</p>
-<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256 totalAssets, uint256 id)
-    external
-    view
-    returns (uint256 assets);
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $n$ = quantity of shares to convert to assets</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>conversion price:
+$$\text{price} = (s + o) \cdot \frac{m}{2}$$</em></p>
+<p><em>where $\frac{m}{2}$ is average price per share</em></p>
+<p><em>assets:
+$$\text{assets} = n \cdot ((s + o) \cdot \frac{m}{2})$$</em></p>
+<p><em>Or to say that another way:
+$$\text{assets} = n \cdot (s + o) \cdot \frac{m}{2}$$</em></p>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
 <tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -368,72 +445,52 @@ economic incentive patterns.</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
 </tbody></table>
 </div>
-<h3 id="currentprice"><a class="header" href="#currentprice">currentPrice</a></h3>
-<p>Get the current price of a share</p>
-<pre><code class="language-solidity">function currentPrice(uint256 totalShares, uint256 id) external view returns (uint256 sharePrice);
+<h3 id="_converttoassets"><a class="header" href="#_converttoassets">_convertToAssets</a></h3>
+<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium,
+now including the offset:
+$$f(x) = m(x + o)$$
+$$\text{Area} = \frac{1}{2} \cdot (a + b) \cdot h$$
+where $a$ and $b$ can be both $f(\text{juniorSupply})$ or $f(\text{seniorSupply})$ depending if used in minting or redeeming,
+and $o$ is the offset value.
+Calculates area as:
+$$((seniorSupply + offset)^2 - (juniorSupply + offset)^2) \cdot \text{halfSlope}$$
+where:
+$$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
+<p><em>This method is identical to the ProgressiveCurve because it works entirely with relative values, which are already
+offset by the invoking methods.</em></p>
+<pre><code class="language-solidity">function _convertToAssets(UD60x18 juniorSupply, UD60x18 seniorSupply) internal view returns (UD60x18 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to use for the calculation</td></tr>
+<tr><td><code>juniorSupply</code></td><td><code>UD60x18</code></td><td>The smaller supply in the operation (the initial supply during mint, or the final supply during a redeem operation).</td></tr>
+<tr><td><code>seniorSupply</code></td><td><code>UD60x18</code></td><td>The larger supply in the operation (the final supply during mint, or the initial supply during a redeem operation).</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+<tr><td><code>assets</code></td><td><code>UD60x18</code></td><td>The computed assets as an instance of UD60x18 (a fixed-point number).</td></tr>
 </tbody></table>
 </div>
-<h3 id="getcurvename"><a class="header" href="#getcurvename">getCurveName</a></h3>
-<p>Get the name of a curve</p>
-<pre><code class="language-solidity">function getCurveName(uint256 id) external view returns (string memory name);
+<h3 id="maxshares"><a class="header" href="#maxshares">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
+<pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to query</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>name</code></td><td><code>string</code></td><td>The name of the curve</td></tr>
-</tbody></table>
-</div>
-<h3 id="getcurvemaxshares"><a class="header" href="#getcurvemaxshares">getCurveMaxShares</a></h3>
-<p>Get the maximum number of shares a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.</p>
-<pre><code class="language-solidity">function getCurveMaxShares(uint256 id) external view returns (uint256 maxShares);
+<h3 id="maxassets"><a class="header" href="#maxassets">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
+<pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to query</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>maxShares</code></td><td><code>uint256</code></td><td>The maximum number of shares</td></tr>
-</tbody></table>
-</div>
-<h3 id="getcurvemaxassets"><a class="header" href="#getcurvemaxassets">getCurveMaxAssets</a></h3>
-<p>Get the maximum number of assets a curve can handle.  Curves compute this ceiling based on their constructor arguments, to avoid overflow.</p>
-<pre><code class="language-solidity">function getCurveMaxAssets(uint256 id) external view returns (uint256 maxAssets);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>id</code></td><td><code>uint256</code></td><td>Curve ID to query</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>maxAssets</code></td><td><code>uint256</code></td><td>The maximum number of assets</td></tr>
-</tbody></table>
-</div>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../src/BaseCurve.sol/abstract.BaseCurve.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../src/EthMultiVault.sol/contract.EthMultiVault.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../src/ProgressiveCurve.sol/contract.ProgressiveCurve.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -443,11 +500,11 @@ economic incentive patterns.</em></p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../src/BaseCurve.sol/abstract.BaseCurve.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../src/EthMultiVault.sol/contract.EthMultiVault.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../src/ProgressiveCurve.sol/contract.ProgressiveCurve.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

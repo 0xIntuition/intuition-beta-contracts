@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="progressivecurve"><a class="header" href="#progressivecurve">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -235,7 +235,9 @@ comes from calculus - it's the integral of a linear price function. The area und
 linear curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
 shares.</em></p>
 <p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
-and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution</em></p>
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  * The key difference
+between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
+instead of directly in the curve implementation. *  Otherwise the math is identical.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
 <p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
@@ -471,7 +473,7 @@ $$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../src/OffsetProgressiveCurve.sol/contract.OffsetProgressiveCurve.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -482,7 +484,7 @@ $$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../src/LinearCurve.sol/contract.LinearCurve.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../src/OffsetProgressiveCurve.sol/contract.OffsetProgressiveCurve.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

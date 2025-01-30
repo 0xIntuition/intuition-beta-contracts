@@ -230,11 +230,12 @@
 <li><a href="https://intuition.gitbook.io/intuition-or-beta-contracts">Deep Dive into Our Smart Contracts</a></li>
 <li><a href="https://0xintuition.github.io/intuition-beta-contracts">Full Contracts Documentation</a></li>
 </ul>
-<h3 id="known-nuances"><a class="header" href="#known-nuances">Known Nuances</a></h3>
+<h3 id="rationale"><a class="header" href="#rationale">Rationale</a></h3>
 <ul>
-<li>Share prices may get arbitrarily large as deposits/withdraws occur after Vault asset and share amounts approach 0 (i.e. if all users have withdrawn from the Vault), but this still elegantly achieves our desired functionality - which is, Users earn fee revenue when they are shareholders of a vault and deposit/redeem activities occur while they remain shareholders. This novel share price mechanism is used in lieu of a side-pocket reward pool for gas efficiency.</li>
-<li>The Admin can pause the contracts, though there is an emergency withdraw that allows users to withdraw from the contract even while paused. This emergency withdraw bypasses all fees, to reduce the surface area of attack.</li>
-<li>Exit fees are configurable, but have a maximum limit which they can be set to, preventing loss of user funds. Users also have the timelock window to withdraw from the contracts if they do not agree with a parameter change.</li>
+<li>This repository contains a sort of frankenstein of the previously audited EthMultiVault and the new Bonding Curve Registry features.</li>
+<li>All bonding curve related activities have their own methods / routes in the EthMultiVault.</li>
+<li>This results in duplicative code, but enables us to keep the old EthMultiVault and the new Bonding Curve Registry features separate.</li>
+<li>The next version of the MultiVault will consolidate and converge these disparate pathways into a far more elegant and organized system.</li>
 </ul>
 <h2 id="building-and-running-tests"><a class="header" href="#building-and-running-tests">Building and Running Tests</a></h2>
 <p>To build the project and run tests, follow these steps:</p>
@@ -328,7 +329,8 @@ $ forge install
         direction LR
         AtomWallet &amp; BaseCurve
         BondingCurveRegistry &amp; EthMultiVault
-        LinearCurve &amp; ProgressiveCurve
+        LinearCurve &amp; OffsetProgressiveCurve
+        ProgressiveCurve
     end
     Core --&gt; CoreList
 
@@ -366,6 +368,7 @@ $ forge install
     click BondingCurveRegistry &quot;BondingCurveRegistry.html&quot; &quot;BondingCurveRegistry documentation&quot;
     click ProgressiveCurve &quot;ProgressiveCurve.html&quot; &quot;ProgressiveCurve documentation&quot;
     click BaseCurve &quot;BaseCurve.html&quot; &quot;BaseCurve documentation&quot;
+    click OffsetProgressiveCurve &quot;OffsetProgressiveCurve.html&quot; &quot;OffsetProgressiveCurve documentation&quot;
     click AtomWallet &quot;AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
     click LinearCurve &quot;LinearCurve.html&quot; &quot;LinearCurve documentation&quot;
     click Attestoor &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html&quot; &quot;Attestoor documentation&quot;
@@ -1083,7 +1086,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -1241,7 +1244,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -1469,7 +1472,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -2565,7 +2568,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2612,7 +2615,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2799,7 +2802,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <li><a href="src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attestoor-1"><a class="header" href="#attestoor-1">Attestoor</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/Attestoor.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/Attestoor.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3074,7 +3077,7 @@ on behalf of the Intuiton itself, effectively acting as an official attestoor ac
 <tr><td><code>whitelisted</code></td><td><code>bool</code></td><td>Whether the attestor is whitelisted or not</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="attestoorfactory-1"><a class="header" href="#attestoorfactory-1">AttestoorFactory</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/AttestoorFactory.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/AttestoorFactory.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3178,7 +3181,7 @@ with the given admin address and the <code>count</code> value</p>
 <tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="custommulticall3-1"><a class="header" href="#custommulticall3-1">CustomMulticall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/CustomMulticall3.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/CustomMulticall3.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, Ownable2StepUpgradeable, <a href="src/utils/CustomMulticall3.sol//src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></p>
 <p><strong>Author:</strong>
@@ -3292,7 +3295,7 @@ Example use case: First two atoms are known, e.g. "I" and "follow", and the thir
 <tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="multicall3"><a class="header" href="#multicall3">Multicall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/utils/Multicall3.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/Multicall3.sol">Git Source</a></p>
 <p><strong>Authors:</strong>
 Michael Elliot <a href="mailto:src/utils/Multicall3.sol/mike@makerdao.com">mike@makerdao.com</a>, Joshua Levine <a href="mailto:src/utils/Multicall3.sol/joshua@makerdao.com">joshua@makerdao.com</a>, Nick Johnson <a href="mailto:src/utils/Multicall3.sol/arachnid@notdot.net">arachnid@notdot.net</a>, Andreas Bigger <a href="mailto:src/utils/Multicall3.sol/andreas@nascent.xyz">andreas@nascent.xyz</a>, Matt Solomon <a href="mailto:src/utils/Multicall3.sol/matt@mattsolomon.dev">matt@mattsolomon.dev</a></p>
 <p>Aggregate results from multiple function calls</p>
@@ -3476,7 +3479,7 @@ which now returns a random number based on the beacon chain</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3677,7 +3680,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Abstract contract for a bonding curve. Defines the interface for converting assets to shares and vice versa.</p>
@@ -3844,7 +3847,7 @@ of the curves themselves.</em></p>
 <tr><td><code>_name</code></td><td><code>string</code></td><td>Unique name for the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable</p>
 <p><strong>Author:</strong>
@@ -4081,7 +4084,7 @@ economic incentive patterns.</em></p>
 <tr><td><code>maxAssets</code></td><td><code>uint256</code></td><td>The maximum number of assets</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-5"><a class="header" href="#ethmultivault-5">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -5485,7 +5488,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5671,8 +5674,302 @@ replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve archite
 <p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><strong>Inherits:</strong>
+<a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
+<p><strong>Author:</strong>
+0xIntuition</p>
+<p>🚀 Welcome to the GENTLER version of our Progressive bonding curve! While the ProgressiveCurve
+brings the HEAT, the OffsetProgressiveCurve offers a more controlled ascent that's still
+rewarding for early stakers. 🎯
+This mathematical innovation modifies our progressive pricing model by introducing an offset
+that shifts the starting point of our curve. The price follows the formula:
+$$P(s) = m \cdot (s + \text{offset})$$
+where $m$ is our slope (measured in basis points), $s$ is the total supply of shares, and
+$\text{offset}$ is our curve-shifting parameter. The actual cost to mint shares is calculated
+as the area under this curve, giving us:
+$$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
+where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
+Why is this so clever? 🧠 By introducing an offset, we can create a more gentle price curve
+that still maintains the core benefits of progressive pricing. It's like starting partway up
+the curve, which means the initial price increase is less aggressive while still providing
+meaningful incentives for early stakers. Think of it as the "smooth operator" version of
+our ProgressiveCurve - all the benefits of progressive pricing, but with more control over
+the initial trajectory! 🎭
+This makes the OffsetProgressiveCurve perfect for scenarios where you want to maintain
+the incentive structure of progressive pricing but need more control over the initial
+price dynamics. It's the sophisticated sibling to our ProgressiveCurve, offering a more
+nuanced approach to value accrual. 🎨</p>
+<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+<p><em>Fixed point precision used for all internal calculations, while return values are all
+represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
+and return 123.</em></p>
+<p><em>The core equation:
+$$P(s) = m \cdot (s + \text{offset})$$
+and the cost equation:
+$$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
+comes from calculus - it's the integral of our modified linear price function. The area under
+the curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
+shares, but now shifted by our offset parameter.</em></p>
+<p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  The key difference
+between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
+instead of directly in the curve implementation. The other significant difference is the inclusion
+of the OFFSET value, which we use to make the curve more gentle.</em></p>
+<h2 id="state-variables-8"><a class="header" href="#state-variables-8">State Variables</a></h2>
+<h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
+<p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
+<p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
+<p><em>If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets</em></p>
+<pre><code class="language-solidity">UD60x18 public immutable SLOPE;
+</code></pre>
+<h3 id="offset"><a class="header" href="#offset">OFFSET</a></h3>
+<p>The offset of the curve.  This value is used to snip off a portion of the beginning of the curve, realigning it to the
+origin.  For more details, see the preview functions.</p>
+<pre><code class="language-solidity">UD60x18 public immutable OFFSET;
+</code></pre>
+<h3 id="half_slope"><a class="header" href="#half_slope">HALF_SLOPE</a></h3>
+<p>The half of the slope, used for calculations.</p>
+<pre><code class="language-solidity">UD60x18 public immutable HALF_SLOPE;
+</code></pre>
+<h3 id="max_shares-1"><a class="header" href="#max_shares-1">MAX_SHARES</a></h3>
+<p><em>Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)</em></p>
+<pre><code class="language-solidity">uint256 public immutable MAX_SHARES;
+</code></pre>
+<h3 id="max_assets-1"><a class="header" href="#max_assets-1">MAX_ASSETS</a></h3>
+<p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
+<pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
+</code></pre>
+<h2 id="functions-13"><a class="header" href="#functions-13">Functions</a></h2>
+<h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
+<p>Constructs a new ProgressiveCurve with the given name and slope</p>
+<p><em>Computes maximum values given constructor arguments</em></p>
+<p><em>Computes Slope / 2 as commonly used constant</em></p>
+<pre><code class="language-solidity">constructor(string memory _name, uint256 slope18, uint256 offset18) BaseCurve(_name);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_name</code></td><td><code>string</code></td><td>The name of the curve (i.e. "Progressive Curve #465")</td></tr>
+<tr><td><code>slope18</code></td><td><code>uint256</code></td><td>The slope of the curve, in basis points (i.e. 0.0025e18)</td></tr>
+<tr><td><code>offset18</code></td><td><code>uint256</code></td><td>The offset of the curve, in basis points (i.e. 0.0001e18)</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewdeposit-7"><a class="header" href="#previewdeposit-7">previewDeposit</a></h3>
+<p>Preview how many shares would be minted for a deposit of assets</p>
+<p><em>Let $s$ = current total supply</em></p>
+<p><em>Let $a$ = amount of assets to deposit</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = \sqrt{(s + o)^2 + \frac{a}{m/2}} - (s + o)$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = \sqrt{(s + o)^2 + \frac{2a}{m}} - (s + o)$$</em></p>
+<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewredeem-7"><a class="header" href="#previewredeem-7">previewRedeem</a></h3>
+<p>Preview how many assets would be returned for burning a specific amount of shares</p>
+<p><em>Let $s$ = initial total supply of shares</em></p>
+<p><em>Let $r$ = shares to redeem</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + o)^2 - ((s - r + o)^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>this can be expanded to:
+$$\text{assets} = ((s + o)^2 - ((s + o)^2 - 2(s + o)r + r^2)) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2(s + o)r - r^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>Implementation note: This formula is computed via the _convertToAssets helper,</em></p>
+<p><em>where juniorSupply = (s - r + o) and seniorSupply = (s + o)</em></p>
+<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewmint-5"><a class="header" href="#previewmint-5">previewMint</a></h3>
+<p>Preview how many assets would be required to mint a specific amount of shares</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $n$ = new shares to mint</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>assets:
+$$\text{assets} = ((s + n + o)^2 - (s + o)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which can be expanded to:
+$$\text{assets} = ((s + o)^2 + 2(s + o)n + n^2 - (s + o)^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>which simplifies to:
+$$\text{assets} = (2(s + o)n + n^2) \cdot \frac{m}{2}$$</em></p>
+<p><em>Implementation note: This formula is computed via the _convertToAssets helper,</em></p>
+<p><em>where juniorSupply = (s + o) and seniorSupply = (s + n + o)</em></p>
+<pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewwithdraw-5"><a class="header" href="#previewwithdraw-5">previewWithdraw</a></h3>
+<p>Preview how many shares would be redeemed for a withdrawal of assets</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to withdraw</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = (s + o) - \sqrt{(s + o)^2 - \frac{a}{m/2}}$$</em></p>
+<p><em>or to say that another way:
+$$\text{shares} = (s + o) - \sqrt{(s + o)^2 - \frac{2a}{m}}$$</em></p>
+<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentprice-5"><a class="header" href="#currentprice-5">currentPrice</a></h3>
+<p>Get the current price of a share</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $m$ = the slope of the curve</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>sharePrice:
+$$\text{sharePrice} = (s + o) \cdot m$$</em></p>
+<p><em>This is the modified linear price function where the price increases linearly with the total supply plus offset</em></p>
+<p><em>And the slope ($m$) determines how quickly the price increases</em></p>
+<p><em>TLDR: Each new share costs more than the last, but starting from an offset point on the curve</em></p>
+<pre><code class="language-solidity">function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttoshares-7"><a class="header" href="#converttoshares-7">convertToShares</a></h3>
+<p>Convert assets to shares at a specific point on the curve</p>
+<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>shares:
+$$\text{shares} = \frac{a}{(s + o) \cdot m/2}$$</em></p>
+<p><em>Or to say that another way:
+$$\text{shares} = \frac{2a}{(s + o) \cdot m}$$</em></p>
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256 totalShares) public view override returns (uint256 shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to convert to shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttoassets-7"><a class="header" href="#converttoassets-7">convertToAssets</a></h3>
+<p>Convert shares to assets at a specific point on the curve</p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
+<p><em>Let $n$ = quantity of shares to convert to assets</em></p>
+<p><em>Let $o$ = offset value</em></p>
+<p><em>conversion price:
+$$\text{price} = (s + o) \cdot \frac{m}{2}$$</em></p>
+<p><em>where $\frac{m}{2}$ is average price per share</em></p>
+<p><em>assets:
+$$\text{assets} = n \cdot ((s + o) \cdot \frac{m}{2})$$</em></p>
+<p><em>Or to say that another way:
+$$\text{assets} = n \cdot (s + o) \cdot \frac{m}{2}$$</em></p>
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256 totalShares, uint256) public view override returns (uint256 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to convert to assets</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
+</tbody></table>
+</div>
+<h3 id="_converttoassets"><a class="header" href="#_converttoassets">_convertToAssets</a></h3>
+<p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium,
+now including the offset:
+$$f(x) = m(x + o)$$
+$$\text{Area} = \frac{1}{2} \cdot (a + b) \cdot h$$
+where $a$ and $b$ can be both $f(\text{juniorSupply})$ or $f(\text{seniorSupply})$ depending if used in minting or redeeming,
+and $o$ is the offset value.
+Calculates area as:
+$$((seniorSupply + offset)^2 - (juniorSupply + offset)^2) \cdot \text{halfSlope}$$
+where:
+$$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
+<p><em>This method is identical to the ProgressiveCurve because it works entirely with relative values, which are already
+offset by the invoking methods.</em></p>
+<pre><code class="language-solidity">function _convertToAssets(UD60x18 juniorSupply, UD60x18 seniorSupply) internal view returns (UD60x18 assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>juniorSupply</code></td><td><code>UD60x18</code></td><td>The smaller supply in the operation (the initial supply during mint, or the final supply during a redeem operation).</td></tr>
+<tr><td><code>seniorSupply</code></td><td><code>UD60x18</code></td><td>The larger supply in the operation (the final supply during mint, or the initial supply during a redeem operation).</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>UD60x18</code></td><td>The computed assets as an instance of UD60x18 (a fixed-point number).</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxshares-3"><a class="header" href="#maxshares-3">maxShares</a></h3>
+<p>The maximum number of shares that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
+<pre><code class="language-solidity">function maxShares() public view override returns (uint256);
+</code></pre>
+<h3 id="maxassets-3"><a class="header" href="#maxassets-3">maxAssets</a></h3>
+<p>The maximum number of assets that this curve can handle without overflowing.</p>
+<p><em>Checked by the EthMultiVault before transacting</em></p>
+<pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/eb2294f017f8967a9ba736d2fc2920642a12bfbd/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5719,28 +6016,30 @@ comes from calculus - it's the integral of a linear price function. The area und
 linear curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
 shares.</em></p>
 <p><em>Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
-and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution</em></p>
-<h2 id="state-variables-8"><a class="header" href="#state-variables-8">State Variables</a></h2>
-<h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
+and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  * The key difference
+between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
+instead of directly in the curve implementation. *  Otherwise the math is identical.</em></p>
+<h2 id="state-variables-9"><a class="header" href="#state-variables-9">State Variables</a></h2>
+<h3 id="slope-1"><a class="header" href="#slope-1">SLOPE</a></h3>
 <p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
 <p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
 <p><em>If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets</em></p>
 <pre><code class="language-solidity">UD60x18 public immutable SLOPE;
 </code></pre>
-<h3 id="half_slope"><a class="header" href="#half_slope">HALF_SLOPE</a></h3>
+<h3 id="half_slope-1"><a class="header" href="#half_slope-1">HALF_SLOPE</a></h3>
 <p>The half of the slope, used for calculations.</p>
 <pre><code class="language-solidity">UD60x18 public immutable HALF_SLOPE;
 </code></pre>
-<h3 id="max_shares-1"><a class="header" href="#max_shares-1">MAX_SHARES</a></h3>
+<h3 id="max_shares-2"><a class="header" href="#max_shares-2">MAX_SHARES</a></h3>
 <p><em>Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES;
 </code></pre>
-<h3 id="max_assets-1"><a class="header" href="#max_assets-1">MAX_ASSETS</a></h3>
+<h3 id="max_assets-2"><a class="header" href="#max_assets-2">MAX_ASSETS</a></h3>
 <p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
-<h2 id="functions-13"><a class="header" href="#functions-13">Functions</a></h2>
-<h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
+<h2 id="functions-14"><a class="header" href="#functions-14">Functions</a></h2>
+<h3 id="constructor-3"><a class="header" href="#constructor-3">constructor</a></h3>
 <p>Constructs a new ProgressiveCurve with the given name and slope</p>
 <p><em>Computes maximum values given constructor arguments</em></p>
 <p><em>Computes Slope / 2 as commonly used constant</em></p>
@@ -5752,7 +6051,7 @@ and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution</em>
 <tr><td><code>slope18</code></td><td><code>uint256</code></td><td>The slope of the curve, in basis points (i.e. 0.0025e18)</td></tr>
 </tbody></table>
 </div>
-<h3 id="previewdeposit-7"><a class="header" href="#previewdeposit-7">previewDeposit</a></h3>
+<h3 id="previewdeposit-8"><a class="header" href="#previewdeposit-8">previewDeposit</a></h3>
 <p>Preview how many shares would be minted for a deposit of assets</p>
 <p><em>Let $s$ = current total supply</em></p>
 <p><em>Let $a$ = amount of assets to deposit</em></p>
@@ -5775,7 +6074,7 @@ $$\text{shares} = \sqrt{s^2 + \frac{2a}{m}} - s$$</em></p>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
 </tbody></table>
 </div>
-<h3 id="previewredeem-7"><a class="header" href="#previewredeem-7">previewRedeem</a></h3>
+<h3 id="previewredeem-8"><a class="header" href="#previewredeem-8">previewRedeem</a></h3>
 <p>Preview how many assets would be returned for burning a specific amount of shares</p>
 <p><em>Let $s$ = initial total supply of shares</em></p>
 <p><em>Let $r$ = shares to redeem</em></p>
@@ -5800,7 +6099,7 @@ $$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
 </tbody></table>
 </div>
-<h3 id="previewmint-5"><a class="header" href="#previewmint-5">previewMint</a></h3>
+<h3 id="previewmint-6"><a class="header" href="#previewmint-6">previewMint</a></h3>
 <p>Preview how many assets would be required to mint a specific amount of shares</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
 <p><em>Let $n$ = new shares to mint</em></p>
@@ -5825,7 +6124,7 @@ $$\text{assets} = (2sn + n^2) \cdot \frac{m}{2}$$</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
 </tbody></table>
 </div>
-<h3 id="previewwithdraw-5"><a class="header" href="#previewwithdraw-5">previewWithdraw</a></h3>
+<h3 id="previewwithdraw-6"><a class="header" href="#previewwithdraw-6">previewWithdraw</a></h3>
 <p>Preview how many shares would be redeemed for a withdrawal of assets</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
 <p><em>Let $a$ = assets to withdraw</em></p>
@@ -5848,7 +6147,7 @@ $$\text{shares} = s - \sqrt{s^2 - \frac{2a}{m}}$$</em></p>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
 </tbody></table>
 </div>
-<h3 id="currentprice-5"><a class="header" href="#currentprice-5">currentPrice</a></h3>
+<h3 id="currentprice-6"><a class="header" href="#currentprice-6">currentPrice</a></h3>
 <p>Get the current price of a share</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
 <p><em>Let $m$ = the slope of the curve</em></p>
@@ -5869,7 +6168,7 @@ $$\text{sharePrice} = s \cdot m$$</em></p>
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
 </tbody></table>
 </div>
-<h3 id="converttoshares-7"><a class="header" href="#converttoshares-7">convertToShares</a></h3>
+<h3 id="converttoshares-8"><a class="header" href="#converttoshares-8">convertToShares</a></h3>
 <p>Convert assets to shares at a specific point on the curve</p>
 <p><em>Let $s$ = the current total supply of shares</em></p>
 <p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
@@ -5892,7 +6191,7 @@ $$\text{shares} = \frac{2a}{s \cdot m}$$</em></p>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares equivalent to the given assets</td></tr>
 </tbody></table>
 </div>
-<h3 id="converttoassets-7"><a class="header" href="#converttoassets-7">convertToAssets</a></h3>
+<h3 id="converttoassets-8"><a class="header" href="#converttoassets-8">convertToAssets</a></h3>
 <p>Convert shares to assets at a specific point on the curve</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
 <p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
@@ -5918,7 +6217,7 @@ $$\text{assets} = n \cdot s \cdot \frac{m}{2}$$</em></p>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets equivalent to the given shares</td></tr>
 </tbody></table>
 </div>
-<h3 id="_converttoassets"><a class="header" href="#_converttoassets">_convertToAssets</a></h3>
+<h3 id="_converttoassets-1"><a class="header" href="#_converttoassets-1">_convertToAssets</a></h3>
 <p>Computes assets as the area under a linear curve with a simplified form of the area of a trapezium:
 $$f(x) = mx + c$$
 $$\text{Area} = \frac{1}{2} \cdot (a + b) \cdot h$$
@@ -5940,12 +6239,12 @@ $$\text{halfSlope} = \frac{\text{slope}}{2}$$</p>
 <tr><td><code>assets</code></td><td><code>UD60x18</code></td><td>The computed assets as an instance of UD60x18 (a fixed-point number).</td></tr>
 </tbody></table>
 </div>
-<h3 id="maxshares-3"><a class="header" href="#maxshares-3">maxShares</a></h3>
+<h3 id="maxshares-4"><a class="header" href="#maxshares-4">maxShares</a></h3>
 <p>The maximum number of shares that this curve can handle without overflowing.</p>
 <p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxShares() public view override returns (uint256);
 </code></pre>
-<h3 id="maxassets-3"><a class="header" href="#maxassets-3">maxAssets</a></h3>
+<h3 id="maxassets-4"><a class="header" href="#maxassets-4">maxAssets</a></h3>
 <p>The maximum number of assets that this curve can handle without overflowing.</p>
 <p><em>Checked by the EthMultiVault before transacting</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
