@@ -20,7 +20,6 @@ import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
 
-import { console } from "forge-std/console.sol"; // REMOVE ME
 /**
  * @title  EthMultiVault
  * @author 0xIntuition
@@ -998,21 +997,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         */
         (uint256 assets, uint256 protocolFee) = _redeemCurve(atomId, curveId, msg.sender, receiver, shares);
 
-        console.log("redeemed from curve!");
-
         // transfer eth to receiver factoring in fees/shares
         (bool success,) = payable(receiver).call{value: assets}("");
         if (!success) {
             revert Errors.EthMultiVault_TransferFailed();
         }
 
-        console.log("transferred ETH to receiver!");
-
         _transferFeesToProtocolMultisig(protocolFee);
-
-        console.log("transferred fees to protocol multisig!");
-
-        console.log("returning assets");
 
         return assets;
     }
@@ -1375,7 +1366,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         // Increment curve vault ledger by amount of assets left over after fees
-        console.log("increasing curve vault totals by assets: ", userAssetsAfterTotalFees);
         _increaseCurveVaultTotals(id, curveId, userAssetsAfterTotalFees, sharesForReceiver);
 
         // mint `sharesOwed` shares to sender factoring in fees
@@ -1467,23 +1457,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) =
             getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
-        console.log("setting vault totals");
 
         // Increment pro rata vault ledger instead of curve vault ledger by fees
         if (exitFee > 0) {
             _setVaultTotals(id, vaults[id].totalAssets + exitFee, vaults[id].totalShares);
         }
 
-        console.log("decrementing curve vault ledger");
         // Decrement curve vault ledger by amount of assets left over after fees
         _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee + exitFee, shares);
 
-        console.log("burning shares");
 
         // burn shares, then transfer assets to receiver
         _burnCurve(sender, id, curveId, shares);
 
-        console.log("emitting redeemed curve event");
 
         // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
         emit RedeemedCurve(
@@ -1496,7 +1482,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             curveId
         );
 
-        console.log("returning assets");
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1587,18 +1572,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
         internal
     {
-        console.log("assetsDelta", assetsDelta);
-        console.log("sharesDelta", sharesDelta);
-        console.log("totalAssets", bondingCurveVaults[id][curveId].totalAssets);
-        console.log("totalShares", bondingCurveVaults[id][curveId].totalShares);
 
         // Share price can only change when vault totals change
         uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
-        console.log("oldSharePrice", oldSharePrice);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
         bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        console.log("newSharePrice", newSharePrice);
         emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
     }
 
@@ -1982,22 +1961,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 shares = _registry().previewDeposit(assets, totalAssets, supply, curveId);
 
         // Pool Ratio Adjustment
-        // if (totalAssets != 0 && supply != 0) {
-        //     console.log(" ---- DOING POOL RATIO ADJUSTMENT ---- ");
-        //     console.log("totalAssets: ", totalAssets);
-        //     console.log("supply: ", supply);
-        //     uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, supply, curveId); // <-- broken currently
-        //     // uint256 totalAssetsInShareSpace = _registry().previewDeposit(totalAssets, 0, supply, curveId); // <-- works
-        //     if (totalAssetsInShareSpace != 0) {
-        //         console.log("gonna divide shares * supply / totalAssetsInShareSpace");
-        //         console.log("shares: ", shares);
-        //         console.log("supply: ", supply);
-        //         console.log("totalAssetsInShareSpace: ", totalAssetsInShareSpace);
-        //         shares = shares * supply / totalAssetsInShareSpace;
-        //         console.log("supply / totalAssetsInShareSpace: ", supply / totalAssetsInShareSpace);
-        //         console.log("shares: ", shares);
-        //     }
-        // }
+        if (totalAssets != 0 && supply != 0) {
+            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, 0, curveId);
+            if (totalAssetsInShareSpace != 0) {
+                shares = shares * totalAssetsInShareSpace / supply;
+            }
+        }
         return shares;
     }
 
@@ -2046,28 +2015,16 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  So you need to compute their value using a common denominator like dollars.
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
-        console.log("supply: ", supply);
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
-        console.log("totalAssets: ", totalAssets);
         uint256 assets = _registry().previewRedeem(shares, supply, totalAssets, curveId);
-        console.log("assets: ", assets);
 
         // // Pool Ratio Adjustment
-        // if (totalAssets != 0 && supply != 0) {
-        //     console.log("totalAssets: ", totalAssets);
-        //     console.log("supply: ", supply);
-        //     uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId); // <-- broken currently
-        //     // uint256 totalSharesInAssetSpace = _registry().previewRedeem(supply, supply, totalAssets, curveId); // <-- works
-        //     console.log("totalSharesInAssetSpace: ", totalSharesInAssetSpace);
-        //     if (totalSharesInAssetSpace != 0) {
-        //         console.log("gonna divide assets * totalAssets / totalSharesInAssetSpace");
-        //         console.log("assets: ", assets);
-        //         console.log("totalAssets: ", totalAssets);
-        //         console.log("totalSharesInAssetSpace: ", totalSharesInAssetSpace);
-        //         assets = assets * totalAssets / totalSharesInAssetSpace;
-        //         console.log("assets: ", assets);
-        //     }
-        // }
+        if (totalAssets != 0 && supply != 0) {
+            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
+            if (totalSharesInAssetSpace != 0) {
+                assets = assets * totalSharesInAssetSpace / totalAssets;
+            }
+        }
         return assets;
     }
 

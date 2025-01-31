@@ -125,7 +125,7 @@ contract BaseTest is Test {
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
         address offsetCurve = address(
-            new OffsetProgressiveCurve("Offset Curve", 0.0001e18, 1e12)
+            new OffsetProgressiveCurve("Offset Curve", 1, 1e17)
         );
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
@@ -218,7 +218,6 @@ contract BaseTest is Test {
 
     function depositAtom(address _who, uint256 _atomId) internal returns (uint256 shares) {
         uint256 atomCost = state.vault.getAtomCost();
-        // uint256 atomCost = 0.1 ether;
         uint256 curveId = 2;
         shares = depositAtom(_who, _atomId, curveId, atomCost);
     }
