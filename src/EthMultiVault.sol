@@ -1457,7 +1457,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         (, uint256 assetsForReceiver, uint256 protocolFee, uint256 exitFee) =
             getRedeemAssetsAndFeesCurve(shares, id, curveId);
 
-
         // Increment pro rata vault ledger instead of curve vault ledger by fees
         if (exitFee > 0) {
             _setVaultTotals(id, vaults[id].totalAssets + exitFee, vaults[id].totalShares);
@@ -1466,10 +1465,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // Decrement curve vault ledger by amount of assets left over after fees
         _decreaseCurveVaultTotals(id, curveId, assetsForReceiver + protocolFee + exitFee, shares);
 
-
         // burn shares, then transfer assets to receiver
         _burnCurve(sender, id, curveId, shares);
-
 
         // Omitting this because of stack too deep, we can figure out what BE actually needs and trim this.
         emit RedeemedCurve(
@@ -1481,7 +1478,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             id,
             curveId
         );
-
 
         return (assetsForReceiver, protocolFee);
     }
@@ -1572,7 +1568,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     function _decreaseCurveVaultTotals(uint256 id, uint256 curveId, uint256 assetsDelta, uint256 sharesDelta)
         internal
     {
-
         // Share price can only change when vault totals change
         uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
