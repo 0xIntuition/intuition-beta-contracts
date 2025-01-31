@@ -62,7 +62,7 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  *        - Separate fee structures for atom/triple creation
  *        - Proportional deposit distribution for triple-related operations
  *
- * @dev ## Please note: 
+ * @dev ## Please note:
  *      This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
  *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
  *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
@@ -71,7 +71,6 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  * @dev The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
  *      interface for depositing and redeeming.
  */
-
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
@@ -1929,7 +1928,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId vault id of the curve
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
     /// @notice The conversion happens in two steps:
-    ///  1. First, we get the base shares from the bonding curve: 
+    ///  1. First, we get the base shares from the bonding curve:
     ///  $$s_{base} = f_{curve}(assets)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
     ///  $$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$
@@ -1986,7 +1985,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId vault id of the curve
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
     /// @notice The conversion happens in two steps:
-    ///  1. First, we get the base assets from the bonding curve: 
+    ///  1. First, we get the base assets from the bonding curve:
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
     ///  $$a_{final} = a_{base} \cdot \frac{S_{total}^{(a)}}{A_{total}}$$

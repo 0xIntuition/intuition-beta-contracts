@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
-import { console2 as console } from "forge-std/console2.sol";
-import { Test, Vm } from "forge-std/Test.sol";
-import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
-import { IEthMultiVault } from "src/interfaces/IEthMultiVault.sol";
-import { IPermit2 } from "src/interfaces/IPermit2.sol";
-import { AtomWallet } from "src/AtomWallet.sol";
-import { BondingCurveRegistry } from "src/BondingCurveRegistry.sol";
-import { EthMultiVault } from "src/EthMultiVault.sol";
-import { LinearCurve } from "src/LinearCurve.sol";
-import { ProgressiveCurve } from "src/ProgressiveCurve.sol";
-import { OffsetProgressiveCurve } from "src/OffsetProgressiveCurve.sol";
+import {console2 as console} from "forge-std/console2.sol";
+import {Test, Vm} from "forge-std/Test.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
+
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {IPermit2} from "src/interfaces/IPermit2.sol";
+import {AtomWallet} from "src/AtomWallet.sol";
+import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {LinearCurve} from "src/LinearCurve.sol";
+import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 
 struct BaseTestActors {
     address deployer;
@@ -52,26 +53,20 @@ contract BaseTest is Test {
         config = _config();
         state.vault = new EthMultiVault();
         state.vault.init(
-            config.general,
-            config.atom,
-            config.triple,
-            config.wallet,
-            config.vaultFees,
-            config.bondingCurve
+            config.general, config.atom, config.triple, config.wallet, config.vaultFees, config.bondingCurve
         );
         vm.stopPrank();
     }
 
     function defaultActors() internal returns (BaseTestActors memory) {
-        return
-            BaseTestActors({
-                deployer: createActor("deployer"),
-                alice: createActor("alice"),
-                bob: createActor("bob"),
-                charlie: createActor("charlie"),
-                dan: createActor("dan"),
-                ethan: createActor("ethan")
-            });
+        return BaseTestActors({
+            deployer: createActor("deployer"),
+            alice: createActor("alice"),
+            bob: createActor("bob"),
+            charlie: createActor("charlie"),
+            dan: createActor("dan"),
+            ethan: createActor("ethan")
+        });
     }
 
     function createActor(string memory _name) internal returns (address actor) {
@@ -106,15 +101,13 @@ contract BaseTest is Test {
                 permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
                 entryPoint: address(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789),
                 atomWarden: address(0xbeef),
-                atomWalletBeacon: address(
-                    new UpgradeableBeacon(address(new AtomWallet()), actors.deployer)
-                )
+                atomWalletBeacon: address(new UpgradeableBeacon(address(new AtomWallet()), actors.deployer))
             }),
             bondingCurve: IEthMultiVault.BondingCurveConfig({
                 registry: address(new BondingCurveRegistry()),
                 defaultCurveId: 1
             }),
-            vaultFees: IEthMultiVault.VaultFees({ entryFee: 500, exitFee: 500, protocolFee: 100 })
+            vaultFees: IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100})
         });
 
         BondingCurveRegistry(c.bondingCurve.registry).initialize(actors.deployer);
@@ -124,9 +117,7 @@ contract BaseTest is Test {
         // Testing for offset curve:
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
-        address offsetCurve = address(
-            new OffsetProgressiveCurve("Offset Curve", 1, 1e17)
-        );
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1, 1e17));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
         // address progressiveCurve = address(
@@ -176,22 +167,16 @@ contract BaseTest is Test {
 
     // ────────────────────────────── Creation ───────────────────────────
 
-    function createTriple(
-        address _who,
-        uint256 _subjectId,
-        uint256 _predicateId,
-        uint256 _objectId
-    ) internal returns (uint256 tripleId) {
+    function createTriple(address _who, uint256 _subjectId, uint256 _predicateId, uint256 _objectId)
+        internal
+        returns (uint256 tripleId)
+    {
         require(state.vault.currentSharePrice(_subjectId) != 0, "subject already exists");
         require(state.vault.currentSharePrice(_predicateId) != 0, "prediacte already exists");
         require(state.vault.currentSharePrice(_objectId) != 0, "object already exists");
 
         vm.startPrank(_who);
-        tripleId = state.vault.createTriple{ value: state.vault.getTripleCost() }(
-            _subjectId,
-            _predicateId,
-            _objectId
-        );
+        tripleId = state.vault.createTriple{value: state.vault.getTripleCost()}(_subjectId, _predicateId, _objectId);
         vm.stopPrank();
     }
 
@@ -199,20 +184,18 @@ contract BaseTest is Test {
         uint256 atomCost = state.vault.getAtomCost();
 
         vm.startPrank(_who);
-        atomId = state.vault.createAtom{ value: atomCost }(bytes(_label));
+        atomId = state.vault.createAtom{value: atomCost}(bytes(_label));
         vm.stopPrank();
     }
 
     // ────────────────────────────── Deposits ───────────────────────────
 
-    function depositAtom(
-        address _who,
-        uint256 _atomId,
-        uint256 _curveId,
-        uint256 _amount
-    ) internal returns (uint256 shares) {
+    function depositAtom(address _who, uint256 _atomId, uint256 _curveId, uint256 _amount)
+        internal
+        returns (uint256 shares)
+    {
         vm.startPrank(_who);
-        shares = state.vault.depositAtomCurve{ value: _amount }(_who, _atomId, _curveId);
+        shares = state.vault.depositAtomCurve{value: _amount}(_who, _atomId, _curveId);
         vm.stopPrank();
     }
 
@@ -224,12 +207,10 @@ contract BaseTest is Test {
 
     // ───────────────────────────── Redemptions ─────────────────────────────
 
-    function redeemAtom(
-        address _who,
-        uint256 _atomId,
-        uint256 _curveId,
-        uint256 _amount
-    ) internal returns (uint256 assets) {
+    function redeemAtom(address _who, uint256 _atomId, uint256 _curveId, uint256 _amount)
+        internal
+        returns (uint256 assets)
+    {
         vm.startPrank(_who);
         assets = state.vault.redeemAtomCurve(_amount, _who, _atomId, _curveId);
         vm.stopPrank();
@@ -238,25 +219,22 @@ contract BaseTest is Test {
     function redeemAtom(address _who, uint256 _atomId) internal returns (uint256 assets) {
         vm.startPrank(_who);
         uint256 curveId = 2;
-        (uint256 shareBalance, ) = state.vault.getVaultStateForUserCurve(_atomId, curveId, _who);
+        (uint256 shareBalance,) = state.vault.getVaultStateForUserCurve(_atomId, curveId, _who);
         assets = state.vault.redeemAtomCurve(shareBalance, _who, _atomId, curveId);
         vm.stopPrank();
     }
 
     // ────────────────────────────── Balances ───────────────────────────
 
-    function vaultBalance(
-        address _who,
-        uint256 _vaultId,
-        uint256 _curveId
-    ) internal view returns (uint256 shares, uint256 assets) {
+    function vaultBalance(address _who, uint256 _vaultId, uint256 _curveId)
+        internal
+        view
+        returns (uint256 shares, uint256 assets)
+    {
         (shares, assets) = state.vault.getVaultStateForUserCurve(_vaultId, _curveId, _who);
     }
 
-    function vaultBalance(
-        address _who,
-        uint256 _vaultId
-    ) internal returns (uint256 shares, uint256 assets) {
+    function vaultBalance(address _who, uint256 _vaultId) internal returns (uint256 shares, uint256 assets) {
         uint256 curveId = 2;
         (shares, assets) = vaultBalance(_who, _vaultId, curveId);
     }
@@ -318,11 +296,6 @@ contract BaseTest is Test {
         vm.prank(actors.bob);
         uint256 bobReceived = state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2);
         vm.prank(actors.charlie);
-        uint256 charlieReceived = state.vault.redeemAtomCurve(
-            charlieShares,
-            actors.charlie,
-            atomId,
-            2
-        );
+        uint256 charlieReceived = state.vault.redeemAtomCurve(charlieShares, actors.charlie, atomId, 2);
     }
 }
