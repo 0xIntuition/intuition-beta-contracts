@@ -1937,7 +1937,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  1. First, we get the base shares from the bonding curve: 
     ///  $$s_{base} = f_{curve}(assets)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$
+    ///  $$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$
     ///  ### Where:
     ///  1. $S_{total}$ is the total supply of shares
     ///  2. $A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
@@ -1947,8 +1947,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  - Protocol fees being taken in assets
     ///  - Share burns
     ///  - Direct asset transfers/airdrops
-    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
-    ///     (due to fees), new depositors will receive proportionally more shares to maintain fairness.
     /// @notice The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
     ///      quantities in the same space, as the bonding curve defines a non-linear relationship
     ///      between assets and shares.
@@ -1996,7 +1994,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  1. First, we get the base assets from the bonding curve: 
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
+    ///  $$a_{final} = a_{base} \cdot \frac{S_{total}^{(a)}}{A_{total}}$$
     /// ### Where:
     ///  1. $A_{total}$ is the total assets in the vault
     ///  2. $S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
@@ -2006,8 +2004,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  - Protocol fees being taken in assets
     ///  - Share burns
     ///  - Direct asset transfers/airdrops
-    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
-    /// (due to fees), redeemers will receive proportionally fewer assets to maintain fairness.
     /// @notice The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
     ///  quantities in the same space, as the bonding curve defines a non-linear relationship
     ///  between shares and assets.
