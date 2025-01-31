@@ -1988,7 +1988,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  1. First, we get the base assets from the bonding curve:
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$a_{final} = a_{base} \cdot \frac{S_{total}^{(a)}}{A_{total}}$$
+    ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
     /// ### Where:
     ///  1. $A_{total}$ is the total assets in the vault
     ///  2. $S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
@@ -2012,7 +2012,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (totalAssets != 0 && supply != 0) {
             uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
-                assets = assets * totalSharesInAssetSpace / totalAssets;
+                assets = assets * totalAssets / totalSharesInAssetSpace;
             }
         }
         return assets;
