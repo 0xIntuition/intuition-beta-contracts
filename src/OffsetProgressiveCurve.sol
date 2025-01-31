@@ -208,8 +208,10 @@ contract OffsetProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
-        return UD60x18.wrap(assets).div(conversionPrice).unwrap();
+        require(assets > 0, "Asset amount must be greater than zero");
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
+        return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
+            .unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -231,8 +233,9 @@ contract OffsetProgressiveCurve is BaseCurve {
         returns (uint256 assets)
     {
         require(totalShares >= shares, "PC: Under supply of shares");
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
-        return UD60x18.wrap(shares).mul(conversionPrice).unwrap();
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
+        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
     }
 
     /**

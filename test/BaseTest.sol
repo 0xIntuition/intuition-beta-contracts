@@ -125,7 +125,7 @@ contract BaseTest is Test {
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
         address offsetCurve = address(
-            new OffsetProgressiveCurve("Offset Curve", 0.00007054e18, 2e10)
+            new OffsetProgressiveCurve("Offset Curve", 0.0001e18, 1e12)
         );
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
@@ -218,6 +218,7 @@ contract BaseTest is Test {
 
     function depositAtom(address _who, uint256 _atomId) internal returns (uint256 shares) {
         uint256 atomCost = state.vault.getAtomCost();
+        // uint256 atomCost = 0.1 ether;
         uint256 curveId = 2;
         shares = depositAtom(_who, _atomId, curveId, atomCost);
     }
@@ -295,8 +296,12 @@ contract BaseTest is Test {
         //       be smoothed?
         //
         console.log("Alice Shares: %e", aliceShares);
-        console.log("Bob Shares: %e", bobShares.divWad(aliceShares));
-        console.log("Charlie Shares: %e", charlieShares.divWad(aliceShares));
+        console.log("Bob Shares: %e", (bobShares * 1e18).divWad(aliceShares * 1e18));
+        console.log("Charlie Shares: %e", (charlieShares * 1e18).divWad(aliceShares * 1e18));
+
+        console.log("Alice Shares Quantity: %e", aliceShares);
+        console.log("Bob Shares Quantity: %e", bobShares);
+        console.log("Charlie Shares Quantity: %e", charlieShares);
 
         if (aliceBalance > actors.alice.balance) {
             console.log("Alice Balance: %e", aliceBalance - actors.alice.balance);
