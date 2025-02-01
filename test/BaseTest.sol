@@ -266,12 +266,6 @@ contract BaseTest is Test {
         uint256 charlieShares = depositAtom(actors.charlie, atomId);
         uint256 charlieBalance = actors.charlie.balance;
 
-        // NOTE: Bob is getting ~31.7% of Alice's shares
-        //       Charlie is getting ~25% of Alice's shares
-        //       It seems odd to me that the bulk of the drop would happen
-        //       between the initial and second depositor.... should this
-        //       be smoothed?
-        //
         console.log("Alice Shares: %e", aliceShares);
         console.log("Bob Shares: %e", (bobShares * 1e18).divWad(aliceShares * 1e18));
         console.log("Charlie Shares: %e", (charlieShares * 1e18).divWad(aliceShares * 1e18));

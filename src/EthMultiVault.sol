@@ -67,7 +67,7 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
  *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
  *      code size, it ensures that users can still use the audited pathways in the code if they wish, while also
- *      enabling them to engage in more economically exciting activities like the Progressive Curve.
+ *      enabling them to engage in more economically exciting activities like the Progressive Curve or Offset Curve.
  * @dev The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
  *      interface for depositing and redeeming.
  */
