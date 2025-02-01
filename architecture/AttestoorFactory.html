@@ -188,60 +188,6 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="attestoorfactory"><a class="header" href="#attestoorfactory">AttestoorFactory</a></h1>
-<p>Detailed view of the AttestoorFactory contract and its members. Click on any member to view its documentation.</p>
-<pre class="mermaid">graph TB
-    root((&quot;AttestoorFactory&quot;))
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_acceptOwnership[acceptOwnership] &amp; func_attestoorBeacon[attestoorBeacon]
-        func_computeAttestoorAddress[computeAttestoorAddress] &amp; func_count[count]
-        func_deployAttestoor[deployAttestoor] &amp; func_ethMultiVault[ethMultiVault]
-        func_owner[owner] &amp; func_pendingOwner[pendingOwner]
-        func_renounceOwnership[renounceOwnership] &amp; func_transferOwnership[transferOwnership]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_init[init]
-    end
-    root --&gt; Initialization
-
-    subgraph Setters [&quot;Setters&quot;]
-        direction LR
-        func_setEthMultiVault[setEthMultiVault]
-    end
-    root --&gt; Setters
-
-    %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
-    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
-    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
-    
-    %% Apply styles
-    class root root;
-    class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_acceptOwnership,func_attestoorBeacon,func_computeAttestoorAddress,func_count,func_deployAttestoor,func_ethMultiVault,func_owner,func_pendingOwner,func_renounceOwnership,func_transferOwnership,func_init,func_setEthMultiVault function;
-
-    %% Click actions
-    click root &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html&quot; &quot;AttestoorFactory documentation&quot;
-    click func_acceptOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#acceptownership&quot; &quot;acceptOwnership documentation&quot;
-    click func_attestoorBeacon &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#attestoorbeacon&quot; &quot;attestoorBeacon documentation&quot;
-    click func_computeAttestoorAddress &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#computeattestooraddress&quot; &quot;computeAttestoorAddress documentation&quot;
-    click func_count &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#count&quot; &quot;count documentation&quot;
-    click func_deployAttestoor &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#deployattestoor&quot; &quot;deployAttestoor documentation&quot;
-    click func_ethMultiVault &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#ethmultivault&quot; &quot;ethMultiVault documentation&quot;
-    click func_owner &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#owner&quot; &quot;owner documentation&quot;
-    click func_pendingOwner &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#pendingowner&quot; &quot;pendingOwner documentation&quot;
-    click func_renounceOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#renounceownership&quot; &quot;renounceOwnership documentation&quot;
-    click func_transferOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#transferownership&quot; &quot;transferOwnership documentation&quot;
-    click func_init &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#init&quot; &quot;init documentation&quot;
-    click func_setEthMultiVault &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#setethmultivault&quot; &quot;setEthMultiVault documentation&quot;
-</pre>
 
                     </main>
 

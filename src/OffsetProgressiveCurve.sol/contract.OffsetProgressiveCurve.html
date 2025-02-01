@@ -188,32 +188,26 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🚀 Welcome to the GENTLER version of our Progressive bonding curve! While the ProgressiveCurve
-brings the HEAT, the OffsetProgressiveCurve offers a more controlled ascent that's still
-rewarding for early stakers. 🎯
-This mathematical innovation modifies our progressive pricing model by introducing an offset
-that shifts the starting point of our curve. The price follows the formula:
+<p>A modified version of the Progressive bonding curve that introduces an offset parameter
+to control the initial price dynamics.
+The price follows the formula:
 $$P(s) = m \cdot (s + \text{offset})$$
-where $m$ is our slope (measured in basis points), $s$ is the total supply of shares, and
-$\text{offset}$ is our curve-shifting parameter. The actual cost to mint shares is calculated
-as the area under this curve, giving us:
+where:</p>
+<ul>
+<li>$m$ is the slope (in basis points)</li>
+<li>$s$ is the total supply of shares</li>
+<li>$\text{offset}$ shifts the starting point of the curve
+The cost to mint shares is calculated as the area under this curve:
 $$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
-where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
-Why is this so clever? 🧠 By introducing an offset, we can create a more gentle price curve
-that still maintains the core benefits of progressive pricing. It's like starting partway up
-the curve, which means the initial price increase is less aggressive while still providing
-meaningful incentives for early stakers. Think of it as the "smooth operator" version of
-our ProgressiveCurve - all the benefits of progressive pricing, but with more control over
-the initial trajectory! 🎭
-This makes the OffsetProgressiveCurve perfect for scenarios where you want to maintain
-the incentive structure of progressive pricing but need more control over the initial
-price dynamics. It's the sophisticated sibling to our ProgressiveCurve, offering a more
-nuanced approach to value accrual. 🎨</p>
+where $s_1$ is the starting share supply and $s_2$ is the final share supply.
+The offset parameter allows for a more gradual initial price increase while maintaining
+the progressive pricing structure.</li>
+</ul>
 <p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
 <p><em>Fixed point precision used for all internal calculations, while return values are all
 represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally

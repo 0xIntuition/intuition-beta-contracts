@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="progressivecurve"><a class="header" href="#progressivecurve">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -202,28 +202,21 @@
 <a href="/src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🚀 Welcome to the SPICIEST bonding curve in the Intuition galaxy! While our LinearCurve
-is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
-early staker rewards! 🌶️
-This mathematical masterpiece uses a progressive pricing model where each new share
-costs more than the last. The price follows the formula:
+<p>A bonding curve implementation that uses a progressive pricing model where
+each new share costs more than the last.
+The price follows the formula:
 $$P(s) = m \cdot s$$
-where $m$ is our slope (measured in basis points) and $s$ is the total supply of shares.
-But wait, there's more! The actual cost to mint shares is calculated as the area under this
-curve, giving us:
+where:</p>
+<ul>
+<li>$m$ is the slope (in basis points)</li>
+<li>$s$ is the total supply of shares
+The cost to mint shares is calculated as the area under this curve:
 $$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
-where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
-Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors
-early stakers. The earlier you get in, the more your shares are worth compared to
-later participants. It's like the LinearCurve's fee-based appreciation got injected
-with pure rocket fuel! While fees still provide that sweet, sweet baseline appreciation,
-the progressive curve adds an aggressive incentivization mechanism that makes early
-staking absolutely JUICY. 💎
-Think of it as DeFi's answer to the early bird special - except instead of getting
-the worm, you're getting exponentially more valuable shares! The perfect complement
-to our low-risk fee model, creating a two-pronged approach to value accrual that's
-simply <em>chef's kiss</em> 👨‍🍳</p>
-<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+where $s_1$ is the starting share supply and $s_2$ is the final share supply.
+This curve creates stronger incentives for early stakers compared to the LinearCurve,
+while maintaining fee-based appreciation.</li>
+</ul>
+<p><em>Uses the prb-math library for fixed point arithmetic with UD60x18</em></p>
 <p><em>Fixed point precision used for all internal calculations, while return values are all
 represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
 and return 123.</em></p>
@@ -389,9 +382,9 @@ $$\text{sharePrice} = s \cdot m$$</em></p>
 </div>
 <h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
 <p>Convert assets to shares at a specific point on the curve</p>
-<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to convert to shares</em></p>
 <p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
-<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
 <p><em>shares:
 $$\text{shares} = \frac{a}{s \cdot m/2}$$</em></p>
 <p><em>Or to say that another way:
@@ -413,7 +406,6 @@ $$\text{shares} = \frac{2a}{s \cdot m}$$</em></p>
 <h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
 <p>Convert shares to assets at a specific point on the curve</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
-<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
 <p><em>Let $n$ = quantity of shares to convert to assets</em></p>
 <p><em>conversion price:
 $$\text{price} = s \cdot \frac{m}{2}$$</em></p>

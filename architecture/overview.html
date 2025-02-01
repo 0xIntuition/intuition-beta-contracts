@@ -191,7 +191,6 @@
 <p>This document provides an overview of the core contracts and their relationships. Click on any contract to view its detailed documentation.</p>
 <pre class="mermaid">graph TB
     Core((&quot;Core&quot;))
-    Utils((&quot;Utils&quot;))
     Interfaces((&quot;Interfaces&quot;))
     Libraries((&quot;Libraries&quot;))
 
@@ -203,13 +202,6 @@
         ProgressiveCurve
     end
     Core --&gt; CoreList
-
-    subgraph UtilsList [&quot;Utils&quot;]
-        direction LR
-        Attestoor &amp; AttestoorFactory
-        CustomMulticall3 &amp; Multicall3
-    end
-    Utils --&gt; UtilsList
 
     subgraph InterfacesList [&quot;Interfaces&quot;]
         direction LR
@@ -230,8 +222,8 @@
     classDef category fill:none,stroke:none,color:#000,font-size:24px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
-    class Core,Utils,Interfaces,Libraries root;
-    class CoreList,UtilsList,InterfacesList,LibrariesList category;
+    class Core,Interfaces,Libraries root;
+    class CoreList,InterfacesList,LibrariesList category;
 
     %% Click actions
     click EthMultiVault &quot;EthMultiVault.html&quot; &quot;EthMultiVault documentation&quot;
@@ -241,10 +233,6 @@
     click OffsetProgressiveCurve &quot;OffsetProgressiveCurve.html&quot; &quot;OffsetProgressiveCurve documentation&quot;
     click AtomWallet &quot;AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
     click LinearCurve &quot;LinearCurve.html&quot; &quot;LinearCurve documentation&quot;
-    click Attestoor &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html&quot; &quot;Attestoor documentation&quot;
-    click AttestoorFactory &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html&quot; &quot;AttestoorFactory documentation&quot;
-    click CustomMulticall3 &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html&quot; &quot;CustomMulticall3 documentation&quot;
-    click Multicall3 &quot;http://localhost:3000/src/utils/Multicall3.sol/contract.Multicall3.html&quot; &quot;Multicall3 documentation&quot;
     click IEthMultiVault &quot;http://localhost:3000/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html&quot; &quot;IEthMultiVault documentation&quot;
     click IBaseCurve &quot;http://localhost:3000/src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html&quot; &quot;IBaseCurve documentation&quot;
     click IBondingCurveRegistry &quot;http://localhost:3000/src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html&quot; &quot;IBondingCurveRegistry documentation&quot;

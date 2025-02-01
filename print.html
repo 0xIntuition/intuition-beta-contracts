@@ -321,7 +321,6 @@ $ forge install
 <p>This document provides an overview of the core contracts and their relationships. Click on any contract to view its detailed documentation.</p>
 <pre class="mermaid">graph TB
     Core((&quot;Core&quot;))
-    Utils((&quot;Utils&quot;))
     Interfaces((&quot;Interfaces&quot;))
     Libraries((&quot;Libraries&quot;))
 
@@ -333,13 +332,6 @@ $ forge install
         ProgressiveCurve
     end
     Core --&gt; CoreList
-
-    subgraph UtilsList [&quot;Utils&quot;]
-        direction LR
-        Attestoor &amp; AttestoorFactory
-        CustomMulticall3 &amp; Multicall3
-    end
-    Utils --&gt; UtilsList
 
     subgraph InterfacesList [&quot;Interfaces&quot;]
         direction LR
@@ -360,8 +352,8 @@ $ forge install
     classDef category fill:none,stroke:none,color:#000,font-size:24px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
-    class Core,Utils,Interfaces,Libraries root;
-    class CoreList,UtilsList,InterfacesList,LibrariesList category;
+    class Core,Interfaces,Libraries root;
+    class CoreList,InterfacesList,LibrariesList category;
 
     %% Click actions
     click EthMultiVault &quot;EthMultiVault.html&quot; &quot;EthMultiVault documentation&quot;
@@ -371,10 +363,6 @@ $ forge install
     click OffsetProgressiveCurve &quot;OffsetProgressiveCurve.html&quot; &quot;OffsetProgressiveCurve documentation&quot;
     click AtomWallet &quot;AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
     click LinearCurve &quot;LinearCurve.html&quot; &quot;LinearCurve documentation&quot;
-    click Attestoor &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html&quot; &quot;Attestoor documentation&quot;
-    click AttestoorFactory &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html&quot; &quot;AttestoorFactory documentation&quot;
-    click CustomMulticall3 &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html&quot; &quot;CustomMulticall3 documentation&quot;
-    click Multicall3 &quot;http://localhost:3000/src/utils/Multicall3.sol/contract.Multicall3.html&quot; &quot;Multicall3 documentation&quot;
     click IEthMultiVault &quot;http://localhost:3000/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html&quot; &quot;IEthMultiVault documentation&quot;
     click IBaseCurve &quot;http://localhost:3000/src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html&quot; &quot;IBaseCurve documentation&quot;
     click IBondingCurveRegistry &quot;http://localhost:3000/src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html&quot; &quot;IBondingCurveRegistry documentation&quot;
@@ -865,219 +853,8 @@ $ forge install
     click func_init &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#init&quot; &quot;init documentation&quot;
 </pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attestoor"><a class="header" href="#attestoor">Attestoor</a></h1>
-<p>Detailed view of the Attestoor contract and its members. Click on any member to view its documentation.</p>
-<pre class="mermaid">graph TB
-    root((&quot;Attestoor&quot;))
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_acceptOwnership[acceptOwnership] &amp; func_batchCreateAtom[batchCreateAtom]
-        func_batchCreateAtomDifferentValues[batchCreateAtomDifferentValues] &amp; func_batchCreateTriple[batchCreateTriple]
-        func_batchCreateTripleDifferentValues[batchCreateTripleDifferentValues] &amp; func_batchDepositAtom[batchDepositAtom]
-        func_batchDepositTriple[batchDepositTriple] &amp; func_batchRedeemAtom[batchRedeemAtom]
-        func_batchRedeemTriple[batchRedeemTriple] &amp; func_batchWhitelistAttestors[batchWhitelistAttestors]
-        func_createAtom[createAtom] &amp; func_createTriple[createTriple]
-        func_depositAtom[depositAtom] &amp; func_depositTriple[depositTriple]
-        func_ethMultiVault[ethMultiVault] &amp; func_owner[owner]
-        func_pendingOwner[pendingOwner] &amp; func_redeemAtom[redeemAtom]
-        func_redeemTriple[redeemTriple] &amp; func_renounceOwnership[renounceOwnership]
-        func_transferOwnership[transferOwnership] &amp; func_whitelistAttestor[whitelistAttestor]
-        func_whitelistedAttestors[whitelistedAttestors]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_init[init]
-    end
-    root --&gt; Initialization
-
-    subgraph Setters [&quot;Setters&quot;]
-        direction LR
-        func_setEthMultiVault[setEthMultiVault]
-    end
-    root --&gt; Setters
-
-    %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
-    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
-    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
-    
-    %% Apply styles
-    class root root;
-    class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_acceptOwnership,func_batchCreateAtom,func_batchCreateAtomDifferentValues,func_batchCreateTriple,func_batchCreateTripleDifferentValues,func_batchDepositAtom,func_batchDepositTriple,func_batchRedeemAtom,func_batchRedeemTriple,func_batchWhitelistAttestors,func_createAtom,func_createTriple,func_depositAtom,func_depositTriple,func_ethMultiVault,func_owner,func_pendingOwner,func_redeemAtom,func_redeemTriple,func_renounceOwnership,func_transferOwnership,func_whitelistAttestor,func_whitelistedAttestors,func_init,func_setEthMultiVault function;
-
-    %% Click actions
-    click root &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html&quot; &quot;Attestoor documentation&quot;
-    click func_acceptOwnership &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#acceptownership&quot; &quot;acceptOwnership documentation&quot;
-    click func_batchCreateAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchcreateatom&quot; &quot;batchCreateAtom documentation&quot;
-    click func_batchCreateAtomDifferentValues &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchcreateatomdifferentvalues&quot; &quot;batchCreateAtomDifferentValues documentation&quot;
-    click func_batchCreateTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchcreatetriple&quot; &quot;batchCreateTriple documentation&quot;
-    click func_batchCreateTripleDifferentValues &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchcreatetripledifferentvalues&quot; &quot;batchCreateTripleDifferentValues documentation&quot;
-    click func_batchDepositAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchdepositatom&quot; &quot;batchDepositAtom documentation&quot;
-    click func_batchDepositTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchdeposittriple&quot; &quot;batchDepositTriple documentation&quot;
-    click func_batchRedeemAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchredeematom&quot; &quot;batchRedeemAtom documentation&quot;
-    click func_batchRedeemTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchredeemtriple&quot; &quot;batchRedeemTriple documentation&quot;
-    click func_batchWhitelistAttestors &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#batchwhitelistattestors&quot; &quot;batchWhitelistAttestors documentation&quot;
-    click func_createAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#createatom&quot; &quot;createAtom documentation&quot;
-    click func_createTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#createtriple&quot; &quot;createTriple documentation&quot;
-    click func_depositAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#depositatom&quot; &quot;depositAtom documentation&quot;
-    click func_depositTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#deposittriple&quot; &quot;depositTriple documentation&quot;
-    click func_ethMultiVault &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#ethmultivault&quot; &quot;ethMultiVault documentation&quot;
-    click func_owner &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#owner&quot; &quot;owner documentation&quot;
-    click func_pendingOwner &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#pendingowner&quot; &quot;pendingOwner documentation&quot;
-    click func_redeemAtom &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#redeematom&quot; &quot;redeemAtom documentation&quot;
-    click func_redeemTriple &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#redeemtriple&quot; &quot;redeemTriple documentation&quot;
-    click func_renounceOwnership &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#renounceownership&quot; &quot;renounceOwnership documentation&quot;
-    click func_transferOwnership &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#transferownership&quot; &quot;transferOwnership documentation&quot;
-    click func_whitelistAttestor &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#whitelistattestor&quot; &quot;whitelistAttestor documentation&quot;
-    click func_whitelistedAttestors &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#whitelistedattestors&quot; &quot;whitelistedAttestors documentation&quot;
-    click func_init &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#init&quot; &quot;init documentation&quot;
-    click func_setEthMultiVault &quot;http://localhost:3000/src/utils/Attestoor.sol/contract.Attestoor.html#setethmultivault&quot; &quot;setEthMultiVault documentation&quot;
-</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="attestoorfactory"><a class="header" href="#attestoorfactory">AttestoorFactory</a></h1>
-<p>Detailed view of the AttestoorFactory contract and its members. Click on any member to view its documentation.</p>
-<pre class="mermaid">graph TB
-    root((&quot;AttestoorFactory&quot;))
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_acceptOwnership[acceptOwnership] &amp; func_attestoorBeacon[attestoorBeacon]
-        func_computeAttestoorAddress[computeAttestoorAddress] &amp; func_count[count]
-        func_deployAttestoor[deployAttestoor] &amp; func_ethMultiVault[ethMultiVault]
-        func_owner[owner] &amp; func_pendingOwner[pendingOwner]
-        func_renounceOwnership[renounceOwnership] &amp; func_transferOwnership[transferOwnership]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_init[init]
-    end
-    root --&gt; Initialization
-
-    subgraph Setters [&quot;Setters&quot;]
-        direction LR
-        func_setEthMultiVault[setEthMultiVault]
-    end
-    root --&gt; Setters
-
-    %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
-    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
-    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
-    
-    %% Apply styles
-    class root root;
-    class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_acceptOwnership,func_attestoorBeacon,func_computeAttestoorAddress,func_count,func_deployAttestoor,func_ethMultiVault,func_owner,func_pendingOwner,func_renounceOwnership,func_transferOwnership,func_init,func_setEthMultiVault function;
-
-    %% Click actions
-    click root &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html&quot; &quot;AttestoorFactory documentation&quot;
-    click func_acceptOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#acceptownership&quot; &quot;acceptOwnership documentation&quot;
-    click func_attestoorBeacon &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#attestoorbeacon&quot; &quot;attestoorBeacon documentation&quot;
-    click func_computeAttestoorAddress &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#computeattestooraddress&quot; &quot;computeAttestoorAddress documentation&quot;
-    click func_count &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#count&quot; &quot;count documentation&quot;
-    click func_deployAttestoor &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#deployattestoor&quot; &quot;deployAttestoor documentation&quot;
-    click func_ethMultiVault &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#ethmultivault&quot; &quot;ethMultiVault documentation&quot;
-    click func_owner &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#owner&quot; &quot;owner documentation&quot;
-    click func_pendingOwner &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#pendingowner&quot; &quot;pendingOwner documentation&quot;
-    click func_renounceOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#renounceownership&quot; &quot;renounceOwnership documentation&quot;
-    click func_transferOwnership &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#transferownership&quot; &quot;transferOwnership documentation&quot;
-    click func_init &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#init&quot; &quot;init documentation&quot;
-    click func_setEthMultiVault &quot;http://localhost:3000/src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html#setethmultivault&quot; &quot;setEthMultiVault documentation&quot;
-</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custommulticall3"><a class="header" href="#custommulticall3">CustomMulticall3</a></h1>
-<p>Detailed view of the CustomMulticall3 contract and its members. Click on any member to view its documentation.</p>
-<pre class="mermaid">graph TB
-    root((&quot;CustomMulticall3&quot;))
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_acceptOwnership[acceptOwnership] &amp; func_aggregate[aggregate]
-        func_aggregate3[aggregate3] &amp; func_aggregate3Value[aggregate3Value]
-        func_blockAndAggregate[blockAndAggregate] &amp; func_createTripleFromNewAtoms[createTripleFromNewAtoms]
-        func_createTripleWithNewAtom[createTripleWithNewAtom] &amp; func_ethMultiVault[ethMultiVault]
-        func_owner[owner] &amp; func_pendingOwner[pendingOwner]
-        func_renounceOwnership[renounceOwnership] &amp; func_transferOwnership[transferOwnership]
-        func_tryAggregate[tryAggregate] &amp; func_tryBlockAndAggregate[tryBlockAndAggregate]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Getters [&quot;Getters&quot;]
-        direction LR
-        func_getBasefee[getBasefee] &amp; func_getBatchUserEthBalancesInVaults[getBatchUserEthBalancesInVaults]
-        func_getBlockHash[getBlockHash] &amp; func_getBlockNumber[getBlockNumber]
-        func_getChainId[getChainId] &amp; func_getCurrentBlockCoinbase[getCurrentBlockCoinbase]
-        func_getCurrentBlockGasLimit[getCurrentBlockGasLimit] &amp; func_getCurrentBlockPrevrandao[getCurrentBlockPrevrandao]
-        func_getCurrentBlockTimestamp[getCurrentBlockTimestamp] &amp; func_getEthBalance[getEthBalance]
-        func_getLastBlockHash[getLastBlockHash] &amp; func_getUserEthBalanceInVault[getUserEthBalanceInVault]
-    end
-    root --&gt; Getters
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_init[init]
-    end
-    root --&gt; Initialization
-
-    subgraph Setters [&quot;Setters&quot;]
-        direction LR
-        func_setEthMultiVault[setEthMultiVault]
-    end
-    root --&gt; Setters
-
-    %% Style definitions
-    classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
-    classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
-    classDef stateVar fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e40af,font-size:28px,font-family:Arial,rounded:true;
-    classDef function fill:#e0e7ff,stroke:#818cf8,stroke-width:2px,color:#4338ca,font-size:28px,font-family:Arial,rounded:true;
-    classDef contract fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,font-size:28px,font-family:Arial,rounded:true;
-    classDef category fill:none,stroke:none,color:#333,font-size:28px,font-weight:bold,font-family:Arial;
-    
-    %% Apply styles
-    class root root;
-    class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_acceptOwnership,func_aggregate,func_aggregate3,func_aggregate3Value,func_blockAndAggregate,func_createTripleFromNewAtoms,func_createTripleWithNewAtom,func_ethMultiVault,func_owner,func_pendingOwner,func_renounceOwnership,func_transferOwnership,func_tryAggregate,func_tryBlockAndAggregate,func_getBasefee,func_getBatchUserEthBalancesInVaults,func_getBlockHash,func_getBlockNumber,func_getChainId,func_getCurrentBlockCoinbase,func_getCurrentBlockGasLimit,func_getCurrentBlockPrevrandao,func_getCurrentBlockTimestamp,func_getEthBalance,func_getLastBlockHash,func_getUserEthBalanceInVault,func_init,func_setEthMultiVault function;
-
-    %% Click actions
-    click root &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html&quot; &quot;CustomMulticall3 documentation&quot;
-    click func_acceptOwnership &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#acceptownership&quot; &quot;acceptOwnership documentation&quot;
-    click func_aggregate &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#aggregate&quot; &quot;aggregate documentation&quot;
-    click func_aggregate3 &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#aggregate3&quot; &quot;aggregate3 documentation&quot;
-    click func_aggregate3Value &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#aggregate3value&quot; &quot;aggregate3Value documentation&quot;
-    click func_blockAndAggregate &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#blockandaggregate&quot; &quot;blockAndAggregate documentation&quot;
-    click func_createTripleFromNewAtoms &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#createtriplefromnewatoms&quot; &quot;createTripleFromNewAtoms documentation&quot;
-    click func_createTripleWithNewAtom &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#createtriplewithnewatom&quot; &quot;createTripleWithNewAtom documentation&quot;
-    click func_ethMultiVault &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#ethmultivault&quot; &quot;ethMultiVault documentation&quot;
-    click func_owner &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#owner&quot; &quot;owner documentation&quot;
-    click func_pendingOwner &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#pendingowner&quot; &quot;pendingOwner documentation&quot;
-    click func_renounceOwnership &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#renounceownership&quot; &quot;renounceOwnership documentation&quot;
-    click func_transferOwnership &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#transferownership&quot; &quot;transferOwnership documentation&quot;
-    click func_tryAggregate &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#tryaggregate&quot; &quot;tryAggregate documentation&quot;
-    click func_tryBlockAndAggregate &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#tryblockandaggregate&quot; &quot;tryBlockAndAggregate documentation&quot;
-    click func_getBasefee &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getbasefee&quot; &quot;getBasefee documentation&quot;
-    click func_getBatchUserEthBalancesInVaults &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getbatchuserethbalancesinvaults&quot; &quot;getBatchUserEthBalancesInVaults documentation&quot;
-    click func_getBlockHash &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getblockhash&quot; &quot;getBlockHash documentation&quot;
-    click func_getBlockNumber &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getblocknumber&quot; &quot;getBlockNumber documentation&quot;
-    click func_getChainId &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getchainid&quot; &quot;getChainId documentation&quot;
-    click func_getCurrentBlockCoinbase &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getcurrentblockcoinbase&quot; &quot;getCurrentBlockCoinbase documentation&quot;
-    click func_getCurrentBlockGasLimit &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getcurrentblockgaslimit&quot; &quot;getCurrentBlockGasLimit documentation&quot;
-    click func_getCurrentBlockPrevrandao &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getcurrentblockprevrandao&quot; &quot;getCurrentBlockPrevrandao documentation&quot;
-    click func_getCurrentBlockTimestamp &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getcurrentblocktimestamp&quot; &quot;getCurrentBlockTimestamp documentation&quot;
-    click func_getEthBalance &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getethbalance&quot; &quot;getEthBalance documentation&quot;
-    click func_getLastBlockHash &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getlastblockhash&quot; &quot;getLastBlockHash documentation&quot;
-    click func_getUserEthBalanceInVault &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#getuserethbalanceinvault&quot; &quot;getUserEthBalanceInVault documentation&quot;
-    click func_init &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#init&quot; &quot;init documentation&quot;
-    click func_setEthMultiVault &quot;http://localhost:3000/src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html#setethmultivault&quot; &quot;setEthMultiVault documentation&quot;
-</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contents"><a class="header" href="#contents">Contents</a></h1>
 <ul>
 <li><a href="src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html">IBaseCurve</a></li>
@@ -1086,7 +863,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -1244,7 +1021,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -1472,7 +1249,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -2568,7 +2345,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2615,7 +2392,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2794,700 +2571,16 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <h3 id="bondingcurveregistry_curvealreadyexists"><a class="header" href="#bondingcurveregistry_curvealreadyexists">BondingCurveRegistry_CurveAlreadyExists</a></h3>
 <pre><code class="language-solidity">error BondingCurveRegistry_CurveAlreadyExists();
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="contents-2"><a class="header" href="#contents-2">Contents</a></h1>
-<ul>
-<li><a href="src/utils/Attestoor.sol/contract.Attestoor.html">Attestoor</a></li>
-<li><a href="src/utils/AttestoorFactory.sol/contract.AttestoorFactory.html">AttestoorFactory</a></li>
-<li><a href="src/utils/CustomMulticall3.sol/contract.CustomMulticall3.html">CustomMulticall3</a></li>
-<li><a href="src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="attestoor-1"><a class="header" href="#attestoor-1">Attestoor</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/Attestoor.sol">Git Source</a></p>
-<p><strong>Inherits:</strong>
-Initializable, Ownable2StepUpgradeable</p>
-<p><strong>Author:</strong>
-0xIntuition</p>
-<p>A utility contract of the Intuition protocol. It allows for the whitelisted accounts to attest
-on behalf of the Intuiton itself, effectively acting as an official attestoor account.</p>
-<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
-<h3 id="ethmultivault-1"><a class="header" href="#ethmultivault-1">ethMultiVault</a></h3>
-<p>The EthMultiVault contract address</p>
-<pre><code class="language-solidity">IEthMultiVault public ethMultiVault;
-</code></pre>
-<h3 id="whitelistedattestors"><a class="header" href="#whitelistedattestors">whitelistedAttestors</a></h3>
-<p>Mapping of whitelisted attestors</p>
-<pre><code class="language-solidity">mapping(address =&gt; bool) public whitelistedAttestors;
-</code></pre>
-<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
-<h3 id="onlywhitelistedattestor"><a class="header" href="#onlywhitelistedattestor">onlyWhitelistedAttestor</a></h3>
-<p>Modifier to allow only whitelisted attestors to call a function</p>
-<pre><code class="language-solidity">modifier onlyWhitelistedAttestor();
-</code></pre>
-<h3 id="init-1"><a class="header" href="#init-1">init</a></h3>
-<p>Initializes the Attestoor contract</p>
-<pre><code class="language-solidity">function init(address admin, IEthMultiVault _ethMultiVault) external initializer;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin</td></tr>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract</td></tr>
-</tbody></table>
-</div>
-<h3 id="createatom-1"><a class="header" href="#createatom-1">createAtom</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#createatom">IEthMultiVault-createAtom</a></em></p>
-<pre><code class="language-solidity">function createAtom(bytes calldata atomUri) external payable onlyWhitelistedAttestor returns (uint256);
-</code></pre>
-<h3 id="batchcreateatom-1"><a class="header" href="#batchcreateatom-1">batchCreateAtom</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#batchcreateatom">IEthMultiVault-batchCreateAtom</a></em></p>
-<pre><code class="language-solidity">function batchCreateAtom(bytes[] calldata atomUris)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<h3 id="batchcreateatomdifferentvalues"><a class="header" href="#batchcreateatomdifferentvalues">batchCreateAtomDifferentValues</a></h3>
-<p>Creates multiple atom vaults with different values in a single transaction</p>
-<pre><code class="language-solidity">function batchCreateAtomDifferentValues(bytes[] calldata atomUris, uint256[] calldata values)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomUris</code></td><td><code>bytes[]</code></td><td>Array of atom URIs</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of asset values to create the vaults</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>ids Array of atom vault IDs</td></tr>
-</tbody></table>
-</div>
-<h3 id="createtriple-1"><a class="header" href="#createtriple-1">createTriple</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#createtriple">IEthMultiVault-createTriple</a></em></p>
-<pre><code class="language-solidity">function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256);
-</code></pre>
-<h3 id="batchcreatetriple-1"><a class="header" href="#batchcreatetriple-1">batchCreateTriple</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#batchcreatetriple">IEthMultiVault-batchCreateTriple</a></em></p>
-<pre><code class="language-solidity">function batchCreateTriple(uint256[] calldata subjectIds, uint256[] calldata predicateIds, uint256[] calldata objectIds)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<h3 id="batchcreatetripledifferentvalues"><a class="header" href="#batchcreatetripledifferentvalues">batchCreateTripleDifferentValues</a></h3>
-<p>Creates multiple triple vaults with different values in a single transaction</p>
-<pre><code class="language-solidity">function batchCreateTripleDifferentValues(
-    uint256[] calldata subjectIds,
-    uint256[] calldata predicateIds,
-    uint256[] calldata objectIds,
-    uint256[] calldata values
-) external payable onlyWhitelistedAttestor returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>subjectIds</code></td><td><code>uint256[]</code></td><td>Array of subject IDs</td></tr>
-<tr><td><code>predicateIds</code></td><td><code>uint256[]</code></td><td>Array of predicate IDs</td></tr>
-<tr><td><code>objectIds</code></td><td><code>uint256[]</code></td><td>Array of object IDs</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of asset values to create the vaults</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>ids Array of triple vault IDs</td></tr>
-</tbody></table>
-</div>
-<h3 id="depositatom-1"><a class="header" href="#depositatom-1">depositAtom</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#depositatom">IEthMultiVault-depositAtom</a></em></p>
-<pre><code class="language-solidity">function depositAtom(address receiver, uint256 id) external payable onlyWhitelistedAttestor returns (uint256);
-</code></pre>
-<h3 id="batchdepositatom"><a class="header" href="#batchdepositatom">batchDepositAtom</a></h3>
-<p>Deposits assets into multiple atom vaults in a single transaction</p>
-<pre><code class="language-solidity">function batchDepositAtom(address receiver, uint256[] calldata ids, uint256[] calldata values)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
-<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>Array of atom vault IDs</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of asset values to deposit</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>shares Array of shares received</td></tr>
-</tbody></table>
-</div>
-<h3 id="deposittriple-1"><a class="header" href="#deposittriple-1">depositTriple</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#deposittriple">IEthMultiVault-depositTriple</a></em></p>
-<pre><code class="language-solidity">function depositTriple(address receiver, uint256 id) external payable onlyWhitelistedAttestor returns (uint256);
-</code></pre>
-<h3 id="batchdeposittriple"><a class="header" href="#batchdeposittriple">batchDepositTriple</a></h3>
-<p>Deposits assets into multiple triple vaults in a single transaction</p>
-<pre><code class="language-solidity">function batchDepositTriple(address receiver, uint256[] calldata ids, uint256[] calldata values)
-    external
-    payable
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
-<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>Array of triple vault IDs</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of asset values to deposit</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>shares Array of shares received</td></tr>
-</tbody></table>
-</div>
-<h3 id="redeematom-1"><a class="header" href="#redeematom-1">redeemAtom</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#redeematom">IEthMultiVault-redeemAtom</a></em></p>
-<pre><code class="language-solidity">function redeemAtom(uint256 shares, address receiver, uint256 id) external onlyWhitelistedAttestor returns (uint256);
-</code></pre>
-<h3 id="batchredeematom"><a class="header" href="#batchredeematom">batchRedeemAtom</a></h3>
-<p>Redeems shares from multiple atom vaults for assets in a single transaction</p>
-<pre><code class="language-solidity">function batchRedeemAtom(uint256[] calldata shares, address receiver, uint256[] calldata ids)
-    external
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256[]</code></td><td>Array of shares to redeem</td></tr>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
-<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>Array of atom vault IDs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>assets Array of assets received</td></tr>
-</tbody></table>
-</div>
-<h3 id="redeemtriple-1"><a class="header" href="#redeemtriple-1">redeemTriple</a></h3>
-<p><em>See <a href="src/utils/Attestoor.sol//src/EthMultiVault.sol/contract.EthMultiVault.html#redeemtriple">IEthMultiVault-redeemTriple</a></em></p>
-<pre><code class="language-solidity">function redeemTriple(uint256 shares, address receiver, uint256 id)
-    external
-    onlyWhitelistedAttestor
-    returns (uint256);
-</code></pre>
-<h3 id="batchredeemtriple"><a class="header" href="#batchredeemtriple">batchRedeemTriple</a></h3>
-<p>Redeems shares from multiple triple vaults for assets in a single transaction</p>
-<pre><code class="language-solidity">function batchRedeemTriple(uint256[] calldata shares, address receiver, uint256[] calldata ids)
-    external
-    onlyWhitelistedAttestor
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256[]</code></td><td>Array of shares to redeem</td></tr>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
-<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>Array of triple vault IDs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>assets Array of assets received</td></tr>
-</tbody></table>
-</div>
-<h3 id="setethmultivault"><a class="header" href="#setethmultivault">setEthMultiVault</a></h3>
-<p>Sets the EthMultiVault contract address</p>
-<pre><code class="language-solidity">function setEthMultiVault(IEthMultiVault _ethMultiVault) external onlyOwner;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div>
-<h3 id="whitelistattestor"><a class="header" href="#whitelistattestor">whitelistAttestor</a></h3>
-<p>Whitelists or blacklists an attestor</p>
-<pre><code class="language-solidity">function whitelistAttestor(address attestor, bool whitelisted) external onlyOwner;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>attestor</code></td><td><code>address</code></td><td>The address of the attestor</td></tr>
-<tr><td><code>whitelisted</code></td><td><code>bool</code></td><td>Whether the attestor is whitelisted or not</td></tr>
-</tbody></table>
-</div>
-<h3 id="batchwhitelistattestors"><a class="header" href="#batchwhitelistattestors">batchWhitelistAttestors</a></h3>
-<p>Whitelists or blacklists multiple attestors</p>
-<pre><code class="language-solidity">function batchWhitelistAttestors(address[] calldata attestors, bool whitelisted) external onlyOwner;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>attestors</code></td><td><code>address[]</code></td><td>Array of attestor addresses</td></tr>
-<tr><td><code>whitelisted</code></td><td><code>bool</code></td><td>Whether the attestors are whitelisted or not</td></tr>
-</tbody></table>
-</div>
-<h3 id="_checkredeemability"><a class="header" href="#_checkredeemability">_checkRedeemability</a></h3>
-<p><em>Checks if all amounts of shares can be redeemed for assets from multiple vaults</em></p>
-<pre><code class="language-solidity">function _checkRedeemability(uint256[] calldata shares, uint256[] calldata ids) internal view returns (bool);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256[]</code></td><td>Array of shares to redeem</td></tr>
-<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>Array of vault IDs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool Whether all shares can be redeemed or not</td></tr>
-</tbody></table>
-</div>
-<h3 id="_getsum"><a class="header" href="#_getsum">_getSum</a></h3>
-<p><em>Computes the sum of an array of values</em></p>
-<pre><code class="language-solidity">function _getSum(uint256[] calldata values) internal pure returns (uint256);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of uint256 values</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>sum The sum of the values</td></tr>
-</tbody></table>
-</div>
-<h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
-<h3 id="ethmultivaultset"><a class="header" href="#ethmultivaultset">EthMultiVaultSet</a></h3>
-<p>Event emitted when the EthMultiVault contract address is set</p>
-<pre><code class="language-solidity">event EthMultiVaultSet(IEthMultiVault ethMultiVault);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div>
-<h3 id="whitelistedattestorset"><a class="header" href="#whitelistedattestorset">WhitelistedAttestorSet</a></h3>
-<p>Event emitted when an attestor is whitelisted or blacklisted</p>
-<pre><code class="language-solidity">event WhitelistedAttestorSet(address attestor, bool whitelisted);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>attestor</code></td><td><code>address</code></td><td>The address of the attestor</td></tr>
-<tr><td><code>whitelisted</code></td><td><code>bool</code></td><td>Whether the attestor is whitelisted or not</td></tr>
-</tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="attestoorfactory-1"><a class="header" href="#attestoorfactory-1">AttestoorFactory</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/AttestoorFactory.sol">Git Source</a></p>
-<p><strong>Inherits:</strong>
-Initializable, Ownable2StepUpgradeable</p>
-<p><strong>Author:</strong>
-0xIntuition</p>
-<p>A utility contract of the Intuition protocol. It allows for the deployment of Attestoor contracts using the BeaconProxy pattern.</p>
-<h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
-<h3 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">ethMultiVault</a></h3>
-<p>The EthMultiVault contract address</p>
-<pre><code class="language-solidity">IEthMultiVault public ethMultiVault;
-</code></pre>
-<h3 id="attestoorbeacon"><a class="header" href="#attestoorbeacon">attestoorBeacon</a></h3>
-<p>The address of the UpgradeableBeacon contract, which points to the implementation of the Attestoor contract</p>
-<pre><code class="language-solidity">address public attestoorBeacon;
-</code></pre>
-<h3 id="count-1"><a class="header" href="#count-1">count</a></h3>
-<p>The count of deployed Attestoor contracts</p>
-<pre><code class="language-solidity">uint256 public count;
-</code></pre>
-<h2 id="functions-5"><a class="header" href="#functions-5">Functions</a></h2>
-<h3 id="init-2"><a class="header" href="#init-2">init</a></h3>
-<p>Initializes the AttestoorFactory contract</p>
-<pre><code class="language-solidity">function init(address admin, IEthMultiVault _ethMultiVault, address _attestoorBeacon) external initializer;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin</td></tr>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract</td></tr>
-<tr><td><code>_attestoorBeacon</code></td><td><code>address</code></td><td></td></tr>
-</tbody></table>
-</div>
-<h3 id="deployattestoor"><a class="header" href="#deployattestoor">deployAttestoor</a></h3>
-<p>Deploys a new Attestoor contract</p>
-<pre><code class="language-solidity">function deployAttestoor(address admin) external returns (address);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin of the new Attestoor contract</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>attestoorAddress The address of the deployed Attestoor contract</td></tr>
-</tbody></table>
-</div>
-<h3 id="computeattestooraddress"><a class="header" href="#computeattestooraddress">computeAttestoorAddress</a></h3>
-<p>Computes the address of the Attestoor contract that would be deployed using deployAttestoor function
-with the given admin address and the <code>count</code> value</p>
-<pre><code class="language-solidity">function computeAttestoorAddress(uint256 _count, address admin) public view returns (address);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_count</code></td><td><code>uint256</code></td><td>The count value to be used in the computation as the salt for create2</td></tr>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin of the new Attestoor contract</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>address The address of the Attestoor contract that would be deployed</td></tr>
-</tbody></table>
-</div>
-<h3 id="_getdeploymentdata"><a class="header" href="#_getdeploymentdata">_getDeploymentData</a></h3>
-<p><em>returns the deployment data for the Attestoor contract</em></p>
-<pre><code class="language-solidity">function _getDeploymentData(address admin) internal view returns (bytes memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin of the new Attestoor contract</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>bytes</code></td><td>bytes memory the deployment data for the Attestoor contract (using BeaconProxy pattern)</td></tr>
-</tbody></table>
-</div>
-<h3 id="setethmultivault-1"><a class="header" href="#setethmultivault-1">setEthMultiVault</a></h3>
-<p>Sets the EthMultiVault contract address</p>
-<pre><code class="language-solidity">function setEthMultiVault(IEthMultiVault _ethMultiVault) external onlyOwner;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div>
-<h2 id="events-2"><a class="header" href="#events-2">Events</a></h2>
-<h3 id="attestoordeployed"><a class="header" href="#attestoordeployed">AttestoorDeployed</a></h3>
-<p>Event emitted when an Attestoor contract is deployed</p>
-<pre><code class="language-solidity">event AttestoorDeployed(address indexed attestoor, address indexed admin);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>attestoor</code></td><td><code>address</code></td><td>The address of the deployed Attestoor contract</td></tr>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin</td></tr>
-</tbody></table>
-</div>
-<h3 id="ethmultivaultset-1"><a class="header" href="#ethmultivaultset-1">EthMultiVaultSet</a></h3>
-<p>Event emitted when the EthMultiVault contract address is set</p>
-<pre><code class="language-solidity">event EthMultiVaultSet(IEthMultiVault ethMultiVault);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="custommulticall3-1"><a class="header" href="#custommulticall3-1">CustomMulticall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/CustomMulticall3.sol">Git Source</a></p>
-<p><strong>Inherits:</strong>
-Initializable, Ownable2StepUpgradeable, <a href="src/utils/CustomMulticall3.sol//src/utils/Multicall3.sol/contract.Multicall3.html">Multicall3</a></p>
-<p><strong>Author:</strong>
-0xIntuition</p>
-<p>A utility contract of the Intuition protocol. It allows for custom multicall operations.</p>
-<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
-<h3 id="ethmultivault-3"><a class="header" href="#ethmultivault-3">ethMultiVault</a></h3>
-<p>EthMultiVault contract</p>
-<pre><code class="language-solidity">IEthMultiVault public ethMultiVault;
-</code></pre>
-<h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
-<h3 id="init-3"><a class="header" href="#init-3">init</a></h3>
-<p>Initializes the CustomMulticall3 contract</p>
-<pre><code class="language-solidity">function init(IEthMultiVault _ethMultiVault, address admin) external initializer;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract</td></tr>
-<tr><td><code>admin</code></td><td><code>address</code></td><td>The address of the admin</td></tr>
-</tbody></table>
-</div>
-<h3 id="createtriplefromnewatoms"><a class="header" href="#createtriplefromnewatoms">createTripleFromNewAtoms</a></h3>
-<p>Creates a triple based on the provided atom URIs in a single transaction,
-in situations where none of the atoms comprising the triple exist yet</p>
-<pre><code class="language-solidity">function createTripleFromNewAtoms(bytes[] calldata atomUris, uint256[] calldata values)
-    external
-    payable
-    returns (uint256);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomUris</code></td><td><code>bytes[]</code></td><td>Array of atom URIs to create an atom for</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of values to create the atoms and the triple</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tripleId The ID of the created triple</td></tr>
-</tbody></table>
-</div>
-<h3 id="createtriplewithnewatom"><a class="header" href="#createtriplewithnewatom">createTripleWithNewAtom</a></h3>
-<p>Creates a triple with a new atom based on the provided atom URI in a single transaction, in
-situations where two of the atoms comprising the triple are known, and the third atom is new
-Example use case: First two atoms are known, e.g. "I" and "follow", and the third atom is the user to follow</p>
-<pre><code class="language-solidity">function createTripleWithNewAtom(bytes calldata atomUri, uint256[] calldata atomIds, uint256[] calldata values)
-    external
-    payable
-    returns (uint256);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomUri</code></td><td><code>bytes</code></td><td>Atom URI to create an atom for</td></tr>
-<tr><td><code>atomIds</code></td><td><code>uint256[]</code></td><td>Array of atom IDs to create the triple with</td></tr>
-<tr><td><code>values</code></td><td><code>uint256[]</code></td><td>Array of values to create the atom and the triple</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>tripleId The ID of the created triple</td></tr>
-</tbody></table>
-</div>
-<h3 id="setethmultivault-2"><a class="header" href="#setethmultivault-2">setEthMultiVault</a></h3>
-<p>Sets the EthMultiVault contract address</p>
-<pre><code class="language-solidity">function setEthMultiVault(IEthMultiVault _ethMultiVault) external onlyOwner;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div>
-<h3 id="getuserethbalanceinvault"><a class="header" href="#getuserethbalanceinvault">getUserEthBalanceInVault</a></h3>
-<p>Gets the user's ETH balance in a particular vault</p>
-<pre><code class="language-solidity">function getUserEthBalanceInVault(uint256 vaultId, address user) public view returns (uint256);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>The ID of the vault</td></tr>
-<tr><td><code>user</code></td><td><code>address</code></td><td>The address of the user</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The user's ETH balance in the vault</td></tr>
-</tbody></table>
-</div>
-<h3 id="getbatchuserethbalancesinvaults"><a class="header" href="#getbatchuserethbalancesinvaults">getBatchUserEthBalancesInVaults</a></h3>
-<p>Gets the user's ETH balances in multiple vaults</p>
-<pre><code class="language-solidity">function getBatchUserEthBalancesInVaults(uint256[] calldata vaultIds, address user)
-    external
-    view
-    returns (uint256[] memory);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>vaultIds</code></td><td><code>uint256[]</code></td><td>Array of vault IDs</td></tr>
-<tr><td><code>user</code></td><td><code>address</code></td><td>The address of the user</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>Array of user's ETH balances in the vaults</td></tr>
-</tbody></table>
-</div>
-<h2 id="events-3"><a class="header" href="#events-3">Events</a></h2>
-<h3 id="ethmultivaultset-2"><a class="header" href="#ethmultivaultset-2">EthMultiVaultSet</a></h3>
-<p>Event emitted when the EthMultiVault contract address is set</p>
-<pre><code class="language-solidity">event EthMultiVaultSet(IEthMultiVault ethMultiVault);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>ethMultiVault</code></td><td><code>IEthMultiVault</code></td><td>EthMultiVault contract address</td></tr>
-</tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="multicall3"><a class="header" href="#multicall3">Multicall3</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/utils/Multicall3.sol">Git Source</a></p>
-<p><strong>Authors:</strong>
-Michael Elliot <a href="mailto:src/utils/Multicall3.sol/mike@makerdao.com">mike@makerdao.com</a>, Joshua Levine <a href="mailto:src/utils/Multicall3.sol/joshua@makerdao.com">joshua@makerdao.com</a>, Nick Johnson <a href="mailto:src/utils/Multicall3.sol/arachnid@notdot.net">arachnid@notdot.net</a>, Andreas Bigger <a href="mailto:src/utils/Multicall3.sol/andreas@nascent.xyz">andreas@nascent.xyz</a>, Matt Solomon <a href="mailto:src/utils/Multicall3.sol/matt@mattsolomon.dev">matt@mattsolomon.dev</a></p>
-<p>Aggregate results from multiple function calls</p>
-<p><em>Multicall &amp; Multicall2 backwards-compatible</em></p>
-<p><em>Aggregate methods are marked <code>payable</code> to save 24 gas per call</em></p>
-<h2 id="functions-7"><a class="header" href="#functions-7">Functions</a></h2>
-<h3 id="aggregate"><a class="header" href="#aggregate">aggregate</a></h3>
-<p>Backwards-compatible call aggregation with Multicall</p>
-<pre><code class="language-solidity">function aggregate(Call[] calldata calls) public payable returns (uint256 blockNumber, bytes[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>calls</code></td><td><code>Call[]</code></td><td>An array of Call structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>blockNumber</code></td><td><code>uint256</code></td><td>The block number where the calls were executed</td></tr>
-<tr><td><code>returnData</code></td><td><code>bytes[]</code></td><td>An array of bytes containing the responses</td></tr>
-</tbody></table>
-</div>
-<h3 id="tryaggregate"><a class="header" href="#tryaggregate">tryAggregate</a></h3>
-<p>Backwards-compatible with Multicall2</p>
-<p>Aggregate calls without requiring success</p>
-<pre><code class="language-solidity">function tryAggregate(bool requireSuccess, Call[] calldata calls) public payable returns (Result[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>requireSuccess</code></td><td><code>bool</code></td><td>If true, require all calls to succeed</td></tr>
-<tr><td><code>calls</code></td><td><code>Call[]</code></td><td>An array of Call structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>returnData</code></td><td><code>Result[]</code></td><td>An array of Result structs</td></tr>
-</tbody></table>
-</div>
-<h3 id="tryblockandaggregate"><a class="header" href="#tryblockandaggregate">tryBlockAndAggregate</a></h3>
-<p>Backwards-compatible with Multicall2</p>
-<p>Aggregate calls and allow failures using tryAggregate</p>
-<pre><code class="language-solidity">function tryBlockAndAggregate(bool requireSuccess, Call[] calldata calls)
-    public
-    payable
-    returns (uint256 blockNumber, bytes32 blockHash, Result[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>requireSuccess</code></td><td><code>bool</code></td><td></td></tr>
-<tr><td><code>calls</code></td><td><code>Call[]</code></td><td>An array of Call structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>blockNumber</code></td><td><code>uint256</code></td><td>The block number where the calls were executed</td></tr>
-<tr><td><code>blockHash</code></td><td><code>bytes32</code></td><td>The hash of the block where the calls were executed</td></tr>
-<tr><td><code>returnData</code></td><td><code>Result[]</code></td><td>An array of Result structs</td></tr>
-</tbody></table>
-</div>
-<h3 id="blockandaggregate"><a class="header" href="#blockandaggregate">blockAndAggregate</a></h3>
-<p>Backwards-compatible with Multicall2</p>
-<p>Aggregate calls and allow failures using tryAggregate</p>
-<pre><code class="language-solidity">function blockAndAggregate(Call[] calldata calls)
-    public
-    payable
-    returns (uint256 blockNumber, bytes32 blockHash, Result[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>calls</code></td><td><code>Call[]</code></td><td>An array of Call structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>blockNumber</code></td><td><code>uint256</code></td><td>The block number where the calls were executed</td></tr>
-<tr><td><code>blockHash</code></td><td><code>bytes32</code></td><td>The hash of the block where the calls were executed</td></tr>
-<tr><td><code>returnData</code></td><td><code>Result[]</code></td><td>An array of Result structs</td></tr>
-</tbody></table>
-</div>
-<h3 id="aggregate3"><a class="header" href="#aggregate3">aggregate3</a></h3>
-<p>Aggregate calls, ensuring each returns success if required</p>
-<pre><code class="language-solidity">function aggregate3(Call3[] calldata calls) public payable returns (Result[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>calls</code></td><td><code>Call3[]</code></td><td>An array of Call3 structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>returnData</code></td><td><code>Result[]</code></td><td>An array of Result structs</td></tr>
-</tbody></table>
-</div>
-<h3 id="aggregate3value"><a class="header" href="#aggregate3value">aggregate3Value</a></h3>
-<p>Aggregate calls with a msg value</p>
-<p>Reverts if msg.value is less than the sum of the call values</p>
-<pre><code class="language-solidity">function aggregate3Value(Call3Value[] calldata calls) public payable returns (Result[] memory returnData);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>calls</code></td><td><code>Call3Value[]</code></td><td>An array of Call3Value structs</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>returnData</code></td><td><code>Result[]</code></td><td>An array of Result structs</td></tr>
-</tbody></table>
-</div>
-<h3 id="getblockhash"><a class="header" href="#getblockhash">getBlockHash</a></h3>
-<p>Returns the block hash for the given block number</p>
-<pre><code class="language-solidity">function getBlockHash(uint256 blockNumber) public view returns (bytes32 blockHash);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>blockNumber</code></td><td><code>uint256</code></td><td>The block number</td></tr>
-</tbody></table>
-</div>
-<h3 id="getblocknumber"><a class="header" href="#getblocknumber">getBlockNumber</a></h3>
-<p>Returns the block number</p>
-<pre><code class="language-solidity">function getBlockNumber() public view returns (uint256 blockNumber);
-</code></pre>
-<h3 id="getcurrentblockcoinbase"><a class="header" href="#getcurrentblockcoinbase">getCurrentBlockCoinbase</a></h3>
-<p>Returns the block coinbase</p>
-<pre><code class="language-solidity">function getCurrentBlockCoinbase() public view returns (address coinbase);
-</code></pre>
-<h3 id="getcurrentblockprevrandao"><a class="header" href="#getcurrentblockprevrandao">getCurrentBlockPrevrandao</a></h3>
-<p>Since the VM version paris, "difficulty" was replaced by "prevrandao",
-which now returns a random number based on the beacon chain</p>
-<pre><code class="language-solidity">function getCurrentBlockPrevrandao() public view returns (uint256 prevrandao);
-</code></pre>
-<h3 id="getcurrentblockgaslimit"><a class="header" href="#getcurrentblockgaslimit">getCurrentBlockGasLimit</a></h3>
-<p>Returns the block gas limit</p>
-<pre><code class="language-solidity">function getCurrentBlockGasLimit() public view returns (uint256 gaslimit);
-</code></pre>
-<h3 id="getcurrentblocktimestamp"><a class="header" href="#getcurrentblocktimestamp">getCurrentBlockTimestamp</a></h3>
-<p>Returns the block timestamp</p>
-<pre><code class="language-solidity">function getCurrentBlockTimestamp() public view returns (uint256 timestamp);
-</code></pre>
-<h3 id="getethbalance"><a class="header" href="#getethbalance">getEthBalance</a></h3>
-<p>Returns the (ETH) balance of a given address</p>
-<pre><code class="language-solidity">function getEthBalance(address addr) public view returns (uint256 balance);
-</code></pre>
-<h3 id="getlastblockhash"><a class="header" href="#getlastblockhash">getLastBlockHash</a></h3>
-<p>Returns the block hash of the last block</p>
-<pre><code class="language-solidity">function getLastBlockHash() public view returns (bytes32 blockHash);
-</code></pre>
-<h3 id="getbasefee"><a class="header" href="#getbasefee">getBasefee</a></h3>
-<p>Gets the base fee of the given block</p>
-<p>Can revert if the BASEFEE opcode is not implemented by the given chain</p>
-<pre><code class="language-solidity">function getBasefee() public view returns (uint256 basefee);
-</code></pre>
-<h3 id="getchainid"><a class="header" href="#getchainid">getChainId</a></h3>
-<p>Returns the chain id</p>
-<pre><code class="language-solidity">function getChainId() public view returns (uint256 chainid);
-</code></pre>
-<h2 id="structs-2"><a class="header" href="#structs-2">Structs</a></h2>
-<h3 id="call"><a class="header" href="#call">Call</a></h3>
-<pre><code class="language-solidity">struct Call {
-    address target;
-    bytes callData;
-}
-</code></pre>
-<h3 id="call3"><a class="header" href="#call3">Call3</a></h3>
-<pre><code class="language-solidity">struct Call3 {
-    address target;
-    bool allowFailure;
-    bytes callData;
-}
-</code></pre>
-<h3 id="call3value"><a class="header" href="#call3value">Call3Value</a></h3>
-<pre><code class="language-solidity">struct Call3Value {
-    address target;
-    bool allowFailure;
-    uint256 value;
-    bytes callData;
-}
-</code></pre>
-<h3 id="result"><a class="header" href="#result">Result</a></h3>
-<pre><code class="language-solidity">struct Result {
-    bool success;
-    bytes returnData;
-}
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Core contract of the Intuition protocol. This contract is an abstract account
 associated with a corresponding atom.</p>
-<h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
-<h3 id="ethmultivault-4"><a class="header" href="#ethmultivault-4">ethMultiVault</a></h3>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="ethmultivault-1"><a class="header" href="#ethmultivault-1">ethMultiVault</a></h3>
 <p>The EthMultiVault contract address</p>
 <pre><code class="language-solidity">IEthMultiVault public ethMultiVault;
 </code></pre>
@@ -3513,12 +2606,12 @@ associated with a corresponding atom.</p>
 <p><em>Gap for upgrade safety</em></p>
 <pre><code class="language-solidity">uint256[50] private __gap;
 </code></pre>
-<h2 id="functions-8"><a class="header" href="#functions-8">Functions</a></h2>
+<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
 <h3 id="onlyownerorentrypoint"><a class="header" href="#onlyownerorentrypoint">onlyOwnerOrEntryPoint</a></h3>
 <p><em>Modifier to allow only the owner or entry point to call a function</em></p>
 <pre><code class="language-solidity">modifier onlyOwnerOrEntryPoint();
 </code></pre>
-<h3 id="init-4"><a class="header" href="#init-4">init</a></h3>
+<h3 id="init-1"><a class="header" href="#init-1">init</a></h3>
 <p>Initialize the AtomWallet contract</p>
 <pre><code class="language-solidity">function init(IEntryPoint anEntryPoint, IEthMultiVault _ethMultiVault) external initializer;
 </code></pre>
@@ -3680,7 +2773,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Abstract contract for a bonding curve. Defines the interface for converting assets to shares and vice versa.</p>
@@ -3689,11 +2782,11 @@ converting between assets and shares.</em></p>
 <p><em>These curves handle the pure mathematical relationship for share price.  Pool ratio adjustments (such as
 accomodating for the effect of fees, supply burn, airdrops, etc) are handled by the EthMultiVault instead
 of the curves themselves.</em></p>
-<h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
+<h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
 <h3 id="name-1"><a class="header" href="#name-1">name</a></h3>
 <pre><code class="language-solidity">string public name;
 </code></pre>
-<h2 id="functions-9"><a class="header" href="#functions-9">Functions</a></h2>
+<h2 id="functions-5"><a class="header" href="#functions-5">Functions</a></h2>
 <h3 id="maxshares-1"><a class="header" href="#maxshares-1">maxShares</a></h3>
 <p>The maximum number of shares that this curve can handle without overflowing.</p>
 <p><em>Checked by the EthMultiVault before transacting</em></p>
@@ -3847,7 +2940,7 @@ of the curves themselves.</em></p>
 <tr><td><code>_name</code></td><td><code>string</code></td><td>Unique name for the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable</p>
 <p><strong>Author:</strong>
@@ -3863,11 +2956,11 @@ supplying a new "vault" for each term (atom or triple).</p>
 computations given the provided economic state and the desired curve implementation.
 You can think of the registry as a concierge the EthMultiVault uses to access various
 economic incentive patterns.</em></p>
-<h2 id="state-variables-5"><a class="header" href="#state-variables-5">State Variables</a></h2>
+<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
 <h3 id="admin-1"><a class="header" href="#admin-1">admin</a></h3>
 <pre><code class="language-solidity">address public admin;
 </code></pre>
-<h3 id="count-2"><a class="header" href="#count-2">count</a></h3>
+<h3 id="count-1"><a class="header" href="#count-1">count</a></h3>
 <pre><code class="language-solidity">uint256 public count;
 </code></pre>
 <h3 id="curveaddresses-1"><a class="header" href="#curveaddresses-1">curveAddresses</a></h3>
@@ -3876,7 +2969,7 @@ economic incentive patterns.</em></p>
 <h3 id="curveids-1"><a class="header" href="#curveids-1">curveIds</a></h3>
 <pre><code class="language-solidity">mapping(address =&gt; uint256) public curveIds;
 </code></pre>
-<h2 id="functions-10"><a class="header" href="#functions-10">Functions</a></h2>
+<h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
 <h3 id="onlyadmin"><a class="header" href="#onlyadmin">onlyAdmin</a></h3>
 <pre><code class="language-solidity">modifier onlyAdmin();
 </code></pre>
@@ -4083,8 +3176,8 @@ economic incentive patterns.</em></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>maxAssets</code></td><td><code>uint256</code></td><td>The maximum number of assets</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-5"><a class="header" href="#ethmultivault-5">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/EthMultiVault.sol">Git Source</a></p>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">EthMultiVault</a></h1>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -4146,10 +3239,10 @@ This implementation of the EthMultiVault is messy for a reason.  We wanted to ke
 the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
 reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
 code size, it ensures that users can still use the audited pathways in the code if they wish, while also
-enabling them to engage in more economically exciting activities like the Progressive Curve.</em></p>
+enabling them to engage in more economically exciting activities like the Progressive Curve or Offset Curve.</em></p>
 <p><em>The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
 interface for depositing and redeeming.</em></p>
-<h2 id="state-variables-6"><a class="header" href="#state-variables-6">State Variables</a></h2>
+<h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
 <h3 id="set_admin"><a class="header" href="#set_admin">SET_ADMIN</a></h3>
 <pre><code class="language-solidity">bytes32 public constant SET_ADMIN = keccak256("setAdmin");
 </code></pre>
@@ -4169,7 +3262,7 @@ interface for depositing and redeeming.</em></p>
 <h3 id="walletconfig-1"><a class="header" href="#walletconfig-1">walletConfig</a></h3>
 <pre><code class="language-solidity">WalletConfig public walletConfig;
 </code></pre>
-<h3 id="count-3"><a class="header" href="#count-3">count</a></h3>
+<h3 id="count-2"><a class="header" href="#count-2">count</a></h3>
 <p>ID of the last vault to be created</p>
 <pre><code class="language-solidity">uint256 public count;
 </code></pre>
@@ -4217,12 +3310,12 @@ interface for depositing and redeeming.</em></p>
 <p><em>Gap for upgrade safety</em></p>
 <pre><code class="language-solidity">uint256[48] private __gap;
 </code></pre>
-<h2 id="functions-11"><a class="header" href="#functions-11">Functions</a></h2>
+<h2 id="functions-7"><a class="header" href="#functions-7">Functions</a></h2>
 <h3 id="onlyadmin-1"><a class="header" href="#onlyadmin-1">onlyAdmin</a></h3>
 <p>Modifier to restrict a function to the admin</p>
 <pre><code class="language-solidity">modifier onlyAdmin();
 </code></pre>
-<h3 id="init-5"><a class="header" href="#init-5">init</a></h3>
+<h3 id="init-2"><a class="header" href="#init-2">init</a></h3>
 <p>Initializes the EthMultiVault contract</p>
 <p><em>This function is called only once (during contract deployment)</em></p>
 <pre><code class="language-solidity">function init(
@@ -4456,7 +3549,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>sender</code></td><td><code>address</code></td><td>address to revoke</td></tr>
 </tbody></table>
 </div>
-<h3 id="createatom-2"><a class="header" href="#createatom-2">createAtom</a></h3>
+<h3 id="createatom-1"><a class="header" href="#createatom-1">createAtom</a></h3>
 <p>Create an atom and return its vault id</p>
 <p><em>This function will revert if called with less than <code>getAtomCost()</code> in <code>msg.value</code></em></p>
 <pre><code class="language-solidity">function createAtom(bytes calldata atomUri) external payable nonReentrant whenNotPaused returns (uint256);
@@ -4471,7 +3564,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the atom</td></tr>
 </tbody></table>
 </div>
-<h3 id="batchcreateatom-2"><a class="header" href="#batchcreateatom-2">batchCreateAtom</a></h3>
+<h3 id="batchcreateatom-1"><a class="header" href="#batchcreateatom-1">batchCreateAtom</a></h3>
 <p>Batch create atoms and return their vault ids</p>
 <p><em>This function will revert if called with less than <code>getAtomCost()</code> * <code>atomUris.length</code> in <code>msg.value</code></em></p>
 <pre><code class="language-solidity">function batchCreateAtom(bytes[] calldata atomUris)
@@ -4507,7 +3600,7 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
-<h3 id="createtriple-2"><a class="header" href="#createtriple-2">createTriple</a></h3>
+<h3 id="createtriple-1"><a class="header" href="#createtriple-1">createTriple</a></h3>
 <p>create a triple and return its vault id</p>
 <p><em>This function will revert if called with less than <code>getTripleCost()</code> in <code>msg.value</code>.
 This function will revert if any of the atoms do not exist or if any ids are triple vaults.</em></p>
@@ -4530,7 +3623,7 @@ This function will revert if any of the atoms do not exist or if any ids are tri
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>id vault id of the triple</td></tr>
 </tbody></table>
 </div>
-<h3 id="batchcreatetriple-2"><a class="header" href="#batchcreatetriple-2">batchCreateTriple</a></h3>
+<h3 id="batchcreatetriple-1"><a class="header" href="#batchcreatetriple-1">batchCreateTriple</a></h3>
 <p>batch create triples and return their vault ids</p>
 <p><em>This function will revert if called with less than <code>getTripleCost()</code> * <code>array.length</code> in <code>msg.value</code>.
 This function will revert if any of the atoms do not exist or if any ids are triple vaults.</em></p>
@@ -4568,7 +3661,7 @@ This function will revert if any of the atoms do not exist or if any ids are tri
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolDepositFee The calculated protocol fee for the deposit</td></tr>
 </tbody></table>
 </div>
-<h3 id="depositatom-2"><a class="header" href="#depositatom-2">depositAtom</a></h3>
+<h3 id="depositatom-1"><a class="header" href="#depositatom-1">depositAtom</a></h3>
 <p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
 *payable msg.value amount of eth to deposit</p>
 <p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
@@ -4615,7 +3708,7 @@ performing an audit of the full refactor (V2).</em></p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
 </tbody></table>
 </div>
-<h3 id="redeematom-2"><a class="header" href="#redeematom-2">redeemAtom</a></h3>
+<h3 id="redeematom-1"><a class="header" href="#redeematom-1">redeemAtom</a></h3>
 <p>redeem shares from an atom vault for assets</p>
 <p><em>Emergency redemptions without any fees being charged are always possible, even if the contract is paused
 See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</em></p>
@@ -4656,7 +3749,7 @@ performing an audit of the full refactor (V2).</em></p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
 </tbody></table>
 </div>
-<h3 id="deposittriple-2"><a class="header" href="#deposittriple-2">depositTriple</a></h3>
+<h3 id="deposittriple-1"><a class="header" href="#deposittriple-1">depositTriple</a></h3>
 <p>deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'receiver'
 *payable msg.value amount of eth to deposit</p>
 <p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
@@ -4701,7 +3794,7 @@ performing an audit of the full refactor (V2).</em></p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted</td></tr>
 </tbody></table>
 </div>
-<h3 id="redeemtriple-2"><a class="header" href="#redeemtriple-2">redeemTriple</a></h3>
+<h3 id="redeemtriple-1"><a class="header" href="#redeemtriple-1">redeemTriple</a></h3>
 <p>redeems 'shares' number of shares from the triple vault and send 'assets' eth
 from the contract to 'reciever' factoring in exit fees</p>
 <p><em>Emergency redemptions without any fees being charged are always possible, even if the contract is paused
@@ -5186,7 +4279,7 @@ No domain conversion needed because 1 dollar worth of assets always equals 1 dol
 <li>First, we get the base shares from the bonding curve:
 $$s_{base} = f_{curve}(assets)$$</li>
 <li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-$$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$</li>
+$$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$</li>
 </ol>
 <h3 id="where-1"><a class="header" href="#where-1">Where:</a></h3>
 <ol>
@@ -5201,8 +4294,6 @@ the bonding curve's 'pure' conversion ratio due to:</p>
 <li>Share burns</li>
 <li>Direct asset transfers/airdrops</li>
 </ul>
-<p>For example, if the pool has fewer assets than the curve expects for its share supply
-(due to fees), new depositors will receive proportionally more shares to maintain fairness.</p>
 <p>The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
 quantities in the same space, as the bonding curve defines a non-linear relationship
 between assets and shares.</p>
@@ -5268,8 +4359,6 @@ the bonding curve's 'pure' conversion ratio due to:</p>
 <li>Share burns</li>
 <li>Direct asset transfers/airdrops</li>
 </ul>
-<p>For example, if the pool has fewer assets than the curve expects for its share supply
-(due to fees), redeemers will receive proportionally fewer assets to maintain fairness.</p>
 <p>The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
 quantities in the same space, as the bonding curve defines a non-linear relationship
 between shares and assets.</p>
@@ -5466,7 +4555,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <h3 id="_hascounterstakecurve"><a class="header" href="#_hascounterstakecurve">_hasCounterStakeCurve</a></h3>
 <pre><code class="language-solidity">function _hasCounterStakeCurve(uint256 id, uint256 curveId, address receiver) internal view returns (bool);
 </code></pre>
-<h3 id="_getdeploymentdata-1"><a class="header" href="#_getdeploymentdata-1">_getDeploymentData</a></h3>
+<h3 id="_getdeploymentdata"><a class="header" href="#_getdeploymentdata">_getDeploymentData</a></h3>
 <p><em>returns the deployment data for the AtomWallet contract</em></p>
 <pre><code class="language-solidity">function _getDeploymentData() internal view returns (bytes memory);
 </code></pre>
@@ -5488,7 +4577,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5502,24 +4591,28 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <a href="src/LinearCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🎯 The OG, battle-tested share price model, now reborn as a bonding curve!
-This magnificent specimen takes the legacy share price logic - a time-honored 1:1
-relationship between assets and shares - and wraps it in our shiny new bonding curve
-architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
-implementation (we see you, future integrations 👀), this curve is the unsung hero
-of low-risk incentivization.</p>
-<p>Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
-on the pure, unadulterated power of fees to affect share price. When fees roll in,
-they're distributed proportionally across all shareholders, creating a gentle upward
-pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰</p>
-<p>This creates an incredibly based, low-risk incentivization model where early stakers
-benefit from the natural accumulation of fees over time. No wild price swings, no
-complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
-bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
-<p><em>This curve is not actually used in this version of the EthMultiVault, so as to avoid changing
-audited code.  It is left here to demonstrate the design pattern of curves for V2.  This curve
-replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve architecture.</em></p>
-<h2 id="state-variables-7"><a class="header" href="#state-variables-7">State Variables</a></h2>
+<p>A simple 1:1 price model implemented as a bonding curve. This curve maintains
+a direct linear relationship between assets and shares, where the conversion
+follows the formula:
+$$f(x) = x$$
+where:</p>
+<ul>
+<li>$x$ represents either assets or shares to be converted</li>
+<li>$f(x)$ returns the corresponding amount in the target unit</li>
+</ul>
+<p>The price mechanism relies on fee accumulation rather than supply-based pricing.
+As fees are collected, they are distributed proportionally across all shareholders,
+creating gradual appreciation in share value. This provides a conservative
+incentivization model where early participants benefit from fee accumulation
+over time.</p>
+<p>This implementation offers a low-volatility approach to value accrual,
+suitable for scenarios where predictable, steady returns are preferred
+over dynamic pricing mechanisms.</p>
+<p><em>This curve is not currently used in the EthMultiVault implementation to preserve
+audited code. It serves as a reference implementation demonstrating how traditional
+pro-rata share pricing can be adapted to the bonding curve architecture for future
+versions.</em></p>
+<h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
 <p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
@@ -5528,7 +4621,7 @@ replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve archite
 <p><em>UD60x18 Max</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
 </code></pre>
-<h2 id="functions-12"><a class="header" href="#functions-12">Functions</a></h2>
+<h2 id="functions-8"><a class="header" href="#functions-8">Functions</a></h2>
 <h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
 <p>Constructor for the Linear Curve.</p>
 <pre><code class="language-solidity">constructor(string memory _name) BaseCurve(_name);
@@ -5675,32 +4768,26 @@ replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve archite
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🚀 Welcome to the GENTLER version of our Progressive bonding curve! While the ProgressiveCurve
-brings the HEAT, the OffsetProgressiveCurve offers a more controlled ascent that's still
-rewarding for early stakers. 🎯
-This mathematical innovation modifies our progressive pricing model by introducing an offset
-that shifts the starting point of our curve. The price follows the formula:
+<p>A modified version of the Progressive bonding curve that introduces an offset parameter
+to control the initial price dynamics.
+The price follows the formula:
 $$P(s) = m \cdot (s + \text{offset})$$
-where $m$ is our slope (measured in basis points), $s$ is the total supply of shares, and
-$\text{offset}$ is our curve-shifting parameter. The actual cost to mint shares is calculated
-as the area under this curve, giving us:
+where:</p>
+<ul>
+<li>$m$ is the slope (in basis points)</li>
+<li>$s$ is the total supply of shares</li>
+<li>$\text{offset}$ shifts the starting point of the curve
+The cost to mint shares is calculated as the area under this curve:
 $$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
-where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
-Why is this so clever? 🧠 By introducing an offset, we can create a more gentle price curve
-that still maintains the core benefits of progressive pricing. It's like starting partway up
-the curve, which means the initial price increase is less aggressive while still providing
-meaningful incentives for early stakers. Think of it as the "smooth operator" version of
-our ProgressiveCurve - all the benefits of progressive pricing, but with more control over
-the initial trajectory! 🎭
-This makes the OffsetProgressiveCurve perfect for scenarios where you want to maintain
-the incentive structure of progressive pricing but need more control over the initial
-price dynamics. It's the sophisticated sibling to our ProgressiveCurve, offering a more
-nuanced approach to value accrual. 🎨</p>
+where $s_1$ is the starting share supply and $s_2$ is the final share supply.
+The offset parameter allows for a more gradual initial price increase while maintaining
+the progressive pricing structure.</li>
+</ul>
 <p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
 <p><em>Fixed point precision used for all internal calculations, while return values are all
 represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
@@ -5717,7 +4804,7 @@ and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  Th
 between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
 instead of directly in the curve implementation. The other significant difference is the inclusion
 of the OFFSET value, which we use to make the curve more gentle.</em></p>
-<h2 id="state-variables-8"><a class="header" href="#state-variables-8">State Variables</a></h2>
+<h2 id="state-variables-5"><a class="header" href="#state-variables-5">State Variables</a></h2>
 <h3 id="slope"><a class="header" href="#slope">SLOPE</a></h3>
 <p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
 <p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
@@ -5741,7 +4828,7 @@ origin.  For more details, see the preview functions.</p>
 <p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
-<h2 id="functions-13"><a class="header" href="#functions-13">Functions</a></h2>
+<h2 id="functions-9"><a class="header" href="#functions-9">Functions</a></h2>
 <h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
 <p>Constructs a new ProgressiveCurve with the given name and slope</p>
 <p><em>Computes maximum values given constructor arguments</em></p>
@@ -5969,7 +5056,7 @@ offset by the invoking methods.</em></p>
 <pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -5983,28 +5070,21 @@ offset by the invoking methods.</em></p>
 <a href="src/ProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🚀 Welcome to the SPICIEST bonding curve in the Intuition galaxy! While our LinearCurve
-is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
-early staker rewards! 🌶️
-This mathematical masterpiece uses a progressive pricing model where each new share
-costs more than the last. The price follows the formula:
+<p>A bonding curve implementation that uses a progressive pricing model where
+each new share costs more than the last.
+The price follows the formula:
 $$P(s) = m \cdot s$$
-where $m$ is our slope (measured in basis points) and $s$ is the total supply of shares.
-But wait, there's more! The actual cost to mint shares is calculated as the area under this
-curve, giving us:
+where:</p>
+<ul>
+<li>$m$ is the slope (in basis points)</li>
+<li>$s$ is the total supply of shares
+The cost to mint shares is calculated as the area under this curve:
 $$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
-where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
-Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors
-early stakers. The earlier you get in, the more your shares are worth compared to
-later participants. It's like the LinearCurve's fee-based appreciation got injected
-with pure rocket fuel! While fees still provide that sweet, sweet baseline appreciation,
-the progressive curve adds an aggressive incentivization mechanism that makes early
-staking absolutely JUICY. 💎
-Think of it as DeFi's answer to the early bird special - except instead of getting
-the worm, you're getting exponentially more valuable shares! The perfect complement
-to our low-risk fee model, creating a two-pronged approach to value accrual that's
-simply <em>chef's kiss</em> 👨‍🍳</p>
-<p><em>Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18</em></p>
+where $s_1$ is the starting share supply and $s_2$ is the final share supply.
+This curve creates stronger incentives for early stakers compared to the LinearCurve,
+while maintaining fee-based appreciation.</li>
+</ul>
+<p><em>Uses the prb-math library for fixed point arithmetic with UD60x18</em></p>
 <p><em>Fixed point precision used for all internal calculations, while return values are all
 represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
 and return 123.</em></p>
@@ -6019,7 +5099,7 @@ shares.</em></p>
 and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  * The key difference
 between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
 instead of directly in the curve implementation. *  Otherwise the math is identical.</em></p>
-<h2 id="state-variables-9"><a class="header" href="#state-variables-9">State Variables</a></h2>
+<h2 id="state-variables-6"><a class="header" href="#state-variables-6">State Variables</a></h2>
 <h3 id="slope-1"><a class="header" href="#slope-1">SLOPE</a></h3>
 <p>The slope of the curve, in basis points.  This is the rate at which the price of shares increases.</p>
 <p><em>0.0025e18 -&gt; 25 basis points, 0.0001e18 = 1 basis point, etc etc</em></p>
@@ -6038,7 +5118,7 @@ instead of directly in the curve implementation. *  Otherwise the math is identi
 <p><em>The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.</em></p>
 <pre><code class="language-solidity">uint256 public immutable MAX_ASSETS;
 </code></pre>
-<h2 id="functions-14"><a class="header" href="#functions-14">Functions</a></h2>
+<h2 id="functions-10"><a class="header" href="#functions-10">Functions</a></h2>
 <h3 id="constructor-3"><a class="header" href="#constructor-3">constructor</a></h3>
 <p>Constructs a new ProgressiveCurve with the given name and slope</p>
 <p><em>Computes maximum values given constructor arguments</em></p>
@@ -6170,9 +5250,9 @@ $$\text{sharePrice} = s \cdot m$$</em></p>
 </div>
 <h3 id="converttoshares-8"><a class="header" href="#converttoshares-8">convertToShares</a></h3>
 <p>Convert assets to shares at a specific point on the curve</p>
-<p><em>Let $s$ = the current total supply of shares</em></p>
+<p><em>Let $s$ = current total supply of shares</em></p>
+<p><em>Let $a$ = assets to convert to shares</em></p>
 <p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
-<p><em>Let $a$ = quantity of assets to convert to shares</em></p>
 <p><em>shares:
 $$\text{shares} = \frac{a}{s \cdot m/2}$$</em></p>
 <p><em>Or to say that another way:
@@ -6194,7 +5274,6 @@ $$\text{shares} = \frac{2a}{s \cdot m}$$</em></p>
 <h3 id="converttoassets-8"><a class="header" href="#converttoassets-8">convertToAssets</a></h3>
 <p>Convert shares to assets at a specific point on the curve</p>
 <p><em>Let $s$ = current total supply of shares</em></p>
-<p><em>Let $\frac{m}{2}$ = half of the slope</em></p>
 <p><em>Let $n$ = quantity of shares to convert to assets</em></p>
 <p><em>conversion price:
 $$\text{price} = s \cdot \frac{m}{2}$$</em></p>

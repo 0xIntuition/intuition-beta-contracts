@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="linearcurve"><a class="header" href="#linearcurve">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -202,23 +202,27 @@
 <a href="/src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
-<p>🎯 The OG, battle-tested share price model, now reborn as a bonding curve!
-This magnificent specimen takes the legacy share price logic - a time-honored 1:1
-relationship between assets and shares - and wraps it in our shiny new bonding curve
-architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
-implementation (we see you, future integrations 👀), this curve is the unsung hero
-of low-risk incentivization.</p>
-<p>Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
-on the pure, unadulterated power of fees to affect share price. When fees roll in,
-they're distributed proportionally across all shareholders, creating a gentle upward
-pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰</p>
-<p>This creates an incredibly based, low-risk incentivization model where early stakers
-benefit from the natural accumulation of fees over time. No wild price swings, no
-complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
-bonding curves: not flashy, but it'll get you there every single time! 🚗</p>
-<p><em>This curve is not actually used in this version of the EthMultiVault, so as to avoid changing
-audited code.  It is left here to demonstrate the design pattern of curves for V2.  This curve
-replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve architecture.</em></p>
+<p>A simple 1:1 price model implemented as a bonding curve. This curve maintains
+a direct linear relationship between assets and shares, where the conversion
+follows the formula:
+$$f(x) = x$$
+where:</p>
+<ul>
+<li>$x$ represents either assets or shares to be converted</li>
+<li>$f(x)$ returns the corresponding amount in the target unit</li>
+</ul>
+<p>The price mechanism relies on fee accumulation rather than supply-based pricing.
+As fees are collected, they are distributed proportionally across all shareholders,
+creating gradual appreciation in share value. This provides a conservative
+incentivization model where early participants benefit from fee accumulation
+over time.</p>
+<p>This implementation offers a low-volatility approach to value accrual,
+suitable for scenarios where predictable, steady returns are preferred
+over dynamic pricing mechanisms.</p>
+<p><em>This curve is not currently used in the EthMultiVault implementation to preserve
+audited code. It serves as a reference implementation demonstrating how traditional
+pro-rata share pricing can be adapted to the bonding curve architecture for future
+versions.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
 <p><em>UD60x18 Max</em></p>

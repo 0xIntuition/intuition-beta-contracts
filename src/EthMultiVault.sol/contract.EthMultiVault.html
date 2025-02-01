@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ethmultivault"><a class="header" href="#ethmultivault">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/3fa150f73a1f1186d143287bdaf448b0d7231227/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/19a7c9b91ef1e5fa49cf876391797a8e0bbc9a34/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -250,7 +250,7 @@ This implementation of the EthMultiVault is messy for a reason.  We wanted to ke
 the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
 reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
 code size, it ensures that users can still use the audited pathways in the code if they wish, while also
-enabling them to engage in more economically exciting activities like the Progressive Curve.</em></p>
+enabling them to engage in more economically exciting activities like the Progressive Curve or Offset Curve.</em></p>
 <p><em>The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
 interface for depositing and redeeming.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -1290,7 +1290,7 @@ No domain conversion needed because 1 dollar worth of assets always equals 1 dol
 <li>First, we get the base shares from the bonding curve:
 $$s_{base} = f_{curve}(assets)$$</li>
 <li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-$$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$</li>
+$$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$</li>
 </ol>
 <h3 id="where-1"><a class="header" href="#where-1">Where:</a></h3>
 <ol>
@@ -1305,8 +1305,6 @@ the bonding curve's 'pure' conversion ratio due to:</p>
 <li>Share burns</li>
 <li>Direct asset transfers/airdrops</li>
 </ul>
-<p>For example, if the pool has fewer assets than the curve expects for its share supply
-(due to fees), new depositors will receive proportionally more shares to maintain fairness.</p>
 <p>The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
 quantities in the same space, as the bonding curve defines a non-linear relationship
 between assets and shares.</p>
@@ -1372,8 +1370,6 @@ the bonding curve's 'pure' conversion ratio due to:</p>
 <li>Share burns</li>
 <li>Direct asset transfers/airdrops</li>
 </ul>
-<p>For example, if the pool has fewer assets than the curve expects for its share supply
-(due to fees), redeemers will receive proportionally fewer assets to maintain fairness.</p>
 <p>The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
 quantities in the same space, as the bonding curve defines a non-linear relationship
 between shares and assets.</p>
