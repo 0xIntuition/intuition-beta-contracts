@@ -19,6 +19,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
+
 /**
  * @title  EthMultiVault
  * @author 0xIntuition
@@ -61,16 +62,15 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  *        - Separate fee structures for atom/triple creation
  *        - Proportional deposit distribution for triple-related operations
  *
- * @dev ## Please note: 
+ * @dev ## Please note:
  *      This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
  *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
  *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
  *      code size, it ensures that users can still use the audited pathways in the code if they wish, while also
- *      enabling them to engage in more economically exciting activities like the Progressive Curve.
+ *      enabling them to engage in more economically exciting activities like the Progressive Curve or Offset Curve.
  * @dev The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
  *      interface for depositing and redeeming.
  */
-
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
     using LibZip for bytes;
@@ -1928,10 +1928,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId vault id of the curve
     /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
     /// @notice The conversion happens in two steps:
-    ///  1. First, we get the base shares from the bonding curve: 
+    ///  1. First, we get the base shares from the bonding curve:
     ///  $$s_{base} = f_{curve}(assets)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$s_{final} = s_{base} \cdot \frac{S_{total}}{A_{total}^{(s)}}$$
+    ///  $$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$
     ///  ### Where:
     ///  1. $S_{total}$ is the total supply of shares
     ///  2. $A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
@@ -1941,8 +1941,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  - Protocol fees being taken in assets
     ///  - Share burns
     ///  - Direct asset transfers/airdrops
-    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
-    ///     (due to fees), new depositors will receive proportionally more shares to maintain fairness.
     /// @notice The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
     ///      quantities in the same space, as the bonding curve defines a non-linear relationship
     ///      between assets and shares.
@@ -1956,9 +1954,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         // Pool Ratio Adjustment
         if (totalAssets != 0 && supply != 0) {
-            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, supply, curveId);
+            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, 0, curveId);
             if (totalAssetsInShareSpace != 0) {
-                shares = shares * supply / totalAssetsInShareSpace;
+                shares = shares * totalAssetsInShareSpace / supply;
             }
         }
         return shares;
@@ -1987,7 +1985,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId vault id of the curve
     /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
     /// @notice The conversion happens in two steps:
-    ///  1. First, we get the base assets from the bonding curve: 
+    ///  1. First, we get the base assets from the bonding curve:
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
     ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
     ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
@@ -2000,8 +1998,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  - Protocol fees being taken in assets
     ///  - Share burns
     ///  - Direct asset transfers/airdrops
-    /// @notice For example, if the pool has fewer assets than the curve expects for its share supply
-    /// (due to fees), redeemers will receive proportionally fewer assets to maintain fairness.
     /// @notice The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
     ///  quantities in the same space, as the bonding curve defines a non-linear relationship
     ///  between shares and assets.
@@ -2012,7 +2008,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 assets = _registry().previewRedeem(shares, supply, totalAssets, curveId);
 
-        // Pool Ratio Adjustment
+        // // Pool Ratio Adjustment
         if (totalAssets != 0 && supply != 0) {
             uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {

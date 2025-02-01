@@ -6,26 +6,28 @@ import {BaseCurve} from "./BaseCurve.sol";
 /**
  * @title  LinearCurve
  * @author 0xIntuition
- * @notice 🎯 The OG, battle-tested share price model, now reborn as a bonding curve!
- *         This magnificent specimen takes the legacy share price logic - a time-honored 1:1
- *         relationship between assets and shares - and wraps it in our shiny new bonding curve
- *         architecture. While it's currently chillin' on the sidelines of our ETHMultiVault
- *         implementation (we see you, future integrations 👀), this curve is the unsung hero
- *         of low-risk incentivization.
+ * @notice A simple 1:1 price model implemented as a bonding curve. This curve maintains
+ *         a direct linear relationship between assets and shares, where the conversion
+ *         follows the formula:
+ *         $$f(x) = x$$
+ *         where:
+ *         - $x$ represents either assets or shares to be converted
+ *         - $f(x)$ returns the corresponding amount in the target unit
  *
- * @notice Here's the secret sauce: instead of fancy mathematical gymnastics, this curve relies
- *         on the pure, unadulterated power of fees to affect share price. When fees roll in,
- *         they're distributed proportionally across all shareholders, creating a gentle upward
- *         pressure on share value. It's like watching paint dry, but the paint is made of MONEY! 💰
+ * @notice The price mechanism relies on fee accumulation rather than supply-based pricing.
+ *         As fees are collected, they are distributed proportionally across all shareholders,
+ *         creating gradual appreciation in share value. This provides a conservative
+ *         incentivization model where early participants benefit from fee accumulation
+ *         over time.
  *
- * @notice This creates an incredibly based, low-risk incentivization model where early stakers
- *         benefit from the natural accumulation of fees over time. No wild price swings, no
- *         complex formulas - just steady, reliable value accrual. It's the Toyota Corolla of
- *         bonding curves: not flashy, but it'll get you there every single time! 🚗
+ * @notice This implementation offers a low-volatility approach to value accrual,
+ *         suitable for scenarios where predictable, steady returns are preferred
+ *         over dynamic pricing mechanisms.
  *
- * @dev This curve is not actually used in this version of the EthMultiVault, so as to avoid changing
- *      audited code.  It is left here to demonstrate the design pattern of curves for V2.  This curve
- *      replaces the legacy "pro-rata" logic by wrapping it in the Bonding Curve architecture.
+ * @dev This curve is not currently used in the EthMultiVault implementation to preserve
+ *      audited code. It serves as a reference implementation demonstrating how traditional
+ *      pro-rata share pricing can be adapted to the bonding curve architecture for future
+ *      versions.
  */
 contract LinearCurve is BaseCurve {
     /// @dev UD60x18 Max

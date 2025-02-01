@@ -10,7 +10,6 @@ import {
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
 import {AtomWallet} from "src/AtomWallet.sol";
-import {CustomMulticall3} from "src/utils/CustomMulticall3.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";

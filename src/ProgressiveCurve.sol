@@ -7,48 +7,38 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 /**
  * @title  ProgressiveCurve
  * @author 0xIntuition
- * @notice 🚀 Welcome to the SPICIEST bonding curve in the Intuition galaxy! While our LinearCurve
- *         is out there playing it safe, the ProgressiveCurve is here to turn up the HEAT on
- *         early staker rewards! 🌶️
+ * @notice A bonding curve implementation that uses a progressive pricing model where 
+ *         each new share costs more than the last.
  *
- *         This mathematical masterpiece uses a progressive pricing model where each new share
- *         costs more than the last. The price follows the formula:
+ *         The price follows the formula:
  *         $$P(s) = m \cdot s$$
- *         where $m$ is our slope (measured in basis points) and $s$ is the total supply of shares.
- *         But wait, there's more! The actual cost to mint shares is calculated as the area under this
- *         curve, giving us:
+ *         where:
+ *         - $m$ is the slope (in basis points)
+ *         - $s$ is the total supply of shares
+ *
+ *         The cost to mint shares is calculated as the area under this curve:
  *         $$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
- *         where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
+ *         where $s_1$ is the starting share supply and $s_2$ is the final share supply.
  *
- *         Why is this so 🔥? Because it creates a natural pyramid of value that HEAVILY favors
- *         early stakers. The earlier you get in, the more your shares are worth compared to
- *         later participants. It's like the LinearCurve's fee-based appreciation got injected
- *         with pure rocket fuel! While fees still provide that sweet, sweet baseline appreciation,
- *         the progressive curve adds an aggressive incentivization mechanism that makes early
- *         staking absolutely JUICY. 💎
+ *         This curve creates stronger incentives for early stakers compared to the LinearCurve,
+ *         while maintaining fee-based appreciation.
  *
- *         Think of it as DeFi's answer to the early bird special - except instead of getting
- *         the worm, you're getting exponentially more valuable shares! The perfect complement
- *         to our low-risk fee model, creating a two-pronged approach to value accrual that's
- *         simply *chef's kiss* 👨‍🍳
- *
- * @dev     Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18
- * @dev     Fixed point precision used for all internal calculations, while return values are all
+ * @dev    Uses the prb-math library for fixed point arithmetic with UD60x18
+ * @dev    Fixed point precision used for all internal calculations, while return values are all
  *             represented as regular uint256s, and unwrapped.  I.e. we might use 123.456 internally
  *             and return 123.
- * @dev     The core equation:
+ * @dev    The core equation:
  *             $$P(s) = m \cdot s$$
  *             and the cost equation:
  *             $$\text{Cost} = (s_2^2 - s_1^2) \cdot \frac{m}{2}$$
  *             comes from calculus - it's the integral of a linear price function. The area under a
  *             linear curve from point $s_1$ to $s_2$ gives us the total cost/return of minting/redeeming
  *             shares.
- * @dev     Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
+ * @dev    Inspired by the Solaxy.sol contract: https://github.com/M3tering/Solaxy/blob/main/src/Solaxy.sol
  *          and https://m3tering.whynotswitch.com/token-economics/mint-and-distribution.  * The key difference
  *          between the Solaxy contract and this one is that the economic state is handled by the EthMultiVault
  *          instead of directly in the curve implementation. *  Otherwise the math is identical.
  */
-
 contract ProgressiveCurve is BaseCurve {
     /// @notice The slope of the curve, in basis points.  This is the rate at which the price of shares increases.
     /// @dev 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc
@@ -179,9 +169,9 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    /// @dev Let $s$ = the current total supply of shares
+    /// @dev Let $s$ = current total supply of shares
+    /// @dev Let $a$ = assets to convert to shares
     /// @dev Let $\frac{m}{2}$ = half of the slope
-    /// @dev Let $a$ = quantity of assets to convert to shares
     /// @dev shares:
     /// $$\text{shares} = \frac{a}{s \cdot m/2}$$
     /// @dev Or to say that another way:
@@ -192,13 +182,14 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).mul(HALF_SLOPE);
-        return UD60x18.wrap(assets).div(conversionPrice).unwrap();
+        require(assets > 0, "Asset amount must be greater than zero");
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
+            .unwrap();
     }
 
     /// @inheritdoc BaseCurve
     /// @dev Let $s$ = current total supply of shares
-    /// @dev Let $\frac{m}{2}$ = half of the slope
     /// @dev Let $n$ = quantity of shares to convert to assets
     /// @dev conversion price:
     /// $$\text{price} = s \cdot \frac{m}{2}$$
@@ -214,8 +205,9 @@ contract ProgressiveCurve is BaseCurve {
         returns (uint256 assets)
     {
         require(totalShares >= shares, "PC: Under supply of shares");
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).mul(HALF_SLOPE);
-        return UD60x18.wrap(shares).mul(conversionPrice).unwrap();
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
+        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
     }
 
     /**

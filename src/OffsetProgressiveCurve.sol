@@ -7,30 +7,22 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 /**
  * @title  OffsetProgressiveCurve
  * @author 0xIntuition
- * @notice 🚀 Welcome to the GENTLER version of our Progressive bonding curve! While the ProgressiveCurve
- *         brings the HEAT, the OffsetProgressiveCurve offers a more controlled ascent that's still
- *         rewarding for early stakers. 🎯
+ * @notice A modified version of the Progressive bonding curve that introduces an offset parameter
+ *         to control the initial price dynamics.
  *
- *         This mathematical innovation modifies our progressive pricing model by introducing an offset
- *         that shifts the starting point of our curve. The price follows the formula:
+ *         The price follows the formula:
  *         $$P(s) = m \cdot (s + \text{offset})$$
- *         where $m$ is our slope (measured in basis points), $s$ is the total supply of shares, and
- *         $\text{offset}$ is our curve-shifting parameter. The actual cost to mint shares is calculated
- *         as the area under this curve, giving us:
+ *         where:
+ *         - $m$ is the slope (in basis points)
+ *         - $s$ is the total supply of shares
+ *         - $\text{offset}$ shifts the starting point of the curve
+ *
+ *         The cost to mint shares is calculated as the area under this curve:
  *         $$\text{Cost} = ((s_2 + \text{offset})^2 - (s_1 + \text{offset})^2) \cdot \frac{m}{2}$$
- *         where $s_1$ is the starting share supply and $s_2$ is the final share supply. 📐
+ *         where $s_1$ is the starting share supply and $s_2$ is the final share supply.
  *
- *         Why is this so clever? 🧠 By introducing an offset, we can create a more gentle price curve
- *         that still maintains the core benefits of progressive pricing. It's like starting partway up
- *         the curve, which means the initial price increase is less aggressive while still providing
- *         meaningful incentives for early stakers. Think of it as the "smooth operator" version of
- *         our ProgressiveCurve - all the benefits of progressive pricing, but with more control over
- *         the initial trajectory! 🎭
- *
- *         This makes the OffsetProgressiveCurve perfect for scenarios where you want to maintain
- *         the incentive structure of progressive pricing but need more control over the initial
- *         price dynamics. It's the sophisticated sibling to our ProgressiveCurve, offering a more
- *         nuanced approach to value accrual. 🎨
+ *         The offset parameter allows for a more gradual initial price increase while maintaining
+ *         the progressive pricing structure.
  *
  * @dev     Uses the prb-math library for performant, precise fixed point arithmetic with UD60x18
  * @dev     Fixed point precision used for all internal calculations, while return values are all
@@ -49,7 +41,6 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
  *          instead of directly in the curve implementation. The other significant difference is the inclusion
  *          of the OFFSET value, which we use to make the curve more gentle.
  */
-
 contract OffsetProgressiveCurve is BaseCurve {
     /// @notice The slope of the curve, in basis points.  This is the rate at which the price of shares increases.
     /// @dev 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc
@@ -85,7 +76,7 @@ contract OffsetProgressiveCurve is BaseCurve {
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
         // Then the maximum assets is the total shares * slope / 2, because multiplication will overflow at this point
         UD60x18 MAX_UD60x18 = UD60x18.wrap(type(uint256).max / 1e18);
-        MAX_SHARES = MAX_UD60x18.sqrt().unwrap();
+        MAX_SHARES = MAX_UD60x18.sqrt().sub(OFFSET).unwrap();
         MAX_ASSETS = MAX_UD60x18.mul(HALF_SLOPE).unwrap();
     }
 
@@ -208,8 +199,10 @@ contract OffsetProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
-        return UD60x18.wrap(assets).div(conversionPrice).unwrap();
+        require(assets > 0, "Asset amount must be greater than zero");
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
+        return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
+            .unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -231,8 +224,9 @@ contract OffsetProgressiveCurve is BaseCurve {
         returns (uint256 assets)
     {
         require(totalShares >= shares, "PC: Under supply of shares");
-        UD60x18 conversionPrice = UD60x18.wrap(totalShares).add(OFFSET).mul(HALF_SLOPE);
-        return UD60x18.wrap(shares).mul(conversionPrice).unwrap();
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
+        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
     }
 
     /**
