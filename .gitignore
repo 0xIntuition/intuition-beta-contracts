@@ -28,3 +28,5 @@ _playground/*.json
 venv
 test/tools/__pycache__/
 docs/
+
+lcov.info
