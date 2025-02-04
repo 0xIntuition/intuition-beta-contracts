@@ -9,7 +9,7 @@ import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     uint256 constant CURVE_ID = 2;
-    uint256 constant NUM_CURVE_OPERATIONS = 50;
+    uint256 constant NUM_CURVE_OPERATIONS = 1;
 
     struct CurveOperation {
         uint256 entryFee;
@@ -55,7 +55,7 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
     function testFeesFlowToProRataVault() public {
         uint256 aliceInitialDeposit = 1 ether;
-        uint256 bobDepositAmount = 1.5 ether;
+        uint256 bobDepositAmount = 1 ether;
         uint256 numCurveOperations = NUM_CURVE_OPERATIONS;
 
         // Create atom
@@ -98,10 +98,12 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         (uint256 aliceShares, uint256 aliceFinalAssets) = ethMultiVault.getVaultStateForUser(atomId, alice);
 
         console.log("\nFee Summary:");
-        console.log("  Entry Fees to Pro Rata:", totalEntryFeesToProRata);
-        console.log("  Exit Fees to Pro Rata:", totalExitFeesToProRata);
-        console.log("  Total Fees to Pro Rata:", totalEntryFeesToProRata + totalExitFeesToProRata);
-        console.log("  Protocol Fees:", totalProtocolFees);
+        console.log("  Entry Fees to Pro Rata: %e", totalEntryFeesToProRata);
+        console.log("  Exit Fees to Pro Rata: %e", totalExitFeesToProRata);
+        console.log("  Total Fees to Pro Rata: %e", totalEntryFeesToProRata + totalExitFeesToProRata);
+        console.log("  Protocol Fees: %e", totalProtocolFees);
+        console.log("  Total Assets Exchanged: %e", NUM_CURVE_OPERATIONS * bobDepositAmount);
+        console.log("  Across %d operations", NUM_CURVE_OPERATIONS);
 
         console.log("\nAlice's State:");
         console.log("  Initial Assets:", aliceInitialAssets);

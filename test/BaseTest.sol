@@ -14,7 +14,7 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
-
+import {BaseCurve} from "src/BaseCurve.sol";
 struct BaseTestActors {
     address deployer;
     address alice;
@@ -117,7 +117,9 @@ contract BaseTest is Test {
         // Testing for offset curve:
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
-        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1, 1e17));
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve 1, 0.5e17", 1, 0.5e17));
+        // address offsetCurve = address(new ProgressiveCurve("Progressive Curve 1", 1));
+        console.log("Testing Deposit / Redeem with %s", BaseCurve(offsetCurve).name());
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
         // address progressiveCurve = address(

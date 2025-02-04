@@ -10,6 +10,7 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 
@@ -82,8 +83,10 @@ contract EthMultiVaultBase is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 1));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
+        address offsetProgressiveCurve = address(new OffsetProgressiveCurve("Offset Progressive Curve", 1, 1e18));
+        BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(offsetProgressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
             IEthMultiVault.BondingCurveConfig({registry: bondingCurveRegistry, defaultCurveId: 1});

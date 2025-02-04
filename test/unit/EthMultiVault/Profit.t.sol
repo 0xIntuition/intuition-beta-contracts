@@ -7,11 +7,11 @@ import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 import {StringUtils} from "./StringUtils.sol";
-
+import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 contract ProfitTest is EthMultiVaultBase, EthMultiVaultHelpers {
     using StringUtils for uint256;
 
-    uint256 constant CURVE_ID = 2;
+    uint256 constant CURVE_ID = 3;
     address internal charlie = makeAddr("charlie");
 
     function setUp() external {
