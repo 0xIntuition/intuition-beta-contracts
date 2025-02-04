@@ -1919,7 +1919,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///  No domain conversion needed because 1 dollar worth of assets always equals 1 dollar worth of shares.
     function convertToShares(uint256 assets, uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
-        return assets.mulDiv(supply, vaults[id].totalAssets);
+        uint256 shares = supply == 0 ? assets : assets.mulDiv(supply, vaults[id].totalAssets);
+        return shares;
     }
 
     /// @notice returns amount of shares that would be exchanged by vault given amount of 'assets' provided
