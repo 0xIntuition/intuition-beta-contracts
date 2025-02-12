@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {IEthMultiVault} from "interfaces/IEthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {SafeTransferLib} from "@openzeppelin/contracts/utils/SafeTransferLib.sol";
 
 contract FeaUrchin is Ownable {
     IEthMultiVault public immutable ethMultiVault;
     uint256 public feeNumerator;
     uint256 public feeDenominator;
+
+    error ETHTransferFailed();
 
     event Deposited(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
     event Redeemed(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
@@ -42,14 +43,24 @@ contract FeaUrchin is Ownable {
     }
 
     function applyFee(uint256 amount) public view returns (uint256 fee, uint256 netValue) {
-        uint256 fee = amount * feeNumerator / feeDenominator;
-        uint256 netValue = amount - fee;
+        fee = amount * feeNumerator / feeDenominator;
+        netValue = amount - fee;
         return (fee, netValue);
     }
 
     modifier trackUser() {
         _trackUser(msg.sender);
         _;
+    }
+
+    function getAtomCost() public view returns (uint256 atomCost) {
+        uint256 targetAmount = ethMultiVault.getAtomCost();
+        atomCost = (targetAmount * feeDenominator) / (feeDenominator - feeNumerator);
+    }
+
+    function getTripleCost() public view returns (uint256 tripleCost) {
+        uint256 targetAmount = ethMultiVault.getTripleCost();
+        tripleCost = (targetAmount * feeDenominator) / (feeDenominator - feeNumerator);
     }
 
     function _processDeposit(uint256 amount) internal returns (uint256 fee, uint256 netValue) {
@@ -82,7 +93,7 @@ contract FeaUrchin is Ownable {
         returns (uint256 termId)
     {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
-        uint256 termId = ethMultiVault.createTriple{value: netValue}(subjectId, predicateId, objectId);
+        termId = ethMultiVault.createTriple{value: netValue}(subjectId, predicateId, objectId);
         emit Deposited(msg.sender, termId, 1, netValue, fee);
         return termId;
     }
@@ -94,7 +105,7 @@ contract FeaUrchin is Ownable {
         returns (uint256 shares)
     {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
-        uint256 shares = _deposit(netValue, receiver, id, curveId);
+        shares = _deposit(netValue, receiver, id, curveId);
         emit Deposited(msg.sender, id, curveId, netValue, fee);
         return shares;
     }
@@ -102,14 +113,19 @@ contract FeaUrchin is Ownable {
     function _deposit(uint256 value, address receiver, uint256 id, uint256 curveId) internal returns (uint256 shares) {
         if (curveId == 1) {
             shares = ethMultiVault.isTripleId(id)
-                ? ethMultiVault.depositTriple{value: netValue}(receiver, id)
-                : ethMultiVault.depositAtom{value: netValue}(receiver, id);
+                ? ethMultiVault.depositTriple{value: value}(receiver, id)
+                : ethMultiVault.depositAtom{value: value}(receiver, id);
         } else {
             shares = ethMultiVault.isTripleId(id)
-                ? ethMultiVault.depositTripleCurve{value: netValue}(receiver, id, curveId)
-                : ethMultiVault.depositAtomCurve{value: netValue}(receiver, id, curveId);
+                ? ethMultiVault.depositTripleCurve{value: value}(receiver, id, curveId)
+                : ethMultiVault.depositAtomCurve{value: value}(receiver, id, curveId);
         }
         return shares;
+    }
+
+    function _sendETH(address to, uint256 amount) internal {
+        (bool success, ) = to.call{value: amount}("");
+        if (!success) revert ETHTransferFailed();
     }
 
     function redeem(uint256 shares, address receiver, uint256 id, uint256 curveId)
@@ -117,29 +133,29 @@ contract FeaUrchin is Ownable {
         trackUser
         returns (uint256)
     {
-        uint256 redeemedAssets = _redeem(shares, receiver, id, curveId);
-        (uint256 fee, uint256 netAmount) = _processRedeem(assets);
-        SafeTransferLib.safeTransferETH(receiver, netAmount);
+        uint256 redeemedAssets = _redeem(shares, id, curveId);
+        (uint256 fee, uint256 netAmount) = _processRedeem(redeemedAssets);
+        _sendETH(receiver, netAmount);
         emit Redeemed(msg.sender, id, curveId, netAmount, fee);
         return netAmount;
     }
 
-    function _redeem(uint256 shares, address receiver, uint256 id, uint256 curveId) internal returns (uint256 assets) {
+    function _redeem(uint256 shares, uint256 id, uint256 curveId) internal returns (uint256 assets) {
         if (curveId == 1) {
             assets = ethMultiVault.isTripleId(id)
-                ? ethMultiVault.redeemTriple(shares, receiver, id)
-                : ethMultiVault.redeemAtom(shares, receiver, id);
+                ? ethMultiVault.redeemTriple(shares, address(this), id)
+                : ethMultiVault.redeemAtom(shares, address(this), id);
         } else {
             assets = ethMultiVault.isTripleId(id)
-                ? ethMultiVault.redeemTripleCurve(shares, receiver, id, curveId)
-                : ethMultiVault.redeemAtomCurve(shares, receiver, id, curveId);
+                ? ethMultiVault.redeemTripleCurve(shares, address(this), id, curveId)
+                : ethMultiVault.redeemAtomCurve(shares, address(this), id, curveId);
         }
         return assets;
     }
 
     function withdrawFees(address payable recipient) external onlyOwner {
         uint256 amount = address(this).balance;
-        SafeTransferLib.safeTransferETH(recipient, amount);
+        _sendETH(recipient, amount);
         emit FeesWithdrawn(msg.sender, amount);
     }
 
@@ -152,7 +168,7 @@ contract FeaUrchin is Ownable {
     }
 
     function _ones(uint256 length) internal returns (uint256[] memory ones) {
-        uint256[] memory ones = new uint256[](length);
+        ones = new uint256[](length);
         for (uint256 i; i < length;) {
             ones[i] = 1;
             unchecked {
@@ -191,7 +207,7 @@ contract FeaUrchin is Ownable {
         (uint256 totalFee, uint256 totalNetValue) = _processDeposit(msg.value);
         uint256 valuePerItem = totalNetValue / count;
 
-        uint256[] memory shares = new uint256[](count);
+        shares = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
             shares[i] = _deposit(valuePerItem, receiver, ids[i], curveIds[i]);
         }
@@ -208,17 +224,18 @@ contract FeaUrchin is Ownable {
     ) external trackUser returns (uint256[] memory assets) {
         require(shares.length == ids.length && ids.length == curveIds.length, "Array length mismatch");
         uint256 count = ids.length;
-        uint256[] memory assets = new uint256[](count);
+        assets = new uint256[](count);
         uint256 totalFee;
         uint256 totalNetValue;
 
         for (uint256 i = 0; i < count; i++) {
-            assets[i] = _redeem(shares[i], receiver, ids[i], curveIds[i]);
-            (uint256 fee, netValue) = _processRedeem(assets[i]);
+            assets[i] = _redeem(shares[i], ids[i], curveIds[i]);
+            (uint256 fee, uint256 netValue) = _processRedeem(assets[i]);
             totalFee += fee;
             totalNetValue += netValue;
         }
 
+        _sendETH(receiver, totalNetValue);
         emit BatchRedeemed(msg.sender, ids, curveIds, totalNetValue, totalFee);
         return assets;
     }
