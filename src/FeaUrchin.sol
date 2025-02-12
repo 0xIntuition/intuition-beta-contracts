@@ -10,14 +10,20 @@ contract FeaUrchin is Ownable {
     uint256 public feeNumerator;
     uint256 public feeDenominator;
 
-    event Deposited(address indexed user, address indexed vault, uint256 assets, uint256 fee);
-    event Redeemed(address indexed user, address indexed vault, uint256 assets, uint256 fee);
+    event Deposited(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
+    event Redeemed(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
     event CurveDeposited(address indexed user, address indexed vault, uint256 curveId, uint256 assets, uint256 fee);
     event CurveRedeemed(address indexed user, address indexed vault, uint256 curveId, uint256 assets, uint256 fee);
     event FeesWithdrawn(address indexed admin, uint256 amount);
     event NewUser(address indexed user);
+    event FeeChanged(uint256 newNumerator, uint256 newDenominator);
+    event BatchDeposited(
+        address indexed user, uint256[] ids, uint256[] curveIds, uint256 totalAssets, uint256 totalFee
+    );
+    event BatchRedeemed(address indexed user, uint256[] ids, uint256[] curveIds, uint256 totalAssets, uint256 totalFee);
 
-    uint256 public totalAssetsProcessed;
+    uint256 public totalAssetsMoved;
+    uint256 public totalAssetsStaked;
     uint256 public totalFeesCollected;
     uint256 public uniqueUsersCount;
     mapping(address => bool) public isUniqueUser;
@@ -28,15 +34,19 @@ contract FeaUrchin is Ownable {
         ethMultiVault = _ethMultiVault;
         feeNumerator = _feeNumerator;
         feeDenominator = _feeDenominator;
+        emit FeeChanged(_feeNumerator, _feeDenominator);
     }
 
     function setFee(uint256 _feeNumerator, uint256 _feeDenominator) external onlyOwner {
         feeNumerator = _feeNumerator;
         feeDenominator = _feeDenominator;
+        emit FeeChanged(_feeNumerator, _feeDenominator);
     }
 
-    function applyFee(uint256 amount) public view returns (uint256) {
-        return amount * feeNumerator / feeDenominator;
+    function applyFee(uint256 amount) public view returns (uint256 fee, uint256 netValue) {
+        uint256 fee = amount * feeNumerator / feeDenominator;
+        uint256 netValue = amount - fee;
+        return (fee, netValue);
     }
 
     modifier trackUser() {
@@ -44,88 +54,89 @@ contract FeaUrchin is Ownable {
         _;
     }
 
-    function _processDeposit(uint256 amount) internal returns (uint256 netValue, uint256 fee) {
-        fee = applyFee(amount);
-        netValue = amount - fee;
-        totalAssetsProcessed += amount;
+    function _processDeposit(uint256 amount) internal returns (uint256 fee, uint256 netValue) {
+        (fee, netValue) = applyFee(amount);
+        totalAssetsMoved += amount;
+        totalAssetsStaked += amount;
         totalFeesCollected += fee;
+        return (fee, netValue);
     }
 
-    function _processRedeem(uint256 assets, address receiver) internal returns (uint256 netAmount, uint256 fee) {
-        fee = applyFee(assets);
-        netAmount = assets - fee;
-        totalAssetsProcessed += assets;
+    function _processRedeem(uint256 assets) internal returns (uint256 fee, uint256 netValue) {
+        (fee, netValue) = applyFee(assets);
+        totalAssetsMoved += assets;
+        totalAssetsStaked -= assets;
         totalFeesCollected += fee;
-        SafeTransferLib.safeTransferETH(receiver, netAmount);
+        return (fee, netValue);
     }
 
-    function createAtom(bytes calldata atomUri) external payable trackUser returns (uint256) {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit Deposited(msg.sender, address(ethMultiVault), msg.value, fee);
-        return ethMultiVault.createAtom{value: netValue}(atomUri);
+    function createAtom(bytes calldata atomUri) external payable trackUser returns (uint256 termId) {
+        (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
+        termId = ethMultiVault.createAtom{value: netValue}(atomUri);
+        emit Deposited(msg.sender, termId, 1, netValue, fee);
+        return termId;
     }
 
     function createTriple(uint256 subjectId, uint256 predicateId, uint256 objectId)
         external
         payable
         trackUser
+        returns (uint256 termId)
+    {
+        (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
+        uint256 termId = ethMultiVault.createTriple{value: netValue}(subjectId, predicateId, objectId);
+        emit Deposited(msg.sender, termId, 1, netValue, fee);
+        return termId;
+    }
+
+    function deposit(address receiver, uint256 id, uint256 curveId)
+        external
+        payable
+        trackUser
+        returns (uint256 shares)
+    {
+        (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
+        uint256 shares = _deposit(netValue, receiver, id, curveId);
+        emit Deposited(msg.sender, id, curveId, netValue, fee);
+        return shares;
+    }
+
+    function _deposit(uint256 value, address receiver, uint256 id, uint256 curveId) internal returns (uint256 shares) {
+        if (curveId == 1) {
+            shares = ethMultiVault.isTripleId(id)
+                ? ethMultiVault.depositTriple{value: netValue}(receiver, id)
+                : ethMultiVault.depositAtom{value: netValue}(receiver, id);
+        } else {
+            shares = ethMultiVault.isTripleId(id)
+                ? ethMultiVault.depositTripleCurve{value: netValue}(receiver, id, curveId)
+                : ethMultiVault.depositAtomCurve{value: netValue}(receiver, id, curveId);
+        }
+        return shares;
+    }
+
+    function redeem(uint256 shares, address receiver, uint256 id, uint256 curveId)
+        external
+        trackUser
         returns (uint256)
     {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit Deposited(msg.sender, address(ethMultiVault), msg.value, fee);
-        return ethMultiVault.createTriple{value: netValue}(subjectId, predicateId, objectId);
-    }
-
-    function depositAtom(address receiver, uint256 id) external payable trackUser returns (uint256) {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit Deposited(msg.sender, address(ethMultiVault), msg.value, fee);
-        return ethMultiVault.depositAtom{value: netValue}(receiver, id);
-    }
-
-    function depositTriple(address receiver, uint256 id) external payable trackUser returns (uint256) {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit Deposited(msg.sender, address(ethMultiVault), msg.value, fee);
-        return ethMultiVault.depositTriple{value: netValue}(receiver, id);
-    }
-
-    function depositAtomCurve(address receiver, uint256 id, uint256 curveId) external payable trackUser returns (uint256) {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit CurveDeposited(msg.sender, address(ethMultiVault), curveId, msg.value, fee);
-        return ethMultiVault.depositAtomCurve{value: netValue}(receiver, id, curveId);
-    }
-
-    function depositTripleCurve(address receiver, uint256 id, uint256 curveId) external payable trackUser returns (uint256) {
-        (uint256 netValue, uint256 fee) = _processDeposit(msg.value);
-        emit CurveDeposited(msg.sender, address(ethMultiVault), curveId, msg.value, fee);
-        return ethMultiVault.depositTripleCurve{value: netValue}(receiver, id, curveId);
-    }
-
-    function redeemAtom(uint256 shares, address receiver, uint256 id) external trackUser returns (uint256) {
-        uint256 assets = ethMultiVault.redeemAtom(shares, address(this), id);
-        (uint256 netAmount, uint256 fee) = _processRedeem(assets, receiver);
-        emit Redeemed(msg.sender, address(ethMultiVault), assets, fee);
+        uint256 redeemedAssets = _redeem(shares, receiver, id, curveId);
+        (uint256 fee, uint256 netAmount) = _processRedeem(assets);
+        SafeTransferLib.safeTransferETH(receiver, netAmount);
+        emit Redeemed(msg.sender, id, curveId, netAmount, fee);
         return netAmount;
     }
 
-    function redeemTriple(uint256 shares, address receiver, uint256 id) external trackUser returns (uint256) {
-        uint256 assets = ethMultiVault.redeemTriple(shares, address(this), id);
-        (uint256 netAmount, uint256 fee) = _processRedeem(assets, receiver);
-        emit Redeemed(msg.sender, address(ethMultiVault), assets, fee);
-        return netAmount;
-    }
-
-    function redeemAtomCurve(uint256 shares, address receiver, uint256 id, uint256 curveId) external trackUser returns (uint256) {
-        uint256 assets = ethMultiVault.redeemAtomCurve(shares, address(this), id, curveId);
-        (uint256 netAmount, uint256 fee) = _processRedeem(assets, receiver);
-        emit CurveRedeemed(msg.sender, address(ethMultiVault), curveId, assets, fee);
-        return netAmount;
-    }
-
-    function redeemTripleCurve(uint256 shares, address receiver, uint256 id, uint256 curveId) external trackUser returns (uint256) {
-        uint256 assets = ethMultiVault.redeemTripleCurve(shares, address(this), id, curveId);
-        (uint256 netAmount, uint256 fee) = _processRedeem(assets, receiver);
-        emit CurveRedeemed(msg.sender, address(ethMultiVault), curveId, assets, fee);
-        return netAmount;
+    function _redeem(uint256 shares, address receiver, uint256 id, uint256 curveId) internal returns (uint256 assets) {
+        if (curveId == 1) {
+            assets = ethMultiVault.isTripleId(id)
+                ? ethMultiVault.redeemTriple(shares, receiver, id)
+                : ethMultiVault.redeemAtom(shares, receiver, id);
+        } else {
+            assets = ethMultiVault.isTripleId(id)
+                ? ethMultiVault.redeemTripleCurve(shares, receiver, id, curveId)
+                : ethMultiVault.redeemAtomCurve(shares, receiver, id, curveId);
+        }
+        return assets;
     }
 
     function withdrawFees(address payable recipient) external onlyOwner {
@@ -140,6 +151,78 @@ contract FeaUrchin is Ownable {
             uniqueUsersCount++;
             emit NewUser(user);
         }
+    }
+
+    function _ones(uint256 length) internal returns (uint256[] memory ones) {
+        uint256[] memory ones = new uint256[](length);
+        for (uint256 i; i < length;) {
+            ones[i] = 1;
+            unchecked {
+                ++i;
+            }
+        }
+        return ones;
+    }
+
+    function batchCreateAtom(bytes[] calldata atomUris) external payable trackUser returns (uint256[] memory termIds) {
+        (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
+        termIds = ethMultiVault.batchCreateAtom{value: netValue}(atomUris);
+        emit BatchDeposited(msg.sender, termIds, _ones(termIds.length), netValue, fee);
+        return termIds;
+    }
+
+    function batchCreateTriple(
+        uint256[] calldata subjectIds,
+        uint256[] calldata predicateIds,
+        uint256[] calldata objectIds
+    ) external payable trackUser returns (uint256[] memory termIds) {
+        (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
+        termIds = ethMultiVault.batchCreateTriple{value: netValue}(subjectIds, predicateIds, objectIds);
+        emit BatchDeposited(msg.sender, termIds, _ones(termIds.length), netValue, fee);
+        return termIds;
+    }
+
+    function batchDeposit(address receiver, uint256[] calldata ids, uint256[] calldata curveIds)
+        external
+        payable
+        trackUser
+        returns (uint256[] memory shares)
+    {
+        require(ids.length == curveIds.length, "Array length mismatch");
+        uint256 count = ids.length;
+        (uint256 totalFee, uint256 totalNetValue) = _processDeposit(msg.value);
+        uint256 valuePerItem = totalNetValue / count;
+
+        uint256[] memory shares = new uint256[](count);
+        for (uint256 i = 0; i < count; i++) {
+            shares[i] = _deposit(valuePerItem, receiver, ids[i], curveIds[i]);
+        }
+
+        emit BatchDeposited(msg.sender, ids, curveIds, totalNetValue, totalFee);
+        return shares;
+    }
+
+    function batchRedeem(
+        uint256[] calldata shares,
+        address receiver,
+        uint256[] calldata ids,
+        uint256[] calldata curveIds
+    ) external trackUser returns (uint256[] memory assets) {
+        require(shares.length == ids.length && ids.length == curveIds.length, "Array length mismatch");
+        uint256 count = ids.length;
+        uint256[] memory assets = new uint256[](count);
+        uint256 totalFee;
+        uint256 totalNetValue;
+
+        for (uint256 i = 0; i < count; i++) {
+            assets[i] = _redeem(shares[i], receiver, ids[i], curveIds[i]);
+            (uint256 fee, netValue) = _processRedeem(assets[i]);
+            totalFee += fee;
+            totalNetValue += netValue;
+        }
+
+        emit BatchRedeemed(msg.sender, ids, curveIds, totalNetValue, totalFee);
+        return assets;
     }
 
     receive() external payable {}
