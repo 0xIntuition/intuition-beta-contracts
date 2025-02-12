@@ -12,8 +12,6 @@ contract FeaUrchin is Ownable {
 
     event Deposited(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
     event Redeemed(address indexed user, uint256 indexed id, uint256 indexed curveId, uint256 assets, uint256 fee);
-    event CurveDeposited(address indexed user, address indexed vault, uint256 curveId, uint256 assets, uint256 fee);
-    event CurveRedeemed(address indexed user, address indexed vault, uint256 curveId, uint256 assets, uint256 fee);
     event FeesWithdrawn(address indexed admin, uint256 amount);
     event NewUser(address indexed user);
     event FeeChanged(uint256 newNumerator, uint256 newDenominator);
