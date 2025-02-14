@@ -16,8 +16,7 @@ contract UD60x18Test is Test {
       console.log("x = ", x);
       console.log("y = ", y);
       console.log("z = ", z);
-      vm.expectRevert();
-      assertEq(z, 35);
+      assertNotEq(z, 35);
     }
 
     function testConvertUnwrap() public {
@@ -28,8 +27,7 @@ contract UD60x18Test is Test {
       console.log("x = ", x);
       console.log("y = ", y);
       console.log("z = ", z);
-      vm.expectRevert();
-      assertEq(z, 35);
+      assertNotEq(z, 35);
     }
 
     function testConvert() public {
@@ -63,8 +61,7 @@ contract UD60x18Test is Test {
       console.log("x = ", x);
       console.log("y = ", y);
       console.log("z = ", z);
-      vm.expectRevert();
-      assertEq(z, 5);
+      assertNotEq(z, 5);
     }
 
     function testE18Wrap() public {
