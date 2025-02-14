@@ -7,6 +7,8 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 
+import {console2 as console} from "forge-std/console2.sol";
+
 contract FeaUrchinTest is Test, EthMultiVaultBase {
     FeaUrchin feaUrchin;
     address admin = address(1);
@@ -150,12 +152,14 @@ contract FeaUrchinTest is Test, EthMultiVaultBase {
         uint256 termId = feaUrchin.createAtom{value: depositAmount}("test_atom");
         
         // Get shares balance
-        (uint256 shares,) = ethMultiVault.getVaultStateForUser(termId, address(feaUrchin));
+        uint256 shares = feaUrchin.getVaultShares(address(user1), termId, 1); 
+        console.log("vault state for user: ", shares);
         
         // Redeem shares
         uint256 balanceBefore = user1.balance;
+        console.log("balance before: ", balanceBefore);
         uint256 redeemedAmount = feaUrchin.redeem(shares, user1, termId, 1);
-        
+        console.log("redeemedAmount: ", redeemedAmount);
         // Verify redemption
         assertEq(user1.balance - balanceBefore, redeemedAmount);
         vm.stopPrank();

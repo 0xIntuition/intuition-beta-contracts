@@ -4,6 +4,8 @@ pragma solidity ^0.8.28;
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+import {console2 as console} from "forge-std/console2.sol";
+
 /**
  * @title  FeaUrchin
  * @author 0xIntuition
@@ -28,6 +30,20 @@ contract FeaUrchin is Ownable {
     uint256 public feeNumerator;
     /// @notice The denominator of the fee fraction
     uint256 public feeDenominator;
+
+    /// @notice Total amount of assets that have moved through this contract
+    uint256 public totalAssetsMoved;
+    /// @notice Total amount of assets currently staked through this contract
+    uint256 public totalAssetsStaked;
+    /// @notice Total amount of fees collected by this contract
+    uint256 public totalFeesCollected;
+    /// @notice Number of unique users who have interacted with this contract
+    uint256 public uniqueUsersCount;
+    /// @notice Mapping to track whether an address has interacted with this contract
+    mapping(address => bool) public isUniqueUser;
+
+    /// @notice Mapping of user -> term -> curve -> shares purchased via this contract
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) userShares;
 
     /// @notice Thrown when an ETH transfer fails
     error ETHTransferFailed();
@@ -80,16 +96,7 @@ contract FeaUrchin is Ownable {
     /// @param totalFee The total amount of fees collected
     event BatchRedeemed(address indexed user, uint256[] ids, uint256[] curveIds, uint256 totalAssets, uint256 totalFee);
 
-    /// @notice Total amount of assets that have moved through this contract
-    uint256 public totalAssetsMoved;
-    /// @notice Total amount of assets currently staked through this contract
-    uint256 public totalAssetsStaked;
-    /// @notice Total amount of fees collected by this contract
-    uint256 public totalFeesCollected;
-    /// @notice Number of unique users who have interacted with this contract
-    uint256 public uniqueUsersCount;
-    /// @notice Mapping to track whether an address has interacted with this contract
-    mapping(address => bool) public isUniqueUser;
+
 
     /// @notice Constructor that initializes the contract with its core parameters
     /// @param _ethMultiVault The EthMultiVault contract this will interact with
@@ -128,6 +135,18 @@ contract FeaUrchin is Ownable {
     modifier trackUser() {
         _trackUser(msg.sender);
         _;
+    }
+
+    function _getVaultShares(address user, uint256 termId, uint256 bondingCurveId) internal view returns (uint256 shares) {
+      if (bondingCurveId == 1) {
+        (shares,) = ethMultiVault.getVaultStateForUser(termId, user);
+      } else {
+        (shares,) = ethMultiVault.getVaultStateForUserCurve(termId, bondingCurveId, user);
+      }
+    }
+
+    function getVaultShares(address user, uint256 termId, uint256 bondingCurveId) external view returns (uint256 shares) {
+        return userShares[user][termId][bondingCurveId];
     }
 
     /// @notice Calculates the total cost to create an atom, including fees
@@ -174,6 +193,7 @@ contract FeaUrchin is Ownable {
     function createAtom(bytes calldata atomUri) external payable trackUser returns (uint256 termId) {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
         termId = ethMultiVault.createAtom{value: netValue}(atomUri);
+        userShares[msg.sender][termId][1] = _getVaultShares(address(this), termId, 1); 
         emit Deposited(msg.sender, termId, 1, netValue, fee);
         return termId;
     }
@@ -191,6 +211,7 @@ contract FeaUrchin is Ownable {
     {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
         termId = ethMultiVault.createTriple{value: netValue}(subjectId, predicateId, objectId);
+        userShares[msg.sender][termId][1] = _getVaultShares(address(this), termId, 1); 
         emit Deposited(msg.sender, termId, 1, netValue, fee);
         return termId;
     }
@@ -208,7 +229,8 @@ contract FeaUrchin is Ownable {
     {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
         shares = _deposit(netValue, receiver, id, curveId);
-        emit Deposited(msg.sender, id, curveId, netValue, fee);
+        userShares[receiver][id][curveId] += shares;
+        emit Deposited(receiver, id, curveId, netValue, fee);
         return shares;
     }
 
@@ -250,10 +272,15 @@ contract FeaUrchin is Ownable {
         trackUser
         returns (uint256)
     {
-        uint256 redeemedAssets = _redeem(shares, id, curveId);
+      console.log("shares: ", shares);
+      console.log("userShares: ", userShares[receiver][id][curveId]);
+      require(shares <= userShares[receiver][id][curveId]);
+
+      uint256 redeemedAssets = _redeem(shares, id, curveId);
         (uint256 fee, uint256 netAmount) = _processRedeem(redeemedAssets);
+        userShares[receiver][id][curveId] -= shares;
         _sendETH(receiver, netAmount);
-        emit Redeemed(msg.sender, id, curveId, netAmount, fee);
+        emit Redeemed(receiver, id, curveId, netAmount, fee);
         return netAmount;
     }
 
@@ -313,6 +340,9 @@ contract FeaUrchin is Ownable {
     function batchCreateAtom(bytes[] calldata atomUris) external payable trackUser returns (uint256[] memory termIds) {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
         termIds = ethMultiVault.batchCreateAtom{value: netValue}(atomUris);
+        for (uint256 i = 0; i < termIds.length; i++) {
+          userShares[msg.sender][termIds[i]][1] = _getVaultShares(address(this), termIds[i], 1); 
+        }
         emit BatchDeposited(msg.sender, termIds, _ones(termIds.length), netValue, fee);
         return termIds;
     }
@@ -329,6 +359,9 @@ contract FeaUrchin is Ownable {
     ) external payable trackUser returns (uint256[] memory termIds) {
         (uint256 fee, uint256 netValue) = _processDeposit(msg.value);
         termIds = ethMultiVault.batchCreateTriple{value: netValue}(subjectIds, predicateIds, objectIds);
+        for (uint256 i = 0; i < termIds.length; i++) {
+          userShares[msg.sender][termIds[i]][1] = _getVaultShares(address(this), termIds[i], 1); 
+        }
         emit BatchDeposited(msg.sender, termIds, _ones(termIds.length), netValue, fee);
         return termIds;
     }
@@ -352,6 +385,7 @@ contract FeaUrchin is Ownable {
         shares = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
             shares[i] = _deposit(valuePerItem, receiver, ids[i], curveIds[i]);
+            userShares[receiver][ids[i]][curveIds[i]] += shares[i];
         }
 
         emit BatchDeposited(msg.sender, ids, curveIds, totalNetValue, totalFee);
@@ -378,13 +412,14 @@ contract FeaUrchin is Ownable {
 
         for (uint256 i = 0; i < count; i++) {
             assets[i] = _redeem(shares[i], ids[i], curveIds[i]);
+            userShares[receiver][ids[i]][curveIds[i]] -= shares[i];
             (uint256 fee, uint256 netValue) = _processRedeem(assets[i]);
             totalFee += fee;
             totalNetValue += netValue;
         }
 
         _sendETH(receiver, totalNetValue);
-        emit BatchRedeemed(msg.sender, ids, curveIds, totalNetValue, totalFee);
+        emit BatchRedeemed(receiver, ids, curveIds, totalNetValue, totalFee);
         return assets;
     }
 

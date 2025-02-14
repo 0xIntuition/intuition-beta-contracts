@@ -799,6 +799,16 @@ interface IEthMultiVault {
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
 
+    /// @notice returns the number of shares and assets (less fees) user has in the curve vault
+    ///
+    /// @param termId ID for the atom or triple
+    /// @param curveId curve id for the term
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUserCurve(uint256 termId, uint256 curveId, address receiver) external view returns (uint256, uint256);
+
     /// @notice returns the Atom Wallet address for the given atom data
     /// @param id vault id of the atom associated to the atom wallet
     /// @return atomWallet the address of the atom wallet

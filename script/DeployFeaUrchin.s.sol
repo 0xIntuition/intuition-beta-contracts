@@ -6,6 +6,9 @@ import {FeaUrchinFactory} from "src/FeaUrchinFactory.sol";
 import {FeaUrchin} from "src/FeaUrchin.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
+// To run this:
+// forge script script/DeployFeaUrchin.s.sol:DeployFeaUrchin --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $BASESCAN_API_KEY --private-key $PRIVATE_KEY
+
 contract DeployFeaUrchin is Script {
     // The EthMultiVault address on the target network
     address constant VAULT_ADDRESS = 0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665;
