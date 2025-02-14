@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {BaseCurve} from "./BaseCurve.sol";
-import {UD60x18, ud60x18, convert} from "@prb/math/UD60x18.sol";
+import {UD60x18, ud60x18, convert, uMAX_UD60x18, uUNIT} from "@prb/math/UD60x18.sol";
 
 /**
  * @title  ProgressiveCurve
@@ -43,16 +43,16 @@ contract ProgressiveCurve is BaseCurve {
     /// @notice The slope of the curve, in basis points.  This is the rate at which the price of shares increases.
     /// @dev 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc
     /// @dev If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets
-    UD60x18 public immutable SLOPE;
+    UD60x18 public SLOPE;
 
     /// @notice The half of the slope, used for calculations.
-    UD60x18 public immutable HALF_SLOPE;
+    UD60x18 public HALF_SLOPE;
 
     /// @dev Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)
-    uint256 public immutable MAX_SHARES;
+    uint256 public MAX_SHARES;
 
     /// @dev The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.
-    uint256 public immutable MAX_ASSETS;
+    uint256 public MAX_ASSETS;
 
     /// @notice Constructs a new ProgressiveCurve with the given name and slope
     /// @param _name The name of the curve (i.e. "Progressive Curve #465")
@@ -63,14 +63,14 @@ contract ProgressiveCurve is BaseCurve {
         require(slope18 > 0, "PC: Slope must be > 0");
 
         SLOPE = UD60x18.wrap(slope18);
-        HALF_SLOPE = SLOPE.div(convert(2));
+        HALF_SLOPE = SLOPE.div(UD60x18.wrap(2));
 
         // Find max values
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
         // Then the maximum assets is the total shares * slope / 2, because multiplication will overflow at this point
-        UD60x18 MAX_UD60x18 = convert(type(uint256).max / 1e18);
-        MAX_SHARES = convert(MAX_UD60x18.sqrt());
-        MAX_ASSETS = convert(MAX_UD60x18.mul(HALF_SLOPE));
+        UD60x18 MAX_SQRT = UD60x18.wrap(uMAX_UD60x18 / uUNIT);
+        MAX_SHARES = MAX_SQRT.sqrt().unwrap();
+        MAX_ASSETS = MAX_SQRT.mul(HALF_SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve
