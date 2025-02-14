@@ -6,7 +6,7 @@ ffi = true
 ast = true
 build_info = true
 extra_output = ["storageLayout"]
-evm_version = "Cancun"
+evm_version = "Paris"
 auto_detect_remappings = false
 fs_permissions = [{ access = "read-write", path = "./out" }]
 # optimizer = true
