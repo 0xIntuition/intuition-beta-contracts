@@ -18,18 +18,15 @@ import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 
-contract DeployEthMultiVault is Script {
-    address public lineaTestnetAdmin = 0xB8e3452E62B45e654a300a296061597E3Cf3e039;
-    address public lineaMainnetAdmin = 0x323e9506B929C21AE602D64d3807721AA49b4884;
-
+contract DeployToBase is Script {
     // Multisig addresses for key roles in the protocol
-    address public admin = lineaMainnetAdmin;
-    address public protocolMultisig = lineaMainnetAdmin;
-    address public atomWarden = lineaMainnetAdmin;
+    address public admin = 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480;
+    address public protocolMultisig = 0xC03F0dE5b34339e1B968e4f317Cd7e7FBd421FD1;
+    address public atomWarden = 0xC35DFCFE50da58d957fc47C7063f56135aFF61B8;
 
-    // Constants from Linea
-    IPermit2 public permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Linea
-    address public entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Linea
+    // Constants from Base
+    IPermit2 public permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
+    address public entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
 
     // Contracts to be deployed
     AtomWallet public atomWallet;
@@ -44,9 +41,15 @@ contract DeployEthMultiVault is Script {
     LinearCurve public linearCurve; // <-- Not used in this edition of EthMultiVault
     ProgressiveCurve public progressiveCurve;
 
+    error UnsupportedChainId();
+
     function run() external {
         // Begin sending tx's to network
         vm.startBroadcast();
+
+        // Check if the script is running on the correct network
+        uint256 chainId = block.chainid;
+        if (chainId != 8453) revert UnsupportedChainId();
 
         // TimelockController parameters
         uint256 minDelay = 3 days;
@@ -112,11 +115,18 @@ contract DeployEthMultiVault is Script {
             protocolFee: 100 // Protocol fee for vault 0
         });
 
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
+            registry: address(bondingCurveRegistry),
+            defaultCurveId: 1 // Unused in this edition of EthMultiVault
+        });
+
         // ------------------------------- Bonding Curves----------------------------------------
 
         // Deploy BondingCurveRegistry and take temporary ownership to add the curves
         bondingCurveRegistry = new BondingCurveRegistry();
         console.logString("deployed BondingCurveRegistry implementation.");
+
+        address bondingCurveRegistryImplementation = address(bondingCurveRegistry);
 
         bytes memory bondingCurveRegistryInitData =
             abi.encodeWithSelector(BondingCurveRegistry.initialize.selector, msg.sender);
@@ -153,11 +163,6 @@ contract DeployEthMultiVault is Script {
         // Transfer ownership of BondingCurveRegistry to multisig
         bondingCurveRegistry.setAdmin(admin);
 
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
-            registry: address(bondingCurveRegistry),
-            defaultCurveId: 1 // Unused in this edition of EthMultiVault
-        });
-
         // -------------------------------------------------------------------------------------
 
         // Prepare data for initializer function
@@ -191,17 +196,18 @@ contract DeployEthMultiVault is Script {
         // stop sending tx's
         vm.stopBroadcast();
 
-        console.log("All contracts deployed successfully:");
+        console.log("All contracts deployed successfully!");
         console.log("TimelockController address:", address(timelock));
         console.log("AtomWallet implementation address:", address(atomWallet));
         console.log("UpgradeableBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
+        console.log("BondingCurveRegistry implementation address:", bondingCurveRegistryImplementation);
+        console.log("BondingCurveRegistry proxy address:", address(bondingCurveRegistryProxy));
         console.log("LinearCurve address:", address(linearCurve));
         console.log("ProgressiveCurve address:", address(progressiveCurve));
-        console.log("BondingCurveRegistry address:", address(bondingCurveRegistry));
         console.log(
-            "To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Lineascan, in particular the AdminChanged event. Same applies to the BondingCurveRegistry proxy contract"
+            "To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event. Same applies to the BondingCurveRegistry proxy contract."
         );
     }
 }
