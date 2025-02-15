@@ -63,7 +63,7 @@ contract ProgressiveCurve is BaseCurve {
         require(slope18 > 0, "PC: Slope must be > 0");
 
         SLOPE = UD60x18.wrap(slope18);
-        HALF_SLOPE = SLOPE.div(UD60x18.wrap(2));
+        HALF_SLOPE = UD60x18.wrap(slope18 / 2);
 
         // Find max values
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
@@ -163,7 +163,8 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
-        return convert(convert(totalShares).mul(SLOPE));
+        // console.log("ProgressiveCurve: currentSharePrice is %e", convert(totalShares).mul(SLOPE).unwrap());
+        return convert(totalShares).mul(SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve

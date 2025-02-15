@@ -120,7 +120,7 @@ contract UpgradeTo is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         bondingCurveRegistry.addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         bondingCurveRegistry.addBondingCurve(progressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =

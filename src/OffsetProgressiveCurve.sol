@@ -70,7 +70,7 @@ contract OffsetProgressiveCurve is BaseCurve {
         require(slope18 > 0, "PC: Slope must be > 0");
 
         SLOPE = UD60x18.wrap(slope18);
-        HALF_SLOPE = SLOPE.div(UD60x18.wrap(2));
+        HALF_SLOPE = UD60x18.wrap(slope18 / 2);
         OFFSET = UD60x18.wrap(offset18);
         // Find max values
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
@@ -179,7 +179,8 @@ contract OffsetProgressiveCurve is BaseCurve {
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last, but starting from an offset point on the curve
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
-        return convert(convert(totalShares).add(OFFSET).mul(SLOPE));
+        console.log("OffsetProgressiveCurve: currentSharePrice is %e", convert(totalShares).add(OFFSET).mul(SLOPE).unwrap());
+        return convert(totalShares).add(OFFSET).mul(SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve

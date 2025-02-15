@@ -99,7 +99,7 @@ abstract contract BaseCurve {
     /// @notice Get the current price of a share
     ///
     /// @param totalShares Total quantity of shares already awarded by the curve
-    /// @return sharePrice The current price of a share
+    /// @return sharePrice The current price of a share, scaled by 1e18
     function currentPrice(uint256 totalShares) public view virtual returns (uint256 sharePrice);
 
     /// @notice Construct the curve with a unique name
