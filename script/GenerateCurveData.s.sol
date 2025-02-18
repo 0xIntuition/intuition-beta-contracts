@@ -22,7 +22,7 @@ contract GenerateCurveData is Script {
         // Initialize all curves we want to analyze
         BaseCurve[] memory curves = new BaseCurve[](2);
         curves[0] = new LinearCurve("Linear");
-        curves[1] = new ProgressiveCurve("Progressive", 0.0025e18);
+        curves[1] = new ProgressiveCurve("Progressive", 2);
 
         // Create a metadata file to store file locations
         string memory metadata = '{"files":[';

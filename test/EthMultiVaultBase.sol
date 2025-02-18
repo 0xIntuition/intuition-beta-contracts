@@ -82,7 +82,7 @@ contract EthMultiVaultBase is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18)); // Because minDeposit is 0.0003 ether
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
@@ -162,6 +162,10 @@ contract EthMultiVaultBase is Test {
 
     function currentSharePrice(uint256 id) public view returns (uint256) {
         return ethMultiVault.currentSharePrice(id);
+    }
+
+    function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
+        return ethMultiVault.currentSharePriceCurve(id, curveId);
     }
 
     function getApproval(address receiver, address sender) public view returns (bool) {

@@ -117,7 +117,7 @@ contract BaseTest is Test {
         // Testing for offset curve:
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
-        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1, 1e17));
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 2, 1e17));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
         // address progressiveCurve = address(
