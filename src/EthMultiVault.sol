@@ -1866,7 +1866,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
                 price = price.mulDiv(totalAssets, totalSharesInAssetSpace);
-                // console.log("currentSharePriceCurve: Price is %e", price);
                 return price;
             }
         }

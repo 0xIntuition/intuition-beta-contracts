@@ -163,7 +163,6 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
-        // console.log("ProgressiveCurve: currentSharePrice is %e", convert(totalShares).mul(SLOPE).unwrap());
         return convert(totalShares).mul(SLOPE).unwrap();
     }
 
