@@ -50,9 +50,9 @@ interface IEthMultiVault {
         /// @dev fee paid to the protocol when depositing vault shares for the triple vault upon creation
         uint256 tripleCreationProtocolFee;
         /// @dev static fee going towards increasing the amount of assets in the underlying atom vaults
-        uint256 atomDepositFractionOnTripleCreation;
+        uint256 totalAtomDepositsOnTripleCreation;
         /// @dev % of the Triple deposit amount that is used to purchase equity in the underlying atoms
-        uint256 atomDepositFractionForTriple;
+        uint256 totalAtomDepositsForTriple;
     }
 
     /// @dev Atom wallet configuration struct
@@ -279,18 +279,18 @@ interface IEthMultiVault {
 
     /// @notice emitted upon changing the atom deposit fraction on triple creation
     ///
-    /// @param newAtomDepositFractionOnTripleCreation new atom deposit fraction on triple creation
-    /// @param oldAtomDepositFractionOnTripleCreation old atom deposit fraction on triple creation
-    event AtomDepositFractionOnTripleCreationSet(
-        uint256 newAtomDepositFractionOnTripleCreation, uint256 oldAtomDepositFractionOnTripleCreation
+    /// @param newTotalAtomDepositsOnTripleCreation new atom deposit fraction on triple creation
+    /// @param oldTotalAtomDepositsOnTripleCreation old atom deposit fraction on triple creation
+    event TotalAtomDepositsOnTripleCreationSet(
+        uint256 newTotalAtomDepositsOnTripleCreation, uint256 oldTotalAtomDepositsOnTripleCreation
     );
 
     /// @notice emitted upon changing the atom deposit fraction for triples
     ///
-    /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
-    /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
-    event AtomDepositFractionForTripleSet(
-        uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple
+    /// @param newTotalAtomDepositsForTriple new atom deposit fraction for triples
+    /// @param oldTotalAtomDepositsForTriple old atom deposit fraction for triples
+    event TotalAtomDepositsForTripleSet(
+        uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple
     );
 
     /// @notice emitted upon changing the entry fee
@@ -421,13 +421,13 @@ interface IEthMultiVault {
 
     /// @dev sets the atom deposit fraction on triple creation used to increase the amount of assets
     ///      in the underlying atom vaults on triple creation
-    /// @param atomDepositFractionOnTripleCreation new atom deposit fraction on triple creation
-    function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external;
+    /// @param totalAtomDepositsOnTripleCreation new atom deposit fraction on triple creation
+    function setTotalAtomDepositsOnTripleCreation(uint256 totalAtomDepositsOnTripleCreation) external;
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
-    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
+    /// @param totalAtomDepositsForTriple new atom deposit fraction percentage
+    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external;
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
@@ -642,14 +642,14 @@ interface IEthMultiVault {
     /// @return feeAmount amount of assets that would be charged by vault on protocol fee
     function protocolFeeAmount(uint256 assets, uint256 id) external view returns (uint256);
 
-    /// @notice returns atom deposit fraction given amount of 'assets' provided
+    /// @notice returns atom deposit given amount of 'assets' provided
     ///
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id
     ///
     /// @return feeAmount amount of assets that would be used as atom deposit fraction
     /// NOTE: only applies to triple vaults
-    function atomDepositFractionAmount(uint256 assets, uint256 id) external view returns (uint256);
+    function atomDepositsAmount(uint256 assets, uint256 id) external view returns (uint256);
 
     /// @notice returns the current share price for the given vault id
     /// @param id vault id to get corresponding share price for

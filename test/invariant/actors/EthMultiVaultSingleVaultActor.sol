@@ -295,7 +295,7 @@ contract EthMultiVaultSingleVaultActor is Test, EthMultiVaultHelpers {
 
         checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
 
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, vaultId);
+        uint256 amountToDistribute = atomDepositsAmount(userDepositAfterprotocolFee, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(

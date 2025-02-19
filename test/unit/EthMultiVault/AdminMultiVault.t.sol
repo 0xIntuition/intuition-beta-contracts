@@ -193,28 +193,28 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getTripleCreationProtocolFee(), testValue);
     }
 
-    function testSetAtomDepositFractionOnTripleCreation() external {
+    function testSetTotalAtomDepositsOnTripleCreation() external {
         uint256 testValue = 0.0006 ether;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomDepositFractionOnTripleCreation(testValue);
-        assertEq(getAtomDepositFractionOnTripleCreation(), testValue);
+        ethMultiVault.setTotalAtomDepositsOnTripleCreation(testValue);
+        assertEq(getTotalAtomDepositsOnTripleCreation(), testValue);
     }
 
-    function testSetAtomDepositFractionForTriple() external {
-        uint256 validAtomDepositFractionForTriple = getFeeDenominator() / 10; // 10% of the deposit
-        uint256 invalidAtomDepositFractionForTriple = getFeeDenominator(); // 100% of the deposit
+    function testSetTotalAtomDepositsForTriple() external {
+        uint256 validTotalAtomDepositsForTriple = getFeeDenominator() / 10; // 10% of the deposit
+        uint256 invalidTotalAtomDepositsForTriple = getFeeDenominator(); // 100% of the deposit
 
         // Attempt to set atom deposit fraction higher than allowed, should revert
         vm.prank(msg.sender);
-        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidAtomDepositFractionForTriple.selector));
-        ethMultiVault.setAtomDepositFractionForTriple(invalidAtomDepositFractionForTriple);
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_InvalidTotalAtomDepositsForTriple.selector));
+        ethMultiVault.setTotalAtomDepositsForTriple(invalidTotalAtomDepositsForTriple);
 
         // Set a valid atom deposit fraction for triple
         vm.prank(msg.sender);
-        ethMultiVault.setAtomDepositFractionForTriple(validAtomDepositFractionForTriple);
-        assertEq(getAtomDepositFraction(), validAtomDepositFractionForTriple);
+        ethMultiVault.setTotalAtomDepositsForTriple(validTotalAtomDepositsForTriple);
+        assertEq(getAtomDepositFraction(), validTotalAtomDepositsForTriple);
     }
 
     function testSetMinDeposit() external {
