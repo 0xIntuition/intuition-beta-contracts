@@ -531,6 +531,19 @@ interface IEthMultiVault {
     ///       if the vault ID does not exist/is not an atom.
     function depositAtom(address receiver, uint256 id) external payable returns (uint256);
 
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param atomId the vault ID of the atom
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return shares the amount of shares minted
+    /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
+    ///       if the vault ID does not exist/is not an atom.
+    function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId) external payable returns (uint256);
+
     /// @notice redeem assets from an atom vault
     ///
     /// @param shares the amount of shares to redeem
@@ -541,6 +554,18 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
+
+    /// @notice redeem shares from a bonding curve atom vault for assets
+    ///
+    /// @param shares the amount of shares to redeem
+    /// @param receiver the address to receiver the assets
+    /// @param atomId the vault ID of the atom
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    ///       See `getRedeemAssetsAndFees` for more details on the fees charged
+    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId) external returns (uint256);
 
     /// @notice deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'receiver'
     ///         *payable msg.value amount of eth to deposit
@@ -554,6 +579,19 @@ interface IEthMultiVault {
     ///       if the vault ID does not exist/is not a triple.
     function depositTriple(address receiver, uint256 id) external payable returns (uint256);
 
+    /// @notice deposit eth into a bonding curve triple vault and grant ownership of 'shares' to 'receiver'
+    ///         *payable msg.value amount of eth to deposit
+    /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param tripleId the vault ID of the triple
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return shares the amount of shares minted
+    /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
+    ///       if the vault ID does not exist/is not a triple.
+    function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId) external payable returns (uint256);
+
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
     ///         from the contract to 'reciever' factoring in exit fees
     ///
@@ -565,6 +603,18 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external returns (uint256);
+
+    /// @notice redeem shares from a bonding curve triple vault for assets
+    ///
+    /// @param shares the amount of shares to redeem
+    /// @param receiver the address to receiver the assets
+    /// @param tripleId the vault ID of the triple
+    /// @param curveId the vault ID of the curve
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    ///       See `getRedeemAssetsAndFees` for more details on the fees charged
+    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId) external returns (uint256);
 
     /* =================================================== */
     /*                    VIEW FUNCTIONS                   */
@@ -747,6 +797,100 @@ interface IEthMultiVault {
     /// @return shares number of shares user has in the vault
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
+
+    /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
+    ///
+    /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFee)
+    /// @param vaultId vault id to get corresponding fees for
+    /// @param curveId curve id to get corresponding fees for
+    ///
+    /// @return totalAssetsDelta changes in vault's total assets
+    /// @return sharesForReceiver changes in vault's total shares (shares owed to receiver)
+    /// @return userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver
+    /// @return entryFee amount of assets that would be charged for the entry fee
+    function getDepositSharesAndFeesCurve(uint256 assets, uint256 vaultId, uint256 curveId)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
+
+    /// @notice returns the assets for receiver and other important values when redeeming 'shares' from a bonding curve vault
+    ///
+    /// @param shares amount of `shares` to calculate fees on
+    /// @param vaultId vault id to get corresponding fees for
+    /// @param curveId curve id to get corresponding fees for
+    ///
+    /// @return totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees
+    /// @return assetsForReceiver amount of assets that is redeemable by the receiver
+    /// @return protocolFee amount of assets that would be sent to the protocol multisig
+    /// @return exitFee amount of assets that would be charged for the exit fee
+    function getRedeemAssetsAndFeesCurve(uint256 shares, uint256 vaultId, uint256 curveId)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
+
+    /// @notice returns the current share price for the given vault id and curve id
+    /// @param vaultId vault id to get corresponding share price for
+    /// @param curveId curve id to get corresponding share price for
+    /// @return price current share price for the given vault id and curve id
+    function currentSharePriceCurve(uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice returns max amount of assets that can be deposited into the vault through a deposit call for a specific curve
+    ///
+    /// @param vaultId vault id to get corresponding max deposit for
+    /// @param curveId curve id to get corresponding max deposit for
+    ///
+    /// @return maxAssets amount of assets that can be deposited into the vault through a deposit call
+    function maxDepositCurve(uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call for a specific curve
+    ///
+    /// @param owner address of the account to get max redeemable shares for
+    /// @param vaultId vault id to get corresponding shares for
+    /// @param curveId curve id to get corresponding shares for
+    ///
+    /// @return shares amount of shares that can be redeemed from the 'owner' balance through a redeem call
+    function maxRedeemCurve(address owner, uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice returns amount of shares that would be exchanged by vault given amount of 'assets' provided for a specific curve
+    ///
+    /// @param assets amount of assets to calculate shares on
+    /// @param vaultId vault id to get corresponding shares for
+    /// @param curveId curve id to get corresponding shares for
+    ///
+    /// @return shares amount of shares that would be exchanged by vault given amount of 'assets' provided
+    function convertToSharesCurve(uint256 assets, uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice returns amount of assets that would be exchanged by vault given amount of 'shares' provided for a specific curve
+    ///
+    /// @param shares amount of shares to calculate assets on
+    /// @param vaultId vault id to get corresponding assets for
+    /// @param curveId curve id to get corresponding assets for
+    ///
+    /// @return assets amount of assets that would be exchanged by vault given amount of 'shares' provided
+    function convertToAssetsCurve(uint256 shares, uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice simulates the effects of the deposited amount of 'assets' and returns the estimated
+    ///         amount of shares that would be minted from the deposit of `assets` for a specific curve
+    ///
+    /// @param assets amount of assets to calculate shares on
+    /// @param vaultId vault id to get corresponding shares for
+    /// @param curveId curve id to get corresponding shares for
+    ///
+    /// @return shares amount of shares that would be minted from the deposit of `assets`
+    /// NOTE: this function pessimistically estimates the amount of shares that would be minted from the
+    ///       input amount of assets so if the vault is empty before the deposit the caller receives more
+    ///       shares than returned by this function, reference internal _depositIntoVault logic for details
+    function previewDepositCurve(uint256 assets, uint256 vaultId, uint256 curveId) external view returns (uint256);
+
+    /// @notice simulates the effects of the redemption of `shares` and returns the estimated
+    ///         amount of assets estimated to be returned to the receiver of the redeem for a specific curve
+    ///
+    /// @param shares amount of shares to calculate assets on
+    /// @param vaultId vault id to get corresponding assets for
+    /// @param curveId curve id to get corresponding assets for
+    ///
+    /// @return assets amount of assets estimated to be returned to the receiver
+    function previewRedeemCurve(uint256 shares, uint256 vaultId, uint256 curveId) external view returns (uint256);
 
     /// @notice returns the Atom Wallet address for the given atom data
     /// @param id vault id of the atom associated to the atom wallet
