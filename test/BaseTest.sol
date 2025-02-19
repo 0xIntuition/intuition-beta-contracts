@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 import {console2 as console} from "forge-std/console2.sol";
 import {Test, Vm} from "forge-std/Test.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -51,10 +52,27 @@ contract BaseTest is Test {
     function setUp() public {
         actors = _actors();
         config = _config();
-        state.vault = new EthMultiVault();
-        state.vault.init(
-            config.general, config.atom, config.triple, config.wallet, config.vaultFees, config.bondingCurve
+
+        // Deploy implementation
+        EthMultiVault implementation = new EthMultiVault();
+
+        // Deploy proxy
+        ERC1967Proxy proxy = new ERC1967Proxy(
+            address(implementation),
+            abi.encodeWithSelector(
+                EthMultiVault.init.selector,
+                config.general,
+                config.atom,
+                config.triple,
+                config.wallet,
+                config.vaultFees,
+                config.bondingCurve
+            )
         );
+
+        // Cast proxy to EthMultiVault interface
+        state.vault = EthMultiVault(payable(address(proxy)));
+
         vm.stopPrank();
     }
 

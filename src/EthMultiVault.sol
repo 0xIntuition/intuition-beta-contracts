@@ -185,6 +185,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         });
     }
 
+    /**
+     * @notice Security measure for upgradeable contracts
+     * @dev Disables initializers on implementation contract to prevent direct initialization
+     * @dev (Security) Prevents attackers from initializing the implementation contract directly
+     */
+    constructor() {
+        _disableInitializers();
+    }
+
     /* =================================================== */
     /*                     FALLBACK                        */
     /* =================================================== */
