@@ -135,7 +135,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     BondingCurveConfig public bondingCurveConfig;
 
     /// @dev Gap for upgrade safety
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 
     /* =================================================== */
     /*                    MODIFIERS                        */
