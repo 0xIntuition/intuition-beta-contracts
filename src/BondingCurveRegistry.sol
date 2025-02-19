@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.27;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 import {Errors} from "src/libraries/Errors.sol";
 
@@ -21,7 +19,7 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry is Initializable {
+contract BondingCurveRegistry {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
@@ -50,13 +48,13 @@ contract BondingCurveRegistry is Initializable {
     }
 
     /* =================================================== */
-    /*                    INITIALIZER                      */
+    /*                    CONSTRUCTOR                      */
     /* =================================================== */
 
     /// @notice Initializes the BondingCurveRegistry contract
     /// @param _admin Address who may add curves to the registry
     /// NOTE: This function is called only once (during contract deployment)
-    function initialize(address _admin) external initializer {
+    constructor(address _admin) {
         require(_admin != address(0), "BondingCurveRegistry: requires owner");
         admin = _admin;
     }

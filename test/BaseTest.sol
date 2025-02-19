@@ -122,13 +122,12 @@ contract BaseTest is Test {
                 atomWalletBeacon: address(new UpgradeableBeacon(address(new AtomWallet()), actors.deployer))
             }),
             bondingCurve: IEthMultiVault.BondingCurveConfig({
-                registry: address(new BondingCurveRegistry()),
+                registry: address(new BondingCurveRegistry(actors.deployer)),
                 defaultCurveId: 1
             }),
             vaultFees: IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100})
         });
 
-        BondingCurveRegistry(c.bondingCurve.registry).initialize(actors.deployer);
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(linearCurve);
 

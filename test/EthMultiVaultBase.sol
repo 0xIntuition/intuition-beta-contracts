@@ -81,8 +81,7 @@ contract EthMultiVaultBase is Test {
         IEthMultiVault.VaultFees memory vaultFees =
             IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
 
-        address bondingCurveRegistry = address(new BondingCurveRegistry());
-        BondingCurveRegistry(bondingCurveRegistry).initialize(address(this)); // this?
+        address bondingCurveRegistry = address(new BondingCurveRegistry(address(this)));
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
