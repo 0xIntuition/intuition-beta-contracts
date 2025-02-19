@@ -389,6 +389,8 @@ interface IEthMultiVault {
 
     /// @dev set admin
     /// @param admin address of the new admin
+    /// @notice Requires new admin to 'confirm' the timelocked operation
+    //  @dev Old admin may still cancel this before timelock duration if desired
     function setAdmin(address admin) external;
 
     /// @dev set protocol multisig

@@ -261,7 +261,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev set admin
     /// @param admin address of the new admin
-    function setAdmin(address admin) external onlyAdmin {
+    /// @notice Requires new admin to 'confirm' the timelocked operation
+    //  @dev Old admin may still cancel this before timelock duration if desired
+    function setAdmin(address admin) external {
+        if (msg.sender != admin) {
+          revert Errors.EthMultiVault_AdminOnly();
+        }
         address oldAdmin = generalConfig.admin;
 
         // Generate the operation hash
