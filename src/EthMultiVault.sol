@@ -2072,9 +2072,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return hash the corresponding hash for the given RDF triple
     /// @dev only applies to triple vault IDs as input
     function tripleHash(uint256 id) public view returns (bytes32) {
-        uint256[3] memory atomIds;
-        (atomIds[0], atomIds[1], atomIds[2]) = getTripleAtoms(id);
-        return keccak256(abi.encodePacked(atomIds[0], atomIds[1], atomIds[2]));
+        (uint256 subjectId, uint256 predicateId, uint256 objectId) = getTripleAtoms(id);
+        return tripleHashFromAtoms(subjectId, predicateId, objectId);
     }
 
     /// @notice returns whether the supplied vault id is a triple
@@ -2082,7 +2081,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return bool whether the supplied vault id is a triple
     function isTripleId(uint256 id) public view returns (bool) {
         bool isCounterTriple = id > type(uint256).max / 2;
-        return isCounterTriple ? isTriple[type(uint256).max - id] : isTriple[id];
+        return isCounterTriple ? isTriple[getCounterIdFromTriple(id)] : isTriple[id];
     }
 
     /// @notice returns the atoms that make up a triple/counter-triple
@@ -2091,7 +2090,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev only applies to triple vault IDs as input
     function getTripleAtoms(uint256 id) public view returns (uint256, uint256, uint256) {
         bool isCounterTriple = id > type(uint256).max / 2;
-        uint256[3] memory atomIds = isCounterTriple ? triples[type(uint256).max - id] : triples[id];
+        uint256[3] memory atomIds = isCounterTriple ? triples[getCounterIdFromTriple(id)] : triples[id];
         return (atomIds[0], atomIds[1], atomIds[2]);
     }
 
@@ -2178,7 +2177,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        return vaults[type(uint256).max - id].balanceOf[receiver] > 0;
+        return vaults[getCounterIdFromTriple(id)].balanceOf[receiver] > 0;
     }
 
     function _hasCounterStakeCurve(uint256 id, uint256 curveId, address receiver) internal view returns (bool) {
@@ -2186,7 +2185,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        return bondingCurveVaults[type(uint256).max - id][curveId].balanceOf[receiver] > 0;
+        return bondingCurveVaults[getCounterIdFromTriple(id)][curveId].balanceOf[receiver] > 0;
     }
 
     /// @dev returns the deployment data for the AtomWallet contract
