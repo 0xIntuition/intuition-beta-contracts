@@ -38,6 +38,9 @@ contract BondingCurveRegistry is Initializable {
     // Mapping of curve addresses to curve IDs, for reverse lookup
     mapping(address => uint256) public curveIds;
 
+    // Mapping of the registered curve names, used to enforce uniqueness
+    mapping(string => bool) public registeredCurveNames;
+
     /* =================================================== */
     /*                    MODIFIERS                        */
     /* =================================================== */
@@ -78,12 +81,21 @@ contract BondingCurveRegistry is Initializable {
             revert Errors.BondingCurveRegistry_CurveAlreadyExists();
         }
 
+        // Enforce curve name uniqueness
+        string memory curveName = IBaseCurve(bondingCurve).name();
+        if (registeredCurveNames[curveName]) {
+            revert Errors.BondingCurveRegistry_CurveNameNotUnique();
+        }
+
         // 0 is reserved to safeguard against uninitialized values
         ++count;
 
         // Add the curve to the registry, keeping track of its address and ID in separate tables
         curveAddresses[count] = bondingCurve;
         curveIds[bondingCurve] = count;
+
+        // Mark the curve name as registered
+        registeredCurveNames[curveName] = true;
     }
 
     /* =================================================== */

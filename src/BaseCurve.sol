@@ -3,6 +3,8 @@ pragma solidity ^0.8.27;
 
 import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 
+import {Errors} from "src/libraries/Errors.sol";
+
 /**
  * @title  BaseCurve
  * @author 0xIntuition
@@ -14,6 +16,7 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
  *      of the curves themselves.
  */
 abstract contract BaseCurve {
+    /// @notice The name of the curve
     string public name;
 
     /// @notice The maximum number of shares that this curve can handle without overflowing.
@@ -106,6 +109,10 @@ abstract contract BaseCurve {
     ///
     /// @param _name Unique name for the curve
     constructor(string memory _name) {
+        if (bytes(_name).length == 0) {
+            revert Errors.BaseCurve_EmptyStringNotAllowed();
+        }
+
         name = _name;
     }
 }
