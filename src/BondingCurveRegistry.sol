@@ -40,6 +40,17 @@ contract BondingCurveRegistry is Initializable, Ownable2StepUpgradeable {
     mapping(string => bool) public registeredCurveNames;
 
     /* =================================================== */
+    /*                    EVENTS                           */
+    /* =================================================== */
+
+    /// @notice Emitted when a new curve is added to the registry
+    ///
+    /// @param curveId The ID of the curve
+    /// @param curveAddress The address of the curve
+    /// @param curveName The name of the curve
+    event BondingCurveAdded(uint256 indexed curveId, address indexed curveAddress, string indexed curveName);
+
+    /* =================================================== */
     /*                    INITIALIZER                      */
     /* =================================================== */
 
@@ -76,6 +87,8 @@ contract BondingCurveRegistry is Initializable, Ownable2StepUpgradeable {
 
         // Mark the curve name as registered
         registeredCurveNames[curveName] = true;
+
+        emit BondingCurveAdded(count, bondingCurve, curveName);
     }
 
     /* =================================================== */
