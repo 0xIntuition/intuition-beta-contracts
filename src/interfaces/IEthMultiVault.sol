@@ -221,6 +221,12 @@ interface IEthMultiVault {
     /// @param readyTime block number when the operation is ready
     event OperationScheduled(bytes32 indexed operationId, bytes data, uint256 readyTime);
 
+    /// @notice emitted upon executing an operation
+    ///
+    /// @param operationId unique identifier for the operation
+    /// @param data data of the operation that was executed
+    event OperationExecuted(bytes32 indexed operationId, bytes data);
+
     /// @notice emitted upon cancelling an operation
     ///
     /// @param operationId unique identifier for the operation

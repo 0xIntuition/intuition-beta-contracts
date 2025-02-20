@@ -278,6 +278,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         timelocks[opHash].executed = true;
 
         emit AdminSet(admin, oldAdmin);
+        emit OperationExecuted(SET_ADMIN, data);
     }
 
     /// @dev set protocol multisig
@@ -433,6 +434,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         timelocks[opHash].executed = true;
 
         emit ExitFeeSet(id, exitFee, oldExitFee);
+        emit OperationExecuted(SET_EXIT_FEE, data);
     }
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
