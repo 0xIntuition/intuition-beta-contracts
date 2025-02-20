@@ -82,7 +82,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev or to say that another way:
     /// $$\text{shares} = \sqrt{s^2 + \frac{2a}{m}} - s$$
     function previewDeposit(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
-        public
+        external
         view
         override
         returns (uint256 shares)
@@ -106,7 +106,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev which simplifies to:
     /// $$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$
     function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
-        public
+        external
         view
         override
         returns (uint256 assets)
@@ -129,7 +129,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev which simplifies to:
     /// $$\text{assets} = (2sn + n^2) \cdot \frac{m}{2}$$
     function previewMint(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
-        public
+        external
         view
         override
         returns (uint256 assets)
@@ -146,7 +146,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev or to say that another way:
     /// $$\text{shares} = s - \sqrt{s^2 - \frac{2a}{m}}$$
     function previewWithdraw(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
-        public
+        external
         view
         override
         returns (uint256 shares)
@@ -164,7 +164,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev This is the basic linear price function where the price increases linearly with the total supply
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last
-    function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
+    function currentPrice(uint256 totalShares) external view override returns (uint256 sharePrice) {
         return UD60x18.wrap(totalShares).mul(SLOPE).unwrap();
     }
 
@@ -177,7 +177,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev Or to say that another way:
     /// $$\text{shares} = \frac{2a}{s \cdot m}$$
     function convertToShares(uint256 assets, uint256, /*totalAssets*/ uint256 totalShares)
-        public
+        external
         view
         override
         returns (uint256 shares)
@@ -199,7 +199,7 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev Or to say that another way:
     /// $$\text{assets} = n \cdot s \cdot \frac{m}{2}$$
     function convertToAssets(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
-        public
+        external
         view
         override
         returns (uint256 assets)
@@ -232,12 +232,12 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    function maxShares() public view override returns (uint256) {
+    function maxShares() external view override returns (uint256) {
         return MAX_SHARES;
     }
 
     /// @inheritdoc BaseCurve
-    function maxAssets() public view override returns (uint256) {
+    function maxAssets() external view override returns (uint256) {
         return MAX_ASSETS;
     }
 }

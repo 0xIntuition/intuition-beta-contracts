@@ -20,11 +20,11 @@ abstract contract BaseCurve is IBaseCurve {
 
     /// @notice The maximum number of shares that this curve can handle without overflowing.
     /// @dev Checked by the EthMultiVault before transacting
-    function maxShares() public view virtual returns (uint256);
+    function maxShares() external view virtual returns (uint256);
 
     /// @notice The maximum number of assets that this curve can handle without overflowing.
     /// @dev Checked by the EthMultiVault before transacting
-    function maxAssets() public view virtual returns (uint256);
+    function maxAssets() external view virtual returns (uint256);
 
     /// @notice Preview how many shares would be minted for a deposit of assets
     ///
@@ -33,7 +33,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would be minted
     function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
-        public
+        external
         view
         virtual
         returns (uint256 shares);
@@ -45,7 +45,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be returned
     function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
-        public
+        external
         view
         virtual
         returns (uint256 assets);
@@ -57,7 +57,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares that would need to be redeemed
     function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
-        public
+        external
         view
         virtual
         returns (uint256 shares);
@@ -69,7 +69,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets that would be required to mint the shares
     function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
-        public
+        external
         view
         virtual
         returns (uint256 assets);
@@ -81,7 +81,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return shares The number of shares equivalent to the given assets
     function convertToShares(uint256 assets, uint256 totalAssets, uint256 totalShares)
-        public
+        external
         view
         virtual
         returns (uint256 shares);
@@ -93,7 +93,7 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalAssets Total quantity of assets already staked into the curve
     /// @return assets The number of assets equivalent to the given shares
     function convertToAssets(uint256 shares, uint256 totalShares, uint256 totalAssets)
-        public
+        external
         view
         virtual
         returns (uint256 assets);
@@ -102,7 +102,7 @@ abstract contract BaseCurve is IBaseCurve {
     ///
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return sharePrice The current price of a share
-    function currentPrice(uint256 totalShares) public view virtual returns (uint256 sharePrice);
+    function currentPrice(uint256 totalShares) external view virtual returns (uint256 sharePrice);
 
     /// @notice Construct the curve with a unique name
     ///

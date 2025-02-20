@@ -43,7 +43,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
-        public
+        external
         view
         override
         returns (uint256 shares)
@@ -58,7 +58,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
-        public
+        external
         view
         override
         returns (uint256 assets)
@@ -73,7 +73,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
-        public
+        external
         view
         override
         returns (uint256 assets)
@@ -88,7 +88,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
-        public
+        external
         view
         override
         returns (uint256 shares)
@@ -103,7 +103,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function convertToShares(uint256 assets, uint256, /*totalAssets*/ uint256 /*totalShares*/ )
-        public
+        external
         pure
         override
         returns (uint256 shares)
@@ -114,7 +114,7 @@ contract LinearCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
     function convertToAssets(uint256 shares, uint256, /*totalShares*/ uint256 /*totalAssets*/ )
-        public
+        external
         pure
         override
         returns (uint256 assets)
@@ -124,17 +124,17 @@ contract LinearCurve is BaseCurve {
 
     /// @inheritdoc BaseCurve
     /// @notice In a linear curve, the base price will always be 1.  Pool ratio adjustments are dealt with in the EthMultiVault itself.
-    function currentPrice(uint256 /*totalShares*/ ) public pure override returns (uint256 sharePrice) {
+    function currentPrice(uint256 /*totalShares*/ ) external pure override returns (uint256 sharePrice) {
         return 1;
     }
 
     /// @inheritdoc BaseCurve
-    function maxShares() public view override returns (uint256) {
+    function maxShares() external view override returns (uint256) {
         return MAX_SHARES;
     }
 
     /// @inheritdoc BaseCurve
-    function maxAssets() public view override returns (uint256) {
+    function maxAssets() external view override returns (uint256) {
         return MAX_ASSETS;
     }
 }
