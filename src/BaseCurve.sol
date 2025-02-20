@@ -18,6 +18,17 @@ abstract contract BaseCurve is IBaseCurve {
     /// @notice The name of the curve
     string public name;
 
+    /// @notice Construct the curve with a unique name
+    ///
+    /// @param _name Unique name for the curve
+    constructor(string memory _name) {
+        if (bytes(_name).length == 0) {
+            revert Errors.BaseCurve_EmptyStringNotAllowed();
+        }
+
+        name = _name;
+    }
+
     /// @notice The maximum number of shares that this curve can handle without overflowing.
     /// @dev Checked by the EthMultiVault before transacting
     function maxShares() external view virtual returns (uint256);
@@ -38,13 +49,13 @@ abstract contract BaseCurve is IBaseCurve {
         virtual
         returns (uint256 shares);
 
-    /// @notice Preview how many assets would be returned for burning a specific amount of shares
+    /// @notice Preview how many assets would be required to mint a specific amount of shares
     ///
-    /// @param shares Quantity of shares to burn
+    /// @param shares Quantity of shares to mint
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
-    /// @return assets The number of assets that would be returned
-    function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    /// @return assets The number of assets that would be required to mint the shares
+    function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
         external
         view
         virtual
@@ -62,13 +73,13 @@ abstract contract BaseCurve is IBaseCurve {
         virtual
         returns (uint256 shares);
 
-    /// @notice Preview how many assets would be required to mint a specific amount of shares
+    /// @notice Preview how many assets would be returned for burning a specific amount of shares
     ///
-    /// @param shares Quantity of shares to mint
+    /// @param shares Quantity of shares to burn
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @param totalAssets Total quantity of assets already staked into the curve
-    /// @return assets The number of assets that would be required to mint the shares
-    function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    /// @return assets The number of assets that would be returned
+    function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
         external
         view
         virtual
@@ -103,15 +114,4 @@ abstract contract BaseCurve is IBaseCurve {
     /// @param totalShares Total quantity of shares already awarded by the curve
     /// @return sharePrice The current price of a share
     function currentPrice(uint256 totalShares) external view virtual returns (uint256 sharePrice);
-
-    /// @notice Construct the curve with a unique name
-    ///
-    /// @param _name Unique name for the curve
-    constructor(string memory _name) {
-        if (bytes(_name).length == 0) {
-            revert Errors.BaseCurve_EmptyStringNotAllowed();
-        }
-
-        name = _name;
-    }
 }

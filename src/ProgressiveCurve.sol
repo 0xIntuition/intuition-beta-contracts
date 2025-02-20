@@ -96,29 +96,6 @@ contract ProgressiveCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    /// @dev Let $s$ = initial total supply of shares
-    /// @dev Let $r$ = shares to redeem
-    /// @dev Let $\frac{m}{2}$ = half of the slope
-    /// @dev assets:
-    /// $$\text{assets} = (s^2 - (s-r)^2) \cdot \frac{m}{2}$$
-    /// @dev this can be expanded to:
-    /// $$\text{assets} = (s^2 - (s^2 - 2sr + r^2)) \cdot \frac{m}{2}$$
-    /// @dev which simplifies to:
-    /// $$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$
-    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
-        external
-        view
-        override
-        returns (uint256 assets)
-    {
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
-
-        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
-
-        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
-    }
-
-    /// @inheritdoc BaseCurve
     /// @dev Let $s$ = current total supply of shares
     /// @dev Let $n$ = new shares to mint
     /// @dev Let $\frac{m}{2}$ = half of the slope
@@ -154,6 +131,29 @@ contract ProgressiveCurve is BaseCurve {
         UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
         return currentSupplyOfShares.sub(currentSupplyOfShares.powu(2).sub(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt())
             .unwrap();
+    }
+
+    /// @inheritdoc BaseCurve
+    /// @dev Let $s$ = initial total supply of shares
+    /// @dev Let $r$ = shares to redeem
+    /// @dev Let $\frac{m}{2}$ = half of the slope
+    /// @dev assets:
+    /// $$\text{assets} = (s^2 - (s-r)^2) \cdot \frac{m}{2}$$
+    /// @dev this can be expanded to:
+    /// $$\text{assets} = (s^2 - (s^2 - 2sr + r^2)) \cdot \frac{m}{2}$$
+    /// @dev which simplifies to:
+    /// $$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$
+    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
+        external
+        view
+        override
+        returns (uint256 assets)
+    {
+        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
+
+        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
     }
 
     /// @inheritdoc BaseCurve

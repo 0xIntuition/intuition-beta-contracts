@@ -53,17 +53,6 @@ contract LinearCurve is BaseCurve {
 
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
-    function previewRedeem(uint256 shares, uint256, /* totalShares */ uint256 /* totalAssets */ )
-        external
-        pure
-        override
-        returns (uint256 /* assets */ )
-    {
-        return shares; // 1:1 relationship
-    }
-
-    /// @inheritdoc BaseCurve
-    /// @notice Computes the 1:1 relationship between assets <--> shares.
     function previewMint(uint256 shares, uint256, /* totalShares */ uint256 /* totalAssets */ )
         external
         pure
@@ -82,6 +71,17 @@ contract LinearCurve is BaseCurve {
         returns (uint256 /* shares */ )
     {
         return assets; // 1:1 relationship
+    }
+
+    /// @inheritdoc BaseCurve
+    /// @notice Computes the 1:1 relationship between assets <--> shares.
+    function previewRedeem(uint256 shares, uint256, /* totalShares */ uint256 /* totalAssets */ )
+        external
+        pure
+        override
+        returns (uint256 /* assets */ )
+    {
+        return shares; // 1:1 relationship
     }
 
     /// @inheritdoc BaseCurve
