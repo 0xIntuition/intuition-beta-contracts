@@ -2,6 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 import {Errors} from "src/libraries/Errors.sol";
@@ -21,13 +22,10 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry is Initializable {
+contract BondingCurveRegistry is Initializable, Ownable2StepUpgradeable {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
-
-    // Admin has the right to add curves to the registry
-    address public admin;
 
     // Quantity of known curves, used to assign IDs
     uint256 public count;
@@ -42,17 +40,6 @@ contract BondingCurveRegistry is Initializable {
     mapping(string => bool) public registeredCurveNames;
 
     /* =================================================== */
-    /*                    MODIFIERS                        */
-    /* =================================================== */
-
-    modifier onlyAdmin() {
-        if (msg.sender != admin) {
-            revert Errors.BondingCurveRegistry_OnlyOwner();
-        }
-        _;
-    }
-
-    /* =================================================== */
     /*                    INITIALIZER                      */
     /* =================================================== */
 
@@ -60,23 +47,16 @@ contract BondingCurveRegistry is Initializable {
     /// @param _admin Address who may add curves to the registry
     /// NOTE: This function is called only once (during contract deployment)
     function initialize(address _admin) external initializer {
-        require(_admin != address(0), "BondingCurveRegistry: requires owner");
-        admin = _admin;
+        __Ownable_init(_admin);
     }
 
     /* =================================================== */
     /*               RESTRICTED FUNCTIONS                  */
     /* =================================================== */
 
-    /// @notice Set the admin address
-    /// @param _admin Address of the new admin
-    function setAdmin(address _admin) external onlyAdmin {
-        admin = _admin;
-    }
-
     /// @notice Add a new bonding curve to the registry
     /// @param bondingCurve Address of the new bonding curve
-    function addBondingCurve(address bondingCurve) external onlyAdmin {
+    function addBondingCurve(address bondingCurve) external onlyOwner {
         if (curveIds[bondingCurve] != 0) {
             revert Errors.BondingCurveRegistry_CurveAlreadyExists();
         }

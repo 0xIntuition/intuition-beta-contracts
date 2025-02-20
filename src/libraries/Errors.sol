@@ -75,9 +75,9 @@ library Errors {
 
     ///////// BONDING CURVE REGISTRY ERRORS /////////////////////////////////////////////////////////////
 
-    error BondingCurveRegistry_OnlyOwner();
     error BondingCurveRegistry_CurveAlreadyExists();
     error BondingCurveRegistry_CurveNameNotUnique();
+    error BondingCurveRegistry_OnlyOwner();
 
     ///////// BASE CURVE ERRORS /////////////////////////////////////////////////////////////////////////
 
