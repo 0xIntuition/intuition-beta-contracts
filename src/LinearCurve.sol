@@ -30,11 +30,11 @@ import {BaseCurve} from "./BaseCurve.sol";
  *      versions.
  */
 contract LinearCurve is BaseCurve {
-    /// @dev UD60x18 Max
-    uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
+    /// @dev Maximum number of shares that can be handled by the curve.
+    uint256 public constant MAX_SHARES = type(uint256).max;
 
-    /// @dev UD60x18 Max
-    uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
+    /// @dev Maximum number of assets that can be handled by the curve.
+    uint256 public constant MAX_ASSETS = type(uint256).max;
 
     /// @notice Constructor for the Linear Curve.
     /// @param _name The name of the curve.
