@@ -234,7 +234,7 @@ contract BaseTest is Test {
         (shares, assets) = state.vault.getVaultStateForUserCurve(_vaultId, _curveId, _who);
     }
 
-    function vaultBalance(address _who, uint256 _vaultId) internal returns (uint256 shares, uint256 assets) {
+    function vaultBalance(address _who, uint256 _vaultId) internal view returns (uint256 shares, uint256 assets) {
         uint256 curveId = 2;
         (shares, assets) = vaultBalance(_who, _vaultId, curveId);
     }
@@ -286,10 +286,10 @@ contract BaseTest is Test {
 
         // Redeem all shares
         vm.prank(actors.alice);
-        uint256 aliceReceived = state.vault.redeemAtomCurve(aliceShares, actors.alice, atomId, 2);
+        state.vault.redeemAtomCurve(aliceShares, actors.alice, atomId, 2); // assets for alice
         vm.prank(actors.bob);
-        uint256 bobReceived = state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2);
+        state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2); // assets for bob
         vm.prank(actors.charlie);
-        uint256 charlieReceived = state.vault.redeemAtomCurve(charlieShares, actors.charlie, atomId, 2);
+        state.vault.redeemAtomCurve(charlieShares, actors.charlie, atomId, 2); // assets for charlie
     }
 }
