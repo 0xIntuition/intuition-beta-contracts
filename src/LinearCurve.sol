@@ -42,62 +42,46 @@ contract LinearCurve is BaseCurve {
 
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
-    function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
+    function previewDeposit(uint256 assets, uint256, /* totalAssets */ uint256 /* totalShares */ )
         external
-        view
+        pure
         override
-        returns (uint256 shares)
+        returns (uint256 /* shares */ )
     {
-        if (assets == 0) return 0;
-
-        shares = assets; // 1:1 relationship
-
-        return shares;
+        return assets; // 1:1 relationship
     }
 
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
-    function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    function previewRedeem(uint256 shares, uint256, /* totalShares */ uint256 /* totalAssets */ )
         external
-        view
+        pure
         override
-        returns (uint256 assets)
+        returns (uint256 /* assets */ )
     {
-        if (shares == 0) return 0;
-
-        assets = shares; // 1:1 relationship
-
-        return assets;
+        return shares; // 1:1 relationship
     }
 
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
-    function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
+    function previewMint(uint256 shares, uint256, /* totalShares */ uint256 /* totalAssets */ )
         external
-        view
+        pure
         override
-        returns (uint256 assets)
+        returns (uint256 /* assets */ )
     {
-        if (shares == 0) return 0;
-
-        assets = shares; // 1:1 relationship
-
-        return assets;
+        return shares; // 1:1 relationship
     }
 
     /// @inheritdoc BaseCurve
     /// @notice Computes the 1:1 relationship between assets <--> shares.
-    function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
+    function previewWithdraw(uint256 assets, uint256, /* totalAssets */ uint256 /* totalShares */ )
         external
-        view
+        pure
         override
-        returns (uint256 shares)
+        returns (uint256 /* shares */ )
     {
-        if (assets == 0) return 0;
-
-        shares = assets; // 1:1 relationship
-
-        return shares;
+        return assets; // 1:1 relationship
     }
 
     /// @inheritdoc BaseCurve
@@ -129,12 +113,12 @@ contract LinearCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    function maxShares() external view override returns (uint256) {
+    function maxShares() external pure override returns (uint256) {
         return MAX_SHARES;
     }
 
     /// @inheritdoc BaseCurve
-    function maxAssets() external view override returns (uint256) {
+    function maxAssets() external pure override returns (uint256) {
         return MAX_ASSETS;
     }
 }
