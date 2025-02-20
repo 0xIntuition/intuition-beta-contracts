@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.27;
 
-import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
-
 import {Errors} from "src/libraries/Errors.sol";
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 
