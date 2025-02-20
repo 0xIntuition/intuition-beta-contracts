@@ -5,6 +5,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
+import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
 import {Errors} from "src/libraries/Errors.sol";
 
 /**
@@ -22,7 +23,7 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry is Initializable, Ownable2StepUpgradeable {
+contract BondingCurveRegistry is IBondingCurveRegistry, Initializable, Ownable2StepUpgradeable {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */

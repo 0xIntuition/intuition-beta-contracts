@@ -4,6 +4,7 @@ pragma solidity ^0.8.27;
 import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
+import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 
 /**
  * @title  BaseCurve
@@ -15,7 +16,7 @@ import {Errors} from "src/libraries/Errors.sol";
  *      accomodating for the effect of fees, supply burn, airdrops, etc) are handled by the EthMultiVault instead
  *      of the curves themselves.
  */
-abstract contract BaseCurve {
+abstract contract BaseCurve is IBaseCurve {
     /// @notice The name of the curve
     string public name;
 
