@@ -67,16 +67,16 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (,,,,,,, minDelay) = ethMultiVault.generalConfig();
     }
 
-    function getAtomDepositFractionOnTripleCreation()
+    function getTotalAtomDepositsOnTripleCreation()
         public
         view
-        returns (uint256 atomDepositFractionOnTripleCreation)
+        returns (uint256 totalAtomDepositsOnTripleCreation)
     {
-        (, atomDepositFractionOnTripleCreation,) = ethMultiVault.tripleConfig();
+        (, totalAtomDepositsOnTripleCreation,) = ethMultiVault.tripleConfig();
     }
 
-    function getAtomDepositFraction() public view returns (uint256 atomDepositFractionForTriple) {
-        (,, atomDepositFractionForTriple) = ethMultiVault.tripleConfig();
+    function getAtomDepositFraction() public view returns (uint256 totalAtomDepositsForTriple) {
+        (,, totalAtomDepositsForTriple) = ethMultiVault.tripleConfig();
     }
 
     function getAtomWalletAddr(uint256 id) public view returns (address) {
@@ -100,8 +100,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         public
         payable
     {
-        uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
-        uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
+        uint256 atomDeposits = atomDepositsAmount(amount, id);
+        uint256 userAssetsAfterAtomDepositFraction = amount - atomDeposits;
 
         uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
 
@@ -188,14 +188,14 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 userDeposit = value - getTripleCost();
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
         uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
 
         uint256 ghostShares = getMinShare();
 
-        uint256 totalAssetsDeltaExpected = userDepositAfterprotocolFee - atomDepositFraction + ghostShares;
+        uint256 totalAssetsDeltaExpected = userDepositAfterprotocolFee - atomDeposits + ghostShares;
 
         // calculate expected total shares delta
-        uint256 sharesForDepositor = userDepositAfterprotocolFee - atomDepositFraction;
+        uint256 sharesForDepositor = userDepositAfterprotocolFee - atomDeposits;
         uint256 totalSharesDeltaExpected = sharesForDepositor + ghostShares;
 
         // vault's total assets should have gone up
@@ -295,8 +295,8 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         uint256 totalAssetsBefore,
         uint256 totalSharesBefore
     ) public payable {
-        uint256 atomDepositFraction = atomDepositFractionAmount(amount, id);
-        uint256 userAssetsAfterAtomDepositFraction = amount - atomDepositFraction;
+        uint256 atomDeposits = atomDepositsAmount(amount, id);
+        uint256 userAssetsAfterAtomDepositFraction = amount - atomDeposits;
 
         uint256 totalAssetsDeltaExpected = userAssetsAfterAtomDepositFraction;
 
