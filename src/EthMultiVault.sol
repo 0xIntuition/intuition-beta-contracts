@@ -1861,17 +1861,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
-        uint256 price = basePrice;
-
-        // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
-            if (totalSharesInAssetSpace != 0) {
-                price = price.mulDiv(totalAssets, totalSharesInAssetSpace);
-                return price;
-            }
-        }
-        return price;
+        return basePrice;
     }
 
     /// @notice returns max amount of eth that can be deposited into the vault
@@ -1934,35 +1924,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice The conversion happens in two steps:
     ///  1. First, we get the base shares from the bonding curve:
     ///  $$s_{base} = f_{curve}(assets)$$
-    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$
-    ///  ### Where:
-    ///  1. $S_{total}$ is the total supply of shares
-    ///  2. $A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
-    ///        using the inverse of the bonding curve function
-    /// @notice This adjustment is necessary because the actual ratio of assets:shares may drift from
-    ///      the bonding curve's 'pure' conversion ratio due to:
-    ///  - Protocol fees being taken in assets
-    ///  - Share burns
-    ///  - Direct asset transfers/airdrops
-    /// @notice The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
-    ///      quantities in the same space, as the bonding curve defines a non-linear relationship
-    ///      between assets and shares.
-    /// @dev TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
-    ///     So you need to compute their value using a common denominator like dollars.
+    //   2. That's it.  The pool ratio adjustment cannot be used for curves other than Linear, which is unused
+    //   in this version of the contract in favor of convertToShares.
     function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
 
         uint256 shares = _registry().previewDeposit(assets, totalAssets, supply, curveId);
-
-        // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, 0, curveId);
-            if (totalAssetsInShareSpace != 0) {
-                shares = shares * totalAssetsInShareSpace / supply;
-            }
-        }
         return shares;
     }
 
@@ -1991,34 +1959,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice The conversion happens in two steps:
     ///  1. First, we get the base assets from the bonding curve:
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
-    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
-    /// ### Where:
-    ///  1. $A_{total}$ is the total assets in the vault
-    ///  2. $S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
-    ///    using the bonding curve function
-    /// @notice This adjustment is necessary because the actual ratio of shares:assets may drift from
-    /// the bonding curve's 'pure' conversion ratio due to:
-    ///  - Protocol fees being taken in assets
-    ///  - Share burns
-    ///  - Direct asset transfers/airdrops
-    /// @notice The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
-    ///  quantities in the same space, as the bonding curve defines a non-linear relationship
-    ///  between shares and assets.
-    /// @dev TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.
-    ///  So you need to compute their value using a common denominator like dollars.
+    //   2. That's it.  No pool ratio adjustment in this version of the contracts because it only works for
+    //   pro-rata, and that is taken care of in convertToAssets.
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 assets = _registry().previewRedeem(shares, supply, totalAssets, curveId);
-
-        // // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
-            if (totalSharesInAssetSpace != 0) {
-                assets = assets * totalAssets / totalSharesInAssetSpace;
-            }
-        }
         return assets;
     }
 
