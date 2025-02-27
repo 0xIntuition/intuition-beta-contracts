@@ -37,6 +37,9 @@ contract BondingCurveRegistry {
     // Mapping of the registered curve names, used to enforce uniqueness
     mapping(string => bool) public registeredCurveNames;
 
+    // Address of the admin who may add curves to the registry
+    address public admin;
+
     /* =================================================== */
     /*                    EVENTS                           */
     /* =================================================== */
@@ -48,6 +51,11 @@ contract BondingCurveRegistry {
     /// @param curveName The name of the curve
     event BondingCurveAdded(uint256 indexed curveId, address indexed curveAddress, string indexed curveName);
 
+    /// @notice Emitted when the admin role is transferred
+    /// @param oldAdmin The previous admin address
+    /// @param newAdmin The new admin address
+    event OwnershipTransferred(address indexed oldAdmin, address indexed newAdmin);
+
     /* =================================================== */
     /*                    CONSTRUCTOR                      */
     /* =================================================== */
@@ -56,8 +64,11 @@ contract BondingCurveRegistry {
     /// @param _admin Address who may add curves to the registry
     /// NOTE: This function is called only once (during contract deployment)
     constructor(address _admin) {
-        require(_admin != address(0), "BondingCurveRegistry: requires owner");
+        if (_admin == address(0)) {
+            revert Errors.BondingCurveRegistry_RequiresOwner();
+        }
         admin = _admin;
+        emit OwnershipTransferred(address(0), _admin);
     }
 
     /* =================================================== */
@@ -66,7 +77,11 @@ contract BondingCurveRegistry {
 
     /// @notice Add a new bonding curve to the registry
     /// @param bondingCurve Address of the new bonding curve
-    function addBondingCurve(address bondingCurve) external onlyOwner {
+    function addBondingCurve(address bondingCurve) external {
+        if (msg.sender != admin) {
+            revert Errors.BondingCurveRegistry_OnlyOwner();
+        }
+
         if (curveIds[bondingCurve] != 0) {
             revert Errors.BondingCurveRegistry_CurveAlreadyExists();
         }
@@ -88,6 +103,17 @@ contract BondingCurveRegistry {
         registeredCurveNames[curveName] = true;
 
         emit BondingCurveAdded(count, bondingCurve, curveName);
+    }
+
+    /// @notice Transfer the admin role to a new address
+    /// @param newOwner The new admin address
+    function transferOwnership(address newOwner) external {
+        if (msg.sender != admin) {
+            revert Errors.BondingCurveRegistry_OnlyOwner();
+        }
+        address oldAdmin = admin;
+        admin = newOwner;
+        emit OwnershipTransferred(oldAdmin, newOwner);
     }
 
     /* =================================================== */

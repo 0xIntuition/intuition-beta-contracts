@@ -170,32 +170,6 @@ contract OffsetProgressiveCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    /// @dev Let $s$ = initial total supply of shares
-    /// @dev Let $r$ = shares to redeem
-    /// @dev Let $\frac{m}{2}$ = half of the slope
-    /// @dev Let $o$ = offset value
-    /// @dev assets:
-    /// $$\text{assets} = ((s + o)^2 - ((s - r + o)^2)) \cdot \frac{m}{2}$$
-    /// @dev this can be expanded to:
-    /// $$\text{assets} = ((s + o)^2 - ((s + o)^2 - 2(s + o)r + r^2)) \cdot \frac{m}{2}$$
-    /// @dev which simplifies to:
-    /// $$\text{assets} = (2(s + o)r - r^2) \cdot \frac{m}{2}$$
-    /// @dev Implementation note: This formula is computed via the _convertToAssets helper,
-    /// @dev where juniorSupply = (s - r + o) and seniorSupply = (s + o)
-    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
-        external
-        view
-        override
-        returns (uint256 assets)
-    {
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares).add(OFFSET);
-
-        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
-
-        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
-    }
-
-    /// @inheritdoc BaseCurve
     /// @dev Let $s$ = current total supply of shares
     /// @dev Let $m$ = the slope of the curve
     /// @dev Let $o$ = offset value

@@ -1229,6 +1229,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///
     /// @dev assumes funds have already been transferred to this contract
     function _depositConstituentAtoms(uint256 id, address receiver, uint256 amount) internal {
+        // floor div, so perAtom is slightly less than 1/3 of total input amount
+        uint256 perAtom = amount / 3;
+
         // load atom IDs
         uint256[3] memory atomsIds;
         (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(id);
@@ -1241,6 +1244,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     }
 
     function _depositConstituentAtomsCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal {
+        // floor div, so perAtom is slightly less than 1/3 of total input amount
+        uint256 perAtom = amount / 3;
+
         // load atom IDs
         uint256[3] memory atomsIds;
         (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(tripleId);

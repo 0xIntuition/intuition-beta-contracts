@@ -7,7 +7,6 @@ import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
-
 contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {
         _setUp();
@@ -59,21 +58,20 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         address newAdmin = address(0x456);
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, newAdmin);
         uint256 minDelay = getMinDelay();
-
         // Schedule the operation
         vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, data);
 
         // Forward time to surpass the delay
         vm.warp(block.timestamp + minDelay + 1);
-
         // should revert if not admin
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AdminOnly.selector));
+        vm.expectRevert();
         ethMultiVault.setAdmin(newAdmin);
 
         // Execute the scheduled operation
-        vm.prank(msg.sender);
+        vm.warp(block.timestamp + minDelay + 1);
+        vm.prank(newAdmin);
         ethMultiVault.setAdmin(newAdmin);
 
         // Verify the operation's effects

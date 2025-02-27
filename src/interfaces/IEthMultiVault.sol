@@ -844,11 +844,10 @@ interface IEthMultiVault {
 
     /// @notice returns max amount of assets that can be deposited into the vault through a deposit call for a specific curve
     ///
-    /// @param vaultId vault id to get corresponding max deposit for
     /// @param curveId curve id to get corresponding max deposit for
     ///
     /// @return maxAssets amount of assets that can be deposited into the vault through a deposit call
-    function maxDepositCurve(uint256 vaultId, uint256 curveId) external view returns (uint256);
+    function maxDepositCurve(uint256 curveId) external view returns (uint256);
 
     /// @notice returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call for a specific curve
     ///
