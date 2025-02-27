@@ -3,6 +3,8 @@ pragma solidity ^0.8.21;
 
 import {Test} from "forge-std/Test.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import {AtomWallet} from "src/AtomWallet.sol";
 import {EthMultiVault} from "src/EthMultiVault.sol";
@@ -29,9 +31,11 @@ contract EthMultiVaultBase is Test {
     address immutable rich = vm.addr(PK_RICH);
 
     /// @notice core contracts
+    EthMultiVault ethMultiVaultImpl;
     EthMultiVault ethMultiVault;
     AtomWallet atomWallet;
     UpgradeableBeacon atomWalletBeacon;
+    ProxyAdmin proxyAdmin;
 
     /// @notice set up test environment
     // usage in other test contracts that extend this one:
@@ -77,8 +81,7 @@ contract EthMultiVaultBase is Test {
         IEthMultiVault.VaultFees memory vaultFees =
             IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100});
 
-        address bondingCurveRegistry = address(new BondingCurveRegistry());
-        BondingCurveRegistry(bondingCurveRegistry).initialize(address(this)); // this?
+        address bondingCurveRegistry = address(new BondingCurveRegistry(address(this)));
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
@@ -88,8 +91,32 @@ contract EthMultiVaultBase is Test {
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
             IEthMultiVault.BondingCurveConfig({registry: bondingCurveRegistry, defaultCurveId: 1});
 
-        ethMultiVault = new EthMultiVault();
-        ethMultiVault.init(generalConfig, atomConfig, tripleConfig, walletConfig, vaultFees, bondingCurveConfig);
+        // Deploy implementation
+        ethMultiVaultImpl = new EthMultiVault();
+
+        // Deploy proxy admin
+        proxyAdmin = new ProxyAdmin(msg.sender);
+
+        // Prepare initialization data
+        bytes memory initData = abi.encodeWithSelector(
+            EthMultiVault.init.selector,
+            generalConfig,
+            atomConfig,
+            tripleConfig,
+            walletConfig,
+            vaultFees,
+            bondingCurveConfig
+        );
+
+        // Deploy proxy
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+            address(ethMultiVaultImpl),
+            address(proxyAdmin),
+            initData
+        );
+
+        // Set up the proxy instance for testing
+        ethMultiVault = EthMultiVault(payable(address(proxy)));
 
         // deal ether for use in tests that call with value
         vm.deal(address(this), initialEth);

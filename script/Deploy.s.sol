@@ -107,23 +107,9 @@ contract DeployEthMultiVault is Script {
 
         // ------------------------------- Bonding Curves----------------------------------------
 
-        // Prepare data for initializer function of BondingCurveRegistry
-        bytes memory bondingCurveRegistryInitData = abi.encodeWithSelector(
-            BondingCurveRegistry.initialize.selector,
-            msg.sender // take temporary ownership of the BondingCurveRegistry contract to add the required curves
-        );
-
-        // Deploy BondingCurveRegistry implementation contract
-        bondingCurveRegistry = new BondingCurveRegistry();
-        console.logString("deployed BondingCurveRegistry implementation.");
-
-        // Deploy TransparentUpgradeableProxy with BondingCurveRegistry logic contract
-        bondingCurveRegistryProxy = new TransparentUpgradeableProxy(
-            address(bondingCurveRegistry), // BondingCurveRegistry logic contract address
-            address(timelock), // Timelock controller address, which will be the owner of the ProxyAdmin contract for the proxy
-            bondingCurveRegistryInitData // Initialization data to call the `initialize` function in BondingCurveRegistry
-        );
-        console.logString("deployed BondingCurveRegistry proxy.");
+        // Deploy BondingCurveRegistry and take temporary ownership to add the curves
+        bondingCurveRegistry = new BondingCurveRegistry(msg.sender);
+        console.logString("deployed BondingCurveRegistry.");
 
         // Deploy LinearCurve
         linearCurve = new LinearCurve("Linear Curve");

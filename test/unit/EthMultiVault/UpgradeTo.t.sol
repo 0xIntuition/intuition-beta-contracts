@@ -115,8 +115,7 @@ contract UpgradeTo is Test {
         });
 
         // Deploy and configure bonding curve registry
-        BondingCurveRegistry bondingCurveRegistry = new BondingCurveRegistry();
-        bondingCurveRegistry.initialize(address(this));
+        BondingCurveRegistry bondingCurveRegistry = new BondingCurveRegistry(address(this));
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         bondingCurveRegistry.addBondingCurve(linearCurve);
