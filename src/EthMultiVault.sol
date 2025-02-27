@@ -1844,19 +1844,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @notice returns the current share price for the given vault id
     /// @param id vault id to get corresponding share price for
-    /// @return price current share price for the given vault id, scaled by generalConfig.decimalPrecision
+    /// @return price current share price for the given vault id, scaled by 1e18
     function currentSharePrice(uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
         // Changing this to match exactly how convertToShares is calculated
         // This was not previously used internally in production code
-        uint256 price = supply == 0 ? 0 : vaults[id].totalAssets.mulDiv(generalConfig.decimalPrecision, supply);
+        uint256 price = supply == 0 ? 0 : vaults[id].totalAssets.mulDiv(1e18, supply);
         return price;
     }
 
     /// @notice returns the current share price for the given vault id and curve id
     /// @param id vault id to get corresponding share price for
     /// @param curveId curve id to get corresponding share price for
-    /// @return price current share price for the given vault id and curve id, scaled by generalConfig.decimalPrecision
+    /// @return price current share price for the given vault id and curve id, scaled by 1e18
     function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
@@ -1867,7 +1867,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         if (totalAssets != 0 && supply != 0) {
             uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
             if (totalSharesInAssetSpace != 0) {
-                price = price.mulDiv(totalAssets * generalConfig.decimalPrecision, totalSharesInAssetSpace);
+                price = price.mulDiv(totalAssets, totalSharesInAssetSpace);
+                return price;
             }
         }
         return price;
@@ -2149,6 +2150,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 shares = bondingCurveVaults[vaultId][curveId].balanceOf[receiver];
         (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId, curveId);
         return (shares, totalUserAssets);
+    }
+
+    function getCurveVaultState(uint256 termId, uint256 curveId) external view returns (uint256, uint256) {
+        return (bondingCurveVaults[termId][curveId].totalAssets, bondingCurveVaults[termId][curveId].totalShares);
     }
 
     /// @notice returns the Atom Wallet address for the given atom data

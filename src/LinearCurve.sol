@@ -108,8 +108,8 @@ contract LinearCurve is BaseCurve {
 
     /// @inheritdoc BaseCurve
     /// @notice In a linear curve, the base price will always be 1.  Pool ratio adjustments are dealt with in the EthMultiVault itself.
-    function currentPrice(uint256 /*totalShares*/ ) external pure override returns (uint256 sharePrice) {
-        return 1;
+    function currentPrice(uint256 /*totalShares*/ ) public pure override returns (uint256 sharePrice) {
+        return 1e18;
     }
 
     /// @inheritdoc BaseCurve

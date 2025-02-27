@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {BaseCurve} from "./BaseCurve.sol";
-import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
+import {UD60x18, ud60x18, convert, uMAX_UD60x18, uUNIT} from "@prb/math/UD60x18.sol";
 
 /**
  * @title  ProgressiveCurve
@@ -43,16 +43,16 @@ contract ProgressiveCurve is BaseCurve {
     /// @notice The slope of the curve, in basis points.  This is the rate at which the price of shares increases.
     /// @dev 0.0025e18 -> 25 basis points, 0.0001e18 = 1 basis point, etc etc
     /// @dev If minDeposit is 0.003 ether, this value would need to be 0.00007054e18 to avoid returning 0 shares for minDeposit assets
-    UD60x18 public immutable SLOPE;
+    UD60x18 public SLOPE;
 
     /// @notice The half of the slope, used for calculations.
-    UD60x18 public immutable HALF_SLOPE;
+    UD60x18 public HALF_SLOPE;
 
     /// @dev Since powu(2) will overflow first (see slope equation), maximum totalShares is sqrt(MAX_UD60x18)
-    uint256 public immutable MAX_SHARES;
+    uint256 public MAX_SHARES;
 
     /// @dev The maximum assets is totalShares * slope / 2, because multiplication (see slope equation) would overflow beyond that point.
-    uint256 public immutable MAX_ASSETS;
+    uint256 public MAX_ASSETS;
 
     /// @notice Constructs a new ProgressiveCurve with the given name and slope
     /// @param _name The name of the curve (i.e. "Progressive Curve #465")
@@ -63,14 +63,14 @@ contract ProgressiveCurve is BaseCurve {
         require(slope18 > 0, "PC: Slope must be > 0");
 
         SLOPE = UD60x18.wrap(slope18);
-        HALF_SLOPE = SLOPE.div(UD60x18.wrap(2));
+        HALF_SLOPE = UD60x18.wrap(slope18 / 2);
 
         // Find max values
         // powu(2) will overflow first, therefore maximum totalShares is sqrt(MAX_UD60x18)
         // Then the maximum assets is the total shares * slope / 2, because multiplication will overflow at this point
-        UD60x18 MAX_UD60x18 = UD60x18.wrap(type(uint256).max / 1e18);
-        MAX_SHARES = MAX_UD60x18.sqrt().unwrap();
-        MAX_ASSETS = MAX_UD60x18.mul(HALF_SLOPE).unwrap();
+        UD60x18 MAX_SQRT = UD60x18.wrap(uMAX_UD60x18 / uUNIT);
+        MAX_SHARES = MAX_SQRT.sqrt().unwrap();
+        MAX_ASSETS = MAX_SQRT.mul(HALF_SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -89,10 +89,32 @@ contract ProgressiveCurve is BaseCurve {
     {
         require(assets > 0, "Asset amount must be greater than zero");
 
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
+        UD60x18 currentSupplyOfShares = convert(totalShares);
 
-        return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
-            .unwrap();
+        return convert(currentSupplyOfShares.powu(2).add(convert(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares));
+    }
+
+    /// @inheritdoc BaseCurve
+    /// @dev Let $s$ = initial total supply of shares
+    /// @dev Let $r$ = shares to redeem
+    /// @dev Let $\frac{m}{2}$ = half of the slope
+    /// @dev assets:
+    /// $$\text{assets} = (s^2 - (s-r)^2) \cdot \frac{m}{2}$$
+    /// @dev this can be expanded to:
+    /// $$\text{assets} = (s^2 - (s^2 - 2sr + r^2)) \cdot \frac{m}{2}$$
+    /// @dev which simplifies to:
+    /// $$\text{assets} = (2sr - r^2) \cdot \frac{m}{2}$$
+    function previewRedeem(uint256 shares, uint256 totalShares, uint256 /*totalAssets*/ )
+        public
+        view
+        override
+        returns (uint256 assets)
+    {
+        UD60x18 currentSupplyOfShares = convert(totalShares);
+
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(convert(shares));
+
+        return convert(_convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares));
     }
 
     /// @inheritdoc BaseCurve
@@ -111,7 +133,7 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 assets)
     {
-        return _convertToAssets(UD60x18.wrap(totalShares), UD60x18.wrap(totalShares + shares)).unwrap();
+        return convert(_convertToAssets(convert(totalShares), convert(totalShares + shares)));
     }
 
     /// @inheritdoc BaseCurve
@@ -128,9 +150,8 @@ contract ProgressiveCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
-        return currentSupplyOfShares.sub(currentSupplyOfShares.powu(2).sub(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt())
-            .unwrap();
+        UD60x18 currentSupplyOfShares = convert(totalShares);
+        return convert(currentSupplyOfShares.sub(currentSupplyOfShares.powu(2).sub(convert(assets).div(HALF_SLOPE)).sqrt()));
     }
 
     /// @inheritdoc BaseCurve
@@ -164,8 +185,8 @@ contract ProgressiveCurve is BaseCurve {
     /// @dev This is the basic linear price function where the price increases linearly with the total supply
     /// @dev And the slope ($m$) determines how quickly the price increases
     /// @dev TLDR: Each new share costs more than the last
-    function currentPrice(uint256 totalShares) external view override returns (uint256 sharePrice) {
-        return UD60x18.wrap(totalShares).mul(SLOPE).unwrap();
+    function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
+        return convert(totalShares).mul(SLOPE).unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -183,9 +204,8 @@ contract ProgressiveCurve is BaseCurve {
         returns (uint256 shares)
     {
         require(assets > 0, "Asset amount must be greater than zero");
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
-        return currentSupplyOfShares.powu(2).add(UD60x18.wrap(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares)
-            .unwrap();
+        UD60x18 currentSupplyOfShares = convert(totalShares);
+        return convert(currentSupplyOfShares.powu(2).add(convert(assets).div(HALF_SLOPE)).sqrt().sub(currentSupplyOfShares));
     }
 
     /// @inheritdoc BaseCurve
@@ -205,9 +225,9 @@ contract ProgressiveCurve is BaseCurve {
         returns (uint256 assets)
     {
         require(totalShares >= shares, "PC: Under supply of shares");
-        UD60x18 currentSupplyOfShares = UD60x18.wrap(totalShares);
-        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(UD60x18.wrap(shares));
-        return _convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares).unwrap();
+        UD60x18 currentSupplyOfShares = convert(totalShares);
+        UD60x18 supplyOfSharesAfterRedeem = currentSupplyOfShares.sub(convert(shares));
+        return convert(_convertToAssets(supplyOfSharesAfterRedeem, currentSupplyOfShares));
     }
 
     /**
