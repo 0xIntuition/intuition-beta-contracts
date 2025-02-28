@@ -95,7 +95,7 @@ contract ArithmeticSeriesCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        // skip the previewWithdraw logic for now
+        // Skip the previewWithdraw logic for now
     }
 
     /// @inheritdoc BaseCurve
@@ -110,11 +110,11 @@ contract ArithmeticSeriesCurve is BaseCurve {
         }
 
         // 1. Disallow fractional shares if not permitted
-        if (shares % 1e18 != 0) {
+        if (shares % DECIMAL_PRECISION != 0) {
             revert FractionalSharesNotAllowed();
         }
 
-        uint256 sharesToMint = shares / 1e18; // integer shares
+        uint256 sharesToMint = shares / DECIMAL_PRECISION; // integer shares
 
         // 3. Now call your helper
         assets = calculateAssetsForDeposit(sharesToMint, totalShares);
@@ -123,43 +123,44 @@ contract ArithmeticSeriesCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
-    function convertToShares(uint256 assets, uint256, /*totalAssets*/ uint256 /*totalShares*/ )
-        public
-        view
-        override
-        returns (uint256 shares)
-    {
+    function convertToShares(
+        uint256 assets, // number of assets the user wants to deposit (18-decimal)
+        uint256, /*totalAssets*/
+        uint256 totalShares // totalShares in the vault (18-decimal)
+    ) public view override returns (uint256 shares) {
         if (assets == 0) {
             revert ZeroAssets();
         }
+        // Convert totalShares from 18-decimal to whole shares.
+        uint256 S = totalShares / DECIMAL_PRECISION;
 
-        // 1. Prepare quadratic equation parameters.
-        //    a, b, c correspond to the rearranged arithmetic-series sum formula.
-        uint256 a = priceIncrement; // d in the typical formula
-        uint256 b = 2 * BASE_PRICE - priceIncrement; // (2*A - d)
-        uint256 c = 2 * assets; // 2S, where S = assets
+        // Define quadratic coefficients:
+        // a = priceIncrement
+        // b = 2*BASE_PRICE - priceIncrement + 2*S*priceIncrement
+        uint256 a = priceIncrement;
+        uint256 b = 2 * BASE_PRICE - priceIncrement + 2 * S * priceIncrement;
 
-        // 2. Compute the discriminant for the quadratic formula: b^2 + 4ac
-        uint256 discriminant = (b * b) + (4 * a * c);
+        // Compute discriminant = b^2 + 8*a*assets.
+        uint256 discriminant = b * b + 8 * a * assets;
+        uint256 sqrtDisc = Math.sqrt(discriminant);
 
-        // 3. sqrt(discriminant)
-        uint256 sqrtD = Math.sqrt(discriminant);
+        // Ensure the square root is large enough.
+        if (sqrtDisc < b) {
+            revert FractionalSharesNotAllowed(); // Should never happen if assets > 0.
+        }
 
-        // 3. We'll compute n = [(-b + sqrtD) / (2a)].
-        uint256 numerator = sqrtD - b;
+        uint256 numerator = sqrtDisc - b;
         uint256 denominator = 2 * a;
 
-        // 4. Check if numerator is evenly divisible by denominator
-        //    If there's a remainder, that means partial shares.
+        // Ensure the result is an integer.
         if (numerator % denominator != 0) {
             revert FractionalSharesNotAllowed();
         }
 
-        // 5. Now we do the integer division safely, with no rounding loss
         uint256 n = numerator / denominator;
 
-        // 6. Convert `n` back to 18-decimals and return.
-        shares = n * 1e18;
+        // Return n converted back to 18-decimal format.
+        shares = n * DECIMAL_PRECISION;
 
         return shares;
     }
@@ -167,8 +168,8 @@ contract ArithmeticSeriesCurve is BaseCurve {
     /// @inheritdoc BaseCurve
     function convertToAssets(
         uint256 shares, // number of shares the user wants to burn (18-decimal)
-        uint256 totalShares, // totalShares in the system (18-decimal)
-        uint256 /* totalAssets */ // might be unused in a pure bonding-curve scenario
+        uint256 totalShares, // totalShares in the vault (18-decimal)
+        uint256 /* totalAssets */
     ) public view override returns (uint256 assets) {
         if (shares == 0) {
             revert ZeroShares();
@@ -210,7 +211,7 @@ contract ArithmeticSeriesCurve is BaseCurve {
 
     /**
      * @notice Helper function to calculate the sum of an arithmetic series
-     * @param shares Desired number of shares to mint (needs to be a whole number - not in 18 decimals format)
+     * @param shares Desired number of shares to mint (needs to be a whole number - NOT in 18 the decimals format)
      * @param totalShares Total number of shares in circulation
      * @return assets Total cost to mint the desired number of shares
      */
