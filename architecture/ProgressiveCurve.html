@@ -192,28 +192,6 @@
 <pre class="mermaid">graph TB
     root((&quot;ProgressiveCurve&quot;))
 
-    subgraph ConversionFunctions [&quot;Conversion Functions&quot;]
-        direction LR
-        func_convertToAssets[convertToAssets] &amp; func_convertToShares[convertToShares]
-    end
-    root --&gt; ConversionFunctions
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_HALF_SLOPE[HALF_SLOPE] &amp; func_MAX_ASSETS[MAX_ASSETS]
-        func_MAX_SHARES[MAX_SHARES] &amp; func_SLOPE[SLOPE]
-        func_currentPrice[currentPrice] &amp; func_maxAssets[maxAssets]
-        func_maxShares[maxShares] &amp; func_name[name]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph PreviewFunctions [&quot;Preview Functions&quot;]
-        direction LR
-        func_previewDeposit[previewDeposit] &amp; func_previewMint[previewMint]
-        func_previewRedeem[previewRedeem] &amp; func_previewWithdraw[previewWithdraw]
-    end
-    root --&gt; PreviewFunctions
-
     %% Style definitions
     classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
     classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
@@ -225,24 +203,9 @@
     %% Apply styles
     class root root;
     class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_convertToAssets,func_convertToShares,func_HALF_SLOPE,func_MAX_ASSETS,func_MAX_SHARES,func_SLOPE,func_currentPrice,func_maxAssets,func_maxShares,func_name,func_previewDeposit,func_previewMint,func_previewRedeem,func_previewWithdraw function;
 
     %% Click actions
     click root &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html&quot; &quot;ProgressiveCurve documentation&quot;
-    click func_HALF_SLOPE &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#half_slope&quot; &quot;HALF_SLOPE documentation&quot;
-    click func_MAX_ASSETS &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#max_assets&quot; &quot;MAX_ASSETS documentation&quot;
-    click func_MAX_SHARES &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#max_shares&quot; &quot;MAX_SHARES documentation&quot;
-    click func_SLOPE &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#slope&quot; &quot;SLOPE documentation&quot;
-    click func_currentPrice &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#currentprice&quot; &quot;currentPrice documentation&quot;
-    click func_maxAssets &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#maxassets&quot; &quot;maxAssets documentation&quot;
-    click func_maxShares &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#maxshares&quot; &quot;maxShares documentation&quot;
-    click func_name &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#name&quot; &quot;name documentation&quot;
-    click func_convertToAssets &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#converttoassets&quot; &quot;convertToAssets documentation&quot;
-    click func_convertToShares &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#converttoshares&quot; &quot;convertToShares documentation&quot;
-    click func_previewDeposit &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#previewdeposit&quot; &quot;previewDeposit documentation&quot;
-    click func_previewMint &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#previewmint&quot; &quot;previewMint documentation&quot;
-    click func_previewRedeem &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#previewredeem&quot; &quot;previewRedeem documentation&quot;
-    click func_previewWithdraw &quot;http://localhost:3000/src/ProgressiveCurve.sol/contract.ProgressiveCurve.html#previewwithdraw&quot; &quot;previewWithdraw documentation&quot;
 </pre>
 
                     </main>

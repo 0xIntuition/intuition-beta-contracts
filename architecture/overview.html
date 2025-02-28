@@ -190,9 +190,16 @@
                         <h1 id="contract-architecture"><a class="header" href="#contract-architecture">Contract Architecture</a></h1>
 <p>This document provides an overview of the core contracts and their relationships. Click on any contract to view its detailed documentation.</p>
 <pre class="mermaid">graph TB
-    Core((&quot;Core&quot;))
     Interfaces((&quot;Interfaces&quot;))
+    Core((&quot;Core&quot;))
     Libraries((&quot;Libraries&quot;))
+
+    subgraph InterfacesList [&quot;Interfaces&quot;]
+        direction LR
+        IBaseCurve &amp; IBondingCurveRegistry
+        IEthMultiVault &amp; IPermit2
+    end
+    Interfaces --&gt; InterfacesList
 
     subgraph CoreList [&quot;Core&quot;]
         direction LR
@@ -202,13 +209,6 @@
         ProgressiveCurve
     end
     Core --&gt; CoreList
-
-    subgraph InterfacesList [&quot;Interfaces&quot;]
-        direction LR
-        IBaseCurve &amp; IBondingCurveRegistry
-        IEthMultiVault &amp; IPermit2
-    end
-    Interfaces --&gt; InterfacesList
 
     subgraph LibrariesList [&quot;Libraries&quot;]
         direction LR
@@ -222,21 +222,21 @@
     classDef category fill:none,stroke:none,color:#000,font-size:24px,font-weight:bold,font-family:Arial;
     
     %% Apply styles
-    class Core,Interfaces,Libraries root;
-    class CoreList,InterfacesList,LibrariesList category;
+    class Interfaces,Core,Libraries root;
+    class InterfacesList,CoreList,LibrariesList category;
 
     %% Click actions
-    click EthMultiVault &quot;EthMultiVault.html&quot; &quot;EthMultiVault documentation&quot;
-    click BondingCurveRegistry &quot;BondingCurveRegistry.html&quot; &quot;BondingCurveRegistry documentation&quot;
-    click ProgressiveCurve &quot;ProgressiveCurve.html&quot; &quot;ProgressiveCurve documentation&quot;
-    click BaseCurve &quot;BaseCurve.html&quot; &quot;BaseCurve documentation&quot;
-    click OffsetProgressiveCurve &quot;OffsetProgressiveCurve.html&quot; &quot;OffsetProgressiveCurve documentation&quot;
-    click AtomWallet &quot;AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
-    click LinearCurve &quot;LinearCurve.html&quot; &quot;LinearCurve documentation&quot;
+    click IPermit2 &quot;http://localhost:3000/src/interfaces/IPermit2.sol/interface.IPermit2.html&quot; &quot;IPermit2 documentation&quot;
     click IEthMultiVault &quot;http://localhost:3000/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html&quot; &quot;IEthMultiVault documentation&quot;
     click IBaseCurve &quot;http://localhost:3000/src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html&quot; &quot;IBaseCurve documentation&quot;
     click IBondingCurveRegistry &quot;http://localhost:3000/src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html&quot; &quot;IBondingCurveRegistry documentation&quot;
-    click IPermit2 &quot;http://localhost:3000/src/interfaces/IPermit2.sol/interface.IPermit2.html&quot; &quot;IPermit2 documentation&quot;
+    click EthMultiVault &quot;EthMultiVault.html&quot; &quot;EthMultiVault documentation&quot;
+    click LinearCurve &quot;LinearCurve.html&quot; &quot;LinearCurve documentation&quot;
+    click AtomWallet &quot;AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
+    click ProgressiveCurve &quot;ProgressiveCurve.html&quot; &quot;ProgressiveCurve documentation&quot;
+    click BondingCurveRegistry &quot;BondingCurveRegistry.html&quot; &quot;BondingCurveRegistry documentation&quot;
+    click BaseCurve &quot;BaseCurve.html&quot; &quot;BaseCurve documentation&quot;
+    click OffsetProgressiveCurve &quot;OffsetProgressiveCurve.html&quot; &quot;OffsetProgressiveCurve documentation&quot;
     click Errors &quot;http://localhost:3000/src/libraries/Errors.sol/library.Errors.html&quot; &quot;Errors documentation&quot;
 </pre>
 

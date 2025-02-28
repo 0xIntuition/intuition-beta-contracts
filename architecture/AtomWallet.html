@@ -192,30 +192,6 @@
 <pre class="mermaid">graph TB
     root((&quot;AtomWallet&quot;))
 
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_acceptOwnership[acceptOwnership] &amp; func_addDeposit[addDeposit]
-        func_entryPoint[entryPoint] &amp; func_ethMultiVault[ethMultiVault]
-        func_execute[execute] &amp; func_executeBatch[executeBatch]
-        func_isClaimed[isClaimed] &amp; func_owner[owner]
-        func_pendingOwner[pendingOwner] &amp; func_renounceOwnership[renounceOwnership]
-        func_transferOwnership[transferOwnership] &amp; func_validateUserOp[validateUserOp]
-        func_withdrawDepositTo[withdrawDepositTo]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Getters [&quot;Getters&quot;]
-        direction LR
-        func_getDeposit[getDeposit] &amp; func_getNonce[getNonce]
-    end
-    root --&gt; Getters
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_init[init]
-    end
-    root --&gt; Initialization
-
     %% Style definitions
     classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
     classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
@@ -227,26 +203,9 @@
     %% Apply styles
     class root root;
     class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_acceptOwnership,func_addDeposit,func_entryPoint,func_ethMultiVault,func_execute,func_executeBatch,func_isClaimed,func_owner,func_pendingOwner,func_renounceOwnership,func_transferOwnership,func_validateUserOp,func_withdrawDepositTo,func_getDeposit,func_getNonce,func_init function;
 
     %% Click actions
     click root &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html&quot; &quot;AtomWallet documentation&quot;
-    click func_acceptOwnership &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#acceptownership&quot; &quot;acceptOwnership documentation&quot;
-    click func_addDeposit &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#adddeposit&quot; &quot;addDeposit documentation&quot;
-    click func_entryPoint &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#entrypoint&quot; &quot;entryPoint documentation&quot;
-    click func_ethMultiVault &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#ethmultivault&quot; &quot;ethMultiVault documentation&quot;
-    click func_execute &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#execute&quot; &quot;execute documentation&quot;
-    click func_executeBatch &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#executebatch&quot; &quot;executeBatch documentation&quot;
-    click func_isClaimed &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#isclaimed&quot; &quot;isClaimed documentation&quot;
-    click func_owner &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#owner&quot; &quot;owner documentation&quot;
-    click func_pendingOwner &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#pendingowner&quot; &quot;pendingOwner documentation&quot;
-    click func_renounceOwnership &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#renounceownership&quot; &quot;renounceOwnership documentation&quot;
-    click func_transferOwnership &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#transferownership&quot; &quot;transferOwnership documentation&quot;
-    click func_validateUserOp &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#validateuserop&quot; &quot;validateUserOp documentation&quot;
-    click func_withdrawDepositTo &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#withdrawdepositto&quot; &quot;withdrawDepositTo documentation&quot;
-    click func_getDeposit &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#getdeposit&quot; &quot;getDeposit documentation&quot;
-    click func_getNonce &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#getnonce&quot; &quot;getNonce documentation&quot;
-    click func_init &quot;http://localhost:3000/src/AtomWallet.sol/contract.AtomWallet.html#init&quot; &quot;init documentation&quot;
 </pre>
 
                     </main>

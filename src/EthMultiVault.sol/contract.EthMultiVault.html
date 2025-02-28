@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ethmultivault"><a class="header" href="#ethmultivault">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ef3b8f7d887f0a33fd6137d22a9a0ea42e5e05bc/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c085911af1bf5631ae2d33bd5ed99fecae2bd8eb/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -319,7 +319,7 @@ interface for depositing and redeeming.</em></p>
 </code></pre>
 <h3 id="__gap"><a class="header" href="#__gap">__gap</a></h3>
 <p><em>Gap for upgrade safety</em></p>
-<pre><code class="language-solidity">uint256[48] private __gap;
+<pre><code class="language-solidity">uint256[47] private __gap;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="onlyadmin"><a class="header" href="#onlyadmin">onlyAdmin</a></h3>
@@ -348,6 +348,12 @@ interface for depositing and redeeming.</em></p>
 <tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
 </tbody></table>
 </div>
+<h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
+<p>Security measure for upgradeable contracts</p>
+<p><em>Disables initializers on implementation contract to prevent direct initialization</em></p>
+<p><em>(Security) Prevents attackers from initializing the implementation contract directly</em></p>
+<pre><code class="language-solidity">constructor();
+</code></pre>
 <h3 id="receive"><a class="header" href="#receive">receive</a></h3>
 <p>contract does not accept ETH donations</p>
 <pre><code class="language-solidity">receive() external payable;
@@ -385,8 +391,9 @@ interface for depositing and redeeming.</em></p>
 </tbody></table>
 </div>
 <h3 id="setadmin"><a class="header" href="#setadmin">setAdmin</a></h3>
+<p>Requires new admin to 'confirm' the timelocked operation</p>
 <p><em>set admin</em></p>
-<pre><code class="language-solidity">function setAdmin(address admin) external onlyAdmin;
+<pre><code class="language-solidity">function setAdmin(address admin) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -456,24 +463,24 @@ interface for depositing and redeeming.</em></p>
 <tr><td><code>tripleCreationProtocolFee</code></td><td><code>uint256</code></td><td>new fee in wei</td></tr>
 </tbody></table>
 </div>
-<h3 id="setatomdepositfractionontriplecreation"><a class="header" href="#setatomdepositfractionontriplecreation">setAtomDepositFractionOnTripleCreation</a></h3>
-<p><em>sets the atom deposit fraction on triple creation used to increase the amount of assets
+<h3 id="settotalatomdepositsontriplecreation"><a class="header" href="#settotalatomdepositsontriplecreation">setTotalAtomDepositsOnTripleCreation</a></h3>
+<p><em>sets the atom deposit on triple creation used to increase the amount of assets
 in the underlying atom vaults on triple creation</em></p>
-<pre><code class="language-solidity">function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external onlyAdmin;
+<pre><code class="language-solidity">function setTotalAtomDepositsOnTripleCreation(uint256 totalAtomDepositsOnTripleCreation) external onlyAdmin;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomDepositFractionOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
+<tr><td><code>totalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="setatomdepositfractionfortriple"><a class="header" href="#setatomdepositfractionfortriple">setAtomDepositFractionForTriple</a></h3>
-<p><em>sets the atom deposit fraction percentage for atoms used in triples
+<h3 id="settotalatomdepositsfortriple"><a class="header" href="#settotalatomdepositsfortriple">setTotalAtomDepositsForTriple</a></h3>
+<p><em>sets the atom deposit percentage for atoms used in triples
 (number to be divided by <code>generalConfig.feeDenominator</code>)</em></p>
-<pre><code class="language-solidity">function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin;
+<pre><code class="language-solidity">function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external onlyAdmin;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+<tr><td><code>totalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit percentage</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
@@ -856,12 +863,12 @@ performing an audit of the full refactor (V2).</em></p>
 <tr><td><code>value</code></td><td><code>uint256</code></td><td>the amount of eth to transfer</td></tr>
 </tbody></table>
 </div>
-<h3 id="_depositatomfraction"><a class="header" href="#_depositatomfraction">_depositAtomFraction</a></h3>
+<h3 id="_depositconstituentatoms"><a class="header" href="#_depositconstituentatoms">_depositConstituentAtoms</a></h3>
 <p><em>divides amount across the three atoms composing the triple and issues shares to
 the receiver. Doesn't charge additional protocol fees, but it does charge entry fees on each deposit
 into an atom vault.</em></p>
 <p><em>assumes funds have already been transferred to this contract</em></p>
-<pre><code class="language-solidity">function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal;
+<pre><code class="language-solidity">function _depositConstituentAtoms(uint256 id, address receiver, uint256 amount) internal;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -870,8 +877,8 @@ into an atom vault.</em></p>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>the amount of eth to deposit</td></tr>
 </tbody></table>
 </div>
-<h3 id="_depositatomfractioncurve"><a class="header" href="#_depositatomfractioncurve">_depositAtomFractionCurve</a></h3>
-<pre><code class="language-solidity">function _depositAtomFractionCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal;
+<h3 id="_depositconstituentatomscurve"><a class="header" href="#_depositconstituentatomscurve">_depositConstituentAtomsCurve</a></h3>
+<pre><code class="language-solidity">function _depositConstituentAtomsCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal;
 </code></pre>
 <h3 id="_depositonvaultcreation"><a class="header" href="#_depositonvaultcreation">_depositOnVaultCreation</a></h3>
 <p><em>deposit assets into a vault upon creation.
@@ -1146,10 +1153,10 @@ provided</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged by vault on protocol fee</td></tr>
 </tbody></table>
 </div>
-<h3 id="atomdepositfractionamount"><a class="header" href="#atomdepositfractionamount">atomDepositFractionAmount</a></h3>
-<p>returns atom deposit fraction given amount of 'assets' provided</p>
+<h3 id="atomdepositsamount"><a class="header" href="#atomdepositsamount">atomDepositsAmount</a></h3>
+<p>returns atom deposit given amount of 'assets' provided</p>
 <p><em>only applies to triple vaults</em></p>
-<pre><code class="language-solidity">function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256);
+<pre><code class="language-solidity">function atomDepositsAmount(uint256 assets, uint256 id) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -1159,7 +1166,7 @@ provided</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be used as atom deposit fraction</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be used as atom deposit</td></tr>
 </tbody></table>
 </div>
 <h3 id="_feeonraw"><a class="header" href="#_feeonraw">_feeOnRaw</a></h3>
@@ -1188,7 +1195,7 @@ provided</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id, scaled by generalConfig.decimalPrecision</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id, scaled by 1e18</td></tr>
 </tbody></table>
 </div>
 <h3 id="currentsharepricecurve"><a class="header" href="#currentsharepricecurve">currentSharePriceCurve</a></h3>
@@ -1203,7 +1210,7 @@ provided</p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id and curve id, scaled by generalConfig.decimalPrecision</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id and curve id, scaled by 1e18</td></tr>
 </tbody></table>
 </div>
 <h3 id="maxdeposit"><a class="header" href="#maxdeposit">maxDeposit</a></h3>
@@ -1289,27 +1296,7 @@ No domain conversion needed because 1 dollar worth of assets always equals 1 dol
 <ol>
 <li>First, we get the base shares from the bonding curve:
 $$s_{base} = f_{curve}(assets)$$</li>
-<li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-$$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$</li>
 </ol>
-<h3 id="where-1"><a class="header" href="#where-1">Where:</a></h3>
-<ol>
-<li>$S_{total}$ is the total supply of shares</li>
-<li>$A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
-using the inverse of the bonding curve function</li>
-</ol>
-<p>This adjustment is necessary because the actual ratio of assets:shares may drift from
-the bonding curve's 'pure' conversion ratio due to:</p>
-<ul>
-<li>Protocol fees being taken in assets</li>
-<li>Share burns</li>
-<li>Direct asset transfers/airdrops</li>
-</ul>
-<p>The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
-quantities in the same space, as the bonding curve defines a non-linear relationship
-between assets and shares.</p>
-<p><em>TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
-So you need to compute their value using a common denominator like dollars.</em></p>
 <pre><code class="language-solidity">function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -1328,7 +1315,7 @@ So you need to compute their value using a common denominator like dollars.</em>
 <p>returns amount of assets that would be exchanged by vault given amount of 'shares' provided</p>
 <p>For regular vaults, assets maintain a linear relationship with shares:
 $assets = shares \cdot \frac{A_{total}}{S_{total}}$</p>
-<h3 id="where-2"><a class="header" href="#where-2">Where:</a></h3>
+<h3 id="where-1"><a class="header" href="#where-1">Where:</a></h3>
 <ul>
 <li>$S_{total}$ is the total supply of shares</li>
 <li>$A_{total}$ is the total assets in the vault</li>
@@ -1354,27 +1341,7 @@ No domain conversion needed because 1 dollar worth of shares always equals 1 dol
 <ol>
 <li>First, we get the base assets from the bonding curve:
 $$a_{base} = f_{curve}^{-1}(shares)$$</li>
-<li>Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-$$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$</li>
 </ol>
-<h3 id="where-3"><a class="header" href="#where-3">Where:</a></h3>
-<ol>
-<li>$A_{total}$ is the total assets in the vault</li>
-<li>$S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
-using the bonding curve function</li>
-</ol>
-<p>This adjustment is necessary because the actual ratio of shares:assets may drift from
-the bonding curve's 'pure' conversion ratio due to:</p>
-<ul>
-<li>Protocol fees being taken in assets</li>
-<li>Share burns</li>
-<li>Direct asset transfers/airdrops</li>
-</ul>
-<p>The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
-quantities in the same space, as the bonding curve defines a non-linear relationship
-between shares and assets.</p>
-<p><em>TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.
-So you need to compute their value using a common denominator like dollars.</em></p>
 <pre><code class="language-solidity">function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -1532,6 +1499,9 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
     external
     view
     returns (uint256, uint256);
+</code></pre>
+<h3 id="getcurvevaultstate"><a class="header" href="#getcurvevaultstate">getCurveVaultState</a></h3>
+<pre><code class="language-solidity">function getCurveVaultState(uint256 termId, uint256 curveId) external view returns (uint256, uint256);
 </code></pre>
 <h3 id="computeatomwalletaddr"><a class="header" href="#computeatomwalletaddr">computeAtomWalletAddr</a></h3>
 <p>returns the Atom Wallet address for the given atom data</p>

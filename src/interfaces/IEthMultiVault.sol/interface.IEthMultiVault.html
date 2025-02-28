@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ef3b8f7d887f0a33fd6137d22a9a0ea42e5e05bc/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c085911af1bf5631ae2d33bd5ed99fecae2bd8eb/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -243,6 +243,7 @@
 </tbody></table>
 </div>
 <h3 id="setadmin"><a class="header" href="#setadmin">setAdmin</a></h3>
+<p>Requires new admin to 'confirm' the timelocked operation</p>
 <p><em>set admin</em></p>
 <pre><code class="language-solidity">function setAdmin(address admin) external;
 </code></pre>
@@ -314,24 +315,24 @@
 <tr><td><code>tripleCreationProtocolFee</code></td><td><code>uint256</code></td><td>new fee in wei</td></tr>
 </tbody></table>
 </div>
-<h3 id="setatomdepositfractionontriplecreation"><a class="header" href="#setatomdepositfractionontriplecreation">setAtomDepositFractionOnTripleCreation</a></h3>
+<h3 id="settotalatomdepositsontriplecreation"><a class="header" href="#settotalatomdepositsontriplecreation">setTotalAtomDepositsOnTripleCreation</a></h3>
 <p><em>sets the atom deposit fraction on triple creation used to increase the amount of assets
 in the underlying atom vaults on triple creation</em></p>
-<pre><code class="language-solidity">function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external;
+<pre><code class="language-solidity">function setTotalAtomDepositsOnTripleCreation(uint256 totalAtomDepositsOnTripleCreation) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomDepositFractionOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
+<tr><td><code>totalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="setatomdepositfractionfortriple"><a class="header" href="#setatomdepositfractionfortriple">setAtomDepositFractionForTriple</a></h3>
+<h3 id="settotalatomdepositsfortriple"><a class="header" href="#settotalatomdepositsfortriple">setTotalAtomDepositsForTriple</a></h3>
 <p><em>sets the atom deposit fraction percentage for atoms used in triples
 (number to be divided by <code>generalConfig.feeDenominator</code>)</em></p>
-<pre><code class="language-solidity">function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
+<pre><code class="language-solidity">function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+<tr><td><code>totalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
@@ -492,6 +493,24 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not an atom.</td></tr>
 </tbody></table>
 </div>
+<h3 id="depositatomcurve"><a class="header" href="#depositatomcurve">depositAtomCurve</a></h3>
+<p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<pre><code class="language-solidity">function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId) external payable returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>atomId</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not an atom.</td></tr>
+</tbody></table>
+</div>
 <h3 id="redeematom"><a class="header" href="#redeematom">redeemAtom</a></h3>
 <p>redeem assets from an atom vault</p>
 <pre><code class="language-solidity">function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
@@ -501,6 +520,25 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
 <tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
 <tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+</tbody></table>
+</div>
+<h3 id="redeematomcurve"><a class="header" href="#redeematomcurve">redeemAtomCurve</a></h3>
+<p>redeem shares from a bonding curve atom vault for assets</p>
+<pre><code class="language-solidity">function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+    external
+    returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>atomId</code></td><td><code>uint256</code></td><td>the vault ID of the atom</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -525,6 +563,24 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not a triple.</td></tr>
 </tbody></table>
 </div>
+<h3 id="deposittriplecurve"><a class="header" href="#deposittriplecurve">depositTripleCurve</a></h3>
+<p>deposit eth into a bonding curve triple vault and grant ownership of 'shares' to 'receiver'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<pre><code class="language-solidity">function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId) external payable returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>tripleId</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares the amount of shares minted NOTE: this function will revert if the minimum deposit amount of eth is not met and if the vault ID does not exist/is not a triple.</td></tr>
+</tbody></table>
+</div>
 <h3 id="redeemtriple"><a class="header" href="#redeemtriple">redeemTriple</a></h3>
 <p>redeems 'shares' number of shares from the triple vault and send 'assets' eth
 from the contract to 'reciever' factoring in exit fees</p>
@@ -535,6 +591,25 @@ from the contract to 'reciever' factoring in exit fees</p>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
 <tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
 <tr><td><code>id</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+</tbody></table>
+</div>
+<h3 id="redeemtriplecurve"><a class="header" href="#redeemtriplecurve">redeemTripleCurve</a></h3>
+<p>redeem shares from a bonding curve triple vault for assets</p>
+<pre><code class="language-solidity">function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+    external
+    returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>the amount of shares to redeem</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>tripleId</code></td><td><code>uint256</code></td><td>the vault ID of the triple</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>the vault ID of the curve</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -663,9 +738,9 @@ provided</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>feeAmount amount of assets that would be charged by vault on protocol fee</td></tr>
 </tbody></table>
 </div>
-<h3 id="atomdepositfractionamount"><a class="header" href="#atomdepositfractionamount">atomDepositFractionAmount</a></h3>
-<p>returns atom deposit fraction given amount of 'assets' provided</p>
-<pre><code class="language-solidity">function atomDepositFractionAmount(uint256 assets, uint256 id) external view returns (uint256);
+<h3 id="atomdepositsamount"><a class="header" href="#atomdepositsamount">atomDepositsAmount</a></h3>
+<p>returns atom deposit given amount of 'assets' provided</p>
+<pre><code class="language-solidity">function atomDepositsAmount(uint256 assets, uint256 id) external view returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -866,6 +941,161 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets number of assets user has in the vault</td></tr>
 </tbody></table>
 </div>
+<h3 id="getdepositsharesandfeescurve"><a class="header" href="#getdepositsharesandfeescurve">getDepositSharesAndFeesCurve</a></h3>
+<p>returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault</p>
+<pre><code class="language-solidity">function getDepositSharesAndFeesCurve(uint256 assets, uint256 vaultId, uint256 curveId)
+    external
+    view
+    returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of <code>assets</code> to calculate fees on (should always be msg.value - protocolFee)</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>totalAssetsDelta changes in vault's total assets</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>sharesForReceiver changes in vault's total shares (shares owed to receiver)</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>userAssetsAfterTotalFees amount of assets that goes towards minting shares for the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>entryFee amount of assets that would be charged for the entry fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="getredeemassetsandfeescurve"><a class="header" href="#getredeemassetsandfeescurve">getRedeemAssetsAndFeesCurve</a></h3>
+<p>returns the assets for receiver and other important values when redeeming 'shares' from a bonding curve vault</p>
+<pre><code class="language-solidity">function getRedeemAssetsAndFeesCurve(uint256 shares, uint256 vaultId, uint256 curveId)
+    external
+    view
+    returns (uint256, uint256, uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of <code>shares</code> to calculate fees on</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding fees for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding fees for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>totalUserAssets total amount of assets user would receive if redeeming 'shares', not including fees</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assetsForReceiver amount of assets that is redeemable by the receiver</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>protocolFee amount of assets that would be sent to the protocol multisig</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>exitFee amount of assets that would be charged for the exit fee</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentsharepricecurve"><a class="header" href="#currentsharepricecurve">currentSharePriceCurve</a></h3>
+<p>returns the current share price for the given vault id and curve id</p>
+<pre><code class="language-solidity">function currentSharePriceCurve(uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding share price for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding share price for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>price current share price for the given vault id and curve id</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxdepositcurve"><a class="header" href="#maxdepositcurve">maxDepositCurve</a></h3>
+<p>returns max amount of assets that can be deposited into the vault through a deposit call for a specific curve</p>
+<pre><code class="language-solidity">function maxDepositCurve(uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding max deposit for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>maxAssets amount of assets that can be deposited into the vault through a deposit call</td></tr>
+</tbody></table>
+</div>
+<h3 id="maxredeemcurve"><a class="header" href="#maxredeemcurve">maxRedeemCurve</a></h3>
+<p>returns max amount of shares that can be redeemed from the 'owner' balance through a redeem call for a specific curve</p>
+<pre><code class="language-solidity">function maxRedeemCurve(address owner, uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>owner</code></td><td><code>address</code></td><td>address of the account to get max redeemable shares for</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that can be redeemed from the 'owner' balance through a redeem call</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttosharescurve"><a class="header" href="#converttosharescurve">convertToSharesCurve</a></h3>
+<p>returns amount of shares that would be exchanged by vault given amount of 'assets' provided for a specific curve</p>
+<pre><code class="language-solidity">function convertToSharesCurve(uint256 assets, uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate shares on</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be exchanged by vault given amount of 'assets' provided</td></tr>
+</tbody></table>
+</div>
+<h3 id="converttoassetscurve"><a class="header" href="#converttoassetscurve">convertToAssetsCurve</a></h3>
+<p>returns amount of assets that would be exchanged by vault given amount of 'shares' provided for a specific curve</p>
+<pre><code class="language-solidity">function convertToAssetsCurve(uint256 shares, uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of shares to calculate assets on</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding assets for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding assets for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets amount of assets that would be exchanged by vault given amount of 'shares' provided</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewdepositcurve"><a class="header" href="#previewdepositcurve">previewDepositCurve</a></h3>
+<p>simulates the effects of the deposited amount of 'assets' and returns the estimated
+amount of shares that would be minted from the deposit of <code>assets</code> for a specific curve</p>
+<pre><code class="language-solidity">function previewDepositCurve(uint256 assets, uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256</code></td><td>amount of assets to calculate shares on</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding shares for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding shares for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares amount of shares that would be minted from the deposit of <code>assets</code> NOTE: this function pessimistically estimates the amount of shares that would be minted from the input amount of assets so if the vault is empty before the deposit the caller receives more shares than returned by this function, reference internal _depositIntoVault logic for details</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewredeemcurve"><a class="header" href="#previewredeemcurve">previewRedeemCurve</a></h3>
+<p>simulates the effects of the redemption of <code>shares</code> and returns the estimated
+amount of assets estimated to be returned to the receiver of the redeem for a specific curve</p>
+<pre><code class="language-solidity">function previewRedeemCurve(uint256 shares, uint256 vaultId, uint256 curveId) external view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>amount of shares to calculate assets on</td></tr>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id to get corresponding assets for</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id to get corresponding assets for</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets amount of assets estimated to be returned to the receiver</td></tr>
+</tbody></table>
+</div>
 <h3 id="computeatomwalletaddr"><a class="header" href="#computeatomwalletaddr">computeAtomWalletAddr</a></h3>
 <p>returns the Atom Wallet address for the given atom data</p>
 <pre><code class="language-solidity">function computeAtomWalletAddr(uint256 id) external view returns (address);
@@ -1023,6 +1253,16 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>readyTime</code></td><td><code>uint256</code></td><td>block number when the operation is ready</td></tr>
 </tbody></table>
 </div>
+<h3 id="operationexecuted"><a class="header" href="#operationexecuted">OperationExecuted</a></h3>
+<p>emitted upon executing an operation</p>
+<pre><code class="language-solidity">event OperationExecuted(bytes32 indexed operationId, bytes data);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>operationId</code></td><td><code>bytes32</code></td><td>unique identifier for the operation</td></tr>
+<tr><td><code>data</code></td><td><code>bytes</code></td><td>data of the operation that was executed</td></tr>
+</tbody></table>
+</div>
 <h3 id="operationcancelled"><a class="header" href="#operationcancelled">OperationCancelled</a></h3>
 <p>emitted upon cancelling an operation</p>
 <pre><code class="language-solidity">event OperationCancelled(bytes32 indexed operationId, bytes data);
@@ -1115,26 +1355,26 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>oldTripleCreationProtocolFee</code></td><td><code>uint256</code></td><td>old triple creation fee</td></tr>
 </tbody></table>
 </div>
-<h3 id="atomdepositfractionontriplecreationset"><a class="header" href="#atomdepositfractionontriplecreationset">AtomDepositFractionOnTripleCreationSet</a></h3>
+<h3 id="totalatomdepositsontriplecreationset"><a class="header" href="#totalatomdepositsontriplecreationset">TotalAtomDepositsOnTripleCreationSet</a></h3>
 <p>emitted upon changing the atom deposit fraction on triple creation</p>
-<pre><code class="language-solidity">event AtomDepositFractionOnTripleCreationSet(
-    uint256 newAtomDepositFractionOnTripleCreation, uint256 oldAtomDepositFractionOnTripleCreation
+<pre><code class="language-solidity">event TotalAtomDepositsOnTripleCreationSet(
+    uint256 newTotalAtomDepositsOnTripleCreation, uint256 oldTotalAtomDepositsOnTripleCreation
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>newAtomDepositFractionOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
-<tr><td><code>oldAtomDepositFractionOnTripleCreation</code></td><td><code>uint256</code></td><td>old atom deposit fraction on triple creation</td></tr>
+<tr><td><code>newTotalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
+<tr><td><code>oldTotalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>old atom deposit fraction on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="atomdepositfractionfortripleset"><a class="header" href="#atomdepositfractionfortripleset">AtomDepositFractionForTripleSet</a></h3>
+<h3 id="totalatomdepositsfortripleset"><a class="header" href="#totalatomdepositsfortripleset">TotalAtomDepositsForTripleSet</a></h3>
 <p>emitted upon changing the atom deposit fraction for triples</p>
-<pre><code class="language-solidity">event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
+<pre><code class="language-solidity">event TotalAtomDepositsForTripleSet(uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>newAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction for triples</td></tr>
-<tr><td><code>oldAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
+<tr><td><code>newTotalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction for triples</td></tr>
+<tr><td><code>oldTotalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
 </tbody></table>
 </div>
 <h3 id="entryfeeset"><a class="header" href="#entryfeeset">EntryFeeSet</a></h3>
@@ -1246,8 +1486,8 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <p><em>Triple configuration struct</em></p>
 <pre><code class="language-solidity">struct TripleConfig {
     uint256 tripleCreationProtocolFee;
-    uint256 atomDepositFractionOnTripleCreation;
-    uint256 atomDepositFractionForTriple;
+    uint256 totalAtomDepositsOnTripleCreation;
+    uint256 totalAtomDepositsForTriple;
 }
 </code></pre>
 <h3 id="walletconfig"><a class="header" href="#walletconfig">WalletConfig</a></h3>

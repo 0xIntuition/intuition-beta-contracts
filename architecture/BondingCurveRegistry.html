@@ -192,46 +192,6 @@
 <pre class="mermaid">graph TB
     root((&quot;BondingCurveRegistry&quot;))
 
-    subgraph ConversionFunctions [&quot;Conversion Functions&quot;]
-        direction LR
-        func_convertToAssets[convertToAssets] &amp; func_convertToShares[convertToShares]
-    end
-    root --&gt; ConversionFunctions
-
-    subgraph CoreFunctions [&quot;Core Functions&quot;]
-        direction LR
-        func_addBondingCurve[addBondingCurve] &amp; func_admin[admin]
-        func_count[count] &amp; func_currentPrice[currentPrice]
-        func_curveAddresses[curveAddresses] &amp; func_curveIds[curveIds]
-    end
-    root --&gt; CoreFunctions
-
-    subgraph Getters [&quot;Getters&quot;]
-        direction LR
-        func_getCurveMaxAssets[getCurveMaxAssets] &amp; func_getCurveMaxShares[getCurveMaxShares]
-        func_getCurveName[getCurveName]
-    end
-    root --&gt; Getters
-
-    subgraph Initialization [&quot;Initialization&quot;]
-        direction LR
-        func_initialize[initialize]
-    end
-    root --&gt; Initialization
-
-    subgraph PreviewFunctions [&quot;Preview Functions&quot;]
-        direction LR
-        func_previewDeposit[previewDeposit] &amp; func_previewMint[previewMint]
-        func_previewRedeem[previewRedeem] &amp; func_previewWithdraw[previewWithdraw]
-    end
-    root --&gt; PreviewFunctions
-
-    subgraph Setters [&quot;Setters&quot;]
-        direction LR
-        func_setAdmin[setAdmin]
-    end
-    root --&gt; Setters
-
     %% Style definitions
     classDef default fill:#f4f4f4,stroke:#333,stroke-width:2px,font-size:28px,font-family:Arial,rounded:true;
     classDef root fill:#6366f1,color:#fff,stroke:#4338ca,stroke-width:4px,font-size:32px,font-weight:bold,font-family:Arial,rx:40px;
@@ -243,27 +203,9 @@
     %% Apply styles
     class root root;
     class StateVars,CoreFunctions,Getters,Setters,PreviewFunctions,ConversionFunctions,Initialization,Uses,Inheritance category;
-    class func_convertToAssets,func_convertToShares,func_addBondingCurve,func_admin,func_count,func_currentPrice,func_curveAddresses,func_curveIds,func_getCurveMaxAssets,func_getCurveMaxShares,func_getCurveName,func_initialize,func_previewDeposit,func_previewMint,func_previewRedeem,func_previewWithdraw,func_setAdmin function;
 
     %% Click actions
     click root &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html&quot; &quot;BondingCurveRegistry documentation&quot;
-    click func_addBondingCurve &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#addbondingcurve&quot; &quot;addBondingCurve documentation&quot;
-    click func_admin &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#admin&quot; &quot;admin documentation&quot;
-    click func_count &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#count&quot; &quot;count documentation&quot;
-    click func_currentPrice &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#currentprice&quot; &quot;currentPrice documentation&quot;
-    click func_curveAddresses &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#curveaddresses&quot; &quot;curveAddresses documentation&quot;
-    click func_curveIds &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#curveids&quot; &quot;curveIds documentation&quot;
-    click func_convertToAssets &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#converttoassets&quot; &quot;convertToAssets documentation&quot;
-    click func_convertToShares &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#converttoshares&quot; &quot;convertToShares documentation&quot;
-    click func_getCurveMaxAssets &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#getcurvemaxassets&quot; &quot;getCurveMaxAssets documentation&quot;
-    click func_getCurveMaxShares &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#getcurvemaxshares&quot; &quot;getCurveMaxShares documentation&quot;
-    click func_getCurveName &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#getcurvename&quot; &quot;getCurveName documentation&quot;
-    click func_initialize &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#initialize&quot; &quot;initialize documentation&quot;
-    click func_previewDeposit &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#previewdeposit&quot; &quot;previewDeposit documentation&quot;
-    click func_previewMint &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#previewmint&quot; &quot;previewMint documentation&quot;
-    click func_previewRedeem &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#previewredeem&quot; &quot;previewRedeem documentation&quot;
-    click func_previewWithdraw &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#previewwithdraw&quot; &quot;previewWithdraw documentation&quot;
-    click func_setAdmin &quot;http://localhost:3000/src/BondingCurveRegistry.sol/contract.BondingCurveRegistry.html#setadmin&quot; &quot;setAdmin documentation&quot;
 </pre>
 
                     </main>

@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="linearcurve"><a class="header" href="#linearcurve">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ef3b8f7d887f0a33fd6137d22a9a0ea42e5e05bc/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c085911af1bf5631ae2d33bd5ed99fecae2bd8eb/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -225,12 +225,12 @@ pro-rata share pricing can be adapted to the bonding curve architecture for futu
 versions.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="max_shares"><a class="header" href="#max_shares">MAX_SHARES</a></h3>
-<p><em>UD60x18 Max</em></p>
-<pre><code class="language-solidity">uint256 public immutable MAX_SHARES = type(uint256).max / 1e18;
+<p><em>Maximum number of shares that can be handled by the curve.</em></p>
+<pre><code class="language-solidity">uint256 public constant MAX_SHARES = type(uint256).max;
 </code></pre>
 <h3 id="max_assets"><a class="header" href="#max_assets">MAX_ASSETS</a></h3>
-<p><em>UD60x18 Max</em></p>
-<pre><code class="language-solidity">uint256 public immutable MAX_ASSETS = type(uint256).max / 1e18;
+<p><em>Maximum number of assets that can be handled by the curve.</em></p>
+<pre><code class="language-solidity">uint256 public constant MAX_ASSETS = type(uint256).max;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
@@ -244,87 +244,71 @@ versions.</em></p>
 </div>
 <h3 id="previewdeposit"><a class="header" href="#previewdeposit">previewDeposit</a></h3>
 <p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256 totalAssets, uint256 totalShares)
-    public
-    view
-    override
-    returns (uint256 shares);
+<pre><code class="language-solidity">function previewDeposit(uint256 assets, uint256, uint256) external pure override returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to deposit</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would be minted</td></tr>
-</tbody></table>
-</div>
-<h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
-<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256 totalShares, uint256 totalAssets)
-    public
-    view
-    override
-    returns (uint256 assets);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be returned</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares The number of shares that would be minted</td></tr>
 </tbody></table>
 </div>
 <h3 id="previewmint"><a class="header" href="#previewmint">previewMint</a></h3>
 <p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function previewMint(uint256 shares, uint256 totalShares, uint256 totalAssets)
-    public
-    view
-    override
-    returns (uint256 assets);
+<pre><code class="language-solidity">function previewMint(uint256 shares, uint256, uint256) external pure override returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to mint</td></tr>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>assets</code></td><td><code>uint256</code></td><td>The number of assets that would be required to mint the shares</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets The number of assets that would be required to mint the shares</td></tr>
 </tbody></table>
 </div>
 <h3 id="previewwithdraw"><a class="header" href="#previewwithdraw">previewWithdraw</a></h3>
 <p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256 totalAssets, uint256 totalShares)
-    public
-    view
-    override
-    returns (uint256 shares);
+<pre><code class="language-solidity">function previewWithdraw(uint256 assets, uint256, uint256) external pure override returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>assets</code></td><td><code>uint256</code></td><td>Quantity of assets to withdraw</td></tr>
-<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>Total quantity of assets already staked into the curve</td></tr>
-<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>Total quantity of shares already awarded by the curve</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>shares</code></td><td><code>uint256</code></td><td>The number of shares that would need to be redeemed</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares The number of shares that would need to be redeemed</td></tr>
+</tbody></table>
+</div>
+<h3 id="previewredeem"><a class="header" href="#previewredeem">previewRedeem</a></h3>
+<p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
+<pre><code class="language-solidity">function previewRedeem(uint256 shares, uint256, uint256) external pure override returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256</code></td><td>Quantity of shares to burn</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets The number of assets that would be returned</td></tr>
 </tbody></table>
 </div>
 <h3 id="converttoshares"><a class="header" href="#converttoshares">convertToShares</a></h3>
 <p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256) public pure override returns (uint256 shares);
+<pre><code class="language-solidity">function convertToShares(uint256 assets, uint256, uint256) external pure override returns (uint256 shares);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -340,7 +324,7 @@ versions.</em></p>
 </div>
 <h3 id="converttoassets"><a class="header" href="#converttoassets">convertToAssets</a></h3>
 <p>Computes the 1:1 relationship between assets &lt;--&gt; shares.</p>
-<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256, uint256) public pure override returns (uint256 assets);
+<pre><code class="language-solidity">function convertToAssets(uint256 shares, uint256, uint256) external pure override returns (uint256 assets);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -365,18 +349,18 @@ versions.</em></p>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share</td></tr>
+<tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div>
 <h3 id="maxshares"><a class="header" href="#maxshares">maxShares</a></h3>
 <p>The maximum number of shares that this curve can handle without overflowing.</p>
 <p><em>Checked by the EthMultiVault before transacting</em></p>
-<pre><code class="language-solidity">function maxShares() public view override returns (uint256);
+<pre><code class="language-solidity">function maxShares() external pure override returns (uint256);
 </code></pre>
 <h3 id="maxassets"><a class="header" href="#maxassets">maxAssets</a></h3>
 <p>The maximum number of assets that this curve can handle without overflowing.</p>
 <p><em>Checked by the EthMultiVault before transacting</em></p>
-<pre><code class="language-solidity">function maxAssets() public view override returns (uint256);
+<pre><code class="language-solidity">function maxAssets() external pure override returns (uint256);
 </code></pre>
 
                     </main>

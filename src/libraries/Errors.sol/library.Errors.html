@@ -188,7 +188,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/ef3b8f7d887f0a33fd6137d22a9a0ea42e5e05bc/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c085911af1bf5631ae2d33bd5ed99fecae2bd8eb/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -244,8 +244,8 @@
 <h3 id="ethmultivault_insufficientsharesinvault"><a class="header" href="#ethmultivault_insufficientsharesinvault">EthMultiVault_InsufficientSharesInVault</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_InsufficientSharesInVault();
 </code></pre>
-<h3 id="ethmultivault_invalidatomdepositfractionfortriple"><a class="header" href="#ethmultivault_invalidatomdepositfractionfortriple">EthMultiVault_InvalidAtomDepositFractionForTriple</a></h3>
-<pre><code class="language-solidity">error EthMultiVault_InvalidAtomDepositFractionForTriple();
+<h3 id="ethmultivault_invalidtotalatomdepositsfortriple"><a class="header" href="#ethmultivault_invalidtotalatomdepositsfortriple">EthMultiVault_InvalidTotalAtomDepositsForTriple</a></h3>
+<pre><code class="language-solidity">error EthMultiVault_InvalidTotalAtomDepositsForTriple();
 </code></pre>
 <h3 id="ethmultivault_invalidentryfee"><a class="header" href="#ethmultivault_invalidentryfee">EthMultiVault_InvalidEntryFee</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_InvalidEntryFee();
@@ -361,11 +361,20 @@
 <h3 id="attestoor_wrongarraylengths"><a class="header" href="#attestoor_wrongarraylengths">Attestoor_WrongArrayLengths</a></h3>
 <pre><code class="language-solidity">error Attestoor_WrongArrayLengths();
 </code></pre>
+<h3 id="bondingcurveregistry_curvealreadyexists"><a class="header" href="#bondingcurveregistry_curvealreadyexists">BondingCurveRegistry_CurveAlreadyExists</a></h3>
+<pre><code class="language-solidity">error BondingCurveRegistry_CurveAlreadyExists();
+</code></pre>
+<h3 id="bondingcurveregistry_curvenamenotunique"><a class="header" href="#bondingcurveregistry_curvenamenotunique">BondingCurveRegistry_CurveNameNotUnique</a></h3>
+<pre><code class="language-solidity">error BondingCurveRegistry_CurveNameNotUnique();
+</code></pre>
 <h3 id="bondingcurveregistry_onlyowner"><a class="header" href="#bondingcurveregistry_onlyowner">BondingCurveRegistry_OnlyOwner</a></h3>
 <pre><code class="language-solidity">error BondingCurveRegistry_OnlyOwner();
 </code></pre>
-<h3 id="bondingcurveregistry_curvealreadyexists"><a class="header" href="#bondingcurveregistry_curvealreadyexists">BondingCurveRegistry_CurveAlreadyExists</a></h3>
-<pre><code class="language-solidity">error BondingCurveRegistry_CurveAlreadyExists();
+<h3 id="bondingcurveregistry_requiresowner"><a class="header" href="#bondingcurveregistry_requiresowner">BondingCurveRegistry_RequiresOwner</a></h3>
+<pre><code class="language-solidity">error BondingCurveRegistry_RequiresOwner();
+</code></pre>
+<h3 id="basecurve_emptystringnotallowed"><a class="header" href="#basecurve_emptystringnotallowed">BaseCurve_EmptyStringNotAllowed</a></h3>
+<pre><code class="language-solidity">error BaseCurve_EmptyStringNotAllowed();
 </code></pre>
 
                     </main>
