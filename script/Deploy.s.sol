@@ -17,6 +17,8 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
+import {ArithmeticSeriesCurve} from "src/ArithmeticSeriesCurve.sol";
 
 contract DeployEthMultiVault is Script {
     address deployer;
@@ -41,6 +43,8 @@ contract DeployEthMultiVault is Script {
     BondingCurveRegistry bondingCurveRegistry;
     LinearCurve linearCurve; // <-- Not used in this edition of EthMultiVault
     ProgressiveCurve progressiveCurve;
+    OffsetProgressiveCurve offsetProgressiveCurve;
+    ArithmeticSeriesCurve arithmeticSeriesCurve;
 
     function run() external {
         // Begin sending tx's to network
@@ -118,12 +122,22 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed LinearCurve.");
 
         // Deploy ProgressiveCurve
-        progressiveCurve = new ProgressiveCurve("Progressive Curve", 0.00007054e18);
+        progressiveCurve = new ProgressiveCurve("Progressive Curve", 2);
         console.logString("deployed ProgressiveCurve.");
+
+        // Deploy OffsetProgressiveCurve
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2, 1e17);
+        console.logString("deployed OffsetProgressiveCurve.");
+
+        // Deploy ArithmeticSeriesCurve
+        arithmeticSeriesCurve = new ArithmeticSeriesCurve("Arithmetic Series Curve", 1);
+        console.logString("deployed ArithmeticSeriesCurve.");
 
         // Add curves to BondingCurveRegistry
         bondingCurveRegistry.addBondingCurve(address(linearCurve));
         bondingCurveRegistry.addBondingCurve(address(progressiveCurve));
+        bondingCurveRegistry.addBondingCurve(address(offsetProgressiveCurve));
+        bondingCurveRegistry.addBondingCurve(address(arithmeticSeriesCurve));
 
         // Transfer ownership of BondingCurveRegistry to admin
         bondingCurveRegistry.setAdmin(admin);
