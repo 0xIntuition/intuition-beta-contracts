@@ -8,9 +8,32 @@ import {BaseCurve} from "src/BaseCurve.sol";
 /**
  * @title  ArithmeticSeriesCurve
  * @author 0xIntuition
- * @notice A simple linear bonding curve where price increases linearly with supply.
- *         Price formula: P(s) = basePrice + (s * priceIncrement)
- *         Total cost is calculated using the arithmetic series sum formula.
+ * @notice A linear bonding curve where price increases linearly with supply.
+ *
+ *         The price follows the formula:
+ *         $$P(s) = \text{basePrice} + (s \cdot \text{priceIncrement})$$
+ *         where:
+ *         - $\text{basePrice}$ is the starting price for the first share (0.0001 ETH)
+ *         - $\text{priceIncrement}$ is the amount price increases per share
+ *         - $s$ is the total supply of shares
+ *
+ *         The cost to mint shares is calculated using the arithmetic series sum formula:
+ *         $$\text{Cost} = n \cdot \frac{\text{firstTerm} + \text{lastTerm}}{2}$$
+ *         where:
+ *         - $n$ is the number of shares to mint
+ *         - $\text{firstTerm}$ is the price of the first share to be minted: $\text{basePrice} + (s \cdot \text{priceIncrement})$
+ *         - $\text{lastTerm}$ is the price of the last share to be minted: $\text{basePrice} + ((s + n - 1) \cdot \text{priceIncrement})$
+ *
+ *         When expanded for minting $n$ shares at current supply $s$, the formula becomes:
+ *         $$\text{Cost} = n \cdot \frac{2 \cdot \text{basePrice} + (2s + n - 1) \cdot \text{priceIncrement}}{2}$$
+ *
+ *         This curve creates a predictable linear price increase with each share minted,
+ *         starting from a non-zero base price.
+ *
+ * @dev    Uses standard integer math for calculations
+ * @dev    The discrete summation approach differs from the continuous integration approach used in
+ *         ProgressiveCurve, resulting in slightly different pricing dynamics
+ * @dev    The non-zero base price ensures that even the first share has a minimum cost
  */
 contract ArithmeticSeriesCurve is BaseCurve {
     using Math for uint256;
@@ -123,6 +146,13 @@ contract ArithmeticSeriesCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
+    /// @dev Let $s$ = current total supply of shares
+    /// @dev Let $a$ = amount of assets to deposit
+    /// @dev Let $b$ = basePrice
+    /// @dev Let $p$ = priceIncrement
+    /// @dev Solves the quadratic equation to find shares:
+    /// $$p \cdot n^2 + (2 \cdot p \cdot s - p + 2 \cdot b) \cdot n - 2 \cdot a = 0$$
+    /// @dev where $n$ is the number of shares to mint
     function convertToShares(
         uint256 assets, // number of assets the user wants to deposit (18-decimal)
         uint256, /*totalAssets*/
@@ -166,6 +196,15 @@ contract ArithmeticSeriesCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
+    /// @dev Let $s$ = current total supply of shares
+    /// @dev Let $r$ = shares to redeem
+    /// @dev Let $b$ = basePrice
+    /// @dev Let $p$ = priceIncrement
+    /// @dev assets:
+    /// $$\text{assets} = r \cdot \frac{\text{highestTerm} + \text{lowestTerm}}{2}$$
+    /// @dev where:
+    /// $$\text{highestTerm} = b + ((s - 1) \cdot p)$$
+    /// $$\text{lowestTerm} = b + ((s - r) \cdot p)$$
     function convertToAssets(
         uint256 shares, // number of shares the user wants to burn (18-decimal)
         uint256 totalShares, // totalShares in the vault (18-decimal)
@@ -194,7 +233,7 @@ contract ArithmeticSeriesCurve is BaseCurve {
         uint256 highestTerm = BASE_PRICE + ((currentSupply - 1) * priceIncrement);
 
         // 5. Cost of the *lowest* share being redeemed:
-        //    That’s (currentSupply - sharesToRedeem).
+        //    That's (currentSupply - sharesToRedeem).
         uint256 lowestTerm = BASE_PRICE + ((currentSupply - sharesToRedeem) * priceIncrement);
 
         // 6. Sum of arithmetic series = numberOfTerms * (firstTerm + lastTerm) / 2
@@ -205,6 +244,13 @@ contract ArithmeticSeriesCurve is BaseCurve {
     }
 
     /// @inheritdoc BaseCurve
+    /// @dev Let $s$ = current total supply of shares
+    /// @dev Let $b$ = basePrice
+    /// @dev Let $p$ = priceIncrement
+    /// @dev sharePrice:
+    /// $$\text{sharePrice} = b + (s \cdot p)$$
+    /// @dev This is the basic linear price function where the price increases linearly with the total supply
+    /// @dev starting from a non-zero base price
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
         return BASE_PRICE + (totalShares * priceIncrement);
     }
@@ -214,6 +260,17 @@ contract ArithmeticSeriesCurve is BaseCurve {
      * @param shares Desired number of shares to mint (needs to be a whole number - NOT in 18 the decimals format)
      * @param totalShares Total number of shares in circulation
      * @return assets Total cost to mint the desired number of shares
+     * @dev Let $s$ = current total supply of shares
+     * @dev Let $n$ = shares to mint
+     * @dev Let $b$ = basePrice
+     * @dev Let $p$ = priceIncrement
+     * @dev assets:
+     * $$\text{assets} = n \cdot \frac{\text{firstTerm} + \text{lastTerm}}{2}$$
+     * @dev where:
+     * $$\text{firstTerm} = b + (s \cdot p)$$
+     * $$\text{lastTerm} = b + ((s + n - 1) \cdot p)$$
+     * @dev which simplifies to:
+     * $$\text{assets} = n \cdot \frac{2b + (2s + n - 1) \cdot p}{2}$$
      */
     function calculateAssetsForDeposit(uint256 shares, uint256 totalShares) public view returns (uint256) {
         if (shares == 0) {
