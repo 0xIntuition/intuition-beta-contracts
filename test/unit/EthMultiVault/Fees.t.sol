@@ -9,7 +9,7 @@ import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
     uint256 constant CURVE_ID = 2;
-    uint256 constant NUM_CURVE_OPERATIONS = 50;
+    uint256 constant NUM_CURVE_OPERATIONS = 500;
 
     struct CurveOperation {
         uint256 entryFee;
@@ -128,5 +128,52 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 expectedSharePriceIncrease =
             (aliceFinalAssets * PRECISION) / aliceShares - (aliceInitialAssets * PRECISION) / aliceInitialShares;
         assertEq(sharePriceIncrease, expectedSharePriceIncrease, "Share price increase should match fees per share");
+    }
+
+    function testFeesMakeSenseInBondingCurve() public {
+        // Create atom
+        vm.startPrank(alice);
+        uint256 testAtomCost = getAtomCost();
+        uint256 atomId = ethMultiVault.createAtom{value: testAtomCost}("atom1");
+
+        // Alice deposits into pro rata vault
+        uint256 aliceInitialShares = ethMultiVault.depositAtomCurve{value: 1 ether}(alice, atomId, 2);
+        console.log("Alice bought %e shares for 1 ether", aliceInitialShares);
+        vm.stopPrank();
+
+        uint256 sharePrice = ethMultiVault.currentSharePriceCurve(atomId, 2);
+        console.log("Share price is %e", sharePrice);
+        (uint256 totalAssetsInVault,) = ethMultiVault.getCurveVaultState(atomId, 2);
+        console.log("Total assets in vault is %e", totalAssetsInVault);
+        // Get Alice's state
+        vm.startPrank(alice);
+        (uint256 aliceShares, uint256 aliceFinalAssets) = ethMultiVault.getVaultStateForUserCurve(atomId, 2, alice);
+        console.log("Alice has %e shares and %e assets", aliceShares, aliceFinalAssets);
+
+        vm.startPrank(bob);
+        vm.deal(bob, 1 ether * NUM_CURVE_OPERATIONS);
+        uint256 bobInitialAssets = 1 ether * NUM_CURVE_OPERATIONS;
+        uint256 bobFinalAssets = bobInitialAssets;
+        for (uint256 i = 0; i < NUM_CURVE_OPERATIONS; i++) {
+            // Deposit
+            uint256 bobShares = ethMultiVault.depositAtomCurve{value: 1 ether}(bob, atomId, 2);
+            bobFinalAssets -= 1 ether;
+            // Redeem
+            uint256 bobAssets = ethMultiVault.redeemAtomCurve(bobShares, bob, atomId, 2);
+            bobFinalAssets += bobAssets;
+        }
+        console.log(
+            "Bob lost %e assets depositing and redeeming in the curve %d times",
+            bobInitialAssets - bobFinalAssets,
+            NUM_CURVE_OPERATIONS
+        );
+        console.log("Bob has %e assets", bobFinalAssets);
+
+        (aliceShares, aliceFinalAssets) = ethMultiVault.getVaultStateForUserCurve(atomId, 2, alice);
+        console.log("Alice now has %e shares and %e assets", aliceShares, aliceFinalAssets);
+        sharePrice = ethMultiVault.currentSharePriceCurve(atomId, 2);
+        console.log("Share price is now %e", sharePrice);
+        (totalAssetsInVault,) = ethMultiVault.getCurveVaultState(atomId, 2);
+        console.log("Total assets in vault is now %e", totalAssetsInVault);
     }
 }

@@ -98,10 +98,6 @@ interface IBondingCurveRegistry {
     /// @return count The number of curves registered
     function count() external view returns (uint256);
 
-    /// @notice Get the admin address
-    /// @return The address of the admin
-    function admin() external view returns (address);
-
     /// @notice Get the curve address for a given ID
     /// @param id The curve ID to query
     /// @return The address of the curve
