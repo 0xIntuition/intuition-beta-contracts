@@ -5,6 +5,8 @@ import {Script} from "forge-std/Script.sol";
 import {BaseCurve} from "src/BaseCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
+import {ArithmeticSeriesCurve} from "src/ArithmeticSeriesCurve.sol";
 
 contract GenerateCurveData is Script {
     // Number of data points to generate
@@ -20,9 +22,11 @@ contract GenerateCurveData is Script {
 
     function run() public {
         // Initialize all curves we want to analyze
-        BaseCurve[] memory curves = new BaseCurve[](2);
+        BaseCurve[] memory curves = new BaseCurve[](4);
         curves[0] = new LinearCurve("Linear");
         curves[1] = new ProgressiveCurve("Progressive", 0.0025e18);
+        curves[2] = new OffsetProgressiveCurve("OffsetProgressive", 2, 1e17);
+        curves[3] = new ArithmeticSeriesCurve("ArithmeticSeries", 1);
 
         // Create a metadata file to store file locations
         string memory metadata = '{"files":[';

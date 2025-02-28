@@ -7,7 +7,7 @@ import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 /**
  * @title  ProgressiveCurve
  * @author 0xIntuition
- * @notice A bonding curve implementation that uses a progressive pricing model where 
+ * @notice A bonding curve implementation that uses a progressive pricing model where
  *         each new share costs more than the last.
  *
  *         The price follows the formula:
