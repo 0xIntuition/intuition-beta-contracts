@@ -274,7 +274,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     //  @dev Old admin may still cancel this before timelock duration if desired
     function setAdmin(address admin) external {
         if (msg.sender != admin) {
-          revert Errors.EthMultiVault_AdminOnly();
+            revert Errors.EthMultiVault_AdminOnly();
         }
         address oldAdmin = generalConfig.admin;
 
@@ -1243,7 +1243,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
     }
 
-    function _depositConstituentAtomsCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal {
+    function _depositConstituentAtomsCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount)
+        internal
+    {
         // floor div, so perAtom is slightly less than 1/3 of total input amount
         uint256 perAtom = amount / 3;
 
@@ -1634,7 +1636,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 userAssetsAfterprotocolFee = assets - protocolFee;
 
         uint256 atomDeposits = atomDepositsAmount(userAssetsAfterprotocolFee, id);
-        uint256 userAssetsAfterprotocolFeeAndAtomDeposits= userAssetsAfterprotocolFee - atomDeposits;
+        uint256 userAssetsAfterprotocolFeeAndAtomDeposits = userAssetsAfterprotocolFee - atomDeposits;
 
         uint256 entryFee = entryFeeAmount(userAssetsAfterprotocolFeeAndAtomDeposits, id);
         uint256 totalFees = protocolFee + atomDeposits + entryFee;

@@ -295,9 +295,7 @@ interface IEthMultiVault {
     ///
     /// @param newTotalAtomDepositsForTriple new atom deposit fraction for triples
     /// @param oldTotalAtomDepositsForTriple old atom deposit fraction for triples
-    event TotalAtomDepositsForTripleSet(
-        uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple
-    );
+    event TotalAtomDepositsForTripleSet(uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple);
 
     /// @notice emitted upon changing the entry fee
     ///
@@ -573,7 +571,9 @@ interface IEthMultiVault {
     /// @return assets the amount of assets/eth withdrawn
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
-    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId) external returns (uint256);
+    function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+        external
+        returns (uint256);
 
     /// @notice deposits assets of underlying tokens into a triple vault and grants ownership of 'shares' to 'receiver'
     ///         *payable msg.value amount of eth to deposit
@@ -598,7 +598,10 @@ interface IEthMultiVault {
     /// @return shares the amount of shares minted
     /// NOTE: this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not a triple.
-    function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId) external payable returns (uint256);
+    function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
+        external
+        payable
+        returns (uint256);
 
     /// @notice redeems 'shares' number of shares from the triple vault and send 'assets' eth
     ///         from the contract to 'reciever' factoring in exit fees
@@ -622,7 +625,9 @@ interface IEthMultiVault {
     /// @return assets the amount of assets/eth withdrawn
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
-    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId) external returns (uint256);
+    function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+        external
+        returns (uint256);
 
     /* =================================================== */
     /*                    VIEW FUNCTIONS                   */

@@ -162,12 +162,16 @@ contract FeesTest is EthMultiVaultBase, EthMultiVaultHelpers {
             uint256 bobAssets = ethMultiVault.redeemAtomCurve(bobShares, bob, atomId, 2);
             bobFinalAssets += bobAssets;
         }
-        console.log("Bob lost %e assets depositing and redeeming in the curve %d times", bobInitialAssets - bobFinalAssets, NUM_CURVE_OPERATIONS);
+        console.log(
+            "Bob lost %e assets depositing and redeeming in the curve %d times",
+            bobInitialAssets - bobFinalAssets,
+            NUM_CURVE_OPERATIONS
+        );
         console.log("Bob has %e assets", bobFinalAssets);
 
         (aliceShares, aliceFinalAssets) = ethMultiVault.getVaultStateForUserCurve(atomId, 2, alice);
         console.log("Alice now has %e shares and %e assets", aliceShares, aliceFinalAssets);
-            sharePrice = ethMultiVault.currentSharePriceCurve(atomId, 2);
+        sharePrice = ethMultiVault.currentSharePriceCurve(atomId, 2);
         console.log("Share price is now %e", sharePrice);
         (totalAssetsInVault,) = ethMultiVault.getCurveVaultState(atomId, 2);
         console.log("Total assets in vault is now %e", totalAssetsInVault);

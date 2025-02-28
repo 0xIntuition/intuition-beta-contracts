@@ -67,11 +67,7 @@ abstract contract EthMultiVaultHelpers is Test, EthMultiVaultBase {
         (,,,,,,, minDelay) = ethMultiVault.generalConfig();
     }
 
-    function getTotalAtomDepositsOnTripleCreation()
-        public
-        view
-        returns (uint256 totalAtomDepositsOnTripleCreation)
-    {
+    function getTotalAtomDepositsOnTripleCreation() public view returns (uint256 totalAtomDepositsOnTripleCreation) {
         (, totalAtomDepositsOnTripleCreation,) = ethMultiVault.tripleConfig();
     }
 

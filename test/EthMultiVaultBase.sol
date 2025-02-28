@@ -109,11 +109,8 @@ contract EthMultiVaultBase is Test {
         );
 
         // Deploy proxy
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            address(ethMultiVaultImpl),
-            address(proxyAdmin),
-            initData
-        );
+        TransparentUpgradeableProxy proxy =
+            new TransparentUpgradeableProxy(address(ethMultiVaultImpl), address(proxyAdmin), initData);
 
         // Set up the proxy instance for testing
         ethMultiVault = EthMultiVault(payable(address(proxy)));
