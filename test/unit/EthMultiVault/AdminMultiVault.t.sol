@@ -66,11 +66,10 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.warp(block.timestamp + minDelay + 1);
         // should revert if not admin
         vm.prank(bob);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AdminOnly.selector));
         ethMultiVault.setAdmin(newAdmin);
 
         // Execute the scheduled operation
-        vm.warp(block.timestamp + minDelay + 1);
         vm.prank(newAdmin);
         ethMultiVault.setAdmin(newAdmin);
 
