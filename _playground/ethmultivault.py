@@ -11,8 +11,8 @@ atomWalletInitialDepositAmount = Web3.to_wei(Decimal('0.0001'), 'ether')
 
 # Triple
 tripleCreationProtocolFee = Web3.to_wei(Decimal('0.0002'), 'ether')
-atomDepositFractionOnTripleCreation = Web3.to_wei(Decimal('0.0003'), 'ether')
-atomDepositFractionForTriple = 1500 # 15%
+totalAtomDepositsOnTripleCreation = Web3.to_wei(Decimal('0.0003'), 'ether')
+totalAtomDepositsForTriple = 1500 # 15%
 
 # General
 minShare = Web3.to_wei(Decimal('0.0000000000001'), 'ether')
@@ -23,7 +23,7 @@ feeDenominator = 10000
 
 # Costs
 atomCost = Decimal(atomCreationProtocolFee) + Decimal(atomWalletInitialDepositAmount) + Decimal(minShare)
-tripleCost = Decimal(tripleCreationProtocolFee) + Decimal(atomDepositFractionOnTripleCreation) + Decimal(2) * Decimal(minShare)
+tripleCost = Decimal(tripleCreationProtocolFee) + Decimal(totalAtomDepositsOnTripleCreation) + Decimal(2) * Decimal(minShare)
 
 
 ## ------------ Functions ------------
@@ -51,9 +51,9 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
   userDeposit = value - tripleCost
   protocolFeeAmount = math.ceil(userDeposit * Decimal(protocolFee) / Decimal(feeDenominator))
   userDepositAfterprotocolFee = userDeposit - Decimal(protocolFeeAmount)
-  atomDepositFraction = math.floor(userDepositAfterprotocolFee * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
-  perAtom = math.floor(atomDepositFraction / Decimal(3))
-  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDepositFraction
+  atomDeposits = math.floor(userDepositAfterprotocolFee * Decimal(totalAtomDepositsForTriple) / Decimal(feeDenominator))
+  perAtom = math.floor(atomDeposits / Decimal(3))
+  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDeposits
   entryFeeAmount = math.floor(perAtom * Decimal(entryFee) / Decimal(feeDenominator))
   assetsForTheAtom = perAtom - entryFeeAmount
   userSharesAfterTotalFees = assetsForTheAtom # assuming current price = 1 ether
@@ -67,7 +67,7 @@ def createTriple(value: Decimal) -> tuple[Decimal, Decimal, Decimal, Decimal, De
 
   # Underlying atom's vaults
   userSharesAtomVault = userSharesAfterTotalFees
-  totalAssetsAtomVault = assetsForTheAtom + entryFeeAmount + math.floor(Decimal(atomDepositFractionOnTripleCreation) / Decimal(3))
+  totalAssetsAtomVault = assetsForTheAtom + entryFeeAmount + math.floor(Decimal(totalAtomDepositsOnTripleCreation) / Decimal(3))
   totalSharesAtomVault = userSharesAfterTotalFees
 
   # Addresses
@@ -106,8 +106,8 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
   # Variables for triple
   protocolFeeAmount = math.ceil(value * Decimal(protocolFee) / Decimal(feeDenominator))
   userDepositAfterprotocolFee = value - Decimal(protocolFeeAmount)
-  atomDepositFraction = math.floor(userDepositAfterprotocolFee * Decimal(atomDepositFractionForTriple) / Decimal(feeDenominator))
-  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDepositFraction
+  atomDeposits = math.floor(userDepositAfterprotocolFee * Decimal(totalAtomDepositsForTriple) / Decimal(feeDenominator))
+  userAssetsAfterAtomDepositFraction = userDepositAfterprotocolFee - atomDeposits
   if (totalShares == minShare):
     entryFeeAmount = 0
   else:
@@ -124,7 +124,7 @@ def depositTriple(value: Decimal, totalAssets: Decimal, totalShares: Decimal, to
   totalSharesPositiveVault = userSharesAfterEntryFee
 
   # Variables for atom
-  perAtom = math.floor(atomDepositFraction / Decimal(3))
+  perAtom = math.floor(atomDeposits / Decimal(3))
   if (totalSharesAtom == minShare):
     entryFeeAmountForAtom = 0
   else:

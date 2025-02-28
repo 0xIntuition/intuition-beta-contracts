@@ -24,7 +24,7 @@ library Errors {
     error EthMultiVault_InsufficientDepositAmountToCoverFees();
     error EthMultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error EthMultiVault_InsufficientSharesInVault();
-    error EthMultiVault_InvalidAtomDepositFractionForTriple();
+    error EthMultiVault_InvalidTotalAtomDepositsForTriple();
     error EthMultiVault_InvalidEntryFee();
     error EthMultiVault_InvalidExitFee();
     error EthMultiVault_InvalidProtocolFee();
@@ -75,6 +75,12 @@ library Errors {
 
     ///////// BONDING CURVE REGISTRY ERRORS /////////////////////////////////////////////////////////////
 
-    error BondingCurveRegistry_OnlyOwner();
     error BondingCurveRegistry_CurveAlreadyExists();
+    error BondingCurveRegistry_CurveNameNotUnique();
+    error BondingCurveRegistry_OnlyOwner();
+    error BondingCurveRegistry_RequiresOwner();
+
+    ///////// BASE CURVE ERRORS /////////////////////////////////////////////////////////////////////////
+
+    error BaseCurve_EmptyStringNotAllowed();
 }
