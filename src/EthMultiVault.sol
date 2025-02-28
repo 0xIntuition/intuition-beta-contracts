@@ -2104,13 +2104,18 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (shares, totalUserAssets);
     }
 
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
-        external
-        view
-        returns (uint256, uint256)
+    /// @notice returns the number of shares and assets (less fees) user has in the curve vault
+    ///
+    /// @param termId ID for the atom or triple
+    /// @param curveId curve id for the term
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUserCurve(uint256 termId, uint256 curveId, address receiver) external view returns (uint256, uint256)
     {
-        uint256 shares = bondingCurveVaults[vaultId][curveId].balanceOf[receiver];
-        (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId, curveId);
+        uint256 shares = bondingCurveVaults[termId][curveId].balanceOf[receiver];
+        (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, termId, curveId);
         return (shares, totalUserAssets);
     }
 

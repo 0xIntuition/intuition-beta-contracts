@@ -909,4 +909,15 @@ interface IEthMultiVault {
     /// @return atomWallet the address of the atom wallet
     /// NOTE: the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) external view returns (address);
+
+    /// @notice returns the number of shares and assets (less fees) user has in the curve vault
+    ///
+    /// @param termId ID for the atom or triple
+    /// @param curveId curve id for the term
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUserCurve(uint256 termId, uint256 curveId, address receiver) external view returns (uint256, uint256);
+
 }
