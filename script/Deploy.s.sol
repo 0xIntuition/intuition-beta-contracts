@@ -17,6 +17,8 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
+import {ArithmeticSeriesCurve} from "src/ArithmeticSeriesCurve.sol";
 
 contract DeployEthMultiVault is Script {
     // Multisig addresses for key roles in the protocol
@@ -36,10 +38,12 @@ contract DeployEthMultiVault is Script {
     TimelockController public timelock;
 
     // Bonding Curves
-    TransparentUpgradeableProxy public bondingCurveRegistryProxy;
-    BondingCurveRegistry public bondingCurveRegistry;
-    LinearCurve public linearCurve; // <-- Not used in this edition of EthMultiVault
-    ProgressiveCurve public progressiveCurve;
+    BondingCurveRegistry bondingCurveRegistry;
+    LinearCurve linearCurve; // <-- Not used in this edition of EthMultiVault
+    ProgressiveCurve progressiveCurve;
+    OffsetProgressiveCurve offsetProgressiveCurve;
+    ArithmeticSeriesCurve arithmeticSeriesCurve;
+
 
     function run() external {
         // Begin sending tx's to network
@@ -119,9 +123,19 @@ contract DeployEthMultiVault is Script {
         progressiveCurve = new ProgressiveCurve("Progressive Curve", 2);
         console.logString("deployed ProgressiveCurve.");
 
+        // Deploy OffsetProgressiveCurve
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2, 1e17);
+        console.logString("deployed OffsetProgressiveCurve.");
+
+        // Deploy ArithmeticSeriesCurve
+        arithmeticSeriesCurve = new ArithmeticSeriesCurve("Arithmetic Series Curve", 1);
+        console.logString("deployed ArithmeticSeriesCurve.");
+
         // Add curves to BondingCurveRegistry
         bondingCurveRegistry.addBondingCurve(address(linearCurve));
         bondingCurveRegistry.addBondingCurve(address(progressiveCurve));
+        bondingCurveRegistry.addBondingCurve(address(offsetProgressiveCurve));
+        bondingCurveRegistry.addBondingCurve(address(arithmeticSeriesCurve));
 
         // Transfer ownership of BondingCurveRegistry to the timelock
         bondingCurveRegistry.transferOwnership(address(timelock));

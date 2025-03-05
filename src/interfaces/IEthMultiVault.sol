@@ -154,7 +154,7 @@ interface IEthMultiVault {
         uint256 sharesForReceiver,
         uint256 entryFee,
         uint256 vaultId,
-        // bool isTriple,
+        // bool isTriple, <-- Omitted because of stack too deep
         bool isAtomWallet
     );
 
