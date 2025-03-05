@@ -70,7 +70,6 @@ contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // test values
         uint256 testAtomCost = getAtomCost();
-        uint256 testMinDeposit = getMinDeposit();
 
         // execute interaction - create atoms
         uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");

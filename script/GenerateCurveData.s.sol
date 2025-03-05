@@ -8,6 +8,7 @@ import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 import {ArithmeticSeriesCurve} from "src/ArithmeticSeriesCurve.sol";
 
+
 contract GenerateCurveData is Script {
     // Number of data points to generate
     uint256 constant POINTS = 100;
@@ -26,7 +27,7 @@ contract GenerateCurveData is Script {
         curves[0] = new LinearCurve("Linear");
         curves[1] = new ProgressiveCurve("Progressive", 0.0025e18);
         curves[2] = new OffsetProgressiveCurve("OffsetProgressive", 2, 1e17);
-        curves[3] = new ArithmeticSeriesCurve("ArithmeticSeries", 1);
+        curves[3] = new ArithmeticSeriesCurve("ArithmeticSeries", 1);n
 
         // Create a metadata file to store file locations
         string memory metadata = '{"files":[';
