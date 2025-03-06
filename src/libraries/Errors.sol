@@ -10,7 +10,7 @@ library Errors {
     error EthMultiVault_AdminOnly();
     error EthMultiVault_ArraysNotSameLength();
     error EthMultiVault_AtomDoesNotExist(uint256 atomId);
-    error EthMultiVault_AtomExists(bytes atomUri);
+    error EthMultiVault_AtomExists(bytes atomUri, uint256 atomId);
     error EthMultiVault_AtomUriTooLong();
     error EthMultiVault_BurnFromZeroAddress();
     error EthMultiVault_BurnInsufficientBalance();

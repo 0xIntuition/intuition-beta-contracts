@@ -650,7 +650,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // check if atom already exists based on hash
         bytes32 hash = keccak256(atomUri);
         if (atomsByHash[hash] != 0) {
-            revert Errors.EthMultiVault_AtomExists(atomUri);
+            revert Errors.EthMultiVault_AtomExists(atomUri, atomsByHash[hash]);
         }
 
         // calculate user deposit amount
