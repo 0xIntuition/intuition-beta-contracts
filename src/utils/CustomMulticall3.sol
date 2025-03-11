@@ -23,6 +23,19 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
      */
     event EthMultiVaultSet(address indexed ethMultiVault);
 
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                 INITIALIZER
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Initializes the CustomMulticall3 contract
      * @param _ethMultiVault EthMultiVault contract
@@ -32,6 +45,10 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
         __Ownable_init(admin);
         ethMultiVault = IEthMultiVault(_ethMultiVault);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 CORE FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Creates a triple based on the provided atom URIs in a single transaction,
@@ -149,6 +166,10 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
         return tripleIds;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                 VIEW FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Gets the user's ETH balance in a particular vault
      * @param vaultId The ID of the vault
@@ -180,7 +201,7 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
         uint256 numBondingCurveIds = bondingCurveIds.length;
 
         if (numIds == 0 || numBondingCurveIds == 0) {
-            revert Errors.CustomMulticall3_ZeroLengthArray();
+            revert Errors.CustomMulticall3_EmptyArray();
         }
 
         if (numBondingCurveIds != numIds) {

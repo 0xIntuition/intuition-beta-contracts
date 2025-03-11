@@ -57,16 +57,15 @@ library Errors {
 
     ///////// CUSTOMMULTICALL3 ERRORS ///////////////////////////////////////////////////////
 
+    error CustomMulticall3_ArraysNotSameLength();
     error CustomMulticall3_EmptyArray();
     error CustomMulticall3_InsufficientValue();
     error CustomMulticall3_InvalidAtomIdsLength();
     error CustomMulticall3_InvalidAtomUrisLength();
     error CustomMulticall3_InvalidEthMultiVaultAddress();
+    error CustomMulticall3_InvalidBondingCurveIdsLength();
     error CustomMulticall3_InvalidValue();
     error CustomMulticall3_InvalidValuesLength();
-    error CustomMulticall3_InvalidBondingCurveIdsLength();
-    error CustomMulticall3_ZeroLengthArray();
-    error CustomMulticall3_ArraysNotSameLength();
 
     ///////// ATTESTOOR ERRORS ////////////////////////////////////////////////////////////////////
 

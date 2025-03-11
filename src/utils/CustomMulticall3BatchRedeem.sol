@@ -6,12 +6,12 @@ import {CustomMulticall3} from "src/utils/CustomMulticall3.sol";
 import {Errors} from "src/libraries/Errors.sol";
 
 /**
- * @title  CustomMulticall3WithRedeem
+ * @title  CustomMulticall3BatchRedeem
  * @author 0xIntuition
  * @notice A modified CustomMulticall3 contract that allows for redeeming assets from the multiple vaults
  *            in a single transaction. It is intended to be used by the single admin only.
  */
-contract CustomMulticall3WithRedeem is CustomMulticall3 {
+contract CustomMulticall3BatchRedeem is CustomMulticall3 {
     /**
      * @notice Redeems a specific amount of shares for a given owner and transfers the assets to the receiver
      * @dev `ids` need to represent either atom or triple vaults, and not a mix of both
@@ -20,7 +20,7 @@ contract CustomMulticall3WithRedeem is CustomMulticall3 {
      * @param shares The amount of shares to redeem
      * @param receivers The receivers of the assets
      * @param ids The IDs of the atoms or triples to redeem
-     * @param isTriple Boolean indicating whether the assets to redeem are from atom or triple vaults
+     * @param areTriples Boolean indicating whether the assets to redeem are from atom or triple vaults
      * @return assetsForReceivers The amount of assets received by the receivers
      */
     function batchRedeem(
@@ -28,12 +28,12 @@ contract CustomMulticall3WithRedeem is CustomMulticall3 {
         uint256[] calldata shares,
         address[] calldata receivers,
         uint256[] calldata ids,
-        bool isTriple
+        bool areTriples
     ) external onlyOwner returns (uint256[] memory) {
         uint256 length = owners.length;
 
         if (length == 0) {
-            revert Errors.CustomMulticall3_ZeroLengthArray();
+            revert Errors.CustomMulticall3_EmptyArray();
         }
 
         if (length != shares.length || length != receivers.length || length != ids.length) {
@@ -41,7 +41,7 @@ contract CustomMulticall3WithRedeem is CustomMulticall3 {
         }
 
         uint256[] memory assetsForReceivers = new uint256[](length);
-        if (isTriple) {
+        if (areTriples) {
             for (uint256 i = 0; i < length; i++) {
                 assetsForReceivers[i] = ethMultiVault.redeemTriple(owners[i], shares[i], receivers[i], ids[i]);
             }
