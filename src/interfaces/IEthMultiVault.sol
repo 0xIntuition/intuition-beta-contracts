@@ -123,6 +123,20 @@ interface IEthMultiVault {
     /// @param approved whether the sender is approved or not
     event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
 
+    /// @notice Emitted when an owner approves a redeemer to redeem assets on their behalf
+    ///
+    /// @param owner address of the owner of the shares
+    /// @param redeemer address of the redeemer
+    /// @param approved whether the redeemer is approved or not
+    event RedeemerApproved(address indexed owner, address indexed redeemer, bool approved);
+
+    /// @notice Emitted when an owner revokes a redeemer's approval to redeem assets on their behalf
+    ///
+    /// @param owner address of the owner of the shares
+    /// @param redeemer address of the redeemer
+    /// @param approved whether the redeemer is approved or not
+    event RedeemerRevoked(address indexed owner, address indexed redeemer, bool approved);
+
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
     /// @param sender initializer of the deposit
@@ -561,6 +575,8 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    function redeemAtom(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
+
     /// @notice redeem shares from a bonding curve atom vault for assets
     ///
     /// @param shares the amount of shares to redeem
@@ -572,6 +588,10 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+        external
+        returns (uint256);
+
+    function redeemAtomCurve(address owner, uint256 shares, address receiver, uint256 atomId, uint256 curveId)
         external
         returns (uint256);
 
@@ -615,6 +635,8 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    function redeemTriple(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
+
     /// @notice redeem shares from a bonding curve triple vault for assets
     ///
     /// @param shares the amount of shares to redeem
@@ -626,6 +648,10 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+        external
+        returns (uint256);
+
+    function redeemTripleCurve(address owner, uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         returns (uint256);
 
@@ -810,6 +836,19 @@ interface IEthMultiVault {
     /// @return shares number of shares user has in the vault
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
+
+    /// @notice returns the number of shares and assets (less fees) user has in the bonding curve vault
+    ///
+    /// @param vaultId vault id of the vault
+    /// @param curveId curve id of the curve
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+        external
+        view
+        returns (uint256, uint256);
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///

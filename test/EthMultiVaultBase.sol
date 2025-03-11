@@ -193,7 +193,7 @@ contract EthMultiVaultBase is Test {
     }
 
     function getApproval(address receiver, address sender) public view returns (bool) {
-        return ethMultiVault.approvals(receiver, sender);
+        return ethMultiVault.depositApprovals(receiver, sender);
     }
 
     //////// Generate Memes ////////
