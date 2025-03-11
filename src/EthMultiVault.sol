@@ -2100,6 +2100,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256) {
         uint256 shares = vaults[vaultId].balanceOf[receiver];
+        if (shares == 0) {
+            return (0, 0);
+        }
+
         (uint256 totalUserAssets,,,) = getRedeemAssetsAndFees(shares, vaultId);
         return (shares, totalUserAssets);
     }
@@ -2110,6 +2114,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         returns (uint256, uint256)
     {
         uint256 shares = bondingCurveVaults[vaultId][curveId].balanceOf[receiver];
+        if (shares == 0) {
+            return (0, 0);
+        }
+
         (uint256 totalUserAssets,,,) = getRedeemAssetsAndFeesCurve(shares, vaultId, curveId);
         return (shares, totalUserAssets);
     }
