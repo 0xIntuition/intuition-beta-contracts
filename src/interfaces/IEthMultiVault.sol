@@ -21,7 +21,7 @@ interface IEthMultiVault {
         uint256 feeDenominator;
         /// @dev minimum amount of assets that must be deposited into an atom/triple vault
         uint256 minDeposit;
-        /// @dev number of shares minted to zero address upon vault creation to initialize the vault
+        /// @dev number of shares minted to admin upon vault creation to initialize the vault
         uint256 minShare;
         /// @dev maximum length of the atom URI data that can be passed when creating atom vaults
         uint256 atomUriMaxLength;
