@@ -650,7 +650,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // check if atom already exists based on hash
         bytes32 hash = keccak256(atomUri);
         if (atomsByHash[hash] != 0) {
-            revert Errors.EthMultiVault_AtomExists(atomUri);
+            revert Errors.EthMultiVault_AtomExists(atomUri, atomsByHash[hash]);
         }
 
         // calculate user deposit amount
@@ -1397,7 +1397,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             sharesForReceiver,
             entryFee,
             id,
-            // isTripleId(id), // <-- Omitted because of stack too deep
+            curveId,
+            isTripleId(id),
             false
         );
 
@@ -1491,7 +1492,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             receiver,
             bondingCurveVaults[id][curveId].balanceOf[sender],
             assetsForReceiver,
-            shares, /*exitFee,*/
+            shares, exitFee,
             id,
             curveId
         );
@@ -1875,7 +1876,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return price current share price for the given vault id and curve id, scaled by 1e18
     function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
-        uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
         return basePrice;
     }
