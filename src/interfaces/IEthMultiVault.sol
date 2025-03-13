@@ -194,8 +194,8 @@ interface IEthMultiVault {
     /// @param creator address of the atom creator
     /// @param atomWallet address of the atom's associated abstract account
     /// @param atomData the atom's respective string
-    /// @param vaultID the vault id of the atom
-    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultID);
+    /// @param vaultId the vault id of the atom
+    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultId);
 
     /// @notice emitted upon creation of a triple
     ///
@@ -203,9 +203,9 @@ interface IEthMultiVault {
     /// @param subjectId the triple's respective subject atom
     /// @param predicateId the triple's respective predicate atom
     /// @param objectId the triple's respective object atom
-    /// @param vaultID the vault id of the triple
+    /// @param vaultId the vault id of the triple
     event TripleCreated(
-        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
+        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultId
     );
 
     /// @notice emitted upon the transfer of fees to the protocol multisig
