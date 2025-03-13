@@ -1397,7 +1397,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             sharesForReceiver,
             entryFee,
             id,
-            // isTripleId(id), // <-- Omitted because of stack too deep
+            curveId,
+            isTripleId(id),
             false
         );
 
@@ -1491,7 +1492,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             receiver,
             bondingCurveVaults[id][curveId].balanceOf[sender],
             assetsForReceiver,
-            shares, /*exitFee,*/
+            shares, exitFee,
             id,
             curveId
         );
