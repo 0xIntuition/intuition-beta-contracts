@@ -154,7 +154,8 @@ interface IEthMultiVault {
         uint256 sharesForReceiver,
         uint256 entryFee,
         uint256 vaultId,
-        // bool isTriple,
+        uint256 curveId,
+        bool isTriple,
         bool isAtomWallet
     );
 
@@ -183,7 +184,7 @@ interface IEthMultiVault {
         uint256 senderTotalSharesInVault,
         uint256 assetsForReceiver,
         uint256 sharesRedeemedBySender,
-        // uint256 exitFee, <-- Omitted because of stack too deep
+        uint256 exitFee,
         uint256 vaultId,
         uint256 curveId
     );
