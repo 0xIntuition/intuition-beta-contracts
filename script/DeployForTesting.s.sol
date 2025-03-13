@@ -19,7 +19,15 @@ import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 
-// To run this: forge script script/DeployForTesting
+// To run this:
+/* forge script script/DeployForTesting.s.sol \
+   --rpc-url $BASE_SEPOLIA_RPC_URL \
+   --private-key $PRIVATE_KEY \
+   --sender $SENDER_ADDRESS \
+   --broadcast \
+   --verify \
+   --etherscan-api-key $BASESCAN_API_KEY
+*/
 
 contract DeployEthMultiVault is Script {
     // Multisig addresses for key roles in the protocol
@@ -125,7 +133,7 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed ProgressiveCurve.");
 
         // Deploy OffsetProgressiveCurve
-        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2);
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2, 1e17);
         console.logString("deployed OffsetProgressiveCurve.");
 
         // Add curves to BondingCurveRegistry
