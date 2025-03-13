@@ -192,8 +192,8 @@ contract EthMultiVaultBase is Test {
         return ethMultiVault.currentSharePriceCurve(id, curveId);
     }
 
-    function getApproval(address receiver, address sender) public view returns (bool) {
-        return ethMultiVault.depositApprovals(receiver, sender);
+    function getApproval(address receiver, address sender) public view returns (uint8) {
+        return uint8(ethMultiVault.approvals(receiver, sender));
     }
 
     //////// Generate Memes ////////

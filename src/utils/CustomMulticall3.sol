@@ -5,7 +5,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import {Errors} from "src/libraries/Errors.sol";
-import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
 import {Multicall3} from "../vendor/multicall/Multicall3.sol";
 
 /**
@@ -15,7 +15,51 @@ import {Multicall3} from "../vendor/multicall/Multicall3.sol";
  */
 contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 {
     /// @notice EthMultiVault contract instance
-    IEthMultiVault public ethMultiVault;
+    EthMultiVault public ethMultiVault;
+
+    /*//////////////////////////////////////////////////////////////
+                                 STRUCTS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Struct containing data for an atom
+     * @param vaultId The ID of the vault
+     * @param atomUri The URI of the atom
+     * @param atomHash The hash of the atom
+     * @param totalAssets The total assets in the atom
+     * @param totalShares The total shares in the atom
+     */
+    struct AtomData {
+        uint256 vaultId;
+        bytes atomUri;
+        bytes32 atomHash;
+        uint256 totalAssets;
+        uint256 totalShares;
+    }
+
+    /**
+     * @notice Struct containing data for a triple
+     * @param vaultId The ID of the vault
+     * @param subjectId The ID of the subject
+     * @param predicateId The ID of the predicate
+     * @param objectId The ID of the object
+     * @param tripleHash The hash of the triple
+     * @param totalAssets The total assets in the triple
+     * @param totalShares The total shares in the triple
+     */
+    struct TripleData {
+        uint256 vaultId;
+        uint256 subjectId;
+        uint256 predicateId;
+        uint256 objectId;
+        bytes32 tripleHash;
+        uint256 totalAssets;
+        uint256 totalShares;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EVENTS
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Event emitted when the EthMultiVault contract address is set
@@ -43,7 +87,7 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
      */
     function initialize(address _ethMultiVault, address admin) external initializer {
         __Ownable_init(admin);
-        ethMultiVault = IEthMultiVault(_ethMultiVault);
+        ethMultiVault = EthMultiVault(payable(_ethMultiVault));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -217,6 +261,109 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
         return balances;
     }
 
+    /**
+     * @notice Gets the data for multiple atoms
+     * @param atomIds Array of atom IDs
+     * @return Array of AtomData structs
+     */
+    function batchGetAtomData(uint256[] calldata atomIds) external view returns (AtomData[] memory) {
+        uint256 length = atomIds.length;
+
+        if (length == 0) {
+            revert Errors.CustomMulticall3_EmptyArray();
+        }
+
+        AtomData[] memory atomData = new AtomData[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            uint256 atomId = atomIds[i];
+
+            if (ethMultiVault.isTripleId(atomId)) {
+                revert Errors.CustomMulticall3_VaultIsTriple(atomId);
+            }
+
+            bytes memory atomUri = ethMultiVault.atoms(atomId);
+            bytes32 atomHash = keccak256(atomUri);
+            (uint256 totalAssets, uint256 totalShares) = ethMultiVault.vaults(atomId);
+
+            atomData[i] = AtomData({
+                vaultId: atomId,
+                atomUri: atomUri,
+                atomHash: atomHash,
+                totalAssets: totalAssets,
+                totalShares: totalShares
+            });
+        }
+
+        return atomData;
+    }
+
+    /**
+     * @notice Gets the data for multiple triples
+     * @param tripleIds Array of triple IDs
+     * @return Array of TripleData structs
+     */
+    function batchGetTripleData(uint256[] calldata tripleIds) external view returns (TripleData[] memory) {
+        uint256 length = tripleIds.length;
+
+        if (length == 0) {
+            revert Errors.CustomMulticall3_EmptyArray();
+        }
+
+        TripleData[] memory tripleData = new TripleData[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tripleId = tripleIds[i];
+
+            if (!ethMultiVault.isTripleId(tripleId)) {
+                revert Errors.CustomMulticall3_VaultNotTriple(tripleId);
+            }
+
+            (uint256 subjectId, uint256 predicateId, uint256 objectId) = ethMultiVault.getTripleAtoms(tripleId);
+            bytes32 tripleHash = ethMultiVault.tripleHashFromAtoms(subjectId, predicateId, objectId);
+            (uint256 totalAssets, uint256 totalShares) = ethMultiVault.vaults(tripleId);
+
+            tripleData[i] = TripleData({
+                vaultId: tripleId,
+                subjectId: subjectId,
+                predicateId: predicateId,
+                objectId: objectId,
+                tripleHash: tripleHash,
+                totalAssets: totalAssets,
+                totalShares: totalShares
+            });
+        }
+
+        return tripleData;
+    }
+
+    /**
+     * @notice Gets the user's shares in multiple vaults
+     * @param user The address of the user
+     * @param ids Array of atom and/or triple IDs
+     * @return Array of user's shares in the vaults
+     */
+    function batchGetUserShares(address user, uint256[] calldata ids) external view returns (uint256[] memory) {
+        if (user == address(0)) {
+            revert Errors.CustomMulticall3_AddressZero();
+        }
+
+        uint256 length = ids.length;
+
+        if (length == 0) {
+            revert Errors.CustomMulticall3_EmptyArray();
+        }
+
+        uint256[] memory userShares = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            (uint256 shares,) = ethMultiVault.getVaultStateForUser(ids[i], user);
+            userShares[i] = shares;
+        }
+
+        return userShares;
+    }
+
     /*//////////////////////////////////////////////////////////////
                             ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -230,7 +377,7 @@ contract CustomMulticall3 is Initializable, Ownable2StepUpgradeable, Multicall3 
             revert Errors.CustomMulticall3_InvalidEthMultiVaultAddress();
         }
 
-        ethMultiVault = IEthMultiVault(_ethMultiVault);
+        ethMultiVault = EthMultiVault(payable(_ethMultiVault));
 
         emit EthMultiVaultSet(_ethMultiVault);
     }

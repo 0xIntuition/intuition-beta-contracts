@@ -6,12 +6,14 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 
 import {CustomMulticall3BatchRedeem} from "src/utils/CustomMulticall3BatchRedeem.sol";
 import {Errors} from "src/libraries/Errors.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 
 contract CustomMulticall3BatchRedeemTest is EthMultiVaultBase {
     TransparentUpgradeableProxy public customMulticall3BatchRedeemProxy;
     CustomMulticall3BatchRedeem public customMulticall3BatchRedeem;
+    IEthMultiVault.ApprovalTypes public redemptionApproval = IEthMultiVault.ApprovalTypes.REDEMPTION;
 
     function setUp() public {
         _setUp();
@@ -62,9 +64,10 @@ contract CustomMulticall3BatchRedeemTest is EthMultiVaultBase {
         tripleShares[1] = newTripleShares;
 
         // alice approves the customMulticall3BatchRedeem contract to redeem her assets
-        ethMultiVault.approveRedeemer(address(customMulticall3BatchRedeemProxy));
+        ethMultiVault.approve(address(customMulticall3BatchRedeemProxy), redemptionApproval);
 
-        assertEq(ethMultiVault.redemptionApprovals(alice, address(customMulticall3BatchRedeemProxy)), true);
+        uint8 redemptionApprovalUint = uint8(redemptionApproval);
+        assertEq(getApproval(alice, address(customMulticall3BatchRedeemProxy)), redemptionApprovalUint);
 
         vm.stopPrank();
 

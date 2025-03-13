@@ -8,6 +8,22 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
+    /*                         ENUMS                       */
+    /* =================================================== */
+
+    /// @notice Enum for the different types of approvals
+    enum ApprovalTypes {
+        /// @dev No approval of any kind (default)
+        NONE,
+        /// @dev Sender is approved to deposit assets on behalf of the receiver
+        DEPOSIT,
+        /// @dev Redeemer is approved to redeem assets on behalf of the owner
+        REDEMPTION,
+        /// @dev Both deposit and redemption approvals
+        DEPOSIT_AND_REDEMPTION
+    }
+
+    /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
 
@@ -109,33 +125,12 @@ interface IEthMultiVault {
     /*                       EVENTS                        */
     /* =================================================== */
 
-    /// @notice Emitted when a receiver approves a sender to deposit assets on their behalf
+    /// @notice Emitted when a spender is approved to perform a specific action on behalf of the account
     ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderApproved(address indexed sender, address indexed receiver, bool approved);
-
-    /// @notice Emitted when a receiver revokes a sender's approval to deposit assets on their behalf
-    ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
-
-    /// @notice Emitted when an owner approves a redeemer to redeem assets on their behalf
-    ///
-    /// @param owner address of the owner of the shares
-    /// @param redeemer address of the redeemer
-    /// @param approved whether the redeemer is approved or not
-    event RedeemerApproved(address indexed owner, address indexed redeemer, bool approved);
-
-    /// @notice Emitted when an owner revokes a redeemer's approval to redeem assets on their behalf
-    ///
-    /// @param owner address of the owner of the shares
-    /// @param redeemer address of the redeemer
-    /// @param approved whether the redeemer is approved or not
-    event RedeemerRevoked(address indexed owner, address indexed redeemer, bool approved);
+    /// @param account address of the account that is approving the spender
+    /// @param spender address of the account that is being approved
+    /// @param approvalType type of approval being granted
+    event SpenderApproved(address indexed account, address indexed spender, ApprovalTypes approvalType);
 
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
@@ -493,13 +488,11 @@ interface IEthMultiVault {
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external returns (address);
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function approveSender(address sender) external;
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function revokeSender(address sender) external;
+    /// @notice approve a spender to perform a specific action on behalf of the account
+    ///
+    /// @param spender address to approve
+    /// @param approvalType type of approval to grant
+    function approve(address spender, ApprovalTypes approvalType) external;
 
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with

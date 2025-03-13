@@ -100,9 +100,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     // Vault ID -> Vault Fees
     mapping(uint256 vaultId => VaultFees vaultFees) public vaultFees;
 
-    /// @notice Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver
-    // Receiver -> Sender -> Is Approved
-    mapping(address receiver => mapping(address sender => bool isApproved)) public depositApprovals;
+    /// @notice Mapping of account to spender to determine a type of approval (none, deposit, redeem or both)
+    // Account -> Spender -> Approval Type
+    mapping(address account => mapping(address spender => IEthMultiVault.ApprovalTypes approvalType)) public approvals;
 
     /// @notice RDF (Resource Description Framework)
     // mapping of vault ID to atom data
@@ -134,12 +134,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice Bonding Curve Configurations
     BondingCurveConfig public bondingCurveConfig;
 
-    /// @notice Mapping of owner to redeemer to determine if a redeemer is allowed to redeem assets from owner's shares
-    // Owner -> Redeemer -> Is Approved
-    mapping(address owner => mapping(address redeemer => bool isApproved)) public redemptionApprovals;
-
     /// @dev Gap for upgrade safety
-    uint256[46] private __gap;
+    uint256[47] private __gap;
 
     /* =================================================== */
     /*                    MODIFIERS                        */
@@ -546,76 +542,20 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*         Approvals          */
     /* -------------------------- */
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address to approve
-    function approveSender(address sender) external {
-        address receiver = msg.sender;
+    /// @notice approve a spender to perform a specific action on behalf of the account
+    ///
+    /// @param spender address to approve
+    /// @param approvalType type of approval to grant
+    function approve(address spender, IEthMultiVault.ApprovalTypes approvalType) external {
+        address account = msg.sender;
 
-        if (receiver == sender) {
+        if (account == spender) {
             revert Errors.EthMultiVault_CannotApproveSelf();
         }
 
-        if (depositApprovals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderAlreadyApproved();
-        }
+        approvals[account][spender] = approvalType;
 
-        depositApprovals[receiver][sender] = true;
-
-        emit SenderApproved(receiver, sender, true);
-    }
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address to revoke
-    function revokeSender(address sender) external {
-        address receiver = msg.sender;
-
-        if (receiver == sender) {
-            revert Errors.EthMultiVault_CannotRevokeSelf();
-        }
-
-        if (!depositApprovals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderNotApproved();
-        }
-
-        depositApprovals[receiver][sender] = false;
-
-        emit SenderRevoked(receiver, sender, false);
-    }
-
-    /// @notice approve a redeemer to redeem assets on behalf of the owner
-    /// @param redeemer address to approve
-    function approveRedeemer(address redeemer) external {
-        address owner = msg.sender;
-
-        if (owner == redeemer) {
-            revert Errors.EthMultiVault_CannotApproveSelf();
-        }
-
-        if (redemptionApprovals[owner][redeemer]) {
-            revert Errors.EthMultiVault_RedeemerAlreadyApproved();
-        }
-
-        redemptionApprovals[owner][redeemer] = true;
-
-        emit RedeemerApproved(owner, redeemer, true);
-    }
-
-    /// @notice revoke a redeemer's approval to redeem assets on behalf of the owner
-    /// @param redeemer address to revoke
-    function revokeRedeemer(address redeemer) external {
-        address owner = msg.sender;
-
-        if (owner == redeemer) {
-            revert Errors.EthMultiVault_CannotRevokeSelf();
-        }
-
-        if (!redemptionApprovals[owner][redeemer]) {
-            revert Errors.EthMultiVault_RedeemerNotApproved();
-        }
-
-        redemptionApprovals[owner][redeemer] = false;
-
-        emit RedeemerRevoked(owner, redeemer, false);
+        emit SpenderApproved(account, spender, approvalType);
     }
 
     /* -------------------------- */
@@ -2212,7 +2152,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param sender address of the sender
     /// @return bool whether the given sender address is an approved sender for the given receiver
     function isApprovedSender(address receiver, address sender) public view returns (bool) {
-        return receiver == sender || depositApprovals[receiver][sender];
+        return receiver == sender
+            || (
+                approvals[receiver][sender] == IEthMultiVault.ApprovalTypes.DEPOSIT
+                    || approvals[receiver][sender] == IEthMultiVault.ApprovalTypes.DEPOSIT_AND_REDEMPTION
+            );
     }
 
     /// @notice returns whether the given redeemer address is an approved redeemer for the given owner
@@ -2221,7 +2165,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param redeemer address of the redeemer
     /// @return bool whether the given redeemer address is an approved redeemer for the given owner
     function isApprovedRedeemer(address owner, address redeemer) public view returns (bool) {
-        return owner == redeemer || redemptionApprovals[owner][redeemer];
+        return owner == redeemer
+            || (
+                approvals[owner][redeemer] == IEthMultiVault.ApprovalTypes.REDEMPTION
+                    || approvals[owner][redeemer] == IEthMultiVault.ApprovalTypes.DEPOSIT_AND_REDEMPTION
+            );
     }
 
     /// @notice returns the address of the atom warden
