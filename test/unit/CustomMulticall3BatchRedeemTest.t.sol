@@ -75,26 +75,30 @@ contract CustomMulticall3BatchRedeemTest is EthMultiVaultBase {
 
         // case 1: should revert if zero length array
         vm.expectRevert(Errors.CustomMulticall3_EmptyArray.selector);
-        customMulticall3BatchRedeem.batchRedeem(emptyArray, atomShares, owners, atomIds, false);
+        customMulticall3BatchRedeem.batchRedeem(emptyArray, atomShares, atomIds, false);
 
         address[] memory shorterOwnersArray = new address[](2);
         shorterOwnersArray[0] = alice;
         shorterOwnersArray[1] = alice;
 
+        uint256[] memory shorterAtomIdsArray = new uint256[](2);
+        shorterAtomIdsArray[0] = atomIds[0];
+        shorterAtomIdsArray[1] = atomIds[1];
+
         // case 2: should revert if arrays are not the same length
         vm.expectRevert(Errors.CustomMulticall3_ArraysNotSameLength.selector);
-        customMulticall3BatchRedeem.batchRedeem(owners, atomShares, shorterOwnersArray, atomIds, false);
+        customMulticall3BatchRedeem.batchRedeem(owners, atomShares, shorterAtomIdsArray, false);
 
         // case 3: should batch redeem from atom vaults
 
         uint256 aliceBalanceBefore = address(alice).balance;
-        customMulticall3BatchRedeem.batchRedeem(owners, atomShares, owners, atomIds, false);
+        customMulticall3BatchRedeem.batchRedeem(owners, atomShares, atomIds, false);
         assertGt(address(alice).balance, aliceBalanceBefore);
 
         // case 4: should batch redeem from triple vaults
 
         aliceBalanceBefore = address(alice).balance;
-        customMulticall3BatchRedeem.batchRedeem(shorterOwnersArray, tripleShares, shorterOwnersArray, tripleIds, true);
+        customMulticall3BatchRedeem.batchRedeem(shorterOwnersArray, tripleShares, tripleIds, true);
         assertGt(address(alice).balance, aliceBalanceBefore);
 
         vm.stopPrank();

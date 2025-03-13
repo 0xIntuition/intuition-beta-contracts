@@ -568,6 +568,7 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    /// @notice Version of the `redeemAtom` function which allows for a redeemer to redeem assets on behalf of an owner
     function redeemAtom(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
 
     /// @notice redeem shares from a bonding curve atom vault for assets
@@ -584,6 +585,7 @@ interface IEthMultiVault {
         external
         returns (uint256);
 
+    /// @notice Version of the `redeemAtomCurve` function which allows for a redeemer to redeem assets on behalf of an owner
     function redeemAtomCurve(address owner, uint256 shares, address receiver, uint256 atomId, uint256 curveId)
         external
         returns (uint256);
@@ -628,6 +630,7 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    /// @notice Version of the `redeemTriple` function which allows for a redeemer to redeem assets on behalf of an owner
     function redeemTriple(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
 
     /// @notice redeem shares from a bonding curve triple vault for assets
@@ -644,6 +647,7 @@ interface IEthMultiVault {
         external
         returns (uint256);
 
+    /// @notice Version of the `redeemTripleCurve` function which allows for a redeemer to redeem assets on behalf of an owner
     function redeemTripleCurve(address owner, uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         returns (uint256);

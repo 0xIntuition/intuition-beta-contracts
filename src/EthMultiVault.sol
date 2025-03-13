@@ -1469,7 +1469,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///      Changes the vault's total assets, total shares and balanceOf mappings to reflect the withdrawal
     ///
     /// @param id the vault ID of the atom or triple
-    /// @param sender the address to redeem the shares from
+    /// @param sender the address to redeem the shares from (owner of the shares)
     /// @param receiver the address to receive the assets
     /// @param shares the amount of shares to redeem
     ///
