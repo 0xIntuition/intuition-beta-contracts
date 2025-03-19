@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.27;
 
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {UD60x18, ud60x18, convert, uMAX_UD60x18, uUNIT} from "@prb/math/UD60x18.sol";
 
 import {BaseCurve} from "src/BaseCurve.sol";
 
@@ -30,34 +30,26 @@ import {BaseCurve} from "src/BaseCurve.sol";
  *         This curve creates a predictable linear price increase with each share minted,
  *         starting from a non-zero base price.
  *
- * @dev    Uses standard integer math for calculations
+ * @dev    Uses fixed-point arithmetic for calculations with UD60x18
  * @dev    The discrete summation approach differs from the continuous integration approach used in
  *         ProgressiveCurve, resulting in slightly different pricing dynamics
  * @dev    The non-zero base price ensures that even the first share has a minimum cost
  */
 contract ArithmeticSeriesCurve is BaseCurve {
-    using Math for uint256;
-
-    /// @notice Decimal precision used for the curve calculations
-    uint256 public constant DECIMAL_PRECISION = 1e18;
-
     /// @notice Maximum number of shares supported by the curve
-    uint256 public constant MAX_SHARES = type(uint256).max;
+    uint256 public immutable MAX_SHARES;
 
     /// @notice Maximum number of assets supported by the curve
-    uint256 public constant MAX_ASSETS = type(uint256).max;
+    uint256 public immutable MAX_ASSETS;
 
-    /// @notice Base price for the first share
-    uint256 public constant BASE_PRICE = 0.0001 ether;
+    /// @notice Base price for the first share as a UD60x18 value
+    UD60x18 public immutable BASE_PRICE;
 
-    /// @notice Price increase per share minted (or decrease per share redeemed)
-    uint256 public priceIncrement;
+    /// @notice Price increase per share minted (or decrease per share redeemed) as a UD60x18 value
+    UD60x18 public immutable PRICE_INCREMENT;
 
-    /// @notice Error message for when fractional shares are attempted to be minted or redeemed
-    error FractionalSharesNotAllowed();
-
-    /// @notice Error message for invalid price increment
-    error InvalidPriceIncrement();
+    /// @notice Half of price increment, used in calculations
+    UD60x18 public immutable HALF_PRICE_INCREMENT;
 
     /// @notice Error message for insufficient shares in the vault
     error InsufficientSharesInVault();
@@ -68,26 +60,42 @@ contract ArithmeticSeriesCurve is BaseCurve {
     /// @notice Error message for zero shares
     error ZeroShares();
 
+    /// @notice Error message for negative discriminant in quadratic formula
+    error NegativeDiscriminant();
+
+    /// @notice Error message for invalid price increment
+    error InvalidPriceIncrement();
+
     /**
      * @notice Constructs a new ArithmeticSeriesCurve
      * @param _name Name of the curve
-     * @param _priceIncrement Amount price increases per share
+     * @param _priceIncrement Amount price increases per share (in wei)
+     * @param _basePrice The base starting price for the first share (i.e 0.0001 ether)
      */
-    constructor(string memory _name, uint256 _priceIncrement) BaseCurve(_name) {
-        if (_priceIncrement == 0 || _priceIncrement > 2 * BASE_PRICE) {
+    constructor(string memory _name, uint256 _priceIncrement, uint256 _basePrice) BaseCurve(_name) {
+        // Convert constants to UD60x18
+        UD60x18 basePrice = convert(_basePrice);
+        UD60x18 priceIncrement = convert(_priceIncrement);
+
+        if (priceIncrement.unwrap() == 0 || priceIncrement.gt(basePrice.mul(convert(2)))) {
             revert InvalidPriceIncrement();
         }
 
-        priceIncrement = _priceIncrement;
+        BASE_PRICE = basePrice;
+        PRICE_INCREMENT = priceIncrement;
+        HALF_PRICE_INCREMENT = priceIncrement.div(convert(2));
+
+        MAX_SHARES = 1e48;
+        MAX_ASSETS = 1e48;
     }
 
     /// @inheritdoc BaseCurve
-    function maxShares() public pure override returns (uint256) {
+    function maxShares() public view override returns (uint256) {
         return MAX_SHARES;
     }
 
     /// @inheritdoc BaseCurve
-    function maxAssets() public pure override returns (uint256) {
+    function maxAssets() public view override returns (uint256) {
         return MAX_ASSETS;
     }
 
@@ -118,7 +126,55 @@ contract ArithmeticSeriesCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        // Skip the previewWithdraw logic for now
+        if (assets == 0) {
+            revert ZeroAssets();
+        }
+        
+        // Convert to UD60x18 for precise calculation
+        UD60x18 assetsUD = convert(assets);
+        UD60x18 totalSharesUD = convert(totalShares);
+        
+        // Solve for sharesToRedeem using quadratic formula
+        // The equation is: priceIncrement * x² - (2*BASE_PRICE + (2*totalSharesUD - 1)*priceIncrement) * x + 2*assets = 0
+        
+        UD60x18 a = PRICE_INCREMENT;
+        UD60x18 b = BASE_PRICE.mul(convert(2)).add(totalSharesUD.mul(convert(2)).sub(convert(1)).mul(PRICE_INCREMENT));
+        UD60x18 c = assetsUD.mul(convert(2));
+        
+        // Calculate discriminant = b² - 4ac
+        UD60x18 discriminant = b.pow(convert(2)).sub(convert(4).mul(a).mul(c));
+        
+        // Ensure discriminant is non-negative (solution exists)
+        if (discriminant.lt(convert(0))) {
+            revert NegativeDiscriminant();
+        }
+        
+        UD60x18 sqrtDisc = discriminant.sqrt();
+        
+        // Using quadratic formula: x = (b - sqrt(b² - 4ac))/(2a)
+        // We use (b - sqrt) rather than (b + sqrt) to get the smaller positive root
+        if (sqrtDisc.gt(b)) {
+            revert InsufficientSharesInVault(); // Not enough assets to fulfill request
+        }
+        
+        UD60x18 sharesToRedeemUD = b.sub(sqrtDisc).div(a.mul(convert(2)));
+        
+        // Verify the solution is valid
+        if (sharesToRedeemUD.gt(totalSharesUD)) {
+            revert InsufficientSharesInVault();
+        }
+        
+        // Convert to uint256 and ensure we round up to get at least the requested assets
+        uint256 sharesToRedeem = sharesToRedeemUD.ceil().unwrap();
+        
+        // Final validation - make sure these shares actually give enough assets
+        UD60x18 resultingAssets = _convertToAssets(convert(sharesToRedeem), totalSharesUD);
+        if (resultingAssets.lt(assetsUD)) {
+            // If still not enough, add a small increment
+            sharesToRedeem += 1;
+        }
+        
+        return sharesToRedeem;
     }
 
     /// @inheritdoc BaseCurve
@@ -132,17 +188,15 @@ contract ArithmeticSeriesCurve is BaseCurve {
             revert ZeroShares();
         }
 
-        // 1. Disallow fractional shares if not permitted
-        if (shares % DECIMAL_PRECISION != 0) {
-            revert FractionalSharesNotAllowed();
-        }
-
-        uint256 sharesToMint = shares / DECIMAL_PRECISION; // integer shares
-
-        // 3. Now call your helper
-        assets = calculateAssetsForDeposit(sharesToMint, totalShares);
-
-        return assets;
+        // Convert to UD60x18 for precise calculation
+        UD60x18 sharesToMintUD = convert(shares);
+        UD60x18 totalSharesUD = convert(totalShares);
+        
+        // Calculate assets needed to mint these shares
+        UD60x18 assetsUD = _calculateAssetsForDeposit(sharesToMintUD, totalSharesUD);
+        
+        // Convert back to uint256
+        return assetsUD.ceil().unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -161,38 +215,31 @@ contract ArithmeticSeriesCurve is BaseCurve {
         if (assets == 0) {
             revert ZeroAssets();
         }
-        // Convert totalShares from 18-decimal to whole shares.
-        uint256 S = totalShares / DECIMAL_PRECISION;
+        
+        // Convert to UD60x18 for precise calculation
+        UD60x18 assetsUD = convert(assets);
+        UD60x18 totalSharesUD = convert(totalShares);
 
         // Define quadratic coefficients:
         // a = priceIncrement
-        // b = 2*BASE_PRICE - priceIncrement + 2*S*priceIncrement
-        uint256 a = priceIncrement;
-        uint256 b = 2 * BASE_PRICE - priceIncrement + 2 * S * priceIncrement;
+        // b = 2*BASE_PRICE - priceIncrement + 2*totalShares*priceIncrement
+        UD60x18 a = PRICE_INCREMENT;
+        UD60x18 b = BASE_PRICE.mul(convert(2)).sub(PRICE_INCREMENT).add(totalSharesUD.mul(convert(2)).mul(PRICE_INCREMENT));
 
         // Compute discriminant = b^2 + 8*a*assets.
-        uint256 discriminant = b * b + 8 * a * assets;
-        uint256 sqrtDisc = Math.sqrt(discriminant);
+        UD60x18 discriminant = b.pow(convert(2)).add(convert(8).mul(a).mul(assetsUD));
+        UD60x18 sqrtDisc = discriminant.sqrt();
 
         // Ensure the square root is large enough.
-        if (sqrtDisc < b) {
-            revert FractionalSharesNotAllowed(); // Should never happen if assets > 0.
+        if (sqrtDisc.lt(b)) {
+            return 0; // No solution or too small to be meaningful
         }
 
-        uint256 numerator = sqrtDisc - b;
-        uint256 denominator = 2 * a;
-
-        // Ensure the result is an integer.
-        if (numerator % denominator != 0) {
-            revert FractionalSharesNotAllowed();
-        }
-
-        uint256 n = numerator / denominator;
-
-        // Return n converted back to 18-decimal format.
-        shares = n * DECIMAL_PRECISION;
-
-        return shares;
+        // Calculate sharesToMint = (sqrtDisc - b) / (2*a)
+        UD60x18 sharesToMintUD = sqrtDisc.sub(b).div(a.mul(convert(2)));
+        
+        // Convert back to uint256, using floor to ensure we don't mint more than assets paid for
+        return sharesToMintUD.floor().unwrap();
     }
 
     /// @inheritdoc BaseCurve
@@ -206,41 +253,47 @@ contract ArithmeticSeriesCurve is BaseCurve {
     /// $$\text{highestTerm} = b + ((s - 1) \cdot p)$$
     /// $$\text{lowestTerm} = b + ((s - r) \cdot p)$$
     function convertToAssets(
-        uint256 shares, // number of shares the user wants to burn (18-decimal)
-        uint256 totalShares, // totalShares in the vault (18-decimal)
+        uint256 shares, // number of shares the user wants to burn
+        uint256 totalShares, // totalShares in the vault
         uint256 /* totalAssets */
     ) public view override returns (uint256 assets) {
         if (shares == 0) {
             revert ZeroShares();
         }
 
-        // 1. Convert totalShares to an integer supply (ignore fractional part for simplicity)
-        uint256 currentSupply = totalShares / DECIMAL_PRECISION;
+        // Convert to UD60x18 for precise calculation
+        UD60x18 sharesToRedeemUD = convert(shares);
+        UD60x18 totalSharesUD = convert(totalShares);
 
-        // 2. Convert 'shares' (in 18 decimals) to an integer and revert if there's a remainder
-        if (shares % DECIMAL_PRECISION != 0) {
-            revert FractionalSharesNotAllowed();
-        }
-        uint256 sharesToRedeem = shares / DECIMAL_PRECISION;
-
-        // 3. Ensure the user cannot redeem more shares than exist in the vault
-        if (sharesToRedeem > currentSupply) {
+        // Ensure the user cannot redeem more shares than exist in the vault
+        if (sharesToRedeemUD.gt(totalSharesUD)) {
             revert InsufficientSharesInVault();
         }
 
-        // 4. Cost of the *highest* share being redeemed:
-        //    The share index is (currentSupply - 1), so its price is:
-        uint256 highestTerm = BASE_PRICE + ((currentSupply - 1) * priceIncrement);
+        // Calculate assets using our helper function
+        UD60x18 assetsUD = _convertToAssets(sharesToRedeemUD, totalSharesUD);
+        
+        // Convert back to uint256
+        return assetsUD.floor().unwrap();
+    }
 
-        // 5. Cost of the *lowest* share being redeemed:
-        //    That's (currentSupply - sharesToRedeem).
-        uint256 lowestTerm = BASE_PRICE + ((currentSupply - sharesToRedeem) * priceIncrement);
-
-        // 6. Sum of arithmetic series = numberOfTerms * (firstTerm + lastTerm) / 2
-        //    Here the 'numberOfTerms' is sharesToRedeem.
-        assets = (sharesToRedeem * (highestTerm + lowestTerm)) / 2;
-
-        return assets;
+    /**
+     * @notice Helper function to calculate assets returned when redeeming shares
+     * @param sharesToRedeem Number of shares to redeem as UD60x18
+     * @param totalShares Total shares in circulation as UD60x18
+     * @return assetsUD Amount of assets returned as UD60x18
+     */
+    function _convertToAssets(UD60x18 sharesToRedeem, UD60x18 totalShares) internal view returns (UD60x18 assetsUD) {
+        // Calculate highest term price: BASE_PRICE + ((totalShares - 1) * PRICE_INCREMENT)
+        UD60x18 highestTerm = BASE_PRICE.add(totalShares.sub(convert(1)).mul(PRICE_INCREMENT));
+        
+        // Calculate lowest term price: BASE_PRICE + ((totalShares - sharesToRedeem) * PRICE_INCREMENT)
+        UD60x18 lowestTerm = BASE_PRICE.add(totalShares.sub(sharesToRedeem).mul(PRICE_INCREMENT));
+        
+        // Sum of arithmetic series = numberOfTerms * (firstTerm + lastTerm) / 2
+        assetsUD = sharesToRedeem.mul(highestTerm.add(lowestTerm)).div(convert(2));
+        
+        return assetsUD;
     }
 
     /// @inheritdoc BaseCurve
@@ -252,14 +305,16 @@ contract ArithmeticSeriesCurve is BaseCurve {
     /// @dev This is the basic linear price function where the price increases linearly with the total supply
     /// @dev starting from a non-zero base price
     function currentPrice(uint256 totalShares) public view override returns (uint256 sharePrice) {
-        return BASE_PRICE + (totalShares * priceIncrement);
+        UD60x18 totalSharesUD = convert(totalShares);
+        UD60x18 price = BASE_PRICE.add(totalSharesUD.mul(PRICE_INCREMENT));
+        return price.unwrap();
     }
 
     /**
      * @notice Helper function to calculate the sum of an arithmetic series
-     * @param shares Desired number of shares to mint (needs to be a whole number - NOT in 18 the decimals format)
-     * @param totalShares Total number of shares in circulation
-     * @return assets Total cost to mint the desired number of shares
+     * @param shares Desired number of shares to mint as UD60x18
+     * @param totalShares Total number of shares in circulation as UD60x18
+     * @return assetsUD Total cost to mint the desired number of shares as UD60x18
      * @dev Let $s$ = current total supply of shares
      * @dev Let $n$ = shares to mint
      * @dev Let $b$ = basePrice
@@ -272,23 +327,33 @@ contract ArithmeticSeriesCurve is BaseCurve {
      * @dev which simplifies to:
      * $$\text{assets} = n \cdot \frac{2b + (2s + n - 1) \cdot p}{2}$$
      */
-    function calculateAssetsForDeposit(uint256 shares, uint256 totalShares) public view returns (uint256) {
-        if (shares == 0) {
+    function _calculateAssetsForDeposit(UD60x18 shares, UD60x18 totalShares) internal view returns (UD60x18 assetsUD) {
+        if (shares.unwrap() == 0) {
             revert ZeroShares();
         }
 
-        // Total supply of whole shares
-        uint256 currentSupply = totalShares / DECIMAL_PRECISION;
+        // Cost of the first share: BASE_PRICE + (totalShares * PRICE_INCREMENT)
+        UD60x18 firstTerm = BASE_PRICE.add(totalShares.mul(PRICE_INCREMENT));
 
-        // Cost of the first share
-        uint256 firstTerm = BASE_PRICE + (currentSupply * priceIncrement);
+        // Cost of the last share: BASE_PRICE + ((totalShares + shares - 1) * PRICE_INCREMENT)
+        UD60x18 lastTerm = BASE_PRICE.add(totalShares.add(shares).sub(convert(1)).mul(PRICE_INCREMENT));
 
-        // Cost of the last share
-        uint256 lastTerm = BASE_PRICE + (currentSupply + shares - 1) * priceIncrement;
+        // Total cost using the sum of arithmetic series formula: shares * (firstTerm + lastTerm) / 2
+        assetsUD = shares.mul(firstTerm.add(lastTerm)).div(convert(2));
 
-        // Total cost using the sum of arithmetic series formula
-        uint256 totalCost = (shares * (firstTerm + lastTerm)) / 2;
+        return assetsUD;
+    }
 
-        return totalCost;
+    /**
+     * @notice Public wrapper for _calculateAssetsForDeposit that accepts uint256 inputs
+     * @param shares Desired number of shares to mint (in uint256)
+     * @param totalShares Total number of shares in circulation (in uint256)
+     * @return Total cost to mint the desired number of shares
+     */
+    function calculateAssetsForDeposit(uint256 shares, uint256 totalShares) public view returns (uint256) {
+        UD60x18 sharesUD = convert(shares);
+        UD60x18 totalSharesUD = convert(totalShares);
+        
+        return _calculateAssetsForDeposit(sharesUD, totalSharesUD).unwrap();
     }
 }

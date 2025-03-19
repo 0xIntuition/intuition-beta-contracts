@@ -128,7 +128,7 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed OffsetProgressiveCurve.");
 
         // Deploy ArithmeticSeriesCurve
-        arithmeticSeriesCurve = new ArithmeticSeriesCurve("Arithmetic Series Curve", 1);
+        arithmeticSeriesCurve = new ArithmeticSeriesCurve("Arithmetic Series Curve", 1, 0.0001 ether);
         console.logString("deployed ArithmeticSeriesCurve.");
 
         // Add curves to BondingCurveRegistry
