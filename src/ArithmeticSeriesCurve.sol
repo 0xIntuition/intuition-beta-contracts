@@ -118,7 +118,50 @@ contract ArithmeticSeriesCurve is BaseCurve {
         override
         returns (uint256 shares)
     {
-        // Skip the previewWithdraw logic for now
+        if (assets == 0) {
+            revert ZeroAssets();
+        }
+        
+        // Convert totalShares to integer supply
+        uint256 currentSupply = totalShares / DECIMAL_PRECISION;
+        
+        // Solve for sharesToRedeem using quadratic formula
+        // The equation is: priceIncrement * x² - (2*BASE_PRICE + (2*currentSupply - 1)*priceIncrement) * x + 2*assets = 0
+        
+        uint256 a = priceIncrement;
+        uint256 b = 2 * BASE_PRICE + (2 * currentSupply - 1) * priceIncrement;
+        uint256 c = 2 * assets;
+        
+        // Calculate discriminant = b² - 4ac
+        uint256 discriminant = b * b - 4 * a * c;
+        uint256 sqrtDisc = Math.sqrt(discriminant);
+        
+        // Using quadratic formula: x = (b - sqrt(b² - 4ac))/(2a)
+        // We use (b - sqrt) rather than (b + sqrt) to get the smaller positive root
+        if (sqrtDisc > b) {
+            revert InsufficientSharesInVault(); // Not enough assets to fulfill request
+        }
+        
+        uint256 numerator = b - sqrtDisc;
+        uint256 denominator = 2 * a;
+        
+        // Ensure the result is an integer
+        if (numerator % denominator != 0) {
+            // Round up to ensure user gets at least the requested assets
+            numerator = numerator + denominator - (numerator % denominator);
+        }
+        
+        uint256 sharesToRedeem = numerator / denominator;
+        
+        // Verify the solution is valid
+        if (sharesToRedeem > currentSupply) {
+            revert InsufficientSharesInVault();
+        }
+        
+        // Convert back to 18-decimal format
+        shares = sharesToRedeem * DECIMAL_PRECISION;
+        
+        return shares;
     }
 
     /// @inheritdoc BaseCurve
