@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
 contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {
@@ -49,7 +50,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -88,7 +89,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -117,7 +118,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -153,7 +154,7 @@ contract DepositAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 

@@ -8,6 +8,22 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
     /* =================================================== */
+    /*                         ENUMS                       */
+    /* =================================================== */
+
+    /// @notice Enum for the different types of approvals
+    enum ApprovalTypes {
+        /// @dev No approval of any kind (default)
+        NONE,
+        /// @dev Sender is approved to deposit assets on behalf of the receiver
+        DEPOSIT,
+        /// @dev Redeemer is approved to redeem assets on behalf of the owner
+        REDEMPTION,
+        /// @dev Both deposit and redemption approvals
+        DEPOSIT_AND_REDEMPTION
+    }
+
+    /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
 
@@ -109,19 +125,12 @@ interface IEthMultiVault {
     /*                       EVENTS                        */
     /* =================================================== */
 
-    /// @notice Emitted when a receiver approves a sender to deposit assets on their behalf
+    /// @notice Emitted when a spender is approved to perform a specific action on behalf of the account
     ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderApproved(address indexed sender, address indexed receiver, bool approved);
-
-    /// @notice Emitted when a receiver revokes a sender's approval to deposit assets on their behalf
-    ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
+    /// @param account address of the account that is approving the spender
+    /// @param spender address of the account that is being approved
+    /// @param approvalType type of approval being granted
+    event SpenderApproved(address indexed account, address indexed spender, ApprovalTypes approvalType);
 
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
@@ -480,13 +489,11 @@ interface IEthMultiVault {
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external returns (address);
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function approveSender(address sender) external;
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function revokeSender(address sender) external;
+    /// @notice approve a spender to perform a specific action on behalf of the account
+    ///
+    /// @param spender address to approve
+    /// @param approvalType type of approval to grant
+    function approve(address spender, ApprovalTypes approvalType) external;
 
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with
@@ -562,6 +569,9 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    /// @notice Version of the `redeemAtom` function which allows for a redeemer to redeem assets on behalf of an owner
+    function redeemAtom(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
+
     /// @notice redeem shares from a bonding curve atom vault for assets
     ///
     /// @param shares the amount of shares to redeem
@@ -573,6 +583,11 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
+        external
+        returns (uint256);
+
+    /// @notice Version of the `redeemAtomCurve` function which allows for a redeemer to redeem assets on behalf of an owner
+    function redeemAtomCurve(address owner, uint256 shares, address receiver, uint256 atomId, uint256 curveId)
         external
         returns (uint256);
 
@@ -616,6 +631,9 @@ interface IEthMultiVault {
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external returns (uint256);
 
+    /// @notice Version of the `redeemTriple` function which allows for a redeemer to redeem assets on behalf of an owner
+    function redeemTriple(address owner, uint256 shares, address receiver, uint256 id) external returns (uint256);
+
     /// @notice redeem shares from a bonding curve triple vault for assets
     ///
     /// @param shares the amount of shares to redeem
@@ -627,6 +645,11 @@ interface IEthMultiVault {
     /// NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
+        external
+        returns (uint256);
+
+    /// @notice Version of the `redeemTripleCurve` function which allows for a redeemer to redeem assets on behalf of an owner
+    function redeemTripleCurve(address owner, uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         returns (uint256);
 
@@ -811,6 +834,19 @@ interface IEthMultiVault {
     /// @return shares number of shares user has in the vault
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
+
+    /// @notice returns the number of shares and assets (less fees) user has in the bonding curve vault
+    ///
+    /// @param vaultId vault id of the vault
+    /// @param curveId curve id of the curve
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    /// @return assets number of assets user has in the vault
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+        external
+        view
+        returns (uint256, uint256);
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///

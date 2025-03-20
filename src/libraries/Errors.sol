@@ -15,7 +15,6 @@ library Errors {
     error EthMultiVault_BurnFromZeroAddress();
     error EthMultiVault_BurnInsufficientBalance();
     error EthMultiVault_CannotApproveSelf();
-    error EthMultiVault_CannotRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
     error EthMultiVault_DepositExceedsMaxAssets();
@@ -33,7 +32,7 @@ library Errors {
     error EthMultiVault_OperationAlreadyScheduled();
     error EthMultiVault_OperationNotScheduled();
     error EthMultiVault_ReceiveNotAllowed();
-    error EthMultiVault_SenderAlreadyApproved();
+    error EthMultiVault_RedeemerNotApproved();
     error EthMultiVault_SenderNotApproved();
     error EthMultiVault_TimelockNotExpired();
     error EthMultiVault_TransferFailed();
@@ -53,15 +52,20 @@ library Errors {
     error AtomWallet_OnlyOwnerOrEntryPoint();
     error AtomWallet_WrongArrayLengths();
 
-    ///////// CUSTOMMULTICALL3 ERRORS /////////////////////////////////////////////////////////////
+    ///////// CUSTOMMULTICALL3 ERRORS ///////////////////////////////////////////////////////
 
+    error CustomMulticall3_AddressZero();
+    error CustomMulticall3_ArraysNotSameLength();
+    error CustomMulticall3_EmptyArray();
     error CustomMulticall3_InsufficientValue();
     error CustomMulticall3_InvalidAtomIdsLength();
     error CustomMulticall3_InvalidAtomUrisLength();
     error CustomMulticall3_InvalidEthMultiVaultAddress();
+    error CustomMulticall3_InvalidBondingCurveIdsLength();
     error CustomMulticall3_InvalidValue();
     error CustomMulticall3_InvalidValuesLength();
-    error CustomMulticall3_ZeroLengthArray();
+    error CustomMulticall3_VaultIsTriple(uint256 vaultId);
+    error CustomMulticall3_VaultNotTriple(uint256 vaultId);
 
     ///////// ATTESTOOR ERRORS ////////////////////////////////////////////////////////////////////
 
