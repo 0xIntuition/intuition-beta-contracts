@@ -1237,7 +1237,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
                 revert Errors.EthMultiVault_VaultDoesNotExist();
             }
 
-            if (msg.value < generalConfig.minDeposit) {
+            if (amounts[i] < generalConfig.minDeposit) {
                 revert Errors.EthMultiVault_MinimumDeposit();
             }
 
@@ -1275,6 +1275,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ) external payable nonReentrant whenNotPaused returns (uint256[] memory shares) {
         if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
             revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
+        if (termIds.length != curveIds.length) {
+            revert Errors.EthMultiVault_ArraysNotSameLength();
         }
 
         shares = new uint256[](termIds.length);
@@ -1316,17 +1320,20 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     {
         uint256 totalAssetsRedeemed = 0;
         uint256 totalProtocolFees = 0;
+        assets = new uint256[](ids.length);
 
         for (uint256 i = 0; i < ids.length; i++) {
             if (ids[i] == 0 || ids[i] > count) {
                 revert Errors.EthMultiVault_VaultDoesNotExist();
             }
 
-            /*
-                withdraw shares from vault, returning the amount of
-                assets to be transferred to the receiver
-            */
-            uint256 shares = (percentage * vaults[ids[i]].balanceOf[msg.sender]) / 100;
+            uint256 userBalance = vaults[ids[i]].balanceOf[msg.sender];
+            if (userBalance == 0) {
+                revert Errors.EthMultiVault_InsufficientSharesInVault();
+            }
+
+            uint256 shares = (percentage * userBalance) / 100;
+
             uint256 protocolFee;
             (assets[i], protocolFee) = _redeem(ids[i], msg.sender, receiver, shares);
             totalAssetsRedeemed += assets[i];
@@ -1371,8 +1378,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
                 revert Errors.EthMultiVault_VaultDoesNotExist();
             }
 
+            // Then check user balance and calculate shares
+            uint256 userBalance = bondingCurveVaults[termIds[i]][curveIds[i]].balanceOf[msg.sender];
+            if (userBalance == 0) {
+                revert Errors.EthMultiVault_InsufficientSharesInVault();
+            }
+
+            uint256 shares = (percentage * userBalance) / 100;
+
             uint256 protocolFee;
-            uint256 shares = (percentage * bondingCurveVaults[termIds[i]][curveIds[i]].balanceOf[msg.sender]) / 100;
             (assets[i], protocolFee) = _redeemCurve(termIds[i], curveIds[i], msg.sender, receiver, shares);
             totalAssetsRedeemed += assets[i];
             totalProtocolFees += protocolFee;
