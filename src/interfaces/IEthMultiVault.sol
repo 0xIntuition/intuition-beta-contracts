@@ -630,6 +630,62 @@ interface IEthMultiVault {
         external
         returns (uint256);
 
+    /// @notice deposit eth into multiple terms and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    ///         works with atoms, triples, and counter-triples
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds the IDs of the terms (atoms, triples, or counter-triples) to deposit into
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares the amount of shares minted for each atom
+    function batchDeposit(address receiver, uint256[] calldata termIds, uint256[] calldata amounts)
+        external
+        payable
+        returns (uint256[] memory);
+
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds array of the vault IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the vault IDs of the curves
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares array of the amount of shares minted in the specified vaults
+    function batchDepositCurve(
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds,
+        uint256[] calldata amounts
+    ) external payable returns (uint256[] memory);
+
+    /// @notice redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples
+    ///
+    /// @param percentage the percentage of shares to redeem from each vault (i.e. 50% -> 50, 100% -> 100)
+    /// @param receiver the address to receiver the assets
+    /// @param ids array of IDs of the term (atom, triple or counter-triple) to redeem from
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    function batchRedeem(uint256 percentage, address receiver, uint256[] calldata ids)
+        external
+        returns (uint256[] memory);
+
+    /// @notice redeem shares from bonding curve atom vaults for assets
+    ///
+    /// @param percentage the percentage of shares to redeem from the vaults
+    /// @param receiver the address to receiver the assets
+    /// @param termIds array of the IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the IDs of the curves for each term
+    ///
+    /// @return assets array of the amounts of assets/eth withdrawn
+    function batchRedeemCurve(
+        uint256 percentage,
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds
+    ) external returns (uint256[] memory);
+
     /* =================================================== */
     /*                    VIEW FUNCTIONS                   */
     /* =================================================== */
