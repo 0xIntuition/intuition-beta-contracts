@@ -34,7 +34,7 @@ contract DeployEthMultiVault is Script {
     // address public admin = 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480; // Gnosis Safe Proxy on Base
     // address public protocolMultisig = 0xC03F0dE5b34339e1B968e4f317Cd7e7FBd421FD1; // Gnosis Safe Proxy on Base
     // address public atomWarden = 0xC35DFCFE50da58d957fc47C7063f56135aFF61B8; // Gnosis Safe Proxy on Base
-    
+
     address public DEVELOPER = 0x44A4b9E2A69d86BA382a511f845CbF2E31286770; // Developer Wallet
 
     // Constants from Base
