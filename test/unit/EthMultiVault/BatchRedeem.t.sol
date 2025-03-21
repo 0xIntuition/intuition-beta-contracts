@@ -41,9 +41,6 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         amounts[1] = testDepositAmount;
         amounts[2] = testDepositAmount;
 
-        // Initial deposit by alice
-        uint256[] memory shares = ethMultiVault.batchDeposit{value: testDepositAmount * 3}(alice, termIds, amounts);
-
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
 
@@ -97,10 +94,6 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         amounts[0] = testDepositAmount;
         amounts[1] = testDepositAmount;
         amounts[2] = testDepositAmount;
-
-        // Initial deposit by alice
-        uint256[] memory shares =
-            ethMultiVault.batchDepositCurve{value: testDepositAmount * 3}(alice, termIds, curveIds, amounts);
 
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
