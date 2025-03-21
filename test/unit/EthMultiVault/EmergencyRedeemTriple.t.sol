@@ -176,7 +176,7 @@ contract EmergencyRedeemTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         vm.startPrank(bob, bob);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_DepositOrWithdrawZeroShares.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_RedeemerNotApproved.selector));
         // execute interaction - redeem all atom shares
         ethMultiVault.redeemTriple(0, alice, id);
 

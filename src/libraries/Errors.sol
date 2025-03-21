@@ -14,8 +14,7 @@ library Errors {
     error EthMultiVault_AtomUriTooLong();
     error EthMultiVault_BurnFromZeroAddress();
     error EthMultiVault_BurnInsufficientBalance();
-    error EthMultiVault_CannotApproveSelf();
-    error EthMultiVault_CannotRevokeSelf();
+    error EthMultiVault_CannotApproveOrRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
     error EthMultiVault_DepositExceedsMaxAssets();
@@ -33,8 +32,8 @@ library Errors {
     error EthMultiVault_OperationAlreadyScheduled();
     error EthMultiVault_OperationNotScheduled();
     error EthMultiVault_ReceiveNotAllowed();
-    error EthMultiVault_SenderAlreadyApproved();
     error EthMultiVault_SenderNotApproved();
+    error EthMultiVault_RedeemerNotApproved();
     error EthMultiVault_TimelockNotExpired();
     error EthMultiVault_TransferFailed();
     error EthMultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);

@@ -549,7 +549,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         address receiver = msg.sender;
 
         if (receiver == sender) {
-            revert Errors.EthMultiVault_CannotApproveSelf();
+            revert Errors.EthMultiVault_CannotApproveOrRevokeSelf();
         }
 
         if (approvalType == ApprovalTypes.NONE) {
@@ -941,7 +941,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (!isApprovedRedeem(msg.sender, receiver)) {
-            revert Errors.EthMultiVault_SenderNotApproved();
+            revert Errors.EthMultiVault_RedeemerNotApproved();
         }
 
         if (id == 0 || id > count) {
@@ -986,7 +986,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         returns (uint256)
     {
         if (!isApprovedRedeem(msg.sender, receiver)) {
-            revert Errors.EthMultiVault_SenderNotApproved();
+            revert Errors.EthMultiVault_RedeemerNotApproved();
         }
 
         if (atomId == 0 || atomId > count) {
@@ -1136,7 +1136,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
         if (!isApprovedRedeem(msg.sender, receiver)) {
-            revert Errors.EthMultiVault_SenderNotApproved();
+            revert Errors.EthMultiVault_RedeemerNotApproved();
         }
 
         if (!isTripleId(id)) {
@@ -1177,7 +1177,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         returns (uint256)
     {
         if (!isApprovedRedeem(msg.sender, receiver)) {
-            revert Errors.EthMultiVault_SenderNotApproved();
+            revert Errors.EthMultiVault_RedeemerNotApproved();
         }
 
         if (!isTripleId(tripleId)) {
@@ -1317,6 +1317,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         nonReentrant
         returns (uint256[] memory assets)
     {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
         uint256 totalAssetsRedeemed = 0;
         uint256 totalProtocolFees = 0;
         assets = new uint256[](ids.length);

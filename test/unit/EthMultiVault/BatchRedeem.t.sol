@@ -48,7 +48,7 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 aliceInitialBalance = address(alice).balance;
 
         // Redeem 100% of shares from all vaults
-        uint256[] memory assets = ethMultiVault.batchRedeem(100, alice, termIds);
+        uint256[] memory assets = ethMultiVault.batchRedeem(10000, alice, termIds);
 
         // Verify balance change
         uint256 totalAssetsReceived = 0;
@@ -106,7 +106,7 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 aliceInitialBalance = address(alice).balance;
 
         // Redeem 100% of shares from all vaults
-        uint256[] memory assets = ethMultiVault.batchRedeemCurve(100, alice, termIds, curveIds);
+        uint256[] memory assets = ethMultiVault.batchRedeemCurve(10000, alice, termIds, curveIds);
 
         // Verify balance change
         uint256 totalAssetsReceived = 0;
