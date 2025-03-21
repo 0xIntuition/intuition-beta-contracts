@@ -14,7 +14,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
-
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 contract EthMultiVaultBase is Test {
     // msg.value - atomCreationProtocolFee - protocolFee
 
@@ -85,8 +85,10 @@ contract EthMultiVaultBase is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 1e16));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
+        address offsetProgressiveCurve = address(new OffsetProgressiveCurve("Offset Progressive Curve", 1e16, 1e28));
+        BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(offsetProgressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
             IEthMultiVault.BondingCurveConfig({registry: bondingCurveRegistry, defaultCurveId: 1});
