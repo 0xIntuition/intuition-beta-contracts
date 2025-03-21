@@ -1756,11 +1756,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param totalShares new total shares for the vault
     function _setVaultTotals(uint256 id, uint256 totalAssets, uint256 totalShares) internal {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePrice(id);
         vaults[id].totalAssets = totalAssets;
         vaults[id].totalShares = totalShares;
         uint256 newSharePrice = currentSharePrice(id);
-        emit SharePriceChanged(id, newSharePrice, oldSharePrice);
+        emit SharePriceChanged(id, newSharePrice, totalAssets, totalShares);
     }
 
     /// @dev increase the total assets and shares for a given bonding curve vault
@@ -1774,11 +1773,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         internal
     {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
         bondingCurveVaults[id][curveId].totalShares += sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
     }
 
     /// @dev decrease the total assets and shares for a given bonding curve vault
@@ -1792,11 +1790,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         internal
     {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
         bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
     }
 
     /// @dev internal method for vault creation
