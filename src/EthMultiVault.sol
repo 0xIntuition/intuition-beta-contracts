@@ -101,8 +101,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     mapping(uint256 vaultId => VaultFees vaultFees) public vaultFees;
 
     /// @notice Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver
-    // Receiver -> Sender -> Is Approved
-    mapping(address receiver => mapping(address sender => bool isApproved)) public approvals;
+    // Receiver -> Sender -> Approval Type
+    mapping(address receiver => mapping(address sender => uint8 approvalType)) public approvals;
 
     /// @notice RDF (Resource Description Framework)
     // mapping of vault ID to atom data
@@ -542,40 +542,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*         Approvals          */
     /* -------------------------- */
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address to approve
-    function approveSender(address sender) external {
+    /// @notice Set the approval type for a sender to act on behalf of the receiver
+    /// @param sender address to set approval for
+    /// @param approvalType type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    function approve(address sender, ApprovalTypes approvalType) external {
         address receiver = msg.sender;
 
         if (receiver == sender) {
             revert Errors.EthMultiVault_CannotApproveSelf();
         }
 
-        if (approvals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderAlreadyApproved();
+        if (approvalType == ApprovalTypes.NONE) {
+            delete approvals[receiver][sender];
+        } else {
+            approvals[receiver][sender] = uint8(approvalType);
         }
 
-        approvals[receiver][sender] = true;
-
-        emit SenderApproved(receiver, sender, true);
-    }
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address to revoke
-    function revokeSender(address sender) external {
-        address receiver = msg.sender;
-
-        if (receiver == sender) {
-            revert Errors.EthMultiVault_CannotRevokeSelf();
-        }
-
-        if (!approvals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderNotApproved();
-        }
-
-        approvals[receiver][sender] = false;
-
-        emit SenderRevoked(receiver, sender, false);
+        emit ApprovalTypeUpdated(sender, receiver, approvalType);
     }
 
     /* -------------------------- */
@@ -872,7 +855,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
     function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256) {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -920,7 +903,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -957,6 +940,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
         if (id == 0 || id > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
@@ -998,6 +985,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         nonReentrant
         returns (uint256)
     {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
         if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
@@ -1044,7 +1035,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1098,7 +1089,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1144,6 +1135,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
         if (!isTripleId(id)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
@@ -1181,6 +1176,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         nonReentrant
         returns (uint256)
     {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
         if (!isTripleId(tripleId)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
@@ -1224,7 +1223,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256[] memory shares)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1273,7 +1272,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256[] calldata curveIds,
         uint256[] calldata amounts
     ) external payable nonReentrant whenNotPaused returns (uint256[] memory shares) {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1306,7 +1305,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @notice redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples
     ///
-    /// @param percentage the percentage of shares to redeem from each vault (i.e. 50% -> 50, 100% -> 100)
+    /// @param percentage the percentage of shares to redeem from each vault (10000 -> 100.00%, 5000 -> 50.00%, etc)
     /// @param receiver the address to receiver the assets
     /// @param ids array of IDs of the term (atom, triple or counter-triple) to redeem from
     ///
@@ -1332,7 +1331,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
                 revert Errors.EthMultiVault_InsufficientSharesInVault();
             }
 
-            uint256 shares = (percentage * userBalance) / 100;
+            uint256 shares = (percentage * userBalance) / 10000;
 
             uint256 protocolFee;
             (assets[i], protocolFee) = _redeem(ids[i], msg.sender, receiver, shares);
@@ -1353,7 +1352,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @notice redeem shares from bonding curve atom vaults for assets
     ///
-    /// @param percentage the percentage of shares to redeem from the vaults
+    /// @param percentage the percentage of shares to redeem from the vaults (10000 -> 100.00%, 5000 -> 50.00%, etc)
     /// @param receiver the address to receiver the assets
     /// @param termIds array of the IDs of the terms (atoms, triples, or counter-triples)
     /// @param curveIds array of the IDs of the curves for each term
@@ -1384,7 +1383,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
                 revert Errors.EthMultiVault_InsufficientSharesInVault();
             }
 
-            uint256 shares = (percentage * userBalance) / 100;
+            uint256 shares = (percentage * userBalance) / 10000;
 
             uint256 protocolFee;
             (assets[i], protocolFee) = _redeemCurve(termIds[i], curveIds[i], msg.sender, receiver, shares);
@@ -2335,6 +2334,22 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         bytes32 rawAddress = keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data)));
 
         return address(bytes20(rawAddress << 96));
+    }
+
+    /// @notice Check if a sender is approved to deposit on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to deposit
+    function isApprovedDeposit(address sender, address receiver) public view returns (bool) {
+        return sender == receiver || (approvals[receiver][sender] & uint8(ApprovalTypes.DEPOSIT)) != 0;
+    }
+
+    /// @notice Check if a sender is approved to redeem on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to redeem
+    function isApprovedRedeem(address sender, address receiver) public view returns (bool) {
+        return sender == receiver || (approvals[receiver][sender] & uint8(ApprovalTypes.REDEMPTION)) != 0;
     }
 
     /// @dev checks if an account holds shares in the vault counter to the id provided

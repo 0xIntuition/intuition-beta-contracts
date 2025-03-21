@@ -7,6 +7,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
+
     /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
@@ -106,22 +107,26 @@ interface IEthMultiVault {
     }
 
     /* =================================================== */
+    /*                        ENUMS                        */
+    /* =================================================== */
+
+    enum ApprovalTypes {
+        NONE,        // 0b00
+        DEPOSIT,     // 0b01
+        REDEMPTION,  // 0b10
+        BOTH        // 0b11
+    }
+
+    /* =================================================== */
     /*                       EVENTS                        */
     /* =================================================== */
 
-    /// @notice Emitted when a receiver approves a sender to deposit assets on their behalf
+    /// @notice Emitted when a receiver changes the approval type for a sender
     ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderApproved(address indexed sender, address indexed receiver, bool approved);
-
-    /// @notice Emitted when a receiver revokes a sender's approval to deposit assets on their behalf
-    ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
+    /// @param sender address of the sender being approved/disapproved
+    /// @param receiver address of the receiver granting/revoking approval
+    /// @param approvalType the type of approval granted (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    event ApprovalTypeUpdated(address indexed sender, address indexed receiver, ApprovalTypes approvalType);
 
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
@@ -480,13 +485,10 @@ interface IEthMultiVault {
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external returns (address);
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function approveSender(address sender) external;
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function revokeSender(address sender) external;
+    /// @notice Set the approval type for a sender to act on behalf of the receiver
+    /// @param sender address to set approval for
+    /// @param approvalType type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    function approve(address sender, ApprovalTypes approvalType) external;
 
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with
@@ -966,4 +968,16 @@ interface IEthMultiVault {
     /// @return atomWallet the address of the atom wallet
     /// NOTE: the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) external view returns (address);
+
+    /// @notice Check if a sender is approved to deposit on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to deposit
+    function isApprovedDeposit(address sender, address receiver) external view returns (bool);
+
+    /// @notice Check if a sender is approved to redeem on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to redeem
+    function isApprovedRedeem(address sender, address receiver) external view returns (bool);
 }
