@@ -500,7 +500,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -658,7 +658,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -877,7 +877,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -1089,22 +1089,14 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist</td></tr>
 </tbody></table>
 </div>
-<h3 id="approvesender"><a class="header" href="#approvesender">approveSender</a></h3>
-<p>approve a sender to deposit assets on behalf of the receiver</p>
-<pre><code class="language-solidity">function approveSender(address sender) external;
+<h3 id="approve"><a class="header" href="#approve">approve</a></h3>
+<p>Set the approval type for a sender to act on behalf of the receiver</p>
+<pre><code class="language-solidity">function approve(address sender, ApprovalTypes approvalType) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the sender</td></tr>
-</tbody></table>
-</div>
-<h3 id="revokesender"><a class="header" href="#revokesender">revokeSender</a></h3>
-<p>revoke a sender's approval to deposit assets on behalf of the receiver</p>
-<pre><code class="language-solidity">function revokeSender(address sender) external;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the sender</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address to set approval for</td></tr>
+<tr><td><code>approvalType</code></td><td><code>ApprovalTypes</code></td><td>type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)</td></tr>
 </tbody></table>
 </div>
 <h3 id="createatom"><a class="header" href="#createatom">createAtom</a></h3>
@@ -1304,6 +1296,87 @@ from the contract to 'reciever' factoring in exit fees</p>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn NOTE: Emergency redemptions without any fees being charged are always possible, even if the contract is paused See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchdeposit"><a class="header" href="#batchdeposit">batchDeposit</a></h3>
+<p>deposit eth into multiple terms and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit
+works with atoms, triples, and counter-triples</p>
+<pre><code class="language-solidity">function batchDeposit(address receiver, uint256[] calldata termIds, uint256[] calldata amounts)
+    external
+    payable
+    returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>the IDs of the terms (atoms, triples, or counter-triples) to deposit into</td></tr>
+<tr><td><code>amounts</code></td><td><code>uint256[]</code></td><td>array of the amount to deposit in each vault</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>shares the amount of shares minted for each atom</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchdepositcurve"><a class="header" href="#batchdepositcurve">batchDepositCurve</a></h3>
+<p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit</p>
+<pre><code class="language-solidity">function batchDepositCurve(
+    address receiver,
+    uint256[] calldata termIds,
+    uint256[] calldata curveIds,
+    uint256[] calldata amounts
+) external payable returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>array of the vault IDs of the terms (atoms, triples, or counter-triples)</td></tr>
+<tr><td><code>curveIds</code></td><td><code>uint256[]</code></td><td>array of the vault IDs of the curves</td></tr>
+<tr><td><code>amounts</code></td><td><code>uint256[]</code></td><td>array of the amount to deposit in each vault</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>shares array of the amount of shares minted in the specified vaults</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchredeem"><a class="header" href="#batchredeem">batchRedeem</a></h3>
+<p>redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples</p>
+<pre><code class="language-solidity">function batchRedeem(uint256 percentage, address receiver, uint256[] calldata ids)
+    external
+    returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>percentage</code></td><td><code>uint256</code></td><td>the percentage of shares to redeem from each vault (i.e. 50% -&gt; 50, 100% -&gt; 100)</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>array of IDs of the term (atom, triple or counter-triple) to redeem from</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchredeemcurve"><a class="header" href="#batchredeemcurve">batchRedeemCurve</a></h3>
+<p>redeem shares from bonding curve atom vaults for assets</p>
+<pre><code class="language-solidity">function batchRedeemCurve(uint256 percentage, address receiver, uint256[] calldata termIds, uint256[] calldata curveIds)
+    external
+    returns (uint256[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>percentage</code></td><td><code>uint256</code></td><td>the percentage of shares to redeem from the vaults</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>array of the IDs of the terms (atoms, triples, or counter-triples)</td></tr>
+<tr><td><code>curveIds</code></td><td><code>uint256[]</code></td><td>array of the IDs of the curves for each term</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256[]</code></td><td>assets array of the amounts of assets/eth withdrawn</td></tr>
 </tbody></table>
 </div>
 <h3 id="getatomcost"><a class="header" href="#getatomcost">getAtomCost</a></h3>
@@ -1799,27 +1872,46 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet NOTE: the create2 salt is based off of the vault ID</td></tr>
 </tbody></table>
 </div>
-<h2 id="events"><a class="header" href="#events">Events</a></h2>
-<h3 id="senderapproved"><a class="header" href="#senderapproved">SenderApproved</a></h3>
-<p>Emitted when a receiver approves a sender to deposit assets on their behalf</p>
-<pre><code class="language-solidity">event SenderApproved(address indexed sender, address indexed receiver, bool approved);
+<h3 id="isapproveddeposit"><a class="header" href="#isapproveddeposit">isApprovedDeposit</a></h3>
+<p>Check if a sender is approved to deposit on behalf of a receiver</p>
+<pre><code class="language-solidity">function isApprovedDeposit(address sender, address receiver) external view returns (bool);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the sender</td></tr>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>address of the receiver</td></tr>
-<tr><td><code>approved</code></td><td><code>bool</code></td><td>whether the sender is approved or not</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>The address of the sender</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
 </tbody></table>
 </div>
-<h3 id="senderrevoked"><a class="header" href="#senderrevoked">SenderRevoked</a></h3>
-<p>Emitted when a receiver revokes a sender's approval to deposit assets on their behalf</p>
-<pre><code class="language-solidity">event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool Whether the sender is approved to deposit</td></tr>
+</tbody></table>
+</div>
+<h3 id="isapprovedredeem"><a class="header" href="#isapprovedredeem">isApprovedRedeem</a></h3>
+<p>Check if a sender is approved to redeem on behalf of a receiver</p>
+<pre><code class="language-solidity">function isApprovedRedeem(address sender, address receiver) external view returns (bool);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the sender</td></tr>
-<tr><td><code>receiver</code></td><td><code>address</code></td><td>address of the receiver</td></tr>
-<tr><td><code>approved</code></td><td><code>bool</code></td><td>whether the sender is approved or not</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>The address of the sender</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool Whether the sender is approved to redeem</td></tr>
+</tbody></table>
+</div>
+<h2 id="events"><a class="header" href="#events">Events</a></h2>
+<h3 id="approvaltypeupdated"><a class="header" href="#approvaltypeupdated">ApprovalTypeUpdated</a></h3>
+<p>Emitted when a receiver changes the approval type for a sender</p>
+<pre><code class="language-solidity">event ApprovalTypeUpdated(address indexed sender, address indexed receiver, ApprovalTypes approvalType);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address of the sender being approved/disapproved</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>address of the receiver granting/revoking approval</td></tr>
+<tr><td><code>approvalType</code></td><td><code>ApprovalTypes</code></td><td>the type of approval granted (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)</td></tr>
 </tbody></table>
 </div>
 <h3 id="deposited"><a class="header" href="#deposited">Deposited</a></h3>
@@ -2215,8 +2307,17 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
     bool executed;
 }
 </code></pre>
+<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
+<h3 id="approvaltypes"><a class="header" href="#approvaltypes">ApprovalTypes</a></h3>
+<pre><code class="language-solidity">enum ApprovalTypes {
+    NONE,
+    DEPOSIT,
+    REDEMPTION,
+    BOTH
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2263,7 +2364,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2289,11 +2390,8 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <h3 id="ethmultivault_burninsufficientbalance"><a class="header" href="#ethmultivault_burninsufficientbalance">EthMultiVault_BurnInsufficientBalance</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_BurnInsufficientBalance();
 </code></pre>
-<h3 id="ethmultivault_cannotapproveself"><a class="header" href="#ethmultivault_cannotapproveself">EthMultiVault_CannotApproveSelf</a></h3>
-<pre><code class="language-solidity">error EthMultiVault_CannotApproveSelf();
-</code></pre>
-<h3 id="ethmultivault_cannotrevokeself"><a class="header" href="#ethmultivault_cannotrevokeself">EthMultiVault_CannotRevokeSelf</a></h3>
-<pre><code class="language-solidity">error EthMultiVault_CannotRevokeSelf();
+<h3 id="ethmultivault_cannotapproveorrevokeself"><a class="header" href="#ethmultivault_cannotapproveorrevokeself">EthMultiVault_CannotApproveOrRevokeSelf</a></h3>
+<pre><code class="language-solidity">error EthMultiVault_CannotApproveOrRevokeSelf();
 </code></pre>
 <h3 id="ethmultivault_deployaccountfailed"><a class="header" href="#ethmultivault_deployaccountfailed">EthMultiVault_DeployAccountFailed</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_DeployAccountFailed();
@@ -2346,11 +2444,11 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <h3 id="ethmultivault_receivenotallowed"><a class="header" href="#ethmultivault_receivenotallowed">EthMultiVault_ReceiveNotAllowed</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_ReceiveNotAllowed();
 </code></pre>
-<h3 id="ethmultivault_senderalreadyapproved"><a class="header" href="#ethmultivault_senderalreadyapproved">EthMultiVault_SenderAlreadyApproved</a></h3>
-<pre><code class="language-solidity">error EthMultiVault_SenderAlreadyApproved();
-</code></pre>
 <h3 id="ethmultivault_sendernotapproved"><a class="header" href="#ethmultivault_sendernotapproved">EthMultiVault_SenderNotApproved</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_SenderNotApproved();
+</code></pre>
+<h3 id="ethmultivault_redeemernotapproved"><a class="header" href="#ethmultivault_redeemernotapproved">EthMultiVault_RedeemerNotApproved</a></h3>
+<pre><code class="language-solidity">error EthMultiVault_RedeemerNotApproved();
 </code></pre>
 <h3 id="ethmultivault_timelocknotexpired"><a class="header" href="#ethmultivault_timelocknotexpired">EthMultiVault_TimelockNotExpired</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_TimelockNotExpired();
@@ -2452,7 +2550,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <pre><code class="language-solidity">error BaseCurve_EmptyStringNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -2653,7 +2751,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BaseCurve.sol//src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html">IBaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -2823,7 +2921,7 @@ of the curves themselves.</em></p>
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Registry contract for the Intuition protocol Bonding Curves. Routes access to the curves
@@ -3080,7 +3178,7 @@ economic incentive patterns.</em></p>
 <tr><td><code>newAdmin</code></td><td><code>address</code></td><td>The new admin address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3179,7 +3277,7 @@ interface for depositing and redeeming.</em></p>
 </code></pre>
 <h3 id="approvals"><a class="header" href="#approvals">approvals</a></h3>
 <p>Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver</p>
-<pre><code class="language-solidity">mapping(address receiver =&gt; mapping(address sender =&gt; bool isApproved)) public approvals;
+<pre><code class="language-solidity">mapping(address receiver =&gt; mapping(address sender =&gt; uint8 approvalType)) public approvals;
 </code></pre>
 <h3 id="atoms"><a class="header" href="#atoms">atoms</a></h3>
 <p>RDF (Resource Description Framework)</p>
@@ -3441,22 +3539,14 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet</td></tr>
 </tbody></table>
 </div>
-<h3 id="approvesender-1"><a class="header" href="#approvesender-1">approveSender</a></h3>
-<p>approve a sender to deposit assets on behalf of the receiver</p>
-<pre><code class="language-solidity">function approveSender(address sender) external;
+<h3 id="approve-1"><a class="header" href="#approve-1">approve</a></h3>
+<p>Set the approval type for a sender to act on behalf of the receiver</p>
+<pre><code class="language-solidity">function approve(address sender, ApprovalTypes approvalType) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address to approve</td></tr>
-</tbody></table>
-</div>
-<h3 id="revokesender-1"><a class="header" href="#revokesender-1">revokeSender</a></h3>
-<p>revoke a sender's approval to deposit assets on behalf of the receiver</p>
-<pre><code class="language-solidity">function revokeSender(address sender) external;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>sender</code></td><td><code>address</code></td><td>address to revoke</td></tr>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>address to set approval for</td></tr>
+<tr><td><code>approvalType</code></td><td><code>ApprovalTypes</code></td><td>type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)</td></tr>
 </tbody></table>
 </div>
 <h3 id="createatom-1"><a class="header" href="#createatom-1">createAtom</a></h3>
@@ -3744,6 +3834,101 @@ performing an audit of the full refactor (V2).</em></p>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets the amount of assets/eth withdrawn</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchdeposit-1"><a class="header" href="#batchdeposit-1">batchDeposit</a></h3>
+<p>deposit eth into multiple terms and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit
+works with atoms, triples, and counter-triples</p>
+<p><em>this function will revert if the minimum deposit amount of eth is not met and
+if a vault ID does not exist/is not an atom.</em></p>
+<pre><code class="language-solidity">function batchDeposit(address receiver, uint256[] calldata termIds, uint256[] calldata amounts)
+    external
+    payable
+    nonReentrant
+    whenNotPaused
+    returns (uint256[] memory shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>the IDs of the terms (atoms, triples, or counter-triples) to deposit into</td></tr>
+<tr><td><code>amounts</code></td><td><code>uint256[]</code></td><td>array of the amount to deposit in each vault</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256[]</code></td><td>the amount of shares minted for each atom</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchdepositcurve-1"><a class="header" href="#batchdepositcurve-1">batchDepositCurve</a></h3>
+<p>deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+*payable msg.value amount of eth to deposit</p>
+<p><em>assets parameter is omitted in favor of msg.value, unlike in ERC4626</em></p>
+<p><em>this function will revert if the minimum deposit amount of eth is not met and
+if the vault ID does not exist/is not an atom.</em></p>
+<p><em>This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
+This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+performing an audit of the full refactor (V2).</em></p>
+<pre><code class="language-solidity">function batchDepositCurve(
+    address receiver,
+    uint256[] calldata termIds,
+    uint256[] calldata curveIds,
+    uint256[] calldata amounts
+) external payable nonReentrant whenNotPaused returns (uint256[] memory shares);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receive the shares</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>array of the vault IDs of the terms (atoms, triples, or counter-triples)</td></tr>
+<tr><td><code>curveIds</code></td><td><code>uint256[]</code></td><td>array of the vault IDs of the curves</td></tr>
+<tr><td><code>amounts</code></td><td><code>uint256[]</code></td><td>array of the amount to deposit in each vault</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>shares</code></td><td><code>uint256[]</code></td><td>array of the amount of shares minted in the specified vaults</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchredeem-1"><a class="header" href="#batchredeem-1">batchRedeem</a></h3>
+<p>redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples</p>
+<p><em>Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+See <code>getRedeemAssetsAndFees</code> for more details on the fees charged</em></p>
+<pre><code class="language-solidity">function batchRedeem(uint256 percentage, address receiver, uint256[] calldata ids)
+    external
+    nonReentrant
+    returns (uint256[] memory assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>percentage</code></td><td><code>uint256</code></td><td>the percentage of shares to redeem from each vault (10000 -&gt; 100.00%, 5000 -&gt; 50.00%, etc)</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>ids</code></td><td><code>uint256[]</code></td><td>array of IDs of the term (atom, triple or counter-triple) to redeem from</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256[]</code></td><td>the amount of assets/eth withdrawn</td></tr>
+</tbody></table>
+</div>
+<h3 id="batchredeemcurve-1"><a class="header" href="#batchredeemcurve-1">batchRedeemCurve</a></h3>
+<p>redeem shares from bonding curve atom vaults for assets</p>
+<pre><code class="language-solidity">function batchRedeemCurve(uint256 percentage, address receiver, uint256[] calldata termIds, uint256[] calldata curveIds)
+    external
+    nonReentrant
+    returns (uint256[] memory assets);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>percentage</code></td><td><code>uint256</code></td><td>the percentage of shares to redeem from the vaults (10000 -&gt; 100.00%, 5000 -&gt; 50.00%, etc)</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>the address to receiver the assets</td></tr>
+<tr><td><code>termIds</code></td><td><code>uint256[]</code></td><td>array of the IDs of the terms (atoms, triples, or counter-triples)</td></tr>
+<tr><td><code>curveIds</code></td><td><code>uint256[]</code></td><td>array of the IDs of the curves for each term</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>assets</code></td><td><code>uint256[]</code></td><td>array of the amounts of assets/eth withdrawn</td></tr>
 </tbody></table>
 </div>
 <h3 id="_transferfeestoprotocolmultisig"><a class="header" href="#_transferfeestoprotocolmultisig">_transferFeesToProtocolMultisig</a></h3>
@@ -4410,6 +4595,36 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>atomWallet the address of the atom wallet</td></tr>
 </tbody></table>
 </div>
+<h3 id="isapproveddeposit-1"><a class="header" href="#isapproveddeposit-1">isApprovedDeposit</a></h3>
+<p>Check if a sender is approved to deposit on behalf of a receiver</p>
+<pre><code class="language-solidity">function isApprovedDeposit(address sender, address receiver) public view returns (bool);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>The address of the sender</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool Whether the sender is approved to deposit</td></tr>
+</tbody></table>
+</div>
+<h3 id="isapprovedredeem-1"><a class="header" href="#isapprovedredeem-1">isApprovedRedeem</a></h3>
+<p>Check if a sender is approved to redeem on behalf of a receiver</p>
+<pre><code class="language-solidity">function isApprovedRedeem(address sender, address receiver) public view returns (bool);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>sender</code></td><td><code>address</code></td><td>The address of the sender</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>The address of the receiver</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool Whether the sender is approved to redeem</td></tr>
+</tbody></table>
+</div>
 <h3 id="_hascounterstake"><a class="header" href="#_hascounterstake">_hasCounterStake</a></h3>
 <p><em>checks if an account holds shares in the vault counter to the id provided</em></p>
 <pre><code class="language-solidity">function _hasCounterStake(uint256 id, address receiver) internal view returns (bool);
@@ -4450,7 +4665,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -4625,7 +4840,7 @@ versions.</em></p>
 <pre><code class="language-solidity">function maxAssets() external pure override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -4925,7 +5140,7 @@ offset by the invoking methods.</em></p>
 <pre><code class="language-solidity">function maxAssets() external view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/deb3f503387e0dcdfff3756dea86e132d87804db/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
