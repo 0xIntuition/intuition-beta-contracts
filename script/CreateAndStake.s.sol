@@ -13,7 +13,7 @@ import {EthMultiVault} from "src/EthMultiVault.sol";
  */
 contract CreateAndStake is Script {
     // Address of the EthMultiVault contract
-    address payable public constant ETH_MULTI_VAULT = payable(0xa42625947e20967e867445182211b2b46fA149F7);
+    address payable public constant ETH_MULTI_VAULT = payable(0x63B90A9c109fF8f137916026876171ffeEdEe714);
 
     bytes[] public ATOM_URIS = [
         bytes("intuition.systems"),
