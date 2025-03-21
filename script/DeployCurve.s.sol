@@ -16,8 +16,8 @@ contract DeployCurve is Script {
         // Deploy OffsetProgressiveCurve
         OffsetProgressiveCurve offsetProgressiveCurve = new OffsetProgressiveCurve(
             "Offset Progressive Curve",
-            2, // slope
-            1e17 // offset
+            1e16, // slope
+            1e28 // offset
         );
         console.logString("deployed OffsetProgressiveCurve.");
 

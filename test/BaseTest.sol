@@ -161,10 +161,10 @@ contract BaseTest is Test {
         //   Bob Shares: 4.14132267880182129e17
         //   Charlie Shares: 3.17781355457602312e17
 
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 1e16));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(progressiveCurve);
 
-        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 0.00007054e18, 1e17));
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1e16, 1e28));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
         vm.stopPrank();
 
