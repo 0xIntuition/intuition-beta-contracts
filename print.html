@@ -500,7 +500,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -658,7 +658,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -877,7 +877,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -2215,28 +2215,30 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 </tbody></table>
 </div>
 <h3 id="sharepricechanged"><a class="header" href="#sharepricechanged">SharePriceChanged</a></h3>
-<p>emitted upon changing the share price of an atom</p>
-<pre><code class="language-solidity">event SharePriceChanged(uint256 indexed vaultId, uint256 newSharePrice, uint256 oldSharePrice);
+<p>emitted upon changing the share price of a term base vault</p>
+<pre><code class="language-solidity">event SharePriceChanged(uint256 indexed termId, uint256 newSharePrice, uint256 totalAssets, uint256 totalShares);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id of the atom</td></tr>
-<tr><td><code>newSharePrice</code></td><td><code>uint256</code></td><td>new share price of the atom</td></tr>
-<tr><td><code>oldSharePrice</code></td><td><code>uint256</code></td><td>old share price of the atom (not needed but staying in parallel with production code)</td></tr>
+<tr><td><code>termId</code></td><td><code>uint256</code></td><td>id of the atom, triple or counter triple</td></tr>
+<tr><td><code>newSharePrice</code></td><td><code>uint256</code></td><td>new share price of the vault</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>new total assets in vault</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>new total shares in vault</td></tr>
 </tbody></table>
 </div>
 <h3 id="sharepricechangedcurve"><a class="header" href="#sharepricechangedcurve">SharePriceChangedCurve</a></h3>
-<p>emitted upon changing the share price of a curve</p>
+<p>emitted upon changing the share price of a curve vault</p>
 <pre><code class="language-solidity">event SharePriceChangedCurve(
-    uint256 indexed vaultId, uint256 indexed curveId, uint256 newSharePrice, uint256 oldSharePrice
+    uint256 indexed termId, uint256 indexed curveId, uint256 newSharePrice, uint256 totalAssets, uint256 totalShares
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id of the atom</td></tr>
+<tr><td><code>termId</code></td><td><code>uint256</code></td><td>id of the atom, triple or counter triple</td></tr>
 <tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id of the curve</td></tr>
-<tr><td><code>newSharePrice</code></td><td><code>uint256</code></td><td>new share price of the curve</td></tr>
-<tr><td><code>oldSharePrice</code></td><td><code>uint256</code></td><td>old share price of the curve (not needed but staying in parallel with production code)</td></tr>
+<tr><td><code>newSharePrice</code></td><td><code>uint256</code></td><td>new share price of the curve vault</td></tr>
+<tr><td><code>totalAssets</code></td><td><code>uint256</code></td><td>new total assets in vault</td></tr>
+<tr><td><code>totalShares</code></td><td><code>uint256</code></td><td>new total shares in vault</td></tr>
 </tbody></table>
 </div>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
@@ -2317,7 +2319,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2364,7 +2366,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2550,7 +2552,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <pre><code class="language-solidity">error BaseCurve_EmptyStringNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -2751,7 +2753,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BaseCurve.sol//src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html">IBaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -2921,7 +2923,7 @@ of the curves themselves.</em></p>
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Registry contract for the Intuition protocol Bonding Curves. Routes access to the curves
@@ -3178,7 +3180,7 @@ economic incentive patterns.</em></p>
 <tr><td><code>newAdmin</code></td><td><code>address</code></td><td>The new admin address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -4665,7 +4667,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -4840,7 +4842,7 @@ versions.</em></p>
 <pre><code class="language-solidity">function maxAssets() external pure override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -5140,7 +5142,7 @@ offset by the invoking methods.</em></p>
 <pre><code class="language-solidity">function maxAssets() external view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/be7abe84df5527833e1ade9bdf33ba67cc9ea194/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/c05eba4d013c67dd0612017d1c771c6d280d2d35/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
