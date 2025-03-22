@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.27;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
+import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
 import {Errors} from "src/libraries/Errors.sol";
 
 /**
@@ -21,13 +20,10 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry is Initializable {
+contract BondingCurveRegistry {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
-
-    // Admin has the right to add curves to the registry
-    address public admin;
 
     // Quantity of known curves, used to assign IDs
     uint256 public count;
@@ -38,44 +34,62 @@ contract BondingCurveRegistry is Initializable {
     // Mapping of curve addresses to curve IDs, for reverse lookup
     mapping(address => uint256) public curveIds;
 
-    /* =================================================== */
-    /*                    MODIFIERS                        */
-    /* =================================================== */
+    // Mapping of the registered curve names, used to enforce uniqueness
+    mapping(string => bool) public registeredCurveNames;
 
-    modifier onlyAdmin() {
-        if (msg.sender != admin) {
-            revert Errors.BondingCurveRegistry_OnlyOwner();
-        }
-        _;
-    }
+    // Address of the admin who may add curves to the registry
+    address public admin;
 
     /* =================================================== */
-    /*                    INITIALIZER                      */
+    /*                    EVENTS                           */
+    /* =================================================== */
+
+    /// @notice Emitted when a new curve is added to the registry
+    ///
+    /// @param curveId The ID of the curve
+    /// @param curveAddress The address of the curve
+    /// @param curveName The name of the curve
+    event BondingCurveAdded(uint256 indexed curveId, address indexed curveAddress, string indexed curveName);
+
+    /// @notice Emitted when the admin role is transferred
+    /// @param oldAdmin The previous admin address
+    /// @param newAdmin The new admin address
+    event OwnershipTransferred(address indexed oldAdmin, address indexed newAdmin);
+
+    /* =================================================== */
+    /*                    CONSTRUCTOR                      */
     /* =================================================== */
 
     /// @notice Initializes the BondingCurveRegistry contract
     /// @param _admin Address who may add curves to the registry
     /// NOTE: This function is called only once (during contract deployment)
-    function initialize(address _admin) external initializer {
-        require(_admin != address(0), "BondingCurveRegistry: requires owner");
+    constructor(address _admin) {
+        if (_admin == address(0)) {
+            revert Errors.BondingCurveRegistry_RequiresOwner();
+        }
         admin = _admin;
+        emit OwnershipTransferred(address(0), _admin);
     }
 
     /* =================================================== */
     /*               RESTRICTED FUNCTIONS                  */
     /* =================================================== */
 
-    /// @notice Set the admin address
-    /// @param _admin Address of the new admin
-    function setAdmin(address _admin) external onlyAdmin {
-        admin = _admin;
-    }
-
     /// @notice Add a new bonding curve to the registry
     /// @param bondingCurve Address of the new bonding curve
-    function addBondingCurve(address bondingCurve) external onlyAdmin {
+    function addBondingCurve(address bondingCurve) external {
+        if (msg.sender != admin) {
+            revert Errors.BondingCurveRegistry_OnlyOwner();
+        }
+
         if (curveIds[bondingCurve] != 0) {
             revert Errors.BondingCurveRegistry_CurveAlreadyExists();
+        }
+
+        // Enforce curve name uniqueness
+        string memory curveName = IBaseCurve(bondingCurve).name();
+        if (registeredCurveNames[curveName]) {
+            revert Errors.BondingCurveRegistry_CurveNameNotUnique();
         }
 
         // 0 is reserved to safeguard against uninitialized values
@@ -84,6 +98,22 @@ contract BondingCurveRegistry is Initializable {
         // Add the curve to the registry, keeping track of its address and ID in separate tables
         curveAddresses[count] = bondingCurve;
         curveIds[bondingCurve] = count;
+
+        // Mark the curve name as registered
+        registeredCurveNames[curveName] = true;
+
+        emit BondingCurveAdded(count, bondingCurve, curveName);
+    }
+
+    /// @notice Transfer the admin role to a new address
+    /// @param newOwner The new admin address
+    function transferOwnership(address newOwner) external {
+        if (msg.sender != admin) {
+            revert Errors.BondingCurveRegistry_OnlyOwner();
+        }
+        address oldAdmin = admin;
+        admin = newOwner;
+        emit OwnershipTransferred(oldAdmin, newOwner);
     }
 
     /* =================================================== */
