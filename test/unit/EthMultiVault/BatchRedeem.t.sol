@@ -8,7 +8,7 @@ import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 
 contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
-    uint256 constant CURVE_ID = 2;
+    uint256 constant CURVE_ID = 3;
 
     function setUp() external {
         _setUp();
@@ -41,8 +41,11 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         amounts[1] = testDepositAmount;
         amounts[2] = testDepositAmount;
 
+        ethMultiVault.batchDeposit{value: testDepositAmount * 3}(alice, termIds, amounts);
+
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
+        console.log("aliceInitialBalance: ", aliceInitialBalance);
 
         // Redeem 100% of shares from all vaults
         uint256[] memory assets = ethMultiVault.batchRedeem(10000, alice, termIds);
@@ -94,6 +97,8 @@ contract BatchRedeemTest is EthMultiVaultBase, EthMultiVaultHelpers {
         amounts[0] = testDepositAmount;
         amounts[1] = testDepositAmount;
         amounts[2] = testDepositAmount;
+
+        ethMultiVault.batchDepositCurve{value: testDepositAmount * 3}(alice, termIds, curveIds, amounts);
 
         // Get initial state
         uint256 aliceInitialBalance = address(alice).balance;
