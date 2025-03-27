@@ -20,7 +20,7 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry {
+contract BondingCurveRegistry is IBondingCurveRegistry {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
