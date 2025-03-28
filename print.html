@@ -500,7 +500,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -658,7 +658,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -877,7 +877,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -1014,14 +1014,14 @@ in the underlying atom vaults on triple creation</em></p>
 <tr><td><code>totalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit fraction on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="settotalatomdepositsfortriple"><a class="header" href="#settotalatomdepositsfortriple">setTotalAtomDepositsForTriple</a></h3>
+<h3 id="setatomdepositfractionfortriple"><a class="header" href="#setatomdepositfractionfortriple">setAtomDepositFractionForTriple</a></h3>
 <p><em>sets the atom deposit fraction percentage for atoms used in triples
 (number to be divided by <code>generalConfig.feeDenominator</code>)</em></p>
-<pre><code class="language-solidity">function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external;
+<pre><code class="language-solidity">function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>totalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+<tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
@@ -1703,6 +1703,26 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets number of assets user has in the vault</td></tr>
 </tbody></table>
 </div>
+<h3 id="getvaultstateforusercurve"><a class="header" href="#getvaultstateforusercurve">getVaultStateForUserCurve</a></h3>
+<p>returns the number of shares and assets (less fees) user has in the vault for a specific curve</p>
+<pre><code class="language-solidity">function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+    external
+    view
+    returns (uint256, uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>vaultId</code></td><td><code>uint256</code></td><td>vault id of the vault</td></tr>
+<tr><td><code>curveId</code></td><td><code>uint256</code></td><td>curve id of the curve</td></tr>
+<tr><td><code>receiver</code></td><td><code>address</code></td><td>address of the receiver</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>shares number of shares user has in the vault</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
+</div>
 <h3 id="getdepositsharesandfeescurve"><a class="header" href="#getdepositsharesandfeescurve">getDepositSharesAndFeesCurve</a></h3>
 <p>returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault</p>
 <pre><code class="language-solidity">function getDepositSharesAndFeesCurve(uint256 assets, uint256 vaultId, uint256 curveId)
@@ -2151,14 +2171,14 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <tr><td><code>oldTotalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>old atom deposit fraction on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="totalatomdepositsfortripleset"><a class="header" href="#totalatomdepositsfortripleset">TotalAtomDepositsForTripleSet</a></h3>
+<h3 id="atomdepositfractionfortripleset"><a class="header" href="#atomdepositfractionfortripleset">AtomDepositFractionForTripleSet</a></h3>
 <p>emitted upon changing the atom deposit fraction for triples</p>
-<pre><code class="language-solidity">event TotalAtomDepositsForTripleSet(uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple);
+<pre><code class="language-solidity">event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>newTotalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction for triples</td></tr>
-<tr><td><code>oldTotalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
+<tr><td><code>newAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction for triples</td></tr>
+<tr><td><code>oldAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
 </tbody></table>
 </div>
 <h3 id="entryfeeset"><a class="header" href="#entryfeeset">EntryFeeSet</a></h3>
@@ -2273,7 +2293,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <pre><code class="language-solidity">struct TripleConfig {
     uint256 tripleCreationProtocolFee;
     uint256 totalAtomDepositsOnTripleCreation;
-    uint256 totalAtomDepositsForTriple;
+    uint256 atomDepositFractionForTriple;
 }
 </code></pre>
 <h3 id="walletconfig"><a class="header" href="#walletconfig">WalletConfig</a></h3>
@@ -2319,7 +2339,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2366,7 +2386,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2419,8 +2439,8 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <h3 id="ethmultivault_insufficientsharesinvault"><a class="header" href="#ethmultivault_insufficientsharesinvault">EthMultiVault_InsufficientSharesInVault</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_InsufficientSharesInVault();
 </code></pre>
-<h3 id="ethmultivault_invalidtotalatomdepositsfortriple"><a class="header" href="#ethmultivault_invalidtotalatomdepositsfortriple">EthMultiVault_InvalidTotalAtomDepositsForTriple</a></h3>
-<pre><code class="language-solidity">error EthMultiVault_InvalidTotalAtomDepositsForTriple();
+<h3 id="ethmultivault_invalidatomdepositfractionfortriple"><a class="header" href="#ethmultivault_invalidatomdepositfractionfortriple">EthMultiVault_InvalidAtomDepositFractionForTriple</a></h3>
+<pre><code class="language-solidity">error EthMultiVault_InvalidAtomDepositFractionForTriple();
 </code></pre>
 <h3 id="ethmultivault_invalidentryfee"><a class="header" href="#ethmultivault_invalidentryfee">EthMultiVault_InvalidEntryFee</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_InvalidEntryFee();
@@ -2552,7 +2572,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <pre><code class="language-solidity">error BaseCurve_EmptyStringNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -2753,7 +2773,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BaseCurve.sol//src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html">IBaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -2923,7 +2943,7 @@ of the curves themselves.</em></p>
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BondingCurveRegistry.sol//src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html">IBondingCurveRegistry</a></p>
 <p><strong>Author:</strong>
@@ -2957,12 +2977,12 @@ economic incentive patterns.</em></p>
 </code></pre>
 <h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
 <h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
-<p>Initializes the BondingCurveRegistry contract</p>
+<p>Constructor for the BondingCurveRegistry contract</p>
 <pre><code class="language-solidity">constructor(address _admin);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>_admin</code></td><td><code>address</code></td><td>Address who may add curves to the registry NOTE: This function is called only once (during contract deployment)</td></tr>
+<tr><td><code>_admin</code></td><td><code>address</code></td><td>Address who may add curves to the registry</td></tr>
 </tbody></table>
 </div>
 <h3 id="addbondingcurve"><a class="header" href="#addbondingcurve">addBondingCurve</a></h3>
@@ -3182,7 +3202,7 @@ economic incentive patterns.</em></p>
 <tr><td><code>newAdmin</code></td><td><code>address</code></td><td>The new admin address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3467,14 +3487,14 @@ in the underlying atom vaults on triple creation</em></p>
 <tr><td><code>totalAtomDepositsOnTripleCreation</code></td><td><code>uint256</code></td><td>new atom deposit on triple creation</td></tr>
 </tbody></table>
 </div>
-<h3 id="settotalatomdepositsfortriple-1"><a class="header" href="#settotalatomdepositsfortriple-1">setTotalAtomDepositsForTriple</a></h3>
+<h3 id="setatomdepositfractionfortriple-1"><a class="header" href="#setatomdepositfractionfortriple-1">setAtomDepositFractionForTriple</a></h3>
 <p><em>sets the atom deposit percentage for atoms used in triples
 (number to be divided by <code>generalConfig.feeDenominator</code>)</em></p>
-<pre><code class="language-solidity">function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external onlyAdmin;
+<pre><code class="language-solidity">function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>totalAtomDepositsForTriple</code></td><td><code>uint256</code></td><td>new atom deposit percentage</td></tr>
+<tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit percentage</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee-1"><a class="header" href="#setentryfee-1">setEntryFee</a></h3>
@@ -4575,7 +4595,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>assets number of assets user has in the vault</td></tr>
 </tbody></table>
 </div>
-<h3 id="getvaultstateforusercurve"><a class="header" href="#getvaultstateforusercurve">getVaultStateForUserCurve</a></h3>
+<h3 id="getvaultstateforusercurve-1"><a class="header" href="#getvaultstateforusercurve-1">getVaultStateForUserCurve</a></h3>
 <pre><code class="language-solidity">function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
     external
     view
@@ -4669,7 +4689,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -4844,7 +4864,7 @@ versions.</em></p>
 <pre><code class="language-solidity">function maxAssets() external pure override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -5144,7 +5164,7 @@ offset by the invoking methods.</em></p>
 <pre><code class="language-solidity">function maxAssets() external view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/b0ea23601a4ad6822949563dc7e770696d588bfe/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
