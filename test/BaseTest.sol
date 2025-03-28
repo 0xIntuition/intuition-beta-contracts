@@ -113,7 +113,7 @@ contract BaseTest is Test {
             triple: IEthMultiVault.TripleConfig({
                 tripleCreationProtocolFee: 0.0002 ether,
                 totalAtomDepositsOnTripleCreation: 0.0003 ether,
-                totalAtomDepositsForTriple: 1500
+                atomDepositFractionForTriple: 1500
             }),
             wallet: IEthMultiVault.WalletConfig({
                 permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
