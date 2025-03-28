@@ -97,7 +97,7 @@ contract UpgradeTo is Test {
 
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether, // Fee for creating a triple
-            atomDepositFractionOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
+            totalAtomDepositsOnTripleCreation: 0.0003 ether, // Static fee going towards increasing the amount of assets in the underlying atom vaults
             atomDepositFractionForTriple: 1500 // Fee for equity in atoms when creating a triple
         });
 
@@ -115,12 +115,11 @@ contract UpgradeTo is Test {
         });
 
         // Deploy and configure bonding curve registry
-        BondingCurveRegistry bondingCurveRegistry = new BondingCurveRegistry();
-        bondingCurveRegistry.initialize(address(this));
+        BondingCurveRegistry bondingCurveRegistry = new BondingCurveRegistry(address(this));
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         bondingCurveRegistry.addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.00007054e18));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         bondingCurveRegistry.addBondingCurve(progressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =

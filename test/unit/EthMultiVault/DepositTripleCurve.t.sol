@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
-
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
     uint256 constant CURVE_ID = 2;
 
@@ -62,7 +62,7 @@ contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -70,7 +70,6 @@ contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
 
         // test values
         uint256 testAtomCost = getAtomCost();
-        uint256 testMinDeposit = getMinDeposit();
 
         // execute interaction - create atoms
         uint256 subjectId = ethMultiVault.createAtom{value: testAtomCost}("subject");
@@ -91,7 +90,7 @@ contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -120,7 +119,7 @@ contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
