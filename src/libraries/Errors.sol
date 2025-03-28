@@ -23,7 +23,7 @@ library Errors {
     error EthMultiVault_InsufficientDepositAmountToCoverFees();
     error EthMultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error EthMultiVault_InsufficientSharesInVault();
-    error EthMultiVault_InvalidTotalAtomDepositsForTriple();
+    error EthMultiVault_InvalidAtomDepositFractionForTriple();
     error EthMultiVault_InvalidEntryFee();
     error EthMultiVault_InvalidExitFee();
     error EthMultiVault_InvalidProtocolFee();

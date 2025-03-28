@@ -380,19 +380,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev sets the atom deposit percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param totalAtomDepositsForTriple new atom deposit percentage
-    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external onlyAdmin {
-        uint256 maxTotalAtomDepositsForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
+    /// @param atomDepositFractionForTriple new atom deposit percentage
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
+        uint256 maxAtomDepositFractionForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
 
-        if (totalAtomDepositsForTriple > maxTotalAtomDepositsForTriple) {
-            revert Errors.EthMultiVault_InvalidTotalAtomDepositsForTriple();
+        if (atomDepositFractionForTriple > maxAtomDepositFractionForTriple) {
+            revert Errors.EthMultiVault_InvalidAtomDepositFractionForTriple();
         }
 
-        uint256 oldTotalAtomDepositsForTriple = tripleConfig.totalAtomDepositsForTriple;
+        uint256 oldAtomDepositFractionForTriple = tripleConfig.atomDepositFractionForTriple;
 
-        tripleConfig.totalAtomDepositsForTriple = totalAtomDepositsForTriple;
+        tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
 
-        emit TotalAtomDepositsForTripleSet(totalAtomDepositsForTriple, oldTotalAtomDepositsForTriple);
+        emit AtomDepositFractionForTripleSet(atomDepositFractionForTriple, oldAtomDepositFractionForTriple);
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -2043,7 +2043,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return feeAmount amount of assets that would be used as atom deposit
     /// @dev only applies to triple vaults
     function atomDepositsAmount(uint256 assets, uint256 id) public view returns (uint256) {
-        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.totalAtomDepositsForTriple) : 0;
+        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
         return feeAmount;
     }
 
