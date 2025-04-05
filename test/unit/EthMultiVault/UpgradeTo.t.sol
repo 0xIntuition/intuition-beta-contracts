@@ -17,6 +17,7 @@ import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 
 contract UpgradeTo is Test {
@@ -121,6 +122,8 @@ contract UpgradeTo is Test {
         bondingCurveRegistry.addBondingCurve(linearCurve);
         address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         bondingCurveRegistry.addBondingCurve(progressiveCurve);
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 2, 5e35));
+        bondingCurveRegistry.addBondingCurve(offsetCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
             IEthMultiVault.BondingCurveConfig({registry: address(bondingCurveRegistry), defaultCurveId: 1});

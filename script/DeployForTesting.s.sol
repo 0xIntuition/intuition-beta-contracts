@@ -129,11 +129,11 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed LinearCurve.");
 
         // Deploy ProgressiveCurve
-        progressiveCurve = new ProgressiveCurve("Progressive Curve", 1e16);
+        progressiveCurve = new ProgressiveCurve("Progressive Curve", 2);
         console.logString("deployed ProgressiveCurve.");
 
         // Deploy OffsetProgressiveCurve
-        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 1e16, 1e28);
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2, 5e35);
         console.logString("deployed OffsetProgressiveCurve.");
 
         // Add curves to BondingCurveRegistry
