@@ -33,7 +33,7 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.stopPrank();
     }
 
-    function testPreviewDeposits() external {
+    function testPreviewDeposits() external view {
         console2.log("Previewing deposits in increments into each curve for Atom ID: %s", testAtomId.toString());
 
         (address registryAddr,) = ethMultiVault.bondingCurveConfig();
@@ -119,8 +119,7 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
                     if (previewSucceeded[i][j]) {
                         uint256 currentAmount = depositAmounts[j];
                         uint256 actualShares = allShares[i][j];
-                        uint256 amountDiffFromBase = currentAmount;
-
+                        
                         // Calculate expected shares: expected = slope * currentAmount
                         // expected = (deltaShares / deltaAmount) * currentAmount
                         // To maintain precision: expected = (deltaShares * currentAmount) / deltaAmount
