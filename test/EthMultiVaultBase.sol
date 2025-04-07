@@ -68,7 +68,7 @@ contract EthMultiVaultBase is Test {
         IEthMultiVault.TripleConfig memory tripleConfig = IEthMultiVault.TripleConfig({
             tripleCreationProtocolFee: 0.0002 ether,
             totalAtomDepositsOnTripleCreation: 0.0003 ether,
-            totalAtomDepositsForTriple: 1500
+            atomDepositFractionForTriple: 1500
         });
 
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({

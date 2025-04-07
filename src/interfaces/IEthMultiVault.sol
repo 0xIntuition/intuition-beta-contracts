@@ -53,7 +53,7 @@ interface IEthMultiVault {
         /// @dev static fee going towards increasing the amount of assets in the underlying atom vaults
         uint256 totalAtomDepositsOnTripleCreation;
         /// @dev % of the Triple deposit amount that is used to purchase equity in the underlying atoms
-        uint256 totalAtomDepositsForTriple;
+        uint256 atomDepositFractionForTriple;
     }
 
     /// @dev Atom wallet configuration struct
@@ -299,9 +299,9 @@ interface IEthMultiVault {
 
     /// @notice emitted upon changing the atom deposit fraction for triples
     ///
-    /// @param newTotalAtomDepositsForTriple new atom deposit fraction for triples
-    /// @param oldTotalAtomDepositsForTriple old atom deposit fraction for triples
-    event TotalAtomDepositsForTripleSet(uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple);
+    /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
+    /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
+    event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
 
     /// @notice emitted upon changing the bonding curve configuration
     ///
@@ -457,8 +457,8 @@ interface IEthMultiVault {
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param totalAtomDepositsForTriple new atom deposit fraction percentage
-    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external;
+    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
 
     /// @dev sets the bonding curve configuration
     /// @param registry address of the new bonding curve registry
@@ -893,6 +893,15 @@ interface IEthMultiVault {
     /// @return shares number of shares user has in the vault
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
+
+    /// @notice returns the number of shares and assets (less fees) user has in the vault for a specific curve
+    ///
+    /// @param vaultId vault id of the vault
+    /// @param curveId curve id of the curve
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver) external view returns (uint256, uint256);
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///
