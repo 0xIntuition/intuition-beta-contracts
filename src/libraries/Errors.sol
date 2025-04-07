@@ -10,12 +10,11 @@ library Errors {
     error EthMultiVault_AdminOnly();
     error EthMultiVault_ArraysNotSameLength();
     error EthMultiVault_AtomDoesNotExist(uint256 atomId);
-    error EthMultiVault_AtomExists(bytes atomUri);
+    error EthMultiVault_AtomExists(bytes atomUri, uint256 atomId);
     error EthMultiVault_AtomUriTooLong();
     error EthMultiVault_BurnFromZeroAddress();
     error EthMultiVault_BurnInsufficientBalance();
-    error EthMultiVault_CannotApproveSelf();
-    error EthMultiVault_CannotRevokeSelf();
+    error EthMultiVault_CannotApproveOrRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
     error EthMultiVault_DepositExceedsMaxAssets();
@@ -24,7 +23,7 @@ library Errors {
     error EthMultiVault_InsufficientDepositAmountToCoverFees();
     error EthMultiVault_InsufficientRemainingSharesInVault(uint256 remainingShares);
     error EthMultiVault_InsufficientSharesInVault();
-    error EthMultiVault_InvalidTotalAtomDepositsForTriple();
+    error EthMultiVault_InvalidAtomDepositFractionForTriple();
     error EthMultiVault_InvalidEntryFee();
     error EthMultiVault_InvalidExitFee();
     error EthMultiVault_InvalidProtocolFee();
@@ -33,8 +32,8 @@ library Errors {
     error EthMultiVault_OperationAlreadyScheduled();
     error EthMultiVault_OperationNotScheduled();
     error EthMultiVault_ReceiveNotAllowed();
-    error EthMultiVault_SenderAlreadyApproved();
     error EthMultiVault_SenderNotApproved();
+    error EthMultiVault_RedeemerNotApproved();
     error EthMultiVault_TimelockNotExpired();
     error EthMultiVault_TransferFailed();
     error EthMultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
