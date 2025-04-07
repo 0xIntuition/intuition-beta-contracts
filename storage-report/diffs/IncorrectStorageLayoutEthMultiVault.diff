@@ -1,0 +1,101 @@
+--- storage-report/layouts/IncorrectStorageLayoutEthMultiVault_onchain.json	2025-04-07 14:48:01
++++ storage-report/layouts/IncorrectStorageLayoutEthMultiVault_local.json	2025-04-07 14:48:01
+@@ -25,69 +25,87 @@
+       "type": "t_struct_storage"
+     },
+     {
+-      "label": "count",
++      "label": "badVar",
+       "offset": 0,
+       "slot": "17",
++      "type": "t_string_storage"
++    },
++    {
++      "label": "count",
++      "offset": 0,
++      "slot": "18",
+       "type": "t_uint256"
+     },
+     {
+       "label": "vaults",
+       "offset": 0,
+-      "slot": "18",
++      "slot": "19",
+       "type": "t_mapping_storage)"
+     },
+     {
+       "label": "vaultFees",
+       "offset": 0,
+-      "slot": "19",
++      "slot": "20",
+       "type": "t_mapping_storage)"
+     },
+     {
+       "label": "approvals",
+       "offset": 0,
+-      "slot": "20",
++      "slot": "21",
+       "type": "t_mapping(t_address,t_mapping(t_address,t_bool))"
+     },
+     {
+       "label": "atoms",
+       "offset": 0,
+-      "slot": "21",
++      "slot": "22",
+       "type": "t_mapping(t_uint256,t_bytes_storage)"
+     },
+     {
+       "label": "atomsByHash",
+       "offset": 0,
+-      "slot": "22",
++      "slot": "23",
+       "type": "t_mapping(t_bytes32,t_uint256)"
+     },
+     {
+       "label": "triples",
+       "offset": 0,
+-      "slot": "23",
++      "slot": "24",
+       "type": "t_mapping_storage)"
+     },
+     {
+       "label": "triplesByHash",
+       "offset": 0,
+-      "slot": "24",
++      "slot": "25",
+       "type": "t_mapping(t_bytes32,t_uint256)"
+     },
+     {
+       "label": "isTriple",
+       "offset": 0,
+-      "slot": "25",
++      "slot": "26",
+       "type": "t_mapping(t_uint256,t_bool)"
+     },
+     {
+       "label": "timelocks",
+       "offset": 0,
+-      "slot": "26",
++      "slot": "27",
+       "type": "t_mapping_storage)"
+     },
+     {
++      "label": "bondingCurveVaults",
++      "offset": 0,
++      "slot": "28",
++      "type": "t_mapping_storage))"
++    },
++    {
++      "label": "bondingCurveConfig",
++      "offset": 0,
++      "slot": "29",
++      "type": "t_struct_storage"
++    },
++    {
+       "label": "__gap",
+       "offset": 0,
+-      "slot": "27",
++      "slot": "31",
+       "type": "t_array_storage"
+     }
+   ]
