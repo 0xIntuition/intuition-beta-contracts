@@ -161,7 +161,7 @@ contract DeployToBase is Script {
         bondingCurveRegistry.addBondingCurve(address(progressiveCurve));
 
         // Transfer ownership of BondingCurveRegistry to multisig
-        bondingCurveRegistry.setAdmin(admin);
+        bondingCurveRegistry.transferOwnership(admin);
 
         // -------------------------------------------------------------------------------------
 
