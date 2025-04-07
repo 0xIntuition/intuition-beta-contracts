@@ -113,7 +113,7 @@ contract BaseTest is Test {
             triple: IEthMultiVault.TripleConfig({
                 tripleCreationProtocolFee: 0.0002 ether,
                 totalAtomDepositsOnTripleCreation: 0.0003 ether,
-                totalAtomDepositsForTriple: 1500
+                atomDepositFractionForTriple: 1500
             }),
             wallet: IEthMultiVault.WalletConfig({
                 permit2: IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)),
@@ -134,8 +134,6 @@ contract BaseTest is Test {
         // Testing for offset curve:
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
-        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 2, 1e17));
-        BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
         // address progressiveCurve = address(
         //     new ProgressiveCurve("Progressive Curve", 0.00007054e18);
@@ -163,8 +161,11 @@ contract BaseTest is Test {
         //   Bob Shares: 4.14132267880182129e17
         //   Charlie Shares: 3.17781355457602312e17
 
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.0001e18)); // Because minDeposit is 0.0003 ether
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 1e16));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(progressiveCurve);
+
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1e16, 1e28));
+        BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
         vm.stopPrank();
 
         return c;

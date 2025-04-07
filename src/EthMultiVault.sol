@@ -101,8 +101,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     mapping(uint256 vaultId => VaultFees vaultFees) public vaultFees;
 
     /// @notice Mapping of receiver to sender to determine if a sender is allowed to deposit assets on behalf of a receiver
-    // Receiver -> Sender -> Is Approved
-    mapping(address receiver => mapping(address sender => bool isApproved)) public approvals;
+    // Receiver -> Sender -> Approval Type
+    mapping(address receiver => mapping(address sender => uint8 approvalType)) public approvals;
 
     /// @notice RDF (Resource Description Framework)
     // mapping of vault ID to atom data
@@ -380,19 +380,19 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev sets the atom deposit percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param totalAtomDepositsForTriple new atom deposit percentage
-    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external onlyAdmin {
-        uint256 maxTotalAtomDepositsForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
+    /// @param atomDepositFractionForTriple new atom deposit percentage
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
+        uint256 maxAtomDepositFractionForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
 
-        if (totalAtomDepositsForTriple > maxTotalAtomDepositsForTriple) {
-            revert Errors.EthMultiVault_InvalidTotalAtomDepositsForTriple();
+        if (atomDepositFractionForTriple > maxAtomDepositFractionForTriple) {
+            revert Errors.EthMultiVault_InvalidAtomDepositFractionForTriple();
         }
 
-        uint256 oldTotalAtomDepositsForTriple = tripleConfig.totalAtomDepositsForTriple;
+        uint256 oldAtomDepositFractionForTriple = tripleConfig.atomDepositFractionForTriple;
 
-        tripleConfig.totalAtomDepositsForTriple = totalAtomDepositsForTriple;
+        tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
 
-        emit TotalAtomDepositsForTripleSet(totalAtomDepositsForTriple, oldTotalAtomDepositsForTriple);
+        emit AtomDepositFractionForTripleSet(atomDepositFractionForTriple, oldAtomDepositFractionForTriple);
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -542,40 +542,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /*         Approvals          */
     /* -------------------------- */
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address to approve
-    function approveSender(address sender) external {
+    /// @notice Set the approval type for a sender to act on behalf of the receiver
+    /// @param sender address to set approval for
+    /// @param approvalType type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    function approve(address sender, ApprovalTypes approvalType) external {
         address receiver = msg.sender;
 
         if (receiver == sender) {
-            revert Errors.EthMultiVault_CannotApproveSelf();
+            revert Errors.EthMultiVault_CannotApproveOrRevokeSelf();
         }
 
-        if (approvals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderAlreadyApproved();
+        if (approvalType == ApprovalTypes.NONE) {
+            delete approvals[receiver][sender];
+        } else {
+            approvals[receiver][sender] = uint8(approvalType);
         }
 
-        approvals[receiver][sender] = true;
-
-        emit SenderApproved(receiver, sender, true);
-    }
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address to revoke
-    function revokeSender(address sender) external {
-        address receiver = msg.sender;
-
-        if (receiver == sender) {
-            revert Errors.EthMultiVault_CannotRevokeSelf();
-        }
-
-        if (!approvals[receiver][sender]) {
-            revert Errors.EthMultiVault_SenderNotApproved();
-        }
-
-        approvals[receiver][sender] = false;
-
-        emit SenderRevoked(receiver, sender, false);
+        emit ApprovalTypeUpdated(sender, receiver, approvalType);
     }
 
     /* -------------------------- */
@@ -650,7 +633,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // check if atom already exists based on hash
         bytes32 hash = keccak256(atomUri);
         if (atomsByHash[hash] != 0) {
-            revert Errors.EthMultiVault_AtomExists(atomUri);
+            revert Errors.EthMultiVault_AtomExists(atomUri, atomsByHash[hash]);
         }
 
         // calculate user deposit amount
@@ -872,7 +855,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
     function depositAtom(address receiver, uint256 id) external payable nonReentrant whenNotPaused returns (uint256) {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -920,7 +903,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -957,6 +940,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemAtom(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
         if (id == 0 || id > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
@@ -998,6 +985,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         nonReentrant
         returns (uint256)
     {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
         if (atomId == 0 || atomId > count) {
             revert Errors.EthMultiVault_VaultDoesNotExist();
         }
@@ -1044,7 +1035,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1098,7 +1089,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         whenNotPaused
         returns (uint256)
     {
-        if (msg.sender != receiver && !approvals[receiver][msg.sender]) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
@@ -1144,6 +1135,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
     ///       See `getRedeemAssetsAndFees` for more details on the fees charged
     function redeemTriple(uint256 shares, address receiver, uint256 id) external nonReentrant returns (uint256) {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
         if (!isTripleId(id)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
@@ -1181,6 +1176,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         nonReentrant
         returns (uint256)
     {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
         if (!isTripleId(tripleId)) {
             revert Errors.EthMultiVault_VaultNotTriple();
         }
@@ -1198,6 +1197,211 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         _transferFeesToProtocolMultisig(protocolFee);
+
+        return assets;
+    }
+
+    /* -------------------------- */
+    /*       Batch Methods        */
+    /* -------------------------- */
+
+    /// @notice deposit eth into multiple terms and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    ///         works with atoms, triples, and counter-triples
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds the IDs of the terms (atoms, triples, or counter-triples) to deposit into
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares the amount of shares minted for each atom
+    /// @dev this function will revert if the minimum deposit amount of eth is not met and
+    ///       if a vault ID does not exist/is not an atom.
+    function batchDeposit(address receiver, uint256[] calldata termIds, uint256[] calldata amounts)
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+        returns (uint256[] memory shares)
+    {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
+        shares = new uint256[](termIds.length);
+
+        // To simplify UX in 1.5, compute fees iteratively
+        // 2.0 will always use batch methods internally
+        for (uint256 i = 0; i < termIds.length; i++) {
+            if (termIds[i] == 0 || termIds[i] > count) {
+                revert Errors.EthMultiVault_VaultDoesNotExist();
+            }
+
+            if (amounts[i] < generalConfig.minDeposit) {
+                revert Errors.EthMultiVault_MinimumDeposit();
+            }
+
+            uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
+            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+
+            // deposit eth into vault and mint shares for the receiver
+            shares[i] = _deposit(receiver, termIds[i], userDepositAfterprotocolFee);
+            _transferFeesToProtocolMultisig(protocolFee);
+        }
+
+        return shares;
+    }
+
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    /// @dev assets parameter is omitted in favor of msg.value, unlike in ERC4626
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds array of the vault IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the vault IDs of the curves
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares array of the amount of shares minted in the specified vaults
+    /// @dev this function will revert if the minimum deposit amount of eth is not met and
+    ///       if the vault ID does not exist/is not an atom.
+    /// @dev This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
+    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
+    ///      performing an audit of the full refactor (V2).
+    function batchDepositCurve(
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds,
+        uint256[] calldata amounts
+    ) external payable nonReentrant whenNotPaused returns (uint256[] memory shares) {
+        if (!isApprovedDeposit(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_SenderNotApproved();
+        }
+
+        if (termIds.length != curveIds.length) {
+            revert Errors.EthMultiVault_ArraysNotSameLength();
+        }
+
+        shares = new uint256[](termIds.length);
+
+        for (uint256 i = 0; i < termIds.length; i++) {
+            if (termIds[i] == 0 || termIds[i] > count) {
+                revert Errors.EthMultiVault_VaultDoesNotExist();
+            }
+
+            if (amounts[i] < generalConfig.minDeposit) {
+                revert Errors.EthMultiVault_MinimumDeposit();
+            }
+
+            uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
+            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+
+            // deposit eth into vault and mint shares for the receiver
+            shares[i] = _depositCurve(receiver, termIds[i], curveIds[i], userDepositAfterprotocolFee);
+
+            _transferFeesToProtocolMultisig(protocolFee);
+        }
+
+        return shares;
+    }
+
+    /// @notice redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples
+    ///
+    /// @param percentage the percentage of shares to redeem from each vault (10000 -> 100.00%, 5000 -> 50.00%, etc)
+    /// @param receiver the address to receiver the assets
+    /// @param ids array of IDs of the term (atom, triple or counter-triple) to redeem from
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    /// @dev Emergency redemptions without any fees being charged are always possible, even if the contract is paused
+    ///       See `getRedeemAssetsAndFees` for more details on the fees charged
+    function batchRedeem(uint256 percentage, address receiver, uint256[] calldata ids)
+        external
+        nonReentrant
+        returns (uint256[] memory assets)
+    {
+        if (!isApprovedRedeem(msg.sender, receiver)) {
+            revert Errors.EthMultiVault_RedeemerNotApproved();
+        }
+
+        uint256 totalAssetsRedeemed = 0;
+        uint256 totalProtocolFees = 0;
+        assets = new uint256[](ids.length);
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            if (ids[i] == 0 || ids[i] > count) {
+                revert Errors.EthMultiVault_VaultDoesNotExist();
+            }
+
+            uint256 userBalance = vaults[ids[i]].balanceOf[msg.sender];
+            if (userBalance == 0) {
+                revert Errors.EthMultiVault_InsufficientSharesInVault();
+            }
+
+            uint256 shares = (percentage * userBalance) / 10000;
+
+            uint256 protocolFee;
+            (assets[i], protocolFee) = _redeem(ids[i], msg.sender, receiver, shares);
+            totalAssetsRedeemed += assets[i];
+            totalProtocolFees += protocolFee;
+        }
+
+        // transfer eth to receiver factoring in fees/shares
+        (bool success,) = payable(receiver).call{value: totalAssetsRedeemed}("");
+        if (!success) {
+            revert Errors.EthMultiVault_TransferFailed();
+        }
+
+        _transferFeesToProtocolMultisig(totalProtocolFees);
+
+        return assets;
+    }
+
+    /// @notice redeem shares from bonding curve atom vaults for assets
+    ///
+    /// @param percentage the percentage of shares to redeem from the vaults (10000 -> 100.00%, 5000 -> 50.00%, etc)
+    /// @param receiver the address to receiver the assets
+    /// @param termIds array of the IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the IDs of the curves for each term
+    ///
+    /// @return assets array of the amounts of assets/eth withdrawn
+    function batchRedeemCurve(
+        uint256 percentage,
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds
+    ) external nonReentrant returns (uint256[] memory assets) {
+        if (termIds.length != curveIds.length) {
+            revert Errors.EthMultiVault_ArraysNotSameLength();
+        }
+
+        assets = new uint256[](termIds.length);
+        uint256 totalAssetsRedeemed = 0;
+        uint256 totalProtocolFees = 0;
+
+        for (uint256 i = 0; i < termIds.length; i++) {
+            if (termIds[i] == 0 || termIds[i] > count) {
+                revert Errors.EthMultiVault_VaultDoesNotExist();
+            }
+
+            // Then check user balance and calculate shares
+            uint256 userBalance = bondingCurveVaults[termIds[i]][curveIds[i]].balanceOf[msg.sender];
+            if (userBalance == 0) {
+                revert Errors.EthMultiVault_InsufficientSharesInVault();
+            }
+
+            uint256 shares = (percentage * userBalance) / 10000;
+
+            uint256 protocolFee;
+            (assets[i], protocolFee) = _redeemCurve(termIds[i], curveIds[i], msg.sender, receiver, shares);
+            totalAssetsRedeemed += assets[i];
+            totalProtocolFees += protocolFee;
+        }
+
+        // transfer eth to receiver factoring in fees/shares
+        (bool success,) = payable(receiver).call{value: totalAssetsRedeemed}("");
+        if (!success) {
+            revert Errors.EthMultiVault_TransferFailed();
+        }
+
+        _transferFeesToProtocolMultisig(totalProtocolFees);
 
         return assets;
     }
@@ -1397,7 +1601,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             sharesForReceiver,
             entryFee,
             id,
-            // isTripleId(id), // <-- Omitted because of stack too deep
+            curveId,
+            isTripleId(id),
             false
         );
 
@@ -1491,7 +1696,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             receiver,
             bondingCurveVaults[id][curveId].balanceOf[sender],
             assetsForReceiver,
-            shares, /*exitFee,*/
+            shares,
+            exitFee,
             id,
             curveId
         );
@@ -1550,11 +1756,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param totalShares new total shares for the vault
     function _setVaultTotals(uint256 id, uint256 totalAssets, uint256 totalShares) internal {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePrice(id);
         vaults[id].totalAssets = totalAssets;
         vaults[id].totalShares = totalShares;
         uint256 newSharePrice = currentSharePrice(id);
-        emit SharePriceChanged(id, newSharePrice, oldSharePrice);
+        emit SharePriceChanged(id, newSharePrice, totalAssets, totalShares);
     }
 
     /// @dev increase the total assets and shares for a given bonding curve vault
@@ -1568,11 +1773,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         internal
     {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
         bondingCurveVaults[id][curveId].totalShares += sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
     }
 
     /// @dev decrease the total assets and shares for a given bonding curve vault
@@ -1586,11 +1790,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         internal
     {
         // Share price can only change when vault totals change
-        uint256 oldSharePrice = currentSharePriceCurve(id, curveId);
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
         bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, oldSharePrice);
+        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
     }
 
     /// @dev internal method for vault creation
@@ -1840,7 +2043,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return feeAmount amount of assets that would be used as atom deposit
     /// @dev only applies to triple vaults
     function atomDepositsAmount(uint256 assets, uint256 id) public view returns (uint256) {
-        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.totalAtomDepositsForTriple) : 0;
+        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
         return feeAmount;
     }
 
@@ -1875,7 +2078,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return price current share price for the given vault id and curve id, scaled by 1e18
     function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
-        uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
         return basePrice;
     }
@@ -2133,6 +2335,22 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         bytes32 rawAddress = keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(data)));
 
         return address(bytes20(rawAddress << 96));
+    }
+
+    /// @notice Check if a sender is approved to deposit on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to deposit
+    function isApprovedDeposit(address sender, address receiver) public view returns (bool) {
+        return sender == receiver || (approvals[receiver][sender] & uint8(ApprovalTypes.DEPOSIT)) != 0;
+    }
+
+    /// @notice Check if a sender is approved to redeem on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to redeem
+    function isApprovedRedeem(address sender, address receiver) public view returns (bool) {
+        return sender == receiver || (approvals[receiver][sender] & uint8(ApprovalTypes.REDEMPTION)) != 0;
     }
 
     /// @dev checks if an account holds shares in the vault counter to the id provided

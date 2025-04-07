@@ -20,7 +20,7 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry {
+contract BondingCurveRegistry is IBondingCurveRegistry {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
@@ -60,9 +60,8 @@ contract BondingCurveRegistry {
     /*                    CONSTRUCTOR                      */
     /* =================================================== */
 
-    /// @notice Initializes the BondingCurveRegistry contract
+    /// @notice Constructor for the BondingCurveRegistry contract
     /// @param _admin Address who may add curves to the registry
-    /// NOTE: This function is called only once (during contract deployment)
     constructor(address _admin) {
         if (_admin == address(0)) {
             revert Errors.BondingCurveRegistry_RequiresOwner();

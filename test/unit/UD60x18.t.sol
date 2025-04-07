@@ -6,7 +6,7 @@ import {UD60x18, ud, convert} from "@prb/math/UD60x18.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 contract UD60x18Test is Test {
-    function testWrap() public {
+    function testWrap() public pure {
         console.log("wrap(5).mul(wrap(7)).unwrap()");
         uint256 x = 5;
         uint256 y = 7;
@@ -17,7 +17,7 @@ contract UD60x18Test is Test {
         assertNotEq(z, 35);
     }
 
-    function testConvertUnwrap() public {
+    function testConvertUnwrap() public pure {
         console.log("convert(5).mul(convert(7)).unwrap()");
         uint256 x = 5;
         uint256 y = 7;
@@ -28,7 +28,7 @@ contract UD60x18Test is Test {
         assertNotEq(z, 35);
     }
 
-    function testConvert() public {
+    function testConvert() public pure {
         console.log("convert(convert(5).mul(convert(7)))");
         uint256 x = 5;
         uint256 y = 7;
@@ -40,7 +40,7 @@ contract UD60x18Test is Test {
         assertEq(z, 35);
     }
 
-    function testDecimal() public {
+    function testDecimal() public pure{
         uint256 x = 10;
         uint256 y = 3;
         uint256 z = convert(convert(x).div(convert(y)));
@@ -51,7 +51,7 @@ contract UD60x18Test is Test {
         assertEq(z, 3);
     }
 
-    function testE18() public {
+    function testE18() public pure {
         uint256 x = 10;
         uint256 y = 0.5e18;
         uint256 z = convert(convert(x).mul(convert(y)));
@@ -62,7 +62,7 @@ contract UD60x18Test is Test {
         assertNotEq(z, 5);
     }
 
-    function testE18Wrap() public {
+    function testE18Wrap() public pure {
         uint256 x = 10;
         uint256 y = 0.5e18;
         uint256 z = convert(convert(x).mul(UD60x18.wrap(y)));

@@ -7,6 +7,7 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
+
     /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
@@ -52,7 +53,7 @@ interface IEthMultiVault {
         /// @dev static fee going towards increasing the amount of assets in the underlying atom vaults
         uint256 totalAtomDepositsOnTripleCreation;
         /// @dev % of the Triple deposit amount that is used to purchase equity in the underlying atoms
-        uint256 totalAtomDepositsForTriple;
+        uint256 atomDepositFractionForTriple;
     }
 
     /// @dev Atom wallet configuration struct
@@ -106,22 +107,26 @@ interface IEthMultiVault {
     }
 
     /* =================================================== */
+    /*                        ENUMS                        */
+    /* =================================================== */
+
+    enum ApprovalTypes {
+        NONE,        // 0b00
+        DEPOSIT,     // 0b01
+        REDEMPTION,  // 0b10
+        BOTH        // 0b11
+    }
+
+    /* =================================================== */
     /*                       EVENTS                        */
     /* =================================================== */
 
-    /// @notice Emitted when a receiver approves a sender to deposit assets on their behalf
+    /// @notice Emitted when a receiver changes the approval type for a sender
     ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderApproved(address indexed sender, address indexed receiver, bool approved);
-
-    /// @notice Emitted when a receiver revokes a sender's approval to deposit assets on their behalf
-    ///
-    /// @param sender address of the sender
-    /// @param receiver address of the receiver
-    /// @param approved whether the sender is approved or not
-    event SenderRevoked(address indexed sender, address indexed receiver, bool approved);
+    /// @param sender address of the sender being approved/disapproved
+    /// @param receiver address of the receiver granting/revoking approval
+    /// @param approvalType the type of approval granted (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    event ApprovalTypeUpdated(address indexed sender, address indexed receiver, ApprovalTypes approvalType);
 
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
@@ -154,7 +159,8 @@ interface IEthMultiVault {
         uint256 sharesForReceiver,
         uint256 entryFee,
         uint256 vaultId,
-        // bool isTriple,
+        uint256 curveId,
+        bool isTriple,
         bool isAtomWallet
     );
 
@@ -183,7 +189,7 @@ interface IEthMultiVault {
         uint256 senderTotalSharesInVault,
         uint256 assetsForReceiver,
         uint256 sharesRedeemedBySender,
-        // uint256 exitFee, <-- Omitted because of stack too deep
+        uint256 exitFee,
         uint256 vaultId,
         uint256 curveId
     );
@@ -193,8 +199,8 @@ interface IEthMultiVault {
     /// @param creator address of the atom creator
     /// @param atomWallet address of the atom's associated abstract account
     /// @param atomData the atom's respective string
-    /// @param vaultID the vault id of the atom
-    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultID);
+    /// @param vaultId the vault id of the atom
+    event AtomCreated(address indexed creator, address indexed atomWallet, bytes atomData, uint256 vaultId);
 
     /// @notice emitted upon creation of a triple
     ///
@@ -202,9 +208,9 @@ interface IEthMultiVault {
     /// @param subjectId the triple's respective subject atom
     /// @param predicateId the triple's respective predicate atom
     /// @param objectId the triple's respective object atom
-    /// @param vaultID the vault id of the triple
+    /// @param vaultId the vault id of the triple
     event TripleCreated(
-        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultID
+        address indexed creator, uint256 subjectId, uint256 predicateId, uint256 objectId, uint256 vaultId
     );
 
     /// @notice emitted upon the transfer of fees to the protocol multisig
@@ -293,9 +299,9 @@ interface IEthMultiVault {
 
     /// @notice emitted upon changing the atom deposit fraction for triples
     ///
-    /// @param newTotalAtomDepositsForTriple new atom deposit fraction for triples
-    /// @param oldTotalAtomDepositsForTriple old atom deposit fraction for triples
-    event TotalAtomDepositsForTripleSet(uint256 newTotalAtomDepositsForTriple, uint256 oldTotalAtomDepositsForTriple);
+    /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
+    /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
+    event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
 
     /// @notice emitted upon changing the entry fee
     ///
@@ -330,21 +336,23 @@ interface IEthMultiVault {
     /// @param atomWallet address of the atom wallet
     event AtomWalletDeployed(uint256 indexed vaultId, address indexed atomWallet);
 
-    /// @notice emitted upon changing the share price of an atom
+    /// @notice emitted upon changing the share price of a term base vault
     ///
-    /// @param vaultId vault id of the atom
-    /// @param newSharePrice new share price of the atom
-    /// @param oldSharePrice old share price of the atom (not needed but staying in parallel with production code)
-    event SharePriceChanged(uint256 indexed vaultId, uint256 newSharePrice, uint256 oldSharePrice);
+    /// @param termId id of the atom, triple or counter triple
+    /// @param newSharePrice new share price of the vault
+    /// @param totalAssets new total assets in vault
+    /// @param totalShares new total shares in vault
+    event SharePriceChanged(uint256 indexed termId, uint256 newSharePrice, uint256 totalAssets, uint256 totalShares);
 
-    /// @notice emitted upon changing the share price of a curve
+    /// @notice emitted upon changing the share price of a curve vault
     ///
-    /// @param vaultId vault id of the atom
+    /// @param termId id of the atom, triple or counter triple
     /// @param curveId curve id of the curve
-    /// @param newSharePrice new share price of the curve
-    /// @param oldSharePrice old share price of the curve (not needed but staying in parallel with production code)
+    /// @param newSharePrice new share price of the curve vault
+    /// @param totalAssets new total assets in vault
+    /// @param totalShares new total shares in vault
     event SharePriceChangedCurve(
-        uint256 indexed vaultId, uint256 indexed curveId, uint256 newSharePrice, uint256 oldSharePrice
+        uint256 indexed termId, uint256 indexed curveId, uint256 newSharePrice, uint256 totalAssets, uint256 totalShares
     );
 
     /* =================================================== */
@@ -432,8 +440,8 @@ interface IEthMultiVault {
 
     /// @dev sets the atom deposit fraction percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param totalAtomDepositsForTriple new atom deposit fraction percentage
-    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external;
+    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
+    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically
@@ -479,13 +487,10 @@ interface IEthMultiVault {
     /// NOTE: deploys an ERC4337 account (atom wallet) through a BeaconProxy. Reverts if the atom vault does not exist
     function deployAtomWallet(uint256 atomId) external returns (address);
 
-    /// @notice approve a sender to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function approveSender(address sender) external;
-
-    /// @notice revoke a sender's approval to deposit assets on behalf of the receiver
-    /// @param sender address of the sender
-    function revokeSender(address sender) external;
+    /// @notice Set the approval type for a sender to act on behalf of the receiver
+    /// @param sender address to set approval for
+    /// @param approvalType type of approval to grant (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
+    function approve(address sender, ApprovalTypes approvalType) external;
 
     /// @notice Create an atom and return its vault id
     /// @param atomUri atom data to create atom with
@@ -628,6 +633,62 @@ interface IEthMultiVault {
     function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         returns (uint256);
+
+    /// @notice deposit eth into multiple terms and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    ///         works with atoms, triples, and counter-triples
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds the IDs of the terms (atoms, triples, or counter-triples) to deposit into
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares the amount of shares minted for each atom
+    function batchDeposit(address receiver, uint256[] calldata termIds, uint256[] calldata amounts)
+        external
+        payable
+        returns (uint256[] memory);
+
+    /// @notice deposit eth into an atom vault and grant ownership of 'shares' to 'reciever'
+    ///         *payable msg.value amount of eth to deposit
+    ///
+    /// @param receiver the address to receive the shares
+    /// @param termIds array of the vault IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the vault IDs of the curves
+    /// @param amounts array of the amount to deposit in each vault
+    ///
+    /// @return shares array of the amount of shares minted in the specified vaults
+    function batchDepositCurve(
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds,
+        uint256[] calldata amounts
+    ) external payable returns (uint256[] memory);
+
+    /// @notice redeem shares from an atom vault for assets -- works for atoms, triples and counter-triples
+    ///
+    /// @param percentage the percentage of shares to redeem from each vault (i.e. 50% -> 50, 100% -> 100)
+    /// @param receiver the address to receiver the assets
+    /// @param ids array of IDs of the term (atom, triple or counter-triple) to redeem from
+    ///
+    /// @return assets the amount of assets/eth withdrawn
+    function batchRedeem(uint256 percentage, address receiver, uint256[] calldata ids)
+        external
+        returns (uint256[] memory);
+
+    /// @notice redeem shares from bonding curve atom vaults for assets
+    ///
+    /// @param percentage the percentage of shares to redeem from the vaults
+    /// @param receiver the address to receiver the assets
+    /// @param termIds array of the IDs of the terms (atoms, triples, or counter-triples)
+    /// @param curveIds array of the IDs of the curves for each term
+    ///
+    /// @return assets array of the amounts of assets/eth withdrawn
+    function batchRedeemCurve(
+        uint256 percentage,
+        address receiver,
+        uint256[] calldata termIds,
+        uint256[] calldata curveIds
+    ) external returns (uint256[] memory);
 
     /* =================================================== */
     /*                    VIEW FUNCTIONS                   */
@@ -811,6 +872,15 @@ interface IEthMultiVault {
     /// @return assets number of assets user has in the vault
     function getVaultStateForUser(uint256 vaultId, address receiver) external view returns (uint256, uint256);
 
+    /// @notice returns the number of shares and assets (less fees) user has in the vault for a specific curve
+    ///
+    /// @param vaultId vault id of the vault
+    /// @param curveId curve id of the curve
+    /// @param receiver address of the receiver
+    ///
+    /// @return shares number of shares user has in the vault
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver) external view returns (uint256, uint256);
+
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///
     /// @param assets amount of `assets` to calculate fees on (should always be msg.value - protocolFee)
@@ -909,4 +979,16 @@ interface IEthMultiVault {
     /// @return atomWallet the address of the atom wallet
     /// NOTE: the create2 salt is based off of the vault ID
     function computeAtomWalletAddr(uint256 id) external view returns (address);
+
+    /// @notice Check if a sender is approved to deposit on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to deposit
+    function isApprovedDeposit(address sender, address receiver) external view returns (bool);
+
+    /// @notice Check if a sender is approved to redeem on behalf of a receiver
+    /// @param sender The address of the sender
+    /// @param receiver The address of the receiver
+    /// @return bool Whether the sender is approved to redeem
+    function isApprovedRedeem(address sender, address receiver) external view returns (bool);
 }

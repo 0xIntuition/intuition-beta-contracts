@@ -17,16 +17,29 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
+import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
+
+// To run this:
+/* forge script script/DeployForTesting.s.sol \
+   --rpc-url $BASE_SEPOLIA_RPC_URL \
+   --private-key $PRIVATE_KEY \
+   --sender $SENDER_ADDRESS \
+   --broadcast \
+   --verify \
+   --etherscan-api-key $BASESCAN_API_KEY
+*/
 
 contract DeployEthMultiVault is Script {
     // Multisig addresses for key roles in the protocol
-    address public admin = 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480;
-    address public protocolMultisig = 0xC03F0dE5b34339e1B968e4f317Cd7e7FBd421FD1;
-    address public atomWarden = 0xC35DFCFE50da58d957fc47C7063f56135aFF61B8;
+    // address public admin = 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480; // Gnosis Safe Proxy on Base
+    // address public protocolMultisig = 0xC03F0dE5b34339e1B968e4f317Cd7e7FBd421FD1; // Gnosis Safe Proxy on Base
+    // address public atomWarden = 0xC35DFCFE50da58d957fc47C7063f56135aFF61B8; // Gnosis Safe Proxy on Base
+
+    address public DEVELOPER = 0x44A4b9E2A69d86BA382a511f845CbF2E31286770; // Developer Wallet
 
     // Constants from Base
-    IPermit2 public permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
-    address public entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
+    IPermit2 public permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base / Base Sepolia
+    address public entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base / Base Sepolia
 
     // Contracts to be deployed
     AtomWallet public atomWallet;
@@ -36,10 +49,10 @@ contract DeployEthMultiVault is Script {
     TimelockController public timelock;
 
     // Bonding Curves
-    TransparentUpgradeableProxy public bondingCurveRegistryProxy;
     BondingCurveRegistry public bondingCurveRegistry;
-    LinearCurve public linearCurve; // <-- Not used in this edition of EthMultiVault
+    LinearCurve public linearCurve;
     ProgressiveCurve public progressiveCurve;
+    OffsetProgressiveCurve public offsetProgressiveCurve;
 
     function run() external {
         // Begin sending tx's to network
@@ -50,7 +63,7 @@ contract DeployEthMultiVault is Script {
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
 
-        proposers[0] = admin;
+        proposers[0] = DEVELOPER;
         executors[0] = address(0);
 
         // deploy TimelockController
@@ -71,8 +84,8 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed UpgradeableBeacon.");
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
-            admin: admin, // Admin address for the EthMultiVault contract
-            protocolMultisig: protocolMultisig, // Protocol multisig address
+            admin: DEVELOPER, // Admin address for the EthMultiVault contract
+            protocolMultisig: DEVELOPER, // Protocol multisig address
             feeDenominator: 10000, // Common denominator for fee calculations
             minDeposit: 0.00042 ether, // Minimum deposit amount in wei
             minShare: 1e6, // Minimum share amount (e.g., for vault initialization)
@@ -95,7 +108,7 @@ contract DeployEthMultiVault is Script {
         IEthMultiVault.WalletConfig memory walletConfig = IEthMultiVault.WalletConfig({
             permit2: IPermit2(address(permit2)), // Permit2 on Base
             entryPoint: entryPoint, // EntryPoint address on Base
-            atomWarden: atomWarden, // atomWarden address
+            atomWarden: DEVELOPER, // atomWarden address
             atomWalletBeacon: address(atomWalletBeacon) // Address of the AtomWalletBeacon contract
         });
 
@@ -116,15 +129,19 @@ contract DeployEthMultiVault is Script {
         console.logString("deployed LinearCurve.");
 
         // Deploy ProgressiveCurve
-        progressiveCurve = new ProgressiveCurve("Progressive Curve", 2);
+        progressiveCurve = new ProgressiveCurve("Progressive Curve", 1e16);
         console.logString("deployed ProgressiveCurve.");
+
+        // Deploy OffsetProgressiveCurve
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 1e16, 1e28);
+        console.logString("deployed OffsetProgressiveCurve.");
 
         // Add curves to BondingCurveRegistry
         bondingCurveRegistry.addBondingCurve(address(linearCurve));
         bondingCurveRegistry.addBondingCurve(address(progressiveCurve));
-
+        bondingCurveRegistry.addBondingCurve(address(offsetProgressiveCurve));
         // Transfer ownership of BondingCurveRegistry to the timelock
-        bondingCurveRegistry.transferOwnership(address(timelock));
+        bondingCurveRegistry.transferOwnership(address(DEVELOPER));
         // NOTE: TimelockController needs to accept the ownership of the BondingCurveRegistry in order to become a new owner
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({

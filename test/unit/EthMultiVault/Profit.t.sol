@@ -11,7 +11,7 @@ import {StringUtils} from "./StringUtils.sol";
 contract ProfitTest is EthMultiVaultBase, EthMultiVaultHelpers {
     using StringUtils for uint256;
 
-    uint256 constant CURVE_ID = 2;
+    uint256 constant CURVE_ID = 3;
     address internal charlie = makeAddr("charlie");
 
     function setUp() external {
