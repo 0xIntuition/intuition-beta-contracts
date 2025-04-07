@@ -1776,7 +1776,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         bondingCurveVaults[id][curveId].totalAssets += assetsDelta;
         bondingCurveVaults[id][curveId].totalShares += sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
+        emit SharePriceChangedCurve(
+            id,
+            curveId,
+            newSharePrice,
+            bondingCurveVaults[id][curveId].totalAssets,
+            bondingCurveVaults[id][curveId].totalShares
+        );
     }
 
     /// @dev decrease the total assets and shares for a given bonding curve vault
@@ -1793,7 +1799,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         bondingCurveVaults[id][curveId].totalAssets -= assetsDelta;
         bondingCurveVaults[id][curveId].totalShares -= sharesDelta;
         uint256 newSharePrice = currentSharePriceCurve(id, curveId);
-        emit SharePriceChangedCurve(id, curveId, newSharePrice, bondingCurveVaults[id][curveId].totalAssets, bondingCurveVaults[id][curveId].totalShares);
+        emit SharePriceChangedCurve(
+            id,
+            curveId,
+            newSharePrice,
+            bondingCurveVaults[id][curveId].totalAssets,
+            bondingCurveVaults[id][curveId].totalShares
+        );
     }
 
     /// @dev internal method for vault creation

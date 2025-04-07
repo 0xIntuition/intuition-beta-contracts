@@ -7,6 +7,7 @@ import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+
 contract DepositTripleCurveTest is EthMultiVaultBase, EthMultiVaultHelpers {
     uint256 constant CURVE_ID = 2;
 

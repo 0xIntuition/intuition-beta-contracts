@@ -1,19 +1,22 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.21;
 
-import { Script, console } from "forge-std/Script.sol";
-import { TimelockController } from "@openzeppelin/contracts/governance/TimelockController.sol";
-import { TransparentUpgradeableProxy, ITransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {Script, console} from "forge-std/Script.sol";
+import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
+import {
+    TransparentUpgradeableProxy,
+    ITransparentUpgradeableProxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
-import { AtomWallet } from "src/AtomWallet.sol";
-import { EthMultiVault } from "src/EthMultiVault.sol";
-import { IEthMultiVault } from "src/interfaces/IEthMultiVault.sol";
-import { IPermit2 } from "src/interfaces/IPermit2.sol";
+import {AtomWallet} from "src/AtomWallet.sol";
+import {EthMultiVault} from "src/EthMultiVault.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
+import {IPermit2} from "src/interfaces/IPermit2.sol";
 
-import { BondingCurveRegistry } from "src/BondingCurveRegistry.sol";
-import { ProgressiveCurve } from "src/ProgressiveCurve.sol";
-import { LinearCurve } from "src/LinearCurve.sol";
+import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
+import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
+import {LinearCurve} from "src/LinearCurve.sol";
 
 contract DeployToBase is Script {
     // Multisig addresses for key roles in the protocol
@@ -112,11 +115,10 @@ contract DeployToBase is Script {
             protocolFee: 100 // Protocol fee for vault 0
         });
 
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault
-            .BondingCurveConfig({
-                registry: address(bondingCurveRegistry),
-                defaultCurveId: 1 // Unused in this edition of EthMultiVault
-            });
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
+            registry: address(bondingCurveRegistry),
+            defaultCurveId: 1 // Unused in this edition of EthMultiVault
+        });
 
         // ------------------------------- Bonding Curves----------------------------------------
 
@@ -126,10 +128,8 @@ contract DeployToBase is Script {
 
         address bondingCurveRegistryImplementation = address(bondingCurveRegistry);
 
-        bytes memory bondingCurveRegistryInitData = abi.encodeWithSelector(
-            BondingCurveRegistry.initialize.selector,
-            msg.sender
-        );
+        bytes memory bondingCurveRegistryInitData =
+            abi.encodeWithSelector(BondingCurveRegistry.initialize.selector, msg.sender);
 
         // Deploy BondingCurveRegistry proxy
         bondingCurveRegistryProxy = new TransparentUpgradeableProxy(
@@ -139,13 +139,7 @@ contract DeployToBase is Script {
         );
         console.logString("deployed BondingCurveRegistry proxy.");
         console.logString("encoded constructor args: ");
-        console.logBytes(
-            abi.encode(
-                address(bondingCurveRegistry),
-                address(timelock),
-                bondingCurveRegistryInitData
-            )
-        );
+        console.logBytes(abi.encode(address(bondingCurveRegistry), address(timelock), bondingCurveRegistryInitData));
 
         // Deploy LinearCurve
         linearCurve = new LinearCurve("Linear Curve");
@@ -208,10 +202,7 @@ contract DeployToBase is Script {
         console.log("UpgradeableBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
         console.log("EthMultiVault proxy address:", address(ethMultiVaultProxy));
-        console.log(
-            "BondingCurveRegistry implementation address:",
-            bondingCurveRegistryImplementation
-        );
+        console.log("BondingCurveRegistry implementation address:", bondingCurveRegistryImplementation);
         console.log("BondingCurveRegistry proxy address:", address(bondingCurveRegistryProxy));
         console.log("LinearCurve address:", address(linearCurve));
         console.log("ProgressiveCurve address:", address(progressiveCurve));
