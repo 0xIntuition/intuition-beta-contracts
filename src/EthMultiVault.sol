@@ -135,7 +135,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     BondingCurveConfig public bondingCurveConfig;
 
     /// @dev Gap for upgrade safety
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 
     /* =================================================== */
     /*                    MODIFIERS                        */
@@ -183,6 +183,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             exitFee: _defaultVaultFees.exitFee,
             protocolFee: _defaultVaultFees.protocolFee
         });
+    }
+
+    /**
+     * @notice Security measure for upgradeable contracts
+     * @dev Disables initializers on implementation contract to prevent direct initialization
+     * @dev (Security) Prevents attackers from initializing the implementation contract directly
+     */
+    constructor() {
+        _disableInitializers();
     }
 
     /* =================================================== */
@@ -261,7 +270,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @dev set admin
     /// @param admin address of the new admin
-    function setAdmin(address admin) external onlyAdmin {
+    /// @notice Requires new admin to 'confirm' the timelocked operation
+    //  @dev Old admin may still cancel this before timelock duration if desired
+    function setAdmin(address admin) external {
+        if (msg.sender != admin) {
+            revert Errors.EthMultiVault_AdminOnly();
+        }
         address oldAdmin = generalConfig.admin;
 
         // Generate the operation hash
@@ -278,6 +292,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         timelocks[opHash].executed = true;
 
         emit AdminSet(admin, oldAdmin);
+        emit OperationExecuted(SET_ADMIN, data);
     }
 
     /// @dev set protocol multisig
@@ -350,34 +365,34 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         emit TripleCreationProtocolFeeSet(tripleCreationProtocolFee, oldTripleCreationProtocolFee);
     }
 
-    /// @dev sets the atom deposit fraction on triple creation used to increase the amount of assets
+    /// @dev sets the atom deposit on triple creation used to increase the amount of assets
     ///      in the underlying atom vaults on triple creation
-    /// @param atomDepositFractionOnTripleCreation new atom deposit fraction on triple creation
-    function setAtomDepositFractionOnTripleCreation(uint256 atomDepositFractionOnTripleCreation) external onlyAdmin {
-        uint256 oldAtomDepositFractionOnTripleCreation = tripleConfig.atomDepositFractionOnTripleCreation;
+    /// @param totalAtomDepositsOnTripleCreation new atom deposit on triple creation
+    function setTotalAtomDepositsOnTripleCreation(uint256 totalAtomDepositsOnTripleCreation) external onlyAdmin {
+        uint256 oldTotalAtomDepositsOnTripleCreation = tripleConfig.totalAtomDepositsOnTripleCreation;
 
-        tripleConfig.atomDepositFractionOnTripleCreation = atomDepositFractionOnTripleCreation;
+        tripleConfig.totalAtomDepositsOnTripleCreation = totalAtomDepositsOnTripleCreation;
 
-        emit AtomDepositFractionOnTripleCreationSet(
-            atomDepositFractionOnTripleCreation, oldAtomDepositFractionOnTripleCreation
+        emit TotalAtomDepositsOnTripleCreationSet(
+            totalAtomDepositsOnTripleCreation, oldTotalAtomDepositsOnTripleCreation
         );
     }
 
-    /// @dev sets the atom deposit fraction percentage for atoms used in triples
+    /// @dev sets the atom deposit percentage for atoms used in triples
     ///      (number to be divided by `generalConfig.feeDenominator`)
-    /// @param atomDepositFractionForTriple new atom deposit fraction percentage
-    function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
-        uint256 maxAtomDepositFractionForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
+    /// @param totalAtomDepositsForTriple new atom deposit percentage
+    function setTotalAtomDepositsForTriple(uint256 totalAtomDepositsForTriple) external onlyAdmin {
+        uint256 maxTotalAtomDepositsForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
 
-        if (atomDepositFractionForTriple > maxAtomDepositFractionForTriple) {
-            revert Errors.EthMultiVault_InvalidAtomDepositFractionForTriple();
+        if (totalAtomDepositsForTriple > maxTotalAtomDepositsForTriple) {
+            revert Errors.EthMultiVault_InvalidTotalAtomDepositsForTriple();
         }
 
-        uint256 oldAtomDepositFractionForTriple = tripleConfig.atomDepositFractionForTriple;
+        uint256 oldTotalAtomDepositsForTriple = tripleConfig.totalAtomDepositsForTriple;
 
-        tripleConfig.atomDepositFractionForTriple = atomDepositFractionForTriple;
+        tripleConfig.totalAtomDepositsForTriple = totalAtomDepositsForTriple;
 
-        emit AtomDepositFractionForTripleSet(atomDepositFractionForTriple, oldAtomDepositFractionForTriple);
+        emit TotalAtomDepositsForTripleSet(totalAtomDepositsForTriple, oldTotalAtomDepositsForTriple);
     }
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -433,6 +448,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         timelocks[opHash].executed = true;
 
         emit ExitFeeSet(id, exitFee, oldExitFee);
+        emit OperationExecuted(SET_EXIT_FEE, data);
     }
 
     /// @dev sets protocol fees for the specified vault (id=0 sets the default fees for all vaults)
@@ -806,31 +822,31 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
 
         // give the user shares in the positive triple vault
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDepositAfterprotocolFee - atomDepositFraction
+            userDepositAfterprotocolFee - atomDeposits
         );
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
-        if (atomDepositFraction > 0) {
-            _depositAtomFraction(
+        if (atomDeposits > 0) {
+            _depositConstituentAtoms(
                 id,
                 msg.sender, // receiver
-                atomDepositFraction
+                atomDeposits
             );
         }
 
-        if (tripleConfig.atomDepositFractionOnTripleCreation > 0) {
+        if (tripleConfig.totalAtomDepositsOnTripleCreation > 0) {
             for (uint256 i = 0; i < 3; i++) {
                 uint256 atomId = tripleAtomIds[i];
                 // increase the total assets in each underlying atom vault
                 _setVaultTotals(
                     atomId,
-                    vaults[atomId].totalAssets + (tripleConfig.atomDepositFractionOnTripleCreation / 3),
+                    vaults[atomId].totalAssets + (tripleConfig.totalAtomDepositsOnTripleCreation / 3),
                     vaults[atomId].totalShares
                 );
             }
@@ -1051,11 +1067,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 shares = _deposit(receiver, id, userDepositAfterprotocolFee);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
-        if (atomDepositFraction > 0) {
-            _depositAtomFraction(id, receiver, atomDepositFraction);
+        if (atomDeposits > 0) {
+            _depositConstituentAtoms(id, receiver, atomDeposits);
         }
 
         _transferFeesToProtocolMultisig(protocolFee);
@@ -1105,11 +1121,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterprotocolFee);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, tripleId);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, tripleId);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
-        if (atomDepositFraction > 0) {
-            _depositAtomFractionCurve(tripleId, curveId, receiver, atomDepositFraction);
+        if (atomDeposits > 0) {
+            _depositConstituentAtomsCurve(tripleId, curveId, receiver, atomDeposits);
         }
 
         _transferFeesToProtocolMultisig(protocolFee);
@@ -1212,13 +1228,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param amount the amount of eth to deposit
     ///
     /// @dev assumes funds have already been transferred to this contract
-    function _depositAtomFraction(uint256 id, address receiver, uint256 amount) internal {
+    function _depositConstituentAtoms(uint256 id, address receiver, uint256 amount) internal {
+        // floor div, so perAtom is slightly less than 1/3 of total input amount
+        uint256 perAtom = amount / 3;
+
         // load atom IDs
         uint256[3] memory atomsIds;
         (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(id);
-
-        // floor div, so perAtom is slightly less than 1/3 of total input amount
-        uint256 perAtom = amount / 3;
 
         // distribute proportional shares to each atom
         for (uint256 i = 0; i < 3; i++) {
@@ -1227,13 +1243,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
     }
 
-    function _depositAtomFractionCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount) internal {
+    function _depositConstituentAtomsCurve(uint256 tripleId, uint256 curveId, address receiver, uint256 amount)
+        internal
+    {
+        // floor div, so perAtom is slightly less than 1/3 of total input amount
+        uint256 perAtom = amount / 3;
+
         // load atom IDs
         uint256[3] memory atomsIds;
         (atomsIds[0], atomsIds[1], atomsIds[2]) = getTripleAtoms(tripleId);
-
-        // floor div, so perAtom is slightly less than 1/3 of total input amount
-        uint256 perAtom = amount / 3;
 
         // distribute proportional shares to each atom
         for (uint256 i = 0; i < 3; i++) {
@@ -1602,7 +1620,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return tripleCost the cost of creating a triple
     function getTripleCost() public view returns (uint256) {
         uint256 tripleCost = tripleConfig.tripleCreationProtocolFee // paid to protocol
-            + tripleConfig.atomDepositFractionOnTripleCreation // goes towards increasing the amount of assets in the underlying atom vaults
+            + tripleConfig.totalAtomDepositsOnTripleCreation // goes towards increasing the amount of assets in the underlying atom vaults
             + generalConfig.minShare * 2; // for purchasing ghost shares for the positive and counter triple vaults
         return tripleCost;
     }
@@ -1617,11 +1635,11 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 protocolFee = protocolFeeAmount(assets, id);
         uint256 userAssetsAfterprotocolFee = assets - protocolFee;
 
-        uint256 atomDepositFraction = atomDepositFractionAmount(userAssetsAfterprotocolFee, id);
-        uint256 userAssetsAfterprotocolFeeAndAtomDepositFraction = userAssetsAfterprotocolFee - atomDepositFraction;
+        uint256 atomDeposits = atomDepositsAmount(userAssetsAfterprotocolFee, id);
+        uint256 userAssetsAfterprotocolFeeAndAtomDeposits = userAssetsAfterprotocolFee - atomDeposits;
 
-        uint256 entryFee = entryFeeAmount(userAssetsAfterprotocolFeeAndAtomDepositFraction, id);
-        uint256 totalFees = protocolFee + atomDepositFraction + entryFee;
+        uint256 entryFee = entryFeeAmount(userAssetsAfterprotocolFeeAndAtomDeposits, id);
+        uint256 totalFees = protocolFee + atomDeposits + entryFee;
 
         return totalFees;
     }
@@ -1640,23 +1658,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         view
         returns (uint256, uint256, uint256, uint256)
     {
-        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
-        uint256 userAssetsAfterAtomDepositFraction = assets - atomDepositFraction;
+        uint256 atomDeposits = atomDepositsAmount(assets, id);
+        uint256 userAssetsAfterAtomDeposits = assets - atomDeposits;
 
         // changes in vault's total assets
-        // if the vault is an atom vault `atomDepositFraction` is 0
-        uint256 totalAssetsDelta = assets - atomDepositFraction;
+        // if the vault is an atom vault `atomDeposits` is 0
+        uint256 totalAssetsDelta = assets - atomDeposits;
 
         uint256 entryFee;
 
         if (vaults[id].totalShares == generalConfig.minShare) {
             entryFee = 0;
         } else {
-            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
+            entryFee = entryFeeAmount(userAssetsAfterAtomDeposits, id);
         }
 
         // amount of assets that goes towards minting shares for the receiver
-        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDeposits - entryFee;
 
         // user receives amount of shares as calculated by `convertToShares`
         uint256 sharesForReceiver = convertToShares(userAssetsAfterTotalFees, id);
@@ -1669,23 +1687,23 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         view
         returns (uint256, uint256, uint256, uint256)
     {
-        uint256 atomDepositFraction = atomDepositFractionAmount(assets, id);
-        uint256 userAssetsAfterAtomDepositFraction = assets - atomDepositFraction;
+        uint256 atomDeposits = atomDepositsAmount(assets, id);
+        uint256 userAssetsAfterAtomDeposits = assets - atomDeposits;
 
         // changes in vault's total assets
-        // if the vault is an atom vault `atomDepositFraction` is 0
-        uint256 totalAssetsDelta = assets - atomDepositFraction;
+        // if the vault is an atom vault `atomDeposits` is 0
+        uint256 totalAssetsDelta = assets - atomDeposits;
 
         uint256 entryFee;
 
         if (bondingCurveVaults[id][curveId].totalShares == generalConfig.minShare) {
             entryFee = 0;
         } else {
-            entryFee = entryFeeAmount(userAssetsAfterAtomDepositFraction, id);
+            entryFee = entryFeeAmount(userAssetsAfterAtomDeposits, id);
         }
 
         // amount of assets that goes towards minting shares for the receiver
-        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDepositFraction - entryFee;
+        uint256 userAssetsAfterTotalFees = userAssetsAfterAtomDeposits - entryFee;
 
         // user receives amount of shares as calculated by `convertToShares`
         uint256 sharesForReceiver = convertToSharesCurve(userAssetsAfterTotalFees, id, curveId);
@@ -1814,15 +1832,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return feeAmount;
     }
 
-    /// @notice returns atom deposit fraction given amount of 'assets' provided
+    /// @notice returns atom deposit given amount of 'assets' provided
     ///
     /// @param assets amount of assets to calculate fee on
     /// @param id vault id
     ///
-    /// @return feeAmount amount of assets that would be used as atom deposit fraction
+    /// @return feeAmount amount of assets that would be used as atom deposit
     /// @dev only applies to triple vaults
-    function atomDepositFractionAmount(uint256 assets, uint256 id) public view returns (uint256) {
-        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.atomDepositFractionForTriple) : 0;
+    function atomDepositsAmount(uint256 assets, uint256 id) public view returns (uint256) {
+        uint256 feeAmount = isTripleId(id) ? _feeOnRaw(assets, tripleConfig.totalAtomDepositsForTriple) : 0;
         return feeAmount;
     }
 
@@ -1842,33 +1860,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
     /// @notice returns the current share price for the given vault id
     /// @param id vault id to get corresponding share price for
-    /// @return price current share price for the given vault id, scaled by generalConfig.decimalPrecision
+    /// @return price current share price for the given vault id, scaled by 1e18
     function currentSharePrice(uint256 id) public view returns (uint256) {
         uint256 supply = vaults[id].totalShares;
         // Changing this to match exactly how convertToShares is calculated
         // This was not previously used internally in production code
-        uint256 price = supply == 0 ? 0 : vaults[id].totalAssets.mulDiv(generalConfig.decimalPrecision, supply);
+        uint256 price = supply == 0 ? 0 : vaults[id].totalAssets.mulDiv(1e18, supply);
         return price;
     }
 
     /// @notice returns the current share price for the given vault id and curve id
     /// @param id vault id to get corresponding share price for
     /// @param curveId curve id to get corresponding share price for
-    /// @return price current share price for the given vault id and curve id, scaled by generalConfig.decimalPrecision
+    /// @return price current share price for the given vault id and curve id, scaled by 1e18
     function currentSharePriceCurve(uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 basePrice = supply == 0 ? 0 : _registry().currentPrice(supply, curveId);
-        uint256 price = basePrice;
-
-        // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
-            if (totalSharesInAssetSpace != 0) {
-                price = price.mulDiv(totalAssets * generalConfig.decimalPrecision, totalSharesInAssetSpace);
-            }
-        }
-        return price;
+        return basePrice;
     }
 
     /// @notice returns max amount of eth that can be deposited into the vault
@@ -1931,35 +1940,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice The conversion happens in two steps:
     ///  1. First, we get the base shares from the bonding curve:
     ///  $$s_{base} = f_{curve}(assets)$$
-    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$s_{final} = s_{base} \cdot \frac{A_{total}^{(s)}}{S_{total}}$$
-    ///  ### Where:
-    ///  1. $S_{total}$ is the total supply of shares
-    ///  2. $A_{total}^{(s)} = f_{curve}^{-1}(A_{total})$ is the total assets converted to share domain
-    ///        using the inverse of the bonding curve function
-    /// @notice This adjustment is necessary because the actual ratio of assets:shares may drift from
-    ///      the bonding curve's 'pure' conversion ratio due to:
-    ///  - Protocol fees being taken in assets
-    ///  - Share burns
-    ///  - Direct asset transfers/airdrops
-    /// @notice The crucial conversion of assets to share domain ($A_{total}^{(s)}$) ensures we're comparing
-    ///      quantities in the same space, as the bonding curve defines a non-linear relationship
-    ///      between assets and shares.
-    /// @dev TLDR: You need to exchange apples for oranges and they each have their own wholesale discount tiers.
-    ///     So you need to compute their value using a common denominator like dollars.
+    //   2. That's it.  The pool ratio adjustment cannot be used for curves other than Linear, which is unused
+    //   in this version of the contract in favor of convertToShares.
     function convertToSharesCurve(uint256 assets, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
 
         uint256 shares = _registry().previewDeposit(assets, totalAssets, supply, curveId);
-
-        // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalAssetsInShareSpace = _registry().convertToShares(totalAssets, 0, 0, curveId);
-            if (totalAssetsInShareSpace != 0) {
-                shares = shares * totalAssetsInShareSpace / supply;
-            }
-        }
         return shares;
     }
 
@@ -1988,34 +1975,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice The conversion happens in two steps:
     ///  1. First, we get the base assets from the bonding curve:
     ///  $$a_{base} = f_{curve}^{-1}(shares)$$
-    ///  2. Then we apply a pool ratio adjustment to account for divergence between total assets and shares:
-    ///  $$a_{final} = a_{base} \cdot \frac{A_{total}}{S_{total}^{(a)}}$$
-    /// ### Where:
-    ///  1. $A_{total}$ is the total assets in the vault
-    ///  2. $S_{total}^{(a)} = f_{curve}(S_{total})$ is the total shares converted to asset domain
-    ///    using the bonding curve function
-    /// @notice This adjustment is necessary because the actual ratio of shares:assets may drift from
-    /// the bonding curve's 'pure' conversion ratio due to:
-    ///  - Protocol fees being taken in assets
-    ///  - Share burns
-    ///  - Direct asset transfers/airdrops
-    /// @notice The crucial conversion of shares to asset domain ($S_{total}^{(a)}$) ensures we're comparing
-    ///  quantities in the same space, as the bonding curve defines a non-linear relationship
-    ///  between shares and assets.
-    /// @dev TLDR: You need to exchange oranges for apples and they each have their own wholesale discount tiers.
-    ///  So you need to compute their value using a common denominator like dollars.
+    //   2. That's it.  No pool ratio adjustment in this version of the contracts because it only works for
+    //   pro-rata, and that is taken care of in convertToAssets.
     function convertToAssetsCurve(uint256 shares, uint256 id, uint256 curveId) public view returns (uint256) {
         uint256 supply = bondingCurveVaults[id][curveId].totalShares;
         uint256 totalAssets = bondingCurveVaults[id][curveId].totalAssets;
         uint256 assets = _registry().previewRedeem(shares, supply, totalAssets, curveId);
-
-        // // Pool Ratio Adjustment
-        if (totalAssets != 0 && supply != 0) {
-            uint256 totalSharesInAssetSpace = _registry().convertToAssets(supply, supply, totalAssets, curveId);
-            if (totalSharesInAssetSpace != 0) {
-                assets = assets * totalAssets / totalSharesInAssetSpace;
-            }
-        }
         return assets;
     }
 
@@ -2072,9 +2037,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return hash the corresponding hash for the given RDF triple
     /// @dev only applies to triple vault IDs as input
     function tripleHash(uint256 id) public view returns (bytes32) {
-        uint256[3] memory atomIds;
-        (atomIds[0], atomIds[1], atomIds[2]) = getTripleAtoms(id);
-        return keccak256(abi.encodePacked(atomIds[0], atomIds[1], atomIds[2]));
+        (uint256 subjectId, uint256 predicateId, uint256 objectId) = getTripleAtoms(id);
+        return tripleHashFromAtoms(subjectId, predicateId, objectId);
     }
 
     /// @notice returns whether the supplied vault id is a triple
@@ -2082,7 +2046,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return bool whether the supplied vault id is a triple
     function isTripleId(uint256 id) public view returns (bool) {
         bool isCounterTriple = id > type(uint256).max / 2;
-        return isCounterTriple ? isTriple[type(uint256).max - id] : isTriple[id];
+        return isCounterTriple ? isTriple[getCounterIdFromTriple(id)] : isTriple[id];
     }
 
     /// @notice returns the atoms that make up a triple/counter-triple
@@ -2091,7 +2055,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @dev only applies to triple vault IDs as input
     function getTripleAtoms(uint256 id) public view returns (uint256, uint256, uint256) {
         bool isCounterTriple = id > type(uint256).max / 2;
-        uint256[3] memory atomIds = isCounterTriple ? triples[type(uint256).max - id] : triples[id];
+        uint256[3] memory atomIds = isCounterTriple ? triples[getCounterIdFromTriple(id)] : triples[id];
         return (atomIds[0], atomIds[1], atomIds[2]);
     }
 
@@ -2150,6 +2114,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         return (shares, totalUserAssets);
     }
 
+    function getCurveVaultState(uint256 termId, uint256 curveId) external view returns (uint256, uint256) {
+        return (bondingCurveVaults[termId][curveId].totalAssets, bondingCurveVaults[termId][curveId].totalShares);
+    }
+
     /// @notice returns the Atom Wallet address for the given atom data
     /// @param id vault id of the atom associated to the atom wallet
     /// @return atomWallet the address of the atom wallet
@@ -2178,7 +2146,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        return vaults[type(uint256).max - id].balanceOf[receiver] > 0;
+        return vaults[getCounterIdFromTriple(id)].balanceOf[receiver] > 0;
     }
 
     function _hasCounterStakeCurve(uint256 id, uint256 curveId, address receiver) internal view returns (bool) {
@@ -2186,7 +2154,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_VaultNotTriple();
         }
 
-        return bondingCurveVaults[type(uint256).max - id][curveId].balanceOf[receiver] > 0;
+        return bondingCurveVaults[getCounterIdFromTriple(id)][curveId].balanceOf[receiver] > 0;
     }
 
     /// @dev returns the deployment data for the AtomWallet contract
