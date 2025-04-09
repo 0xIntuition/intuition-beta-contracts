@@ -96,8 +96,8 @@ contract UpgradeTest is Test {
         });
 
         // Prepare initialization data for the upgrade
-        bytes memory initData = abi.encodeWithSelector(
-            EthMultiVault.reinit.selector,
+        bytes memory reinitData = abi.encodeWithSelector(
+            EthMultiVault.reinitialize.selector,
             bondingCurveConfig
         );
 
@@ -105,7 +105,7 @@ contract UpgradeTest is Test {
 
         vm.prank(proxyAdminOwner);
         proxyAdmin.upgradeAndCall{value: 0}(
-            ITransparentUpgradeableProxy(ethMultiVaultDeployedAddress), newEthMultiVaultImplementation, initData
+            ITransparentUpgradeableProxy(ethMultiVaultDeployedAddress), newEthMultiVaultImplementation, reinitData
         );
 
         // Deal some ether to test addresses

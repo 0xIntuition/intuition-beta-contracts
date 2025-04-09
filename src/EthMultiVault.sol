@@ -188,7 +188,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @notice Reinitializes the EthMultiVault contract during an upgrade
     /// @dev This function can only be called once during a version upgrade
     /// @param _bondingCurveConfig Bonding curve configuration struct
-    function reinit(BondingCurveConfig memory _bondingCurveConfig) external reinitializer(2) {
+    function reinitialize(BondingCurveConfig memory _bondingCurveConfig) external reinitializer(2) {
         bondingCurveConfig = _bondingCurveConfig;
     }
 
@@ -494,6 +494,9 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param newRegistry Address of the new bonding curve registry
     /// @param _defaultCurveId New default curve ID
     function setBondingCurveConfig(address newRegistry, uint256 _defaultCurveId) external onlyAdmin {
+        if (newRegistry == address(0)) {
+            revert Errors.EthMultiVault_InvalidRegistry();
+        }
         address oldRegistry = bondingCurveConfig.registry;
         uint256 oldDefaultCurveId = bondingCurveConfig.defaultCurveId;
 

@@ -392,7 +392,7 @@ interface IEthMultiVault {
 
     /// @notice Reinitialize the contract with new bonding curve configuration
     /// @param bondingCurveConfig The new bonding curve configuration
-    function reinit(BondingCurveConfig calldata bondingCurveConfig) external;
+    function reinitialize(BondingCurveConfig calldata bondingCurveConfig) external;
 
     /* =================================================== */
     /*               RESTRICTED FUNCTIONS                  */
