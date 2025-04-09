@@ -63,10 +63,11 @@
         <link rel="stylesheet" href="../../../book.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../../../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+            const path_to_root = "../../../";
+            const default_light_theme = "dark";
+            const default_dark_theme = "ayu";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../../toc.js"></script>
@@ -76,8 +77,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -91,7 +92,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -104,8 +106,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -141,6 +143,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -188,7 +191,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -212,6 +215,15 @@
 <tr><td><code>_walletConfig</code></td><td><code>WalletConfig</code></td><td>Wallet configuration struct</td></tr>
 <tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct NOTE: This function is called only once (during contract deployment)</td></tr>
 <tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="reinitialize"><a class="header" href="#reinitialize">reinitialize</a></h3>
+<p>Reinitialize the contract with new bonding curve configuration</p>
+<pre><code class="language-solidity">function reinitialize(BondingCurveConfig calldata bondingCurveConfig) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td>The new bonding curve configuration</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
@@ -333,6 +345,16 @@ in the underlying atom vaults on triple creation</em></p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+</tbody></table>
+</div>
+<h3 id="setbondingcurveconfig"><a class="header" href="#setbondingcurveconfig">setBondingCurveConfig</a></h3>
+<p><em>sets the bonding curve configuration</em></p>
+<pre><code class="language-solidity">function setBondingCurveConfig(address registry, uint256 defaultCurveId) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>registry</code></td><td><code>address</code></td><td>address of the new bonding curve registry</td></tr>
+<tr><td><code>defaultCurveId</code></td><td><code>uint256</code></td><td>new default curve ID</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
@@ -1490,6 +1512,20 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>newAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction for triples</td></tr>
 <tr><td><code>oldAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
+</tbody></table>
+</div>
+<h3 id="bondingcurveconfigset"><a class="header" href="#bondingcurveconfigset">BondingCurveConfigSet</a></h3>
+<p>emitted upon changing the bonding curve configuration</p>
+<pre><code class="language-solidity">event BondingCurveConfigSet(
+    address indexed newRegistry, uint256 newDefaultCurveId, address indexed oldRegistry, uint256 oldDefaultCurveId
+);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>newRegistry</code></td><td><code>address</code></td><td>address of the new bonding curve registry</td></tr>
+<tr><td><code>newDefaultCurveId</code></td><td><code>uint256</code></td><td>new default curve ID</td></tr>
+<tr><td><code>oldRegistry</code></td><td><code>address</code></td><td>address of the old bonding curve registry</td></tr>
+<tr><td><code>oldDefaultCurveId</code></td><td><code>uint256</code></td><td>old default curve ID</td></tr>
 </tbody></table>
 </div>
 <h3 id="entryfeeset"><a class="header" href="#entryfeeset">EntryFeeSet</a></h3>

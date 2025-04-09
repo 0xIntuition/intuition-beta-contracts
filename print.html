@@ -64,10 +64,11 @@
         <link rel="stylesheet" href="book.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "ayu" : "dark";
+            const path_to_root = "";
+            const default_light_theme = "dark";
+            const default_dark_theme = "ayu";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -77,8 +78,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -92,7 +93,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -105,8 +107,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -142,6 +144,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -500,7 +503,7 @@ $ forge install
 <li><a href="src/interfaces/IPermit2.sol/interface.IPermit2.html">IPermit2</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ibasecurve"><a class="header" href="#ibasecurve">IBaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IBaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/interfaces/IBaseCurve.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for bonding curves in the Intuition protocol.
@@ -658,7 +661,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ibondingcurveregistry"><a class="header" href="#ibondingcurveregistry">IBondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/interfaces/IBondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms &amp; triples.</p>
@@ -877,7 +880,7 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The ID of the curve</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="iethmultivault"><a class="header" href="#iethmultivault">IEthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/interfaces/IEthMultiVault.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Interface for managing many ERC4626 style vaults in a single contract</p>
@@ -901,6 +904,15 @@ All curves must implement these functions to be compatible with the protocol.</p
 <tr><td><code>_walletConfig</code></td><td><code>WalletConfig</code></td><td>Wallet configuration struct</td></tr>
 <tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct NOTE: This function is called only once (during contract deployment)</td></tr>
 <tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="reinitialize"><a class="header" href="#reinitialize">reinitialize</a></h3>
+<p>Reinitialize the contract with new bonding curve configuration</p>
+<pre><code class="language-solidity">function reinitialize(BondingCurveConfig calldata bondingCurveConfig) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td>The new bonding curve configuration</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
@@ -1022,6 +1034,16 @@ in the underlying atom vaults on triple creation</em></p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>atomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>new atom deposit fraction percentage</td></tr>
+</tbody></table>
+</div>
+<h3 id="setbondingcurveconfig"><a class="header" href="#setbondingcurveconfig">setBondingCurveConfig</a></h3>
+<p><em>sets the bonding curve configuration</em></p>
+<pre><code class="language-solidity">function setBondingCurveConfig(address registry, uint256 defaultCurveId) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>registry</code></td><td><code>address</code></td><td>address of the new bonding curve registry</td></tr>
+<tr><td><code>defaultCurveId</code></td><td><code>uint256</code></td><td>new default curve ID</td></tr>
 </tbody></table>
 </div>
 <h3 id="setentryfee"><a class="header" href="#setentryfee">setEntryFee</a></h3>
@@ -2181,6 +2203,20 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <tr><td><code>oldAtomDepositFractionForTriple</code></td><td><code>uint256</code></td><td>old atom deposit fraction for triples</td></tr>
 </tbody></table>
 </div>
+<h3 id="bondingcurveconfigset"><a class="header" href="#bondingcurveconfigset">BondingCurveConfigSet</a></h3>
+<p>emitted upon changing the bonding curve configuration</p>
+<pre><code class="language-solidity">event BondingCurveConfigSet(
+    address indexed newRegistry, uint256 newDefaultCurveId, address indexed oldRegistry, uint256 oldDefaultCurveId
+);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>newRegistry</code></td><td><code>address</code></td><td>address of the new bonding curve registry</td></tr>
+<tr><td><code>newDefaultCurveId</code></td><td><code>uint256</code></td><td>new default curve ID</td></tr>
+<tr><td><code>oldRegistry</code></td><td><code>address</code></td><td>address of the old bonding curve registry</td></tr>
+<tr><td><code>oldDefaultCurveId</code></td><td><code>uint256</code></td><td>old default curve ID</td></tr>
+</tbody></table>
+</div>
 <h3 id="entryfeeset"><a class="header" href="#entryfeeset">EntryFeeSet</a></h3>
 <p>emitted upon changing the entry fee</p>
 <pre><code class="language-solidity">event EntryFeeSet(uint256 id, uint256 newEntryFee, uint256 oldEntryFee);
@@ -2339,7 +2375,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ipermit2"><a class="header" href="#ipermit2">IPermit2</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/interfaces/IPermit2.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/interfaces/IPermit2.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="permittransferfrom"><a class="header" href="#permittransferfrom">permitTransferFrom</a></h3>
 <p>Consume a permit2 message and transfer tokens</p>
@@ -2386,7 +2422,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/libraries/Errors.sol">Git Source</a></p>
 <p><strong>Author:</strong>
 0xIntuition</p>
 <p>Library containing all custom errors detailing cases where the Intuition Protocol may revert.</p>
@@ -2493,6 +2529,9 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <h3 id="ethmultivault_vaultnottriple"><a class="header" href="#ethmultivault_vaultnottriple">EthMultiVault_VaultNotTriple</a></h3>
 <pre><code class="language-solidity">error EthMultiVault_VaultNotTriple();
 </code></pre>
+<h3 id="ethmultivault_invalidregistry"><a class="header" href="#ethmultivault_invalidregistry">EthMultiVault_InvalidRegistry</a></h3>
+<pre><code class="language-solidity">error EthMultiVault_InvalidRegistry();
+</code></pre>
 <h3 id="atomwallet_invalidcalldatalength"><a class="header" href="#atomwallet_invalidcalldatalength">AtomWallet_InvalidCallDataLength</a></h3>
 <pre><code class="language-solidity">error AtomWallet_InvalidCallDataLength();
 </code></pre>
@@ -2572,7 +2611,7 @@ amount of assets estimated to be returned to the receiver of the redeem for a sp
 <pre><code class="language-solidity">error BaseCurve_EmptyStringNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="atomwallet-1"><a class="header" href="#atomwallet-1">AtomWallet</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/AtomWallet.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/AtomWallet.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, BaseAccount, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable</p>
 <p><strong>Author:</strong>
@@ -2773,7 +2812,7 @@ is the user. Otherwise, the owner is the atomWarden.</p>
 <tr><td><code>$</code></td><td><code>Ownable2StepStorage</code></td><td>the storage slot</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="basecurve-1"><a class="header" href="#basecurve-1">BaseCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/BaseCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/BaseCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BaseCurve.sol//src/interfaces/IBaseCurve.sol/interface.IBaseCurve.html">IBaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -2943,7 +2982,7 @@ of the curves themselves.</em></p>
 <tr><td><code>sharePrice</code></td><td><code>uint256</code></td><td>The current price of a share, scaled by 1e18</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="bondingcurveregistry-1"><a class="header" href="#bondingcurveregistry-1">BondingCurveRegistry</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/BondingCurveRegistry.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/BondingCurveRegistry.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/BondingCurveRegistry.sol//src/interfaces/IBondingCurveRegistry.sol/interface.IBondingCurveRegistry.html">IBondingCurveRegistry</a></p>
 <p><strong>Author:</strong>
@@ -3202,7 +3241,7 @@ economic incentive patterns.</em></p>
 <tr><td><code>newAdmin</code></td><td><code>address</code></td><td>The new admin address</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ethmultivault-2"><a class="header" href="#ethmultivault-2">EthMultiVault</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/EthMultiVault.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/EthMultiVault.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/EthMultiVault.sol//src/interfaces/IEthMultiVault.sol/interface.IEthMultiVault.html">IEthMultiVault</a>, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable</p>
 <p><strong>Author:</strong>
@@ -3360,6 +3399,16 @@ interface for depositing and redeeming.</em></p>
 <tr><td><code>_walletConfig</code></td><td><code>WalletConfig</code></td><td>Wallet configuration struct</td></tr>
 <tr><td><code>_defaultVaultFees</code></td><td><code>VaultFees</code></td><td>Default vault fees struct</td></tr>
 <tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="reinitialize-1"><a class="header" href="#reinitialize-1">reinitialize</a></h3>
+<p>Reinitializes the EthMultiVault contract during an upgrade</p>
+<p><em>This function can only be called once during a version upgrade</em></p>
+<pre><code class="language-solidity">function reinitialize(BondingCurveConfig memory _bondingCurveConfig) external reinitializer(2);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>_bondingCurveConfig</code></td><td><code>BondingCurveConfig</code></td><td>Bonding curve configuration struct</td></tr>
 </tbody></table>
 </div>
 <h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
@@ -3546,6 +3595,16 @@ being able to prevent users from depositing or withdrawing their assets with unr
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>atomWarden</code></td><td><code>address</code></td><td>address of the new atomWarden</td></tr>
+</tbody></table>
+</div>
+<h3 id="setbondingcurveconfig-1"><a class="header" href="#setbondingcurveconfig-1">setBondingCurveConfig</a></h3>
+<p>Sets the bonding curve configuration</p>
+<pre><code class="language-solidity">function setBondingCurveConfig(address newRegistry, uint256 _defaultCurveId) external onlyAdmin;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>newRegistry</code></td><td><code>address</code></td><td>Address of the new bonding curve registry</td></tr>
+<tr><td><code>_defaultCurveId</code></td><td><code>uint256</code></td><td>New default curve ID</td></tr>
 </tbody></table>
 </div>
 <h3 id="deployatomwallet-1"><a class="header" href="#deployatomwallet-1">deployAtomWallet</a></h3>
@@ -4689,7 +4748,7 @@ amount of assets estimated to be returned to the receiver of the redeem</p>
 <pre><code class="language-solidity">function _registry() internal view returns (IBondingCurveRegistry);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linearcurve-1"><a class="header" href="#linearcurve-1">LinearCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/LinearCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/LinearCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization"><a class="header" href="#curve-visualization">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
@@ -4864,7 +4923,7 @@ versions.</em></p>
 <pre><code class="language-solidity">function maxAssets() external pure override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="offsetprogressivecurve"><a class="header" href="#offsetprogressivecurve">OffsetProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/OffsetProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/OffsetProgressiveCurve.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/OffsetProgressiveCurve.sol//src/BaseCurve.sol/abstract.BaseCurve.html">BaseCurve</a></p>
 <p><strong>Author:</strong>
@@ -5164,7 +5223,7 @@ offset by the invoking methods.</em></p>
 <pre><code class="language-solidity">function maxAssets() external view override returns (uint256);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="progressivecurve-1"><a class="header" href="#progressivecurve-1">ProgressiveCurve</a></h1>
-<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/fbfb869220304067dc92c88edba381d484a09ac1/src/ProgressiveCurve.sol">Git Source</a></p>
+<p><a href="https://github.com/0xIntuition/intuition-beta-contracts/blob/8bbd577d3f3f4c72fb04aa0e796814d62baec94f/src/ProgressiveCurve.sol">Git Source</a></p>
 <h2 id="curve-visualization-1"><a class="header" href="#curve-visualization-1">Curve Visualization</a></h2>
 <pre class="mermaid">%%{init: {&quot;xychart&quot;: {&quot;showTitle&quot;: true}} }%%
 </pre>
