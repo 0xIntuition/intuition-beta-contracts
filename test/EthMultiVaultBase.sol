@@ -85,9 +85,9 @@ contract EthMultiVaultBase is Test {
 
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(linearCurve);
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 1e16));
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(progressiveCurve);
-        address offsetProgressiveCurve = address(new OffsetProgressiveCurve("Offset Progressive Curve", 1e16, 1e28));
+        address offsetProgressiveCurve = address(new OffsetProgressiveCurve("Offset Progressive Curve", 2, 5e35));
         BondingCurveRegistry(bondingCurveRegistry).addBondingCurve(offsetProgressiveCurve);
 
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =

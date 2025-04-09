@@ -303,6 +303,19 @@ interface IEthMultiVault {
     /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
     event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
 
+    /// @notice emitted upon changing the bonding curve configuration
+    ///
+    /// @param newRegistry address of the new bonding curve registry
+    /// @param newDefaultCurveId new default curve ID
+    /// @param oldRegistry address of the old bonding curve registry
+    /// @param oldDefaultCurveId old default curve ID
+    event BondingCurveConfigSet(
+        address indexed newRegistry,
+        uint256 newDefaultCurveId,
+        address indexed oldRegistry,
+        uint256 oldDefaultCurveId
+    );
+
     /// @notice emitted upon changing the entry fee
     ///
     /// @param id vault id to set entry fee for
@@ -377,6 +390,10 @@ interface IEthMultiVault {
         BondingCurveConfig memory _bondingCurveConfig
     ) external;
 
+    /// @notice Reinitialize the contract with new bonding curve configuration
+    /// @param bondingCurveConfig The new bonding curve configuration
+    function reinitialize(BondingCurveConfig calldata bondingCurveConfig) external;
+
     /* =================================================== */
     /*               RESTRICTED FUNCTIONS                  */
     /* =================================================== */
@@ -442,6 +459,11 @@ interface IEthMultiVault {
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit fraction percentage
     function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external;
+
+    /// @dev sets the bonding curve configuration
+    /// @param registry address of the new bonding curve registry
+    /// @param defaultCurveId new default curve ID
+    function setBondingCurveConfig(address registry, uint256 defaultCurveId) external;
 
     /// @dev sets entry fees for the specified vault (id=0 sets the default fees for all vaults)
     ///      id = 0 changes the default entry fee, id = n changes fees for vault n specifically

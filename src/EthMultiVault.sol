@@ -185,6 +185,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         });
     }
 
+    /// @notice Reinitializes the EthMultiVault contract during an upgrade
+    /// @dev This function can only be called once during a version upgrade
+    /// @param _bondingCurveConfig Bonding curve configuration struct
+    function reinitialize(BondingCurveConfig memory _bondingCurveConfig) external reinitializer(2) {
+        bondingCurveConfig = _bondingCurveConfig;
+    }
+
     /**
      * @notice Security measure for upgradeable contracts
      * @dev Disables initializers on implementation contract to prevent direct initialization
@@ -481,6 +488,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         walletConfig.atomWarden = atomWarden;
 
         emit AtomWardenSet(atomWarden, oldAtomWarden);
+    }
+
+    /// @notice Sets the bonding curve configuration
+    /// @param newRegistry Address of the new bonding curve registry
+    /// @param _defaultCurveId New default curve ID
+    function setBondingCurveConfig(address newRegistry, uint256 _defaultCurveId) external onlyAdmin {
+        if (newRegistry == address(0)) {
+            revert Errors.EthMultiVault_InvalidRegistry();
+        }
+        address oldRegistry = bondingCurveConfig.registry;
+        uint256 oldDefaultCurveId = bondingCurveConfig.defaultCurveId;
+
+        bondingCurveConfig = BondingCurveConfig({
+            registry: newRegistry,
+            defaultCurveId: _defaultCurveId
+        });
+
+        emit BondingCurveConfigSet(newRegistry, _defaultCurveId, oldRegistry, oldDefaultCurveId);
     }
 
     /* =================================================== */
