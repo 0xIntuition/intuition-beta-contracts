@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 import {console2 as console} from "forge-std/console2.sol";
 import {Test, Vm} from "forge-std/Test.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
@@ -51,10 +52,27 @@ contract BaseTest is Test {
     function setUp() public {
         actors = _actors();
         config = _config();
-        state.vault = new EthMultiVault();
-        state.vault.init(
-            config.general, config.atom, config.triple, config.wallet, config.vaultFees, config.bondingCurve
+
+        // Deploy implementation
+        EthMultiVault implementation = new EthMultiVault();
+
+        // Deploy proxy
+        ERC1967Proxy proxy = new ERC1967Proxy(
+            address(implementation),
+            abi.encodeWithSelector(
+                EthMultiVault.init.selector,
+                config.general,
+                config.atom,
+                config.triple,
+                config.wallet,
+                config.vaultFees,
+                config.bondingCurve
+            )
         );
+
+        // Cast proxy to EthMultiVault interface
+        state.vault = EthMultiVault(payable(address(proxy)));
+
         vm.stopPrank();
     }
 
@@ -94,7 +112,7 @@ contract BaseTest is Test {
             }),
             triple: IEthMultiVault.TripleConfig({
                 tripleCreationProtocolFee: 0.0002 ether,
-                atomDepositFractionOnTripleCreation: 0.0003 ether,
+                totalAtomDepositsOnTripleCreation: 0.0003 ether,
                 atomDepositFractionForTriple: 1500
             }),
             wallet: IEthMultiVault.WalletConfig({
@@ -104,21 +122,18 @@ contract BaseTest is Test {
                 atomWalletBeacon: address(new UpgradeableBeacon(address(new AtomWallet()), actors.deployer))
             }),
             bondingCurve: IEthMultiVault.BondingCurveConfig({
-                registry: address(new BondingCurveRegistry()),
+                registry: address(new BondingCurveRegistry(actors.deployer)),
                 defaultCurveId: 1
             }),
             vaultFees: IEthMultiVault.VaultFees({entryFee: 500, exitFee: 500, protocolFee: 100})
         });
 
-        BondingCurveRegistry(c.bondingCurve.registry).initialize(actors.deployer);
         address linearCurve = address(new LinearCurve("Linear Curve"));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(linearCurve);
 
         // Testing for offset curve:
         // - 7e13 - 0 - 36%
         // - 7e13 - 10 - 36% initial dropoff
-        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 1, 1e17));
-        BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
 
         // address progressiveCurve = address(
         //     new ProgressiveCurve("Progressive Curve", 0.00007054e18);
@@ -146,8 +161,11 @@ contract BaseTest is Test {
         //   Bob Shares: 4.14132267880182129e17
         //   Charlie Shares: 3.17781355457602312e17
 
-        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 0.0001e18)); // Because minDeposit is 0.0003 ether
+        address progressiveCurve = address(new ProgressiveCurve("Progressive Curve", 2));
         BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(progressiveCurve);
+
+        address offsetCurve = address(new OffsetProgressiveCurve("Offset Curve", 2, 5e35));
+        BondingCurveRegistry(c.bondingCurve.registry).addBondingCurve(offsetCurve);
         vm.stopPrank();
 
         return c;
@@ -234,7 +252,7 @@ contract BaseTest is Test {
         (shares, assets) = state.vault.getVaultStateForUserCurve(_vaultId, _curveId, _who);
     }
 
-    function vaultBalance(address _who, uint256 _vaultId) internal returns (uint256 shares, uint256 assets) {
+    function vaultBalance(address _who, uint256 _vaultId) internal view returns (uint256 shares, uint256 assets) {
         uint256 curveId = 2;
         (shares, assets) = vaultBalance(_who, _vaultId, curveId);
     }
@@ -286,10 +304,10 @@ contract BaseTest is Test {
 
         // Redeem all shares
         vm.prank(actors.alice);
-        uint256 aliceReceived = state.vault.redeemAtomCurve(aliceShares, actors.alice, atomId, 2);
+        state.vault.redeemAtomCurve(aliceShares, actors.alice, atomId, 2); // assets for alice
         vm.prank(actors.bob);
-        uint256 bobReceived = state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2);
+        state.vault.redeemAtomCurve(bobShares, actors.bob, atomId, 2); // assets for bob
         vm.prank(actors.charlie);
-        uint256 charlieReceived = state.vault.redeemAtomCurve(charlieShares, actors.charlie, atomId, 2);
+        state.vault.redeemAtomCurve(charlieShares, actors.charlie, atomId, 2); // assets for charlie
     }
 }
