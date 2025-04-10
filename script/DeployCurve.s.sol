@@ -5,9 +5,19 @@ import {Script, console} from "forge-std/Script.sol";
 import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
 
+// To run this:
+/* forge script script/DeployCurve.s.sol \
+   --rpc-url $BASE_SEPOLIA_RPC_URL \
+   --private-key $PRIVATE_KEY \
+   --sender $SENDER_ADDRESS \
+   --broadcast \
+   --verify \
+   --etherscan-api-key $BASESCAN_API_KEY
+*/
+
 contract DeployCurve is Script {
     // Constants from previous deployment
-    address public constant REGISTRY = 0xB91c9B231cD726f84E5c5Caa6d320d26fF2424A2;
+    address public constant REGISTRY = 0x62d0670858ad598b5A65b3B5206A7C7937Ddabad;
 
     function run() external {
         // Begin sending tx's to network
@@ -15,9 +25,9 @@ contract DeployCurve is Script {
 
         // Deploy OffsetProgressiveCurve
         OffsetProgressiveCurve offsetProgressiveCurve = new OffsetProgressiveCurve(
-            "Offset Progressive Curve",
-            1e16, // slope
-            1e28 // offset
+            "Offset Curve 2,5e35",
+            2, // slope
+            5e35 // offset
         );
         console.logString("deployed OffsetProgressiveCurve.");
 
