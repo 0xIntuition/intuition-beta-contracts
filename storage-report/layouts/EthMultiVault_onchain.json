@@ -1,0 +1,94 @@
+{
+  "storage": [
+    {
+      "label": "generalConfig",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_struct_storage"
+    },
+    {
+      "label": "atomConfig",
+      "offset": 0,
+      "slot": "8",
+      "type": "t_struct_storage"
+    },
+    {
+      "label": "tripleConfig",
+      "offset": 0,
+      "slot": "10",
+      "type": "t_struct_storage"
+    },
+    {
+      "label": "walletConfig",
+      "offset": 0,
+      "slot": "13",
+      "type": "t_struct_storage"
+    },
+    {
+      "label": "count",
+      "offset": 0,
+      "slot": "17",
+      "type": "t_uint256"
+    },
+    {
+      "label": "vaults",
+      "offset": 0,
+      "slot": "18",
+      "type": "t_mapping_storage)"
+    },
+    {
+      "label": "vaultFees",
+      "offset": 0,
+      "slot": "19",
+      "type": "t_mapping_storage)"
+    },
+    {
+      "label": "approvals",
+      "offset": 0,
+      "slot": "20",
+      "type": "t_mapping(t_address,t_mapping(t_address,t_bool))"
+    },
+    {
+      "label": "atoms",
+      "offset": 0,
+      "slot": "21",
+      "type": "t_mapping(t_uint256,t_bytes_storage)"
+    },
+    {
+      "label": "atomsByHash",
+      "offset": 0,
+      "slot": "22",
+      "type": "t_mapping(t_bytes32,t_uint256)"
+    },
+    {
+      "label": "triples",
+      "offset": 0,
+      "slot": "23",
+      "type": "t_mapping_storage)"
+    },
+    {
+      "label": "triplesByHash",
+      "offset": 0,
+      "slot": "24",
+      "type": "t_mapping(t_bytes32,t_uint256)"
+    },
+    {
+      "label": "isTriple",
+      "offset": 0,
+      "slot": "25",
+      "type": "t_mapping(t_uint256,t_bool)"
+    },
+    {
+      "label": "timelocks",
+      "offset": 0,
+      "slot": "26",
+      "type": "t_mapping_storage)"
+    },
+    {
+      "label": "__gap",
+      "offset": 0,
+      "slot": "27",
+      "type": "t_array_storage"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "contracts": [
+    {
+      "name": "EthMultiVault",
+      "address": "0x430BbF52503Bd4801E51182f4cB9f8F534225DE5",
+      "new_implementation_address": "0x7499bFa918DBc73Ace4A05D6194a5Cd343AE32Dd",
+      "note": "This is the correct new implementation address with the correct storage layout."
+    },
+    {
+      "name": "IncorrectStorageLayoutEthMultiVault",
+      "address": "0x430BbF52503Bd4801E51182f4cB9f8F534225DE5",
+      "new_implementation_address": "0x685e55e93Abc467Aa14EC93E306FF8eAD26883d2",
+      "note": "This is the incorrect new implementation address, as it contains the intentionally incorrect storage layout for testing purposes."
+    }
+  ]
+}

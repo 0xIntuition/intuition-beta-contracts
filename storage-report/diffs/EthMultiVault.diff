@@ -1,0 +1,25 @@
+--- storage-report/layouts/EthMultiVault_onchain.json	2025-04-07 14:47:51
++++ storage-report/layouts/EthMultiVault_local.json	2025-04-07 14:47:51
+@@ -85,9 +85,21 @@
+       "type": "t_mapping_storage)"
+     },
+     {
+-      "label": "__gap",
++      "label": "bondingCurveVaults",
+       "offset": 0,
+       "slot": "27",
++      "type": "t_mapping_storage))"
++    },
++    {
++      "label": "bondingCurveConfig",
++      "offset": 0,
++      "slot": "28",
++      "type": "t_struct_storage"
++    },
++    {
++      "label": "__gap",
++      "offset": 0,
++      "slot": "30",
+       "type": "t_array_storage"
+     }
+   ]
