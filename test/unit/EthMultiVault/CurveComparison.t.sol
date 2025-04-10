@@ -28,10 +28,16 @@ contract CurveComparisonTest is EthMultiVaultBase, EthMultiVaultHelpers {
         (address registry,) = ethMultiVault.bondingCurveConfig();
         address progressiveCurve = BondingCurveRegistry(registry).curveAddresses(PROGRESSIVE_CURVE_ID);
         address offsetProgressiveCurve = BondingCurveRegistry(registry).curveAddresses(OFFSET_PROGRESSIVE_CURVE_ID);
-        
+
         console2.log("Progressive Curve slope: ", ProgressiveCurve(progressiveCurve).SLOPE().unwrap().toString());
-        console2.log("Offset Progressive Curve slope: ", OffsetProgressiveCurve(offsetProgressiveCurve).SLOPE().unwrap().toString());
-        console2.log("Offset Progressive Curve offset: ", OffsetProgressiveCurve(offsetProgressiveCurve).OFFSET().unwrap().toString());
+        console2.log(
+            "Offset Progressive Curve slope: ",
+            OffsetProgressiveCurve(offsetProgressiveCurve).SLOPE().unwrap().toString()
+        );
+        console2.log(
+            "Offset Progressive Curve offset: ",
+            OffsetProgressiveCurve(offsetProgressiveCurve).OFFSET().unwrap().toString()
+        );
 
         // Alice creates an atom
         vm.startPrank(alice, alice);
@@ -51,7 +57,11 @@ contract CurveComparisonTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(bob, bob);
         try ethMultiVault.depositAtomCurve{value: depositAmount}(bob, atomId, PROGRESSIVE_CURVE_ID) {
             (progressiveShares,) = ethMultiVault.getVaultStateForUserCurve(atomId, PROGRESSIVE_CURVE_ID, bob);
-            console2.log("%s Assets into Progressive Curve yields %s shares", depositAmount.toString(), progressiveShares.toString());
+            console2.log(
+                "%s Assets into Progressive Curve yields %s shares",
+                depositAmount.toString(),
+                progressiveShares.toString()
+            );
         } catch Error(string memory reason) {
             console2.log("Failed to deposit into progressive curve: ", reason);
             revert(reason);
@@ -61,8 +71,13 @@ contract CurveComparisonTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // Deposit into Curve 3 (Offset Progressive)
         vm.startPrank(charlie, charlie);
         try ethMultiVault.depositAtomCurve{value: depositAmount}(charlie, atomId, OFFSET_PROGRESSIVE_CURVE_ID) {
-            (offsetProgressiveShares,) = ethMultiVault.getVaultStateForUserCurve(atomId, OFFSET_PROGRESSIVE_CURVE_ID, charlie);
-            console2.log("%s Assets into Offset Progressive Curve yields %s shares", depositAmount.toString(), offsetProgressiveShares.toString());
+            (offsetProgressiveShares,) =
+                ethMultiVault.getVaultStateForUserCurve(atomId, OFFSET_PROGRESSIVE_CURVE_ID, charlie);
+            console2.log(
+                "%s Assets into Offset Progressive Curve yields %s shares",
+                depositAmount.toString(),
+                offsetProgressiveShares.toString()
+            );
         } catch Error(string memory reason) {
             console2.log("Failed to deposit into offset curve: ", reason);
             revert(reason);
@@ -105,4 +120,4 @@ contract CurveComparisonTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function testCompareCurvesMicroAmount() external {
         testCompareCurves(0.03 ether);
     }
-} 
+}

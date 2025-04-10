@@ -15,6 +15,7 @@ import {BondingCurveRegistry} from "src/BondingCurveRegistry.sol";
 import {ProgressiveCurve} from "src/ProgressiveCurve.sol";
 import {LinearCurve} from "src/LinearCurve.sol";
 import {OffsetProgressiveCurve} from "src/OffsetProgressiveCurve.sol";
+
 contract EthMultiVaultBase is Test {
     // msg.value - atomCreationProtocolFee - protocolFee
 
