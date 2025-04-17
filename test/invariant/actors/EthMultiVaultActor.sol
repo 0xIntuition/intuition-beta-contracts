@@ -538,15 +538,15 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, atomIds[0]);
         uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
 
-        uint256 atomDepositFraction = atomDepositFractionAmount(userDepositAfterprotocolFee, atomIds[0]);
-        uint256 distributeAmountPerAtomVault = atomDepositFraction / 3;
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, atomIds[0]);
+        uint256 distributeAmountPerAtomVault = atomDeposits / 3;
 
-        uint256 atomDepositFractionOnTripleCreationPerAtom = getAtomDepositFractionOnTripleCreation() / 3;
+        uint256 totalAtomDepositsOnTripleCreationPerAtom = getTotalAtomDepositsOnTripleCreation() / 3;
 
         for (uint256 i = 0; i < 3; i++) {
             checkAtomDepositIntoVaultOnTripleVaultCreation(
                 distributeAmountPerAtomVault,
-                atomDepositFractionOnTripleCreationPerAtom,
+                totalAtomDepositsOnTripleCreationPerAtom,
                 atomIds[i],
                 totalAssetsBeforeAtomVaults[i],
                 totalSharesBeforeAtomVaults[i]
@@ -579,7 +579,7 @@ contract EthMultiVaultActor is Test, EthMultiVaultHelpers {
 
         checkProtocolMultisigBalance(vaultId, msgValue, protocolMultisigBalanceBefore);
 
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, vaultId);
+        uint256 amountToDistribute = atomDepositsAmount(userDepositAfterprotocolFee, vaultId);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
