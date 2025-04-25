@@ -25,7 +25,12 @@ interface IOldEthMultiVault {
 }
 
 // To run this:
-/* forge script script/UpgradeLocalGeth.s.sol \
+/* 
+export ETH_MULTI_VAULT_DEPLOYED_ADDRESS=0x04da5ecD66052469473B892fd86b12ACdb73799a
+export ADMIN=0x07baA707F61c89F6eB33c8Cb948c483c9b387084
+export PROXY_ADMIN_ADDRESS=0x0A50fe533b67E8a08f69E6bdf5722e6A1A62e494
+
+forge script script/UpgradeLocalGeth.s.sol \
 --optimize --via-ir \
 --rpc-url http://localhost:8545 \
 --keystore ../intuition-rs/geth/keystore.json \
@@ -34,14 +39,6 @@ interface IOldEthMultiVault {
 */
 
 contract UpgradeLocalGeth is Script {
-    address public admin = 0x07baA707F61c89F6eB33c8Cb948c483c9b387084;
-    address public ethMultiVaultDeployedAddress = 0x60fF03e024dFdd7cee71CF541133FD88c7a59499;
-    uint256 public defaultBondingCurveId = 1;
-    uint256 public progressiveCurveId = 2;
-
-    IPermit2 permit2 = IPermit2(address(0x000000000022D473030F116dDEE9F6B43aC78BA3)); // Permit2 on Base
-    address entryPoint = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789; // EntryPoint on Base
-    address atomWarden = admin;
 
     /// @notice Deployed contracts
     EthMultiVault public ethMultiVault;
@@ -49,13 +46,23 @@ contract UpgradeLocalGeth is Script {
     LinearCurve public linearCurve;
     ProgressiveCurve public progressiveCurve;
     OffsetProgressiveCurve public offsetProgressiveCurve;
-    AtomWallet atomWallet;
-    UpgradeableBeacon atomWalletBeacon;
-    uint256 public oldCount;
+
 
     function run() external {
         // Begin sending tx's to network
         vm.startBroadcast();
+
+        address admin = vm.envAddress("ADMIN");
+
+        // Get the deployed EthMultiVault contract address from env variable
+        address ethMultiVaultDeployedAddress = vm.envAddress("ETH_MULTI_VAULT_DEPLOYED_ADDRESS");
+
+        // old proxy admin address
+        // IEthMultiVault(ethMultiVaultDeployedAddress).generalConfig().admin ?????
+
+       // To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event. 
+        address proxyAdminAddress = vm.envAddress("PROXY_ADMIN_ADDRESS");
+        ProxyAdmin proxyAdmin = ProxyAdmin(proxyAdminAddress);
 
 
         // Deploy the BondingCurveRegistry contract
@@ -63,8 +70,6 @@ contract UpgradeLocalGeth is Script {
 
         // Get the deployed EthMultiVault contract
         ethMultiVault = EthMultiVault(payable(ethMultiVaultDeployedAddress));
-
-        oldCount = IOldEthMultiVault(ethMultiVaultDeployedAddress).count();
 
         // Deploy the LinearCurve contract
         linearCurve = new LinearCurve("Linear Curve");
@@ -85,9 +90,7 @@ contract UpgradeLocalGeth is Script {
         bondingCurveRegistry.addBondingCurve(address(offsetProgressiveCurve));
 
         // Upgrade EthMultiVault to the latest version
-        // To find the address of the ProxyAdmin contract for the EthMultiVault proxy, inspect the creation transaction of the EthMultiVault proxy contract on Basescan, in particular the AdminChanged event. Same applies to the CustomMulticall3 proxy contract.
-        ProxyAdmin proxyAdmin = ProxyAdmin(0xadDCf9f1015bD2BD4f8591E8E8876Ef94E6aaf32);
-        address newEthMultiVaultImplementation = address(new EthMultiVault());
+         address newEthMultiVaultImplementation = address(new EthMultiVault());
 
         // Prepare the bonding curve configuration
         IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
