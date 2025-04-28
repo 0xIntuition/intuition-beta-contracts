@@ -7,7 +7,6 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
-
     /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
@@ -111,10 +110,11 @@ interface IEthMultiVault {
     /* =================================================== */
 
     enum ApprovalTypes {
-        NONE,        // 0b00
-        DEPOSIT,     // 0b01
-        REDEMPTION,  // 0b10
-        BOTH        // 0b11
+        NONE, // 0b00
+        DEPOSIT, // 0b01
+        REDEMPTION, // 0b10
+        BOTH // 0b11
+
     }
 
     /* =================================================== */
@@ -301,7 +301,9 @@ interface IEthMultiVault {
     ///
     /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
     /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
-    event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
+    event AtomDepositFractionForTripleSet(
+        uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple
+    );
 
     /// @notice emitted upon changing the bonding curve configuration
     ///
@@ -901,7 +903,10 @@ interface IEthMultiVault {
     /// @param receiver address of the receiver
     ///
     /// @return shares number of shares user has in the vault
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver) external view returns (uint256, uint256);
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+        external
+        view
+        returns (uint256, uint256);
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///
