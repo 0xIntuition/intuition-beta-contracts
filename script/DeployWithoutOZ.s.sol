@@ -19,7 +19,7 @@ contract DeployEthMultiVault is Script {
     address deployer;
 
     // Multisig addresses for key roles in the protocol (should be replaced with the actual multisig addresses for each role in the production)
-    address admin = 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB; // Testnet multisig Safe address
+    address admin = 0x07baA707F61c89F6eB33c8Cb948c483c9b387084; // Testnet multisig Safe address
     address protocolVault = admin;
     address atomWarden = admin;
 
@@ -32,7 +32,7 @@ contract DeployEthMultiVault is Script {
     UpgradeableBeacon atomWalletBeacon;
     EthMultiVault ethMultiVault;
     TransparentUpgradeableProxy ethMultiVaultProxy;
-    TimelockController timelock;
+
 
     function run() external {
         // Begin sending tx's to network
@@ -46,21 +46,14 @@ contract DeployEthMultiVault is Script {
         proposers[0] = admin;
         executors[0] = admin;
 
-        // deploy TimelockController
-        timelock = new TimelockController(
-            minDelay, // minimum delay for timelock transactions
-            proposers, // proposers (can schedule transactions)
-            executors, // executors
-            address(0) // no default admin that can change things without going through the timelock process (self-administered)
-        );
-        console.logString("deployed TimelockController.");
+
 
         // deploy AtomWallet implementation contract
         atomWallet = new AtomWallet();
         console.logString("deployed AtomWallet.");
 
         // deploy AtomWalletBeacon pointing to the AtomWallet implementation contract
-        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), address(timelock));
+        atomWalletBeacon = new UpgradeableBeacon(address(atomWallet), admin);
         console.logString("deployed UpgradeableBeacon.");
 
         IEthMultiVault.GeneralConfig memory generalConfig = IEthMultiVault.GeneralConfig({
@@ -110,7 +103,7 @@ contract DeployEthMultiVault is Script {
         // Deploy TransparentUpgradeableProxy with EthMultiVault logic contract
         ethMultiVaultProxy = new TransparentUpgradeableProxy(
             address(ethMultiVault), // EthMultiVault logic contract address
-            address(timelock), // Timelock controller address, which will be the owner of the ProxyAdmin contract for the proxy
+            admin, // Timelock controller address, which will be the owner of the ProxyAdmin contract for the proxy
             initData // Initialization data to call the `init` function in EthMultiVault
         );
         console.logString("deployed TransparentUpgradeableProxy.");
@@ -139,7 +132,6 @@ contract DeployEthMultiVault is Script {
         vm.stopBroadcast();
 
         console.log("All contracts deployed successfully:");
-        console.log("TimelockController address:", address(timelock));
         console.log("AtomWallet implementation address:", address(atomWallet));
         console.log("UpgradeableBeacon address:", address(atomWalletBeacon));
         console.log("EthMultiVault implementation address:", address(ethMultiVault));
