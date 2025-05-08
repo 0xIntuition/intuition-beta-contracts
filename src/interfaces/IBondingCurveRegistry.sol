@@ -7,6 +7,21 @@ pragma solidity ^0.8.27;
  * @notice Interface for the BondingCurveRegistry contract. Routes access to the curves associated with atoms & triples.
  */
 interface IBondingCurveRegistry {
+    /* =================================================== */
+    /*                    EVENTS                           */
+    /* =================================================== */
+
+    /// @notice Emitted when a new curve is added to the registry
+    ///
+    /// @param curveId The ID of the curve
+    /// @param curveAddress The address of the curve
+    /// @param curveName The name of the curve
+    event BondingCurveAdded(uint256 indexed curveId, address indexed curveAddress, string indexed curveName);
+
+    /* =================================================== */
+    /*                    FUNCTIONS                        */
+    /* =================================================== */
+
     /// @notice Preview how many shares would be minted for a deposit of assets
     /// @param assets Quantity of assets to deposit
     /// @param totalAssets Total quantity of assets already staked into the curve

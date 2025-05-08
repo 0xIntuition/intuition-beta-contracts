@@ -42,6 +42,7 @@ library Errors {
     error EthMultiVault_VaultNotAtom();
     error EthMultiVault_VaultNotTriple();
     error EthMultiVault_InvalidRegistry();
+
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
     error AtomWallet_InvalidCallDataLength();
@@ -76,8 +77,8 @@ library Errors {
 
     error BondingCurveRegistry_CurveAlreadyExists();
     error BondingCurveRegistry_CurveNameNotUnique();
-    error BondingCurveRegistry_OnlyOwner();
-    error BondingCurveRegistry_RequiresOwner();
+    error BondingCurveRegistry_EmptyCurveName();
+    error BondingCurveRegistry_ZeroAddress();
 
     ///////// BASE CURVE ERRORS /////////////////////////////////////////////////////////////////////////
 

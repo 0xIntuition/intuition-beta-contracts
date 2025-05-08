@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.27;
 
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+
 import {IBaseCurve} from "src/interfaces/IBaseCurve.sol";
 import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
 import {Errors} from "src/libraries/Errors.sol";
@@ -20,41 +22,22 @@ import {Errors} from "src/libraries/Errors.sol";
  *         You can think of the registry as a concierge the EthMultiVault uses to access various
  *         economic incentive patterns.
  */
-contract BondingCurveRegistry is IBondingCurveRegistry {
+contract BondingCurveRegistry is IBondingCurveRegistry, Ownable2Step {
     /* =================================================== */
     /*                  STATE VARIABLES                    */
     /* =================================================== */
 
-    // Quantity of known curves, used to assign IDs
+    /// @notice Quantity of known curves, used to assign IDs
     uint256 public count;
 
-    // Mapping of curve IDs to curve addresses, used for lookup
+    /// @notice Mapping of curve IDs to curve addresses, used for lookup
     mapping(uint256 => address) public curveAddresses;
 
-    // Mapping of curve addresses to curve IDs, for reverse lookup
+    /// @notice Mapping of curve addresses to curve IDs, for reverse lookup
     mapping(address => uint256) public curveIds;
 
-    // Mapping of the registered curve names, used to enforce uniqueness
+    /// @notice Mapping of the registered curve names, used to enforce uniqueness
     mapping(string => bool) public registeredCurveNames;
-
-    // Address of the admin who may add curves to the registry
-    address public admin;
-
-    /* =================================================== */
-    /*                    EVENTS                           */
-    /* =================================================== */
-
-    /// @notice Emitted when a new curve is added to the registry
-    ///
-    /// @param curveId The ID of the curve
-    /// @param curveAddress The address of the curve
-    /// @param curveName The name of the curve
-    event BondingCurveAdded(uint256 indexed curveId, address indexed curveAddress, string indexed curveName);
-
-    /// @notice Emitted when the admin role is transferred
-    /// @param oldAdmin The previous admin address
-    /// @param newAdmin The new admin address
-    event OwnershipTransferred(address indexed oldAdmin, address indexed newAdmin);
 
     /* =================================================== */
     /*                    CONSTRUCTOR                      */
@@ -62,31 +45,32 @@ contract BondingCurveRegistry is IBondingCurveRegistry {
 
     /// @notice Constructor for the BondingCurveRegistry contract
     /// @param _admin Address who may add curves to the registry
-    constructor(address _admin) {
-        if (_admin == address(0)) {
-            revert Errors.BondingCurveRegistry_RequiresOwner();
-        }
-        admin = _admin;
-        emit OwnershipTransferred(address(0), _admin);
-    }
+    constructor(address _admin) Ownable(_admin) {}
 
     /* =================================================== */
-    /*               RESTRICTED FUNCTIONS                  */
+    /*              ACCESS-RESTRICTED FUNCTIONS            */
     /* =================================================== */
 
     /// @notice Add a new bonding curve to the registry
     /// @param bondingCurve Address of the new bonding curve
-    function addBondingCurve(address bondingCurve) external {
-        if (msg.sender != admin) {
-            revert Errors.BondingCurveRegistry_OnlyOwner();
+    function addBondingCurve(address bondingCurve) external onlyOwner {
+        if (bondingCurve == address(0)) {
+            revert Errors.BondingCurveRegistry_ZeroAddress();
         }
 
+        // Ensure curve is not already registered
         if (curveIds[bondingCurve] != 0) {
             revert Errors.BondingCurveRegistry_CurveAlreadyExists();
         }
 
-        // Enforce curve name uniqueness
         string memory curveName = IBaseCurve(bondingCurve).name();
+
+        // Ensure the curve name is not empty
+        if (bytes(curveName).length == 0) {
+            revert Errors.BondingCurveRegistry_EmptyCurveName();
+        }
+
+        // Enforce curve name uniqueness
         if (registeredCurveNames[curveName]) {
             revert Errors.BondingCurveRegistry_CurveNameNotUnique();
         }
@@ -104,19 +88,8 @@ contract BondingCurveRegistry is IBondingCurveRegistry {
         emit BondingCurveAdded(count, bondingCurve, curveName);
     }
 
-    /// @notice Transfer the admin role to a new address
-    /// @param newOwner The new admin address
-    function transferOwnership(address newOwner) external {
-        if (msg.sender != admin) {
-            revert Errors.BondingCurveRegistry_OnlyOwner();
-        }
-        address oldAdmin = admin;
-        admin = newOwner;
-        emit OwnershipTransferred(oldAdmin, newOwner);
-    }
-
     /* =================================================== */
-    /*                PUBLIC FUNCTIONS                     */
+    /*                VIEW FUNCTIONS                       */
     /* =================================================== */
 
     /// @notice Preview how many shares would be minted for a deposit of assets
