@@ -40,7 +40,7 @@ contract UD60x18Test is Test {
         assertEq(z, 35);
     }
 
-    function testDecimal() public pure{
+    function testDecimal() public pure {
         uint256 x = 10;
         uint256 y = 3;
         uint256 z = convert(convert(x).div(convert(y)));

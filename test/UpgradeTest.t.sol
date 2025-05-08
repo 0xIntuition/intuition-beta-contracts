@@ -71,7 +71,7 @@ contract UpgradeTest is Test {
         progressiveCurve = new ProgressiveCurve("Progressive Curve", 2);
 
         // Deploy the OffsetProgressiveCurve contract
-        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2,5e35);
+        offsetProgressiveCurve = new OffsetProgressiveCurve("Offset Progressive Curve", 2, 5e35);
 
         // Add the LinearCurve to the BondingCurveRegistry
         vm.prank(admin);
@@ -90,16 +90,11 @@ contract UpgradeTest is Test {
         address newEthMultiVaultImplementation = address(new EthMultiVault());
 
         // Prepare the bonding curve configuration
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
-            registry: address(bondingCurveRegistry),
-            defaultCurveId: 1
-        });
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
+            IEthMultiVault.BondingCurveConfig({registry: address(bondingCurveRegistry), defaultCurveId: 1});
 
         // Prepare initialization data for the upgrade
-        bytes memory reinitData = abi.encodeWithSelector(
-            EthMultiVault.reinitialize.selector,
-            bondingCurveConfig
-        );
+        bytes memory reinitData = abi.encodeWithSelector(EthMultiVault.reinitialize.selector, bondingCurveConfig);
 
         address proxyAdminOwner = proxyAdmin.owner();
 
@@ -491,7 +486,8 @@ contract UpgradeTest is Test {
 
         (uint256 sharesForReceiverBefore,) = ethMultiVault.getVaultStateForUserCurve(atomId, progressiveCurveId, alice);
 
-        uint256 expectedSharesForReceiver = _getExpectedSharesForReceiverCurve(depositAmountAfterGhostShares, atomId, progressiveCurveId);
+        uint256 expectedSharesForReceiver =
+            _getExpectedSharesForReceiverCurve(depositAmountAfterGhostShares, atomId, progressiveCurveId);
 
         uint256 protocolMultisigBalanceBefore = address(_getProtocolMultisig()).balance;
 
@@ -529,7 +525,8 @@ contract UpgradeTest is Test {
 
         uint256 userEthBalanceBeforeRedeem = address(alice).balance;
 
-        uint256 assetsForReceiverBeforeFees = ethMultiVault.convertToAssetsCurve(redeemAmount, atomId, progressiveCurveId);
+        uint256 assetsForReceiverBeforeFees =
+            ethMultiVault.convertToAssetsCurve(redeemAmount, atomId, progressiveCurveId);
         uint256 protocolFeeAmount = ethMultiVault.protocolFeeAmount(assetsForReceiverBeforeFees, atomId);
 
         uint256 protocolMultisigBalanceBefore = address(_getProtocolMultisig()).balance;
@@ -565,17 +562,21 @@ contract UpgradeTest is Test {
         uint256 expectedGhostShares = _getGhostSharesAmount();
         uint256 depositAmountAfterGhostShares = depositAmount - (expectedGhostShares * 2); // ghost shares are minted for both the positive and counter vaults
 
-        (uint256 sharesForReceiverBefore,) = ethMultiVault.getVaultStateForUserCurve(tripleId, progressiveCurveId, alice);
+        (uint256 sharesForReceiverBefore,) =
+            ethMultiVault.getVaultStateForUserCurve(tripleId, progressiveCurveId, alice);
 
-        uint256 expectedSharesForReceiver = _getExpectedSharesForReceiverCurve(depositAmountAfterGhostShares, tripleId, progressiveCurveId);
+        uint256 expectedSharesForReceiver =
+            _getExpectedSharesForReceiverCurve(depositAmountAfterGhostShares, tripleId, progressiveCurveId);
 
         uint256 protocolMultisigBalanceBefore = address(_getProtocolMultisig()).balance;
 
-        uint256 mintedShares = ethMultiVault.depositTripleCurve{value: depositAmount}(alice, tripleId, progressiveCurveId);
+        uint256 mintedShares =
+            ethMultiVault.depositTripleCurve{value: depositAmount}(alice, tripleId, progressiveCurveId);
 
         uint256 protocolMultisigBalanceAfter = address(_getProtocolMultisig()).balance;
 
-        (uint256 ghostSharesForPositiveVault,) = ethMultiVault.getVaultStateForUserCurve(tripleId, progressiveCurveId, _getAdmin());
+        (uint256 ghostSharesForPositiveVault,) =
+            ethMultiVault.getVaultStateForUserCurve(tripleId, progressiveCurveId, _getAdmin());
         (uint256 ghostSharesForCounterVault,) = ethMultiVault.getVaultStateForUserCurve(
             ethMultiVault.getCounterIdFromTriple(tripleId), progressiveCurveId, _getAdmin()
         );
@@ -613,7 +614,8 @@ contract UpgradeTest is Test {
 
         uint256 userEthBalanceBeforeRedeem = address(alice).balance;
 
-        uint256 assetsForReceiverBeforeFees = ethMultiVault.convertToAssetsCurve(redeemAmount, tripleId, progressiveCurveId);
+        uint256 assetsForReceiverBeforeFees =
+            ethMultiVault.convertToAssetsCurve(redeemAmount, tripleId, progressiveCurveId);
         uint256 protocolFeeAmount = ethMultiVault.protocolFeeAmount(assetsForReceiverBeforeFees, tripleId);
 
         uint256 protocolMultisigBalanceBefore = address(_getProtocolMultisig()).balance;
@@ -640,7 +642,7 @@ contract UpgradeTest is Test {
         returns (uint256 expectedSharesForReceiver)
     {
         uint256 depositAmountAfterProtocolFees = depositAmount - ethMultiVault.protocolFeeAmount(depositAmount, termId);
-        
+
         // Handle atom deposits for triple vaults
         uint256 atomDeposits = ethMultiVault.atomDepositsAmount(depositAmountAfterProtocolFees, termId);
         uint256 userAssetsAfterAtomDeposits = depositAmountAfterProtocolFees - atomDeposits;
@@ -700,6 +702,7 @@ contract UpgradeTest is Test {
     {
         uint256 depositAmountAfterProtocolFees = depositAmount - ethMultiVault.protocolFeeAmount(depositAmount, termId);
 
-        (,, expectedSharesForReceiver,) = ethMultiVault.getDepositSharesAndFeesCurve(depositAmountAfterProtocolFees, termId, curveId);
+        (,, expectedSharesForReceiver,) =
+            ethMultiVault.getDepositSharesAndFeesCurve(depositAmountAfterProtocolFees, termId, curveId);
     }
 }
