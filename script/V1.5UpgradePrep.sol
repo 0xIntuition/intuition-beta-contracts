@@ -47,16 +47,11 @@ contract V1_5UpgradePrep is Script {
         bondingCurveRegistry.transferOwnership(address(DEVELOPER));
 
         // Build the bonding curve config
-        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig = IEthMultiVault.BondingCurveConfig({
-            registry: address(bondingCurveRegistry),
-            defaultCurveId: 1
-        });
+        IEthMultiVault.BondingCurveConfig memory bondingCurveConfig =
+            IEthMultiVault.BondingCurveConfig({registry: address(bondingCurveRegistry), defaultCurveId: 1});
 
         // Print the data for the reinitialize call to the EthMultiVault
-        bytes memory reinitializeData = abi.encodeWithSelector(
-            EthMultiVault.reinitialize.selector,
-            bondingCurveConfig
-        );
+        bytes memory reinitializeData = abi.encodeWithSelector(EthMultiVault.reinitialize.selector, bondingCurveConfig);
         console.logString("Reinitialize data for EthMultiVault: ");
         console.logBytes(reinitializeData);
 
