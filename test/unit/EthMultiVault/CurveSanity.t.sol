@@ -53,25 +53,27 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256[] memory depositAmounts = new uint256[](numSteps);
         // Store shares for each curve [curveIndex][stepIndex]
         uint256[][] memory allShares = new uint256[][](curveIds.length);
-        for (uint i = 0; i < curveIds.length; i++) {
+        for (uint256 i = 0; i < curveIds.length; i++) {
             allShares[i] = new uint256[](numSteps);
         }
         // Keep track if preview succeeded for a point
         bool[][] memory previewSucceeded = new bool[][](curveIds.length);
-         for (uint i = 0; i < curveIds.length; i++) {
+        for (uint256 i = 0; i < curveIds.length; i++) {
             previewSucceeded[i] = new bool[](numSteps);
         }
 
         // --- Data Collection Loop ---
         uint256 step = 0;
         for (uint256 depositAmount = increment; depositAmount <= maxAmount; depositAmount += increment) {
-             depositAmounts[step] = depositAmount;
-             console.log("\nPreviewing deposit of %s assets:", depositAmount.toString());
+            depositAmounts[step] = depositAmount;
+            console.log("\nPreviewing deposit of %s assets:", depositAmount.toString());
 
-            for (uint i = 0; i < curveIds.length; i++) {
+            for (uint256 i = 0; i < curveIds.length; i++) {
                 uint256 curveId = curveIds[i];
                 if (registry.curveAddresses(curveId) != address(0)) {
-                    try ethMultiVault.previewDepositCurve(depositAmount, testAtomId, curveId) returns (uint256 previewShares) {
+                    try ethMultiVault.previewDepositCurve(depositAmount, testAtomId, curveId) returns (
+                        uint256 previewShares
+                    ) {
                         console.log("  Curve ID %s: %s shares", curveId.toString(), previewShares.toString());
                         allShares[i][step] = previewShares;
                         previewSucceeded[i][step] = true;
@@ -79,13 +81,15 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
                         console.log("  Curve ID %s: Failed preview - %s", curveId.toString(), reason);
                         previewSucceeded[i][step] = false;
                     } catch {
-                         console.log("  Curve ID %s: Failed preview - Unknown reason", curveId.toString());
-                         previewSucceeded[i][step] = false;
+                        console.log("  Curve ID %s: Failed preview - Unknown reason", curveId.toString());
+                        previewSucceeded[i][step] = false;
                     }
                 } else {
-                     console.log("  Curve ID %s: Not registered", curveId.toString());
-                     // Mark as failed if not registered
-                     for(uint s=0; s < numSteps; s++) { previewSucceeded[i][s] = false; }
+                    console.log("  Curve ID %s: Not registered", curveId.toString());
+                    // Mark as failed if not registered
+                    for (uint256 s = 0; s < numSteps; s++) {
+                        previewSucceeded[i][s] = false;
+                    }
                 }
             }
             step++;
@@ -94,7 +98,7 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
         // --- Linearity Calculation and Logging ---
         console.log("\n--- Linearity Analysis ---");
 
-        for (uint i = 0; i < curveIds.length; i++) {
+        for (uint256 i = 0; i < curveIds.length; i++) {
             uint256 curveId = curveIds[i];
             console.log("\nCurve ID: %s", curveId.toString());
 
@@ -111,15 +115,25 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
                     continue;
                 }
 
-                console.log(string(abi.encodePacked("  Baseline: 0 ETH = 0 Shares -> ", amount0.toString(), " ETH = ", shares0.toString(), " Shares")));
+                console.log(
+                    string(
+                        abi.encodePacked(
+                            "  Baseline: 0 ETH = 0 Shares -> ",
+                            amount0.toString(),
+                            " ETH = ",
+                            shares0.toString(),
+                            " Shares"
+                        )
+                    )
+                );
 
                 // Calculate slope components for precision: slope = deltaShares / deltaAmount
 
-                for (uint j = 1; j < numSteps; j++) {
+                for (uint256 j = 1; j < numSteps; j++) {
                     if (previewSucceeded[i][j]) {
                         uint256 currentAmount = depositAmounts[j];
                         uint256 actualShares = allShares[i][j];
-                        
+
                         // Calculate expected shares: expected = slope * currentAmount
                         // expected = (deltaShares / deltaAmount) * currentAmount
                         // To maintain precision: expected = (deltaShares * currentAmount) / deltaAmount
@@ -136,9 +150,26 @@ contract CurveSanityTest is EthMultiVaultBase, EthMultiVaultHelpers {
                             positiveDeviation = false;
                         }
 
-                        console.log(string(abi.encodePacked("  ", currentAmount.toString(), " ETH -> ", actualShares.toString(), " Shares (Linear: ", expectedShares.toString(), " Shares, ", positiveDeviation ? "+" : "-", deviation.toString(), " Shares)")));
+                        console.log(
+                            string(
+                                abi.encodePacked(
+                                    "  ",
+                                    currentAmount.toString(),
+                                    " ETH -> ",
+                                    actualShares.toString(),
+                                    " Shares (Linear: ",
+                                    expectedShares.toString(),
+                                    " Shares, ",
+                                    positiveDeviation ? "+" : "-",
+                                    deviation.toString(),
+                                    " Shares)"
+                                )
+                            )
+                        );
                     } else {
-                        console.log(string(abi.encodePacked("  ", depositAmounts[j].toString(), " ETH: Preview failed")));
+                        console.log(
+                            string(abi.encodePacked("  ", depositAmounts[j].toString(), " ETH: Preview failed"))
+                        );
                     }
                 }
             } else {
