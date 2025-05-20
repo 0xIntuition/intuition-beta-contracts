@@ -11,7 +11,7 @@ The Intuition Knowledge Graph will be recognized as an organic flywheel, where t
 - [Intuition Protocol](#intuition-protocol)
   - [Getting Started](#getting-started)
   - [Documentation](#documentation)
-    - [Known Nuances](#known-nuances)
+    - [Rationale](#rationale)
   - [Building and Running Tests](#building-and-running-tests)
     - [Prerequisites](#prerequisites)
     - [Step by Step Guide](#step-by-step-guide)
@@ -23,6 +23,10 @@ The Intuition Knowledge Graph will be recognized as an organic flywheel, where t
       - [Run Manticore (Symbolic Execution)](#run-manticore-symbolic-execution)
     - [Deployment Process](#deployment-process)
     - [Deployment Verification](#deployment-verification)
+  - [Deployed Contracts](#deployed-contracts)
+    - [Base Mainnet](#base-mainnet)
+    - [Base Sepolia](#base-sepolia)
+    - [Linea Mainnet](#linea-mainnet)
 
 ## Documentation
 
@@ -143,3 +147,26 @@ $ forge verify-contract <0x_contract_address> ContractName --watch --chain-id <c
 
 - When verifying your smart contracts, you can use an optional parameter `--constructor-args` to pass the constructor arguments of the smart contract in the ABI-encoded format
 - The chain ID for Base Sepolia is `84532`, whereas the chain ID for Base Mainnet is `8453`
+
+## Deployed Contracts
+
+### Base Mainnet
+
+ProxyAdmin: 0xc920E2F5eB6925faE85C69a98a2df6f56a7a245A
+TimelockController (proxy admin owner): 0xE4992f9805D7737b5bDaDBEF5688087CF25D4B89
+EthMultiVault (proxy address): 0x430BbF52503Bd4801E51182f4cB9f8F534225DE5
+Admin Safe: 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480
+
+### Base Sepolia
+
+ProxyAdmin: 0xD4436f981D2dcE0C074Eca869fdA1650227c7Efe
+TimelockController (proxy admin owner): 0xe6BE2A42cCAeB73909A79CC89299eBDA7bAa7Ea2
+EthMultiVault (proxy address): 0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665
+Admin Safe: 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB
+
+### Linea Mainnet
+
+ProxyAdmin: 0x89e65a3c49cb1DF3D8Ee6036a158A728603CC1AD
+TimelockController (proxy admin owner): 0xA71B2185D10CaB95Cd0d2DA2B9b0210f8ed31A66
+EthMultiVault (proxy address): 0xB4375293a13017BCe71a034bB588786A3D3C7295
+Admin Safe: 0x323e9506B929C21AE602D64d3807721AA49b4884
