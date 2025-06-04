@@ -61,15 +61,6 @@ import {IBondingCurveRegistry} from "src/interfaces/IBondingCurveRegistry.sol";
  *        - Configurable per vault
  *        - Separate fee structures for atom/triple creation
  *        - Proportional deposit distribution for triple-related operations
- *
- * @dev ## Please note:
- *      This implementation of the EthMultiVault is messy for a reason.  We wanted to keep all of
- *      the audited code in place, while also enabling users to interact with Bonding Curve vaults.  For this
- *      reason, there are separate functions for all Bonding Curve related activity.  While this bloats the
- *      code size, it ensures that users can still use the audited pathways in the code if they wish, while also
- *      enabling them to engage in more economically exciting activities like the Progressive Curve or Offset Curve.
- * @dev The V2 of this contract will merge these pathways into one, providing a cleaner and more straightforward
- *      interface for depositing and redeeming.
  */
 contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using FixedPointMathLib for uint256;
@@ -599,6 +590,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // create atom and get the protocol deposit fee
         (uint256 id, uint256 protocolDepositFee) = _createAtom(atomUri, msg.value);
 
+        emit ETHDeposit(msg.value, id);
+
         uint256 totalFeesForProtocol = atomConfig.atomCreationProtocolFee + protocolDepositFee;
         _transferFeesToProtocolMultisig(totalFeesForProtocol);
 
@@ -631,6 +624,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
             // add protocol deposit fees to total
             protocolDepositFeeTotal += protocolDepositFee;
+
+            emit ETHDeposit(valuePerAtom, ids[i]);
         }
 
         uint256 totalFeesForProtocol = atomConfig.atomCreationProtocolFee * length + protocolDepositFeeTotal;
@@ -668,13 +663,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // calculate user deposit after protocol fees
-        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
+        uint256 userDepositAfterProtocolFee = userDeposit - protocolDepositFee;
 
         // deposit user funds into vault and mint shares for the user and shares for the admin to initialize the vault
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDepositAfterprotocolFee
+            userDepositAfterProtocolFee
         );
 
         // get atom wallet address for the corresponding atom
@@ -725,6 +720,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // create triple and get the protocol deposit fee
         (uint256 id, uint256 protocolDepositFee) = _createTriple(subjectId, predicateId, objectId, msg.value);
 
+        emit ETHDeposit(msg.value, id);
+
         uint256 totalFeesForProtocol = tripleConfig.tripleCreationProtocolFee + protocolDepositFee;
         _transferFeesToProtocolMultisig(totalFeesForProtocol);
 
@@ -764,6 +761,8 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
             // add protocol deposit fees to total
             protocolDepositFeeTotal += protocolDepositFee;
+
+            emit ETHDeposit(valuePerTriple, ids[i]);
         }
 
         uint256 totalFeesForProtocol = tripleConfig.tripleCreationProtocolFee * length + protocolDepositFeeTotal;
@@ -816,7 +815,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // calculate user deposit after protocol fees
-        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
+        uint256 userDepositAfterProtocolFee = userDeposit - protocolDepositFee;
 
         // map the resultant triple hash to the new vault ID of the triple
         triplesByHash[hash] = id;
@@ -827,13 +826,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, id);
 
         // give the user shares in the positive triple vault
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDepositAfterprotocolFee - atomDeposits
+            userDepositAfterProtocolFee - atomDeposits
         );
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
@@ -894,10 +893,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, id);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _deposit(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFee);
+
+        emit ETHDeposit(msg.value, id);
 
         _transferFeesToProtocolMultisig(protocolFee);
 
@@ -915,9 +916,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return shares the amount of shares minted
     /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
-    /// @dev This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
-    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
-    ///      performing an audit of the full refactor (V2).
     function depositAtomCurve(address receiver, uint256 atomId, uint256 curveId)
         external
         payable
@@ -942,10 +940,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, atomId);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _depositCurve(receiver, atomId, curveId, userDepositAfterprotocolFee);
+        uint256 shares = _depositCurve(receiver, atomId, curveId, userDepositAfterProtocolFee);
+
+        emit ETHDepositCurve(msg.value, atomId, curveId);
 
         _transferFeesToProtocolMultisig(protocolFee);
 
@@ -999,9 +999,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId the vault ID of the curve
     ///
     /// @return assets the amount of assets/eth withdrawn
-    /// @dev This method is entirely separate from redeemAtom, because we wanted to leave the audited pathways intact.
-    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
-    ///      performing an audit of the full refactor (V2).
     function redeemAtomCurve(uint256 shares, address receiver, uint256 atomId, uint256 curveId)
         external
         nonReentrant
@@ -1074,13 +1071,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, id);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _deposit(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFee);
+
+        emit ETHDeposit(msg.value, id);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, id);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
         if (atomDeposits > 0) {
@@ -1101,9 +1100,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId the vault ID of the curve
     ///
     /// @return shares the amount of shares minted
-    /// @dev This method is entirely separate from depositTriple, because we wanted to leave the audited pathways intact.
-    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
-    ///      performing an audit of the full refactor (V2).
     function depositTripleCurve(address receiver, uint256 tripleId, uint256 curveId)
         external
         payable
@@ -1128,13 +1124,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, tripleId);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterprotocolFee);
+        uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterProtocolFee);
+
+        emit ETHDepositCurve(msg.value, tripleId, curveId);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, tripleId);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, tripleId);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
         if (atomDeposits > 0) {
@@ -1190,9 +1188,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @param curveId the vault ID of the curve
     ///
     /// @return assets the amount of assets/eth withdrawn
-    /// @dev This method is entirely separate from redeemTriple, because we wanted to leave the audited pathways intact.
-    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
-    ///      performing an audit of the full refactor (V2).
     function redeemTripleCurve(uint256 shares, address receiver, uint256 tripleId, uint256 curveId)
         external
         nonReentrant
@@ -1251,8 +1246,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
 
         shares = new uint256[](termIds.length);
 
-        // To simplify UX in 1.5, compute fees iteratively
-        // 2.0 will always use batch methods internally
         for (uint256 i = 0; i < termIds.length; i++) {
             if (termIds[i] == 0 || termIds[i] > count) {
                 revert Errors.EthMultiVault_VaultDoesNotExist();
@@ -1263,10 +1256,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             }
 
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
-            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+            uint256 userDepositAfterProtocolFee = amounts[i] - protocolFee;
 
             // deposit eth into vault and mint shares for the receiver
-            shares[i] = _deposit(receiver, termIds[i], userDepositAfterprotocolFee);
+            shares[i] = _deposit(receiver, termIds[i], userDepositAfterProtocolFee);
+
+            emit ETHDeposit(amounts[i], termIds[i]);
+
             _transferFeesToProtocolMultisig(protocolFee);
         }
 
@@ -1285,9 +1281,6 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     /// @return shares array of the amount of shares minted in the specified vaults
     /// @dev this function will revert if the minimum deposit amount of eth is not met and
     ///       if the vault ID does not exist/is not an atom.
-    /// @dev This method is entirely separate from depositAtom, because we wanted to leave the audited pathways intact.
-    ///      This serves as an intermediary solution to enable users to interact with bonding curve vaults before
-    ///      performing an audit of the full refactor (V2).
     function batchDepositCurve(
         address receiver,
         uint256[] calldata termIds,
@@ -1314,10 +1307,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             }
 
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
-            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+            uint256 userDepositAfterProtocolFee = amounts[i] - protocolFee;
 
             // deposit eth into vault and mint shares for the receiver
-            shares[i] = _depositCurve(receiver, termIds[i], curveIds[i], userDepositAfterprotocolFee);
+            shares[i] = _depositCurve(receiver, termIds[i], curveIds[i], userDepositAfterProtocolFee);
+
+            emit ETHDepositCurve(amounts[i], termIds[i], curveIds[i]);
 
             _transferFeesToProtocolMultisig(protocolFee);
         }

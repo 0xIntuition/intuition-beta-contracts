@@ -128,6 +128,19 @@ interface IEthMultiVault {
     /// @param approvalType the type of approval granted (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
     event ApprovalTypeUpdated(address indexed sender, address indexed receiver, ApprovalTypes approvalType);
 
+    /// @notice Emitted when ETH is deposited into the atom or triple vault
+    ///
+    /// @param value the amount of ETH deposited into the vault
+    /// @param termId the term ID of the atom or triple
+    event ETHDeposit(uint256 value, uint256 termId);
+
+    /// @notice Emitted when ETH is deposited into the atom or triple vault of a particular bonding curve
+    ///
+    /// @param value the amount of ETH deposited into the vault
+    /// @param termId the term ID of the atom or triple
+    /// @param curveId the bonding curve ID
+    event ETHDepositCurve(uint256 value, uint256 termId, uint256 curveId);
+
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
     /// @param sender initializer of the deposit
