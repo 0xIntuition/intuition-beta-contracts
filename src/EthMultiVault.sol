@@ -663,13 +663,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // calculate user deposit after protocol fees
-        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
+        uint256 userDepositAfterProtocolFee = userDeposit - protocolDepositFee;
 
         // deposit user funds into vault and mint shares for the user and shares for the admin to initialize the vault
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDepositAfterprotocolFee
+            userDepositAfterProtocolFee
         );
 
         // get atom wallet address for the corresponding atom
@@ -815,7 +815,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         uint256 protocolDepositFee = protocolFeeAmount(userDeposit, id);
 
         // calculate user deposit after protocol fees
-        uint256 userDepositAfterprotocolFee = userDeposit - protocolDepositFee;
+        uint256 userDepositAfterProtocolFee = userDeposit - protocolDepositFee;
 
         // map the resultant triple hash to the new vault ID of the triple
         triplesByHash[hash] = id;
@@ -826,13 +826,13 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // set this new triple's vault ID as true in the IsTriple mapping as well as its counter
         isTriple[id] = true;
 
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, id);
 
         // give the user shares in the positive triple vault
         _depositOnVaultCreation(
             id,
             msg.sender, // receiver
-            userDepositAfterprotocolFee - atomDeposits
+            userDepositAfterProtocolFee - atomDeposits
         );
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
@@ -893,10 +893,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, id);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _deposit(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFee);
 
         emit ETHDeposit(msg.value, id);
 
@@ -945,7 +945,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         // deposit eth into vault and mint shares for the receiver
         uint256 shares = _depositCurve(receiver, atomId, curveId, userDepositAfterProtocolFee);
 
-        emit ETHDeposit(msg.value, atomId, curveId);
+        emit ETHDepositCurve(msg.value, atomId, curveId);
 
         _transferFeesToProtocolMultisig(protocolFee);
 
@@ -1071,15 +1071,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, id);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _deposit(receiver, id, userDepositAfterprotocolFee);
+        uint256 shares = _deposit(receiver, id, userDepositAfterProtocolFee);
 
         emit ETHDeposit(msg.value, id);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, id);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, id);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
         if (atomDeposits > 0) {
@@ -1124,15 +1124,15 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
         }
 
         uint256 protocolFee = protocolFeeAmount(msg.value, tripleId);
-        uint256 userDepositAfterprotocolFee = msg.value - protocolFee;
+        uint256 userDepositAfterProtocolFee = msg.value - protocolFee;
 
         // deposit eth into vault and mint shares for the receiver
-        uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterprotocolFee);
+        uint256 shares = _depositCurve(receiver, tripleId, curveId, userDepositAfterProtocolFee);
 
-        emit ETHDeposit(msg.value, tripleId, curveId);
+        emit ETHDepositCurve(msg.value, tripleId, curveId);
 
         // distribute atom shares for all 3 atoms that underly the triple
-        uint256 atomDeposits = atomDepositsAmount(userDepositAfterprotocolFee, tripleId);
+        uint256 atomDeposits = atomDepositsAmount(userDepositAfterProtocolFee, tripleId);
 
         // deposit assets into each underlying atom vault and mint shares for the receiver
         if (atomDeposits > 0) {
@@ -1256,10 +1256,10 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             }
 
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
-            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+            uint256 userDepositAfterProtocolFee = amounts[i] - protocolFee;
 
             // deposit eth into vault and mint shares for the receiver
-            shares[i] = _deposit(receiver, termIds[i], userDepositAfterprotocolFee);
+            shares[i] = _deposit(receiver, termIds[i], userDepositAfterProtocolFee);
 
             emit ETHDeposit(amounts[i], termIds[i]);
 
@@ -1307,12 +1307,12 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             }
 
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
-            uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
+            uint256 userDepositAfterProtocolFee = amounts[i] - protocolFee;
 
             // deposit eth into vault and mint shares for the receiver
-            shares[i] = _depositCurve(receiver, termIds[i], curveIds[i], userDepositAfterprotocolFee);
+            shares[i] = _depositCurve(receiver, termIds[i], curveIds[i], userDepositAfterProtocolFee);
 
-            emit ETHDeposit(amounts[i], termIds[i], curveIds[i]);
+            emit ETHDepositCurve(amounts[i], termIds[i], curveIds[i]);
 
             _transferFeesToProtocolMultisig(protocolFee);
         }
