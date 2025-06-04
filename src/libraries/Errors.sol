@@ -10,12 +10,11 @@ library Errors {
     error EthMultiVault_AdminOnly();
     error EthMultiVault_ArraysNotSameLength();
     error EthMultiVault_AtomDoesNotExist(uint256 atomId);
-    error EthMultiVault_AtomExists(bytes atomUri);
+    error EthMultiVault_AtomExists(bytes atomUri, uint256 atomId);
     error EthMultiVault_AtomUriTooLong();
     error EthMultiVault_BurnFromZeroAddress();
     error EthMultiVault_BurnInsufficientBalance();
-    error EthMultiVault_CannotApproveSelf();
-    error EthMultiVault_CannotRevokeSelf();
+    error EthMultiVault_CannotApproveOrRevokeSelf();
     error EthMultiVault_DeployAccountFailed();
     error EthMultiVault_DepositOrWithdrawZeroShares();
     error EthMultiVault_DepositExceedsMaxAssets();
@@ -33,8 +32,8 @@ library Errors {
     error EthMultiVault_OperationAlreadyScheduled();
     error EthMultiVault_OperationNotScheduled();
     error EthMultiVault_ReceiveNotAllowed();
-    error EthMultiVault_SenderAlreadyApproved();
     error EthMultiVault_SenderNotApproved();
+    error EthMultiVault_RedeemerNotApproved();
     error EthMultiVault_TimelockNotExpired();
     error EthMultiVault_TransferFailed();
     error EthMultiVault_TripleExists(uint256 subjectId, uint256 predicateId, uint256 objectId);
@@ -42,7 +41,7 @@ library Errors {
     error EthMultiVault_VaultIsTriple(uint256 vaultId);
     error EthMultiVault_VaultNotAtom();
     error EthMultiVault_VaultNotTriple();
-
+    error EthMultiVault_InvalidRegistry();
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
     error AtomWallet_InvalidCallDataLength();
@@ -75,6 +74,12 @@ library Errors {
 
     ///////// BONDING CURVE REGISTRY ERRORS /////////////////////////////////////////////////////////////
 
-    error BondingCurveRegistry_OnlyOwner();
     error BondingCurveRegistry_CurveAlreadyExists();
+    error BondingCurveRegistry_CurveNameNotUnique();
+    error BondingCurveRegistry_OnlyOwner();
+    error BondingCurveRegistry_RequiresOwner();
+
+    ///////// BASE CURVE ERRORS /////////////////////////////////////////////////////////////////////////
+
+    error BaseCurve_EmptyStringNotAllowed();
 }

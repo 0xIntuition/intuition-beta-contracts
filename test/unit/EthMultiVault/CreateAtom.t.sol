@@ -78,7 +78,7 @@ contract CreateAtomTest is EthMultiVaultBase, EthMultiVaultHelpers {
         uint256 id1 = ethMultiVault.createAtom{value: getAtomCost()}("atom1");
         assertEq(id1, ethMultiVault.count());
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AtomExists.selector, "atom1"));
+        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AtomExists.selector, "atom1", id1));
         ethMultiVault.createAtom{value: testAtomCost}("atom1");
 
         vm.stopPrank();

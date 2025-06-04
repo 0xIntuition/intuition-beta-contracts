@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import {Errors} from "src/libraries/Errors.sol";
 import {EthMultiVaultBase} from "test/EthMultiVaultBase.sol";
 import {EthMultiVaultHelpers} from "test/helpers/EthMultiVaultHelpers.sol";
+import {IEthMultiVault} from "src/interfaces/IEthMultiVault.sol";
 
 contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
     function setUp() external {
@@ -42,14 +43,14 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
         vm.startPrank(address(2), address(2));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(bob);
+        ethMultiVault.approve(bob, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -65,7 +66,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         checkProtocolMultisigBalance(id, testDepositAmount, protocolMultisigBalanceBefore);
 
         // ------ Check Deposit Atom Fraction ------ //
-        uint256 amountToDistribute = atomDepositFractionAmount(userDepositAfterprotocolFee, id);
+        uint256 amountToDistribute = atomDepositsAmount(userDepositAfterprotocolFee, id);
         uint256 distributeAmountPerAtomVault = amountToDistribute / 3;
 
         checkDepositIntoVault(
@@ -92,7 +93,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -121,7 +122,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 
@@ -152,7 +153,7 @@ contract DepositTripleTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(address(1), address(1));
 
         // execute interaction - approve sender
-        ethMultiVault.approveSender(alice);
+        ethMultiVault.approve(alice, IEthMultiVault.ApprovalTypes.DEPOSIT);
 
         vm.stopPrank();
 

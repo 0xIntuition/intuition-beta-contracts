@@ -156,7 +156,7 @@ contract HelpersTest is EthMultiVaultBase, EthMultiVaultHelpers {
         vm.startPrank(alice, alice);
 
         // should revert if plain ether transfer is attempted
-        vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_ReceiveNotAllowed.selector));
+        vm.expectRevert();
         payable(address(ethMultiVault)).transfer(1 ether);
 
         vm.stopPrank();

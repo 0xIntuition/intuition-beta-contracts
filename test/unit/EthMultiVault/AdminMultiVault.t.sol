@@ -59,21 +59,19 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         address newAdmin = address(0x456);
         bytes memory data = abi.encodeWithSelector(EthMultiVault.setAdmin.selector, newAdmin);
         uint256 minDelay = getMinDelay();
-
         // Schedule the operation
         vm.prank(msg.sender);
         ethMultiVault.scheduleOperation(operationId, data);
 
         // Forward time to surpass the delay
         vm.warp(block.timestamp + minDelay + 1);
-
         // should revert if not admin
         vm.prank(bob);
         vm.expectRevert(abi.encodeWithSelector(Errors.EthMultiVault_AdminOnly.selector));
         ethMultiVault.setAdmin(newAdmin);
 
         // Execute the scheduled operation
-        vm.prank(msg.sender);
+        vm.prank(newAdmin);
         ethMultiVault.setAdmin(newAdmin);
 
         // Verify the operation's effects
@@ -193,16 +191,16 @@ contract AdminMultiVaultTest is EthMultiVaultBase, EthMultiVaultHelpers {
         assertEq(getTripleCreationProtocolFee(), testValue);
     }
 
-    function testSetAtomDepositFractionOnTripleCreation() external {
+    function testSetTotalAtomDepositsOnTripleCreation() external {
         uint256 testValue = 0.0006 ether;
 
         // msg.sender is the caller of EthMultiVaultBase
         vm.prank(msg.sender);
-        ethMultiVault.setAtomDepositFractionOnTripleCreation(testValue);
-        assertEq(getAtomDepositFractionOnTripleCreation(), testValue);
+        ethMultiVault.setTotalAtomDepositsOnTripleCreation(testValue);
+        assertEq(getTotalAtomDepositsOnTripleCreation(), testValue);
     }
 
-    function testSetAtomDepositFractionForTriple() external {
+    function testSetTotalAtomDepositsForTriple() external {
         uint256 validAtomDepositFractionForTriple = getFeeDenominator() / 10; // 10% of the deposit
         uint256 invalidAtomDepositFractionForTriple = getFeeDenominator(); // 100% of the deposit
 
