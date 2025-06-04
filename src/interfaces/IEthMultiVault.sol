@@ -7,7 +7,6 @@ import {IPermit2} from "src/interfaces/IPermit2.sol";
 /// @author 0xIntuition
 /// @notice Interface for managing many ERC4626 style vaults in a single contract
 interface IEthMultiVault {
-
     /* =================================================== */
     /*                   CONFIGS STRUCTS                   */
     /* =================================================== */
@@ -111,10 +110,11 @@ interface IEthMultiVault {
     /* =================================================== */
 
     enum ApprovalTypes {
-        NONE,        // 0b00
-        DEPOSIT,     // 0b01
-        REDEMPTION,  // 0b10
-        BOTH        // 0b11
+        NONE, // 0b00
+        DEPOSIT, // 0b01
+        REDEMPTION, // 0b10
+        BOTH // 0b11
+
     }
 
     /* =================================================== */
@@ -127,6 +127,19 @@ interface IEthMultiVault {
     /// @param receiver address of the receiver granting/revoking approval
     /// @param approvalType the type of approval granted (NONE = 0, DEPOSIT = 1, REDEMPTION = 2, BOTH = 3)
     event ApprovalTypeUpdated(address indexed sender, address indexed receiver, ApprovalTypes approvalType);
+
+    /// @notice Emitted when ETH is deposited into the atom or triple vault
+    ///
+    /// @param value the amount of ETH deposited into the vault
+    /// @param termId the term ID of the atom or triple
+    event ETHDeposit(uint256 value, uint256 termId);
+
+    /// @notice Emitted when ETH is deposited into the atom or triple vault of a particular bonding curve
+    ///
+    /// @param value the amount of ETH deposited into the vault
+    /// @param termId the term ID of the atom or triple
+    /// @param curveId the bonding curve ID
+    event ETHDepositCurve(uint256 value, uint256 termId, uint256 curveId);
 
     /// @notice Emitted upon the minting of shares in the vault by depositing assets
     ///
@@ -301,7 +314,9 @@ interface IEthMultiVault {
     ///
     /// @param newAtomDepositFractionForTriple new atom deposit fraction for triples
     /// @param oldAtomDepositFractionForTriple old atom deposit fraction for triples
-    event AtomDepositFractionForTripleSet(uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple);
+    event AtomDepositFractionForTripleSet(
+        uint256 newAtomDepositFractionForTriple, uint256 oldAtomDepositFractionForTriple
+    );
 
     /// @notice emitted upon changing the bonding curve configuration
     ///
@@ -310,10 +325,7 @@ interface IEthMultiVault {
     /// @param oldRegistry address of the old bonding curve registry
     /// @param oldDefaultCurveId old default curve ID
     event BondingCurveConfigSet(
-        address indexed newRegistry,
-        uint256 newDefaultCurveId,
-        address indexed oldRegistry,
-        uint256 oldDefaultCurveId
+        address indexed newRegistry, uint256 newDefaultCurveId, address indexed oldRegistry, uint256 oldDefaultCurveId
     );
 
     /// @notice emitted upon changing the entry fee
@@ -901,7 +913,10 @@ interface IEthMultiVault {
     /// @param receiver address of the receiver
     ///
     /// @return shares number of shares user has in the vault
-    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver) external view returns (uint256, uint256);
+    function getVaultStateForUserCurve(uint256 vaultId, uint256 curveId, address receiver)
+        external
+        view
+        returns (uint256, uint256);
 
     /// @notice returns the shares for recipient and other important values when depositing 'assets' into a bonding curve vault
     ///
