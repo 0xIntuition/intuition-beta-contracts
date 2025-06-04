@@ -73,6 +73,17 @@
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
@@ -150,7 +161,7 @@
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -201,7 +212,7 @@
 <li><a href="#getting-started">Getting Started</a></li>
 <li><a href="#documentation">Documentation</a>
 <ul>
-<li><a href="#known-nuances">Known Nuances</a></li>
+<li><a href="#rationale">Rationale</a></li>
 </ul>
 </li>
 <li><a href="#building-and-running-tests">Building and Running Tests</a>
@@ -219,6 +230,13 @@
 </li>
 <li><a href="#deployment-process">Deployment Process</a></li>
 <li><a href="#deployment-verification">Deployment Verification</a></li>
+</ul>
+</li>
+<li><a href="#deployed-contracts">Deployed Contracts</a>
+<ul>
+<li><a href="#base-mainnet">Base Mainnet</a></li>
+<li><a href="#base-sepolia">Base Sepolia</a></li>
+<li><a href="#linea-mainnet-valuesys">Linea Mainnet (ValueSys)</a></li>
 </ul>
 </li>
 </ul>
@@ -319,6 +337,22 @@ $ forge install
 <li>When verifying your smart contracts, you can use an optional parameter <code>--constructor-args</code> to pass the constructor arguments of the smart contract in the ABI-encoded format</li>
 <li>The chain ID for Base Sepolia is <code>84532</code>, whereas the chain ID for Base Mainnet is <code>8453</code></li>
 </ul>
+<h2 id="deployed-contracts"><a class="header" href="#deployed-contracts">Deployed Contracts</a></h2>
+<h3 id="base-mainnet"><a class="header" href="#base-mainnet">Base Mainnet</a></h3>
+<p>ProxyAdmin: 0xc920E2F5eB6925faE85C69a98a2df6f56a7a245A</p>
+<p>TimelockController (proxy admin owner): 0xE4992f9805D7737b5bDaDBEF5688087CF25D4B89</p>
+<p>EthMultiVault (proxy address): 0x430BbF52503Bd4801E51182f4cB9f8F534225DE5</p>
+<p>Admin Safe: 0xa28d4AAcA48bE54824dA53a19b05121DE71Ef480</p>
+<h3 id="base-sepolia"><a class="header" href="#base-sepolia">Base Sepolia</a></h3>
+<p>ProxyAdmin: 0xD4436f981D2dcE0C074Eca869fdA1650227c7Efe</p>
+<p>TimelockController (proxy admin owner): 0xe6BE2A42cCAeB73909A79CC89299eBDA7bAa7Ea2</p>
+<p>EthMultiVault (proxy address): 0x1A6950807E33d5bC9975067e6D6b5Ea4cD661665</p>
+<p>Admin Safe: 0xEcAc3Da134C2e5f492B702546c8aaeD2793965BB</p>
+<h3 id="linea-mainnet-valuesys"><a class="header" href="#linea-mainnet-valuesys">Linea Mainnet (ValueSys)</a></h3>
+<p>ProxyAdmin: 0x89e65a3c49cb1DF3D8Ee6036a158A728603CC1AD</p>
+<p>TimelockController (proxy admin owner): 0xA71B2185D10CaB95Cd0d2DA2B9b0210f8ed31A66</p>
+<p>EthMultiVault (proxy address): 0xB4375293a13017BCe71a034bB588786A3D3C7295</p>
+<p>Admin Safe: 0x323e9506B929C21AE602D64d3807721AA49b4884</p>
 
                     </main>
 
