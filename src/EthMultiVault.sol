@@ -389,7 +389,7 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
     ///      (number to be divided by `generalConfig.feeDenominator`)
     /// @param atomDepositFractionForTriple new atom deposit percentage
     function setAtomDepositFractionForTriple(uint256 atomDepositFractionForTriple) external onlyAdmin {
-        uint256 maxAtomDepositFractionForTriple = generalConfig.feeDenominator * 9 / 10; // 90% of the fee denominator
+        uint256 maxAtomDepositFractionForTriple = (generalConfig.feeDenominator * 9) / 10; // 90% of the fee denominator
 
         if (atomDepositFractionForTriple > maxAtomDepositFractionForTriple) {
             revert Errors.EthMultiVault_InvalidAtomDepositFractionForTriple();
@@ -1249,19 +1249,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_SenderNotApproved();
         }
 
-        shares = new uint256[](termIds.length);
-
-        // To simplify UX in 1.5, compute fees iteratively
-        // 2.0 will always use batch methods internally
+        uint256 totalRequired = 0;
         for (uint256 i = 0; i < termIds.length; i++) {
             if (termIds[i] == 0 || termIds[i] > count) {
                 revert Errors.EthMultiVault_VaultDoesNotExist();
             }
-
             if (amounts[i] < generalConfig.minDeposit) {
                 revert Errors.EthMultiVault_MinimumDeposit();
             }
+            totalRequired += amounts[i];
+        }
 
+        if (msg.value != totalRequired) {
+            revert Errors.EthMultiVault_IncorrectETHAmount();
+        }
+
+        shares = new uint256[](termIds.length);
+
+        for (uint256 i = 0; i < termIds.length; i++) {
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
             uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
 
@@ -1302,17 +1307,24 @@ contract EthMultiVault is IEthMultiVault, Initializable, ReentrancyGuardUpgradea
             revert Errors.EthMultiVault_ArraysNotSameLength();
         }
 
-        shares = new uint256[](termIds.length);
-
+        uint256 totalRequired = 0;
         for (uint256 i = 0; i < termIds.length; i++) {
             if (termIds[i] == 0 || termIds[i] > count) {
                 revert Errors.EthMultiVault_VaultDoesNotExist();
             }
-
             if (amounts[i] < generalConfig.minDeposit) {
                 revert Errors.EthMultiVault_MinimumDeposit();
             }
+            totalRequired += amounts[i];
+        }
 
+        if (msg.value != totalRequired) {
+            revert Errors.EthMultiVault_IncorrectETHAmount();
+        }
+
+        shares = new uint256[](termIds.length);
+
+        for (uint256 i = 0; i < termIds.length; i++) {
             uint256 protocolFee = protocolFeeAmount(amounts[i], termIds[i]);
             uint256 userDepositAfterprotocolFee = amounts[i] - protocolFee;
 

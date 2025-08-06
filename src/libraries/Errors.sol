@@ -42,6 +42,7 @@ library Errors {
     error EthMultiVault_VaultNotAtom();
     error EthMultiVault_VaultNotTriple();
     error EthMultiVault_InvalidRegistry();
+    error EthMultiVault_IncorrectETHAmount();
     ///////// ATOMWALLET ERRORS /////////////////////////////////////////////////////////////
 
     error AtomWallet_InvalidCallDataLength();
