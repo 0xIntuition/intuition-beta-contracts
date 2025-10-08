@@ -10,7 +10,8 @@
     "slither": "./test/tools/slither.sh",
     "docs:dev": "bash scripts/docs-dev.sh",
     "docs:build": "forge doc && cd docs && mdbook build",
-    "docs:diagrams": "mmdc -i docs/src/diagrams/contracts.mmd -o docs/src/diagrams/contracts.svg && mmdc -i docs/src/diagrams/bonding-curves.mmd -o docs/src/diagrams/bonding-curves.svg"
+    "docs:diagrams": "mmdc -i docs/src/diagrams/contracts.mmd -o docs/src/diagrams/contracts.svg && mmdc -i docs/src/diagrams/bonding-curves.mmd -o docs/src/diagrams/bonding-curves.svg",
+    "storage-diff": "./scripts/storage-diff.sh"
   },
   "keywords": [],
   "author": "0xIntuition",
