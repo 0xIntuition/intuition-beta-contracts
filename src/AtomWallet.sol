@@ -235,8 +235,13 @@ contract AtomWallet is Initializable, BaseAccount, Ownable2StepUpgradeable, Reen
             revert Errors.AtomWallet_InvalidCallDataLength();
         }
 
-        validUntil = abi.decode(callData[:12], (uint256));
-        validAfter = abi.decode(callData[12:24], (uint256));
+        // `abi.decode` requires a full 32-byte word per value, but each of these fields is only
+        // 12 bytes wide, so read them directly off calldata instead of decoding 12-byte slices.
+        assembly {
+            validUntil := shr(160, calldataload(callData.offset))
+            validAfter := shr(160, calldataload(add(callData.offset, 12)))
+        }
+
         actualCallData = callData[24:];
 
         return (validUntil, validAfter, actualCallData);
